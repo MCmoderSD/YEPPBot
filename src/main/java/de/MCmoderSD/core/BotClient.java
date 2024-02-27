@@ -97,21 +97,22 @@ public class BotClient {
 
     // Init Commands
     public void initCommands(String[] admins) {
-        new Status(commandHandler, chat);
-        new Play(commandHandler, chat);
-        new Join(commandHandler, chat);
-        new Joke(commandHandler, chat);
-        new Lurk(commandHandler, chat, lurkChannel, lurkTime);
         new Fact(commandHandler, chat);
-        new Weather(commandHandler, chat);
+        new Join(commandHandler, chat);
+        new Lurk(commandHandler, chat, lurkChannel, lurkTime);
+        new Play(commandHandler, chat);
+        // new Prompt(commandHandler, chat); ToDo Make it work
         new Say(commandHandler, chat, admins);
+        new Status(commandHandler, chat);
+        new Weather(commandHandler, chat);
+        new Wiki(commandHandler, chat);
     }
 
     // Init Interactions
     public void initInteractions() {
-        new Yepp(interactionHandler, chat);
         new ReplyYepp(interactionHandler, chat);
         new StoppedLurk(interactionHandler, chat, lurkChannel, lurkTime);
+        new Yepp(interactionHandler, chat);
     }
 
     // Methods

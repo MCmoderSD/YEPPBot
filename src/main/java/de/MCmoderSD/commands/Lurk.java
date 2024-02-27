@@ -19,7 +19,7 @@ public class Lurk {
             public void execute(ChannelMessageEvent event, String... args) {
 
                 // Send message
-                chat.sendMessage(event.getChannel().getName(), getAuthor(event) + " ist jetzt im Lurk!");
+                //chat.sendMessage(event.getChannel().getName(), getAuthor(event) + " ist jetzt im Lurk!"); ToDo Temporary disabled
 
                 // Save data
                 lurkChannel.put(getAuthor(event), event.getChannel().getName());
