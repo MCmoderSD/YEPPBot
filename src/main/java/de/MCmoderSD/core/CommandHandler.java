@@ -26,11 +26,11 @@ public class CommandHandler {
     public void registerCommand(Command command) {
 
         // Register command
-        String name = command.getCommand();
+        String name = command.getCommand().toLowerCase();
         commands.put(name, command);
 
         // Register aliases
-        for (String alias : command.getAlias()) aliases.put(alias, name);
+        for (String alias : command.getAlias()) aliases.put(alias.toLowerCase(), name);
     }
 
     // Manually execute a command

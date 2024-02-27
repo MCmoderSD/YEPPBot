@@ -30,11 +30,11 @@ public class InteractionHandler {
     public void registerEvent(Event event) {
 
         // Register command
-        String name = event.getEvent();
+        String name = event.getEvent().toLowerCase();
         interactions.put(name, event);
 
         // Register aliases
-        for (String alias : event.getAlias()) aliases.put(alias, name);
+        for (String alias : event.getAlias()) aliases.put(alias.toLowerCase(), name);
     }
 
     // Manually execute a command

@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.Calculate.*;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"FieldCanBeLocal", "unused", "CodeBlock2Expr"})
 public class BotClient {
 
     // Attributes
@@ -31,7 +31,6 @@ public class BotClient {
     private final HashMap<String, Long> lurkTime = new HashMap<>(); // Time
 
     // Constructor
-    @SuppressWarnings("CodeBlock2Expr")
     public BotClient(String botName, String botToken, String prefix, String[] admins, String[] channels) {
 
         // Init Credential
@@ -99,6 +98,9 @@ public class BotClient {
     public void initCommands(String[] admins) {
         new Fact(commandHandler, chat);
         new Join(commandHandler, chat);
+        new JoinChat(commandHandler, chat, admins);
+        new Joke(commandHandler, chat);
+        new LeaveChat(commandHandler, chat, admins);
         new Lurk(commandHandler, chat, lurkChannel, lurkTime);
         new Play(commandHandler, chat);
         // new Prompt(commandHandler, chat); ToDo Make it work
