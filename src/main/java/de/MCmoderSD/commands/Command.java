@@ -10,8 +10,14 @@ public abstract class Command {
 
     // Constructor
     public Command(String... command) {
-        this.command = command[0];
-        this.alias = command;
+
+        // Null Check
+        if (command.length == 0)
+            throw new IllegalArgumentException("Command name missing!");
+
+        // Set attributes
+        this.command = command[0]; // Name
+        this.alias = command; // Alias
     }
 
     // Methods

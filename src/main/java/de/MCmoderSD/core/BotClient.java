@@ -61,6 +61,11 @@ public class BotClient {
         commandHandler = new CommandHandler(prefix);
         interactionHandler = new InteractionHandler(botName, lurkChannel, lurkTime);
 
+        // format admin names
+        for (int i = 0; i < admins.length; i++) {
+            admins[i] = admins[i].toLowerCase();
+        }
+
         // Init Commands
         initCommands(admins);
 

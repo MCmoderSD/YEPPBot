@@ -16,10 +16,12 @@ public class JoinChat {
         commandHandler.registerCommand(new Command("joinchat", "addchat", "addtochat") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                if (tagAuthor(event).equals(event.getChannel().getName()))
-                    join(event, chat, event.getChannel().getName());
-                else for (String admin : admins)
-                    if (getAuthor(event).equals(admin.toLowerCase())) join(event, chat, args[0]);
+                String channel = getChannel(event);
+
+                if (tagAuthor(event).equals(channel))
+                    join(event, chat, channel); // Broadcaster
+                else if (Arrays.stream(admins).toList().contains(getAuthor(event).toLowerCase()))
+                    join(event, chat, args[0]); // Admin
             }
         });
     }
