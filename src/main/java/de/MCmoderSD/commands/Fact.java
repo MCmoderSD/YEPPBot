@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import static de.MCmoderSD.utilities.Calculate.getChannel;
+
 public class Fact {
 
     // Attributes
@@ -27,11 +29,13 @@ public class Fact {
         commandHandler.registerCommand(new Command("fact", "fakt") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+
+                // Generate fact
                 StringBuilder fact = new StringBuilder();
                 for (String[] word : germanFacts)
                     fact.append(word[(int) (Math.random() * word.length)]).append(" "); // Random fact
 
-                chat.sendMessage(event.getChannel().getName(), fact.toString().trim() + '.');
+                chat.sendMessage(getChannel(event), fact.toString().trim() + '.');
             }
         });
     }
@@ -41,21 +45,24 @@ public class Fact {
     private String[][] readFacts(String path) {
         ArrayList<String> types = new ArrayList<>();
 
+        // Read file
         try {
             InputStream inputStream = getClass().getResourceAsStream(path);
             BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
-            
+
             String line;
             while ((line = reader.readLine()) != null) types.add(line);
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
 
-        String[][] facts = new String[types.size()][];
+        // Split facts
+        int typeSize = types.size();
+        String[][] facts = new String[typeSize][];
 
-        for (String line : types) {
-            String[] split = line.split(";");
-            facts[types.indexOf(line)] = split;
+        for (int i = 0; i < typeSize; i++) {
+            String[] split = types.get(i).split(";");
+            facts[i] = split;
         }
 
         return facts;

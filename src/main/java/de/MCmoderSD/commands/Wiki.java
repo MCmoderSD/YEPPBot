@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import static de.MCmoderSD.utilities.Calculate.getChannel;
+
 public class Wiki {
 
     // Constructor
@@ -20,6 +22,7 @@ public class Wiki {
         commandHandler.registerCommand(new Command("wiki", "wikipedia", "summarize", "zusammenfassung") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+                String channel = getChannel(event);
 
                 // Query Wikipedia
                 String topic = String.join(" ", args);
@@ -34,7 +37,7 @@ public class Wiki {
 
                     // Send summary
                     if (summary.length() <= 500) {
-                        chat.sendMessage(event.getChannel().getName(), summary); // Send summary
+                        chat.sendMessage(channel, summary); // Send summary
                     } else {
                         while (summary.length() > 500) {
                             int endOfSentence = summary.lastIndexOf('.', 500);
@@ -45,7 +48,7 @@ public class Wiki {
                         }
                     }
                 } catch (IOException e) {
-                    chat.sendMessage(event.getChannel().getName(), "Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage()); // Send error message
+                    chat.sendMessage(channel, "Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage()); // Send error message
                 }
             }
         });

@@ -79,13 +79,13 @@ public class BotClient {
         eventManager.onEvent(ChannelMessageEvent.class, event -> {
 
             // Console Output
-            System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, event.getChannel().getName(), event.getUser().getName(), event.getMessage(), BREAK);
+            System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, getChannel(event), getAuthor(event), getMessage(event), BREAK);
 
             // Handle Interaction
-            interactionHandler.handleInteraction(event);
+            interactionHandler.handleInteraction(event, botName);
 
             // Handle Command
-            commandHandler.handleCommand(event);
+            commandHandler.handleCommand(event, botName);
         });
 
         // Follow Event

@@ -10,8 +10,14 @@ public abstract class Event {
 
     // Constructor
     public Event(String... event) {
-        this.event = event[0];
-        this.alias = event;
+
+        // Null Check
+        if (event.length == 0)
+            throw new IllegalArgumentException("Event name missing!");
+
+        // Set attributes
+        this.event = event[0]; // Name
+        this.alias = event; // Alias
     }
 
     // Methods

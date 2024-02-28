@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import static de.MCmoderSD.utilities.Calculate.getChannel;
+
 public class Joke {
 
     // Attributes
@@ -34,7 +36,7 @@ public class Joke {
                 if (args.length > 0)
                     isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
                 ArrayList<String> jokes = isEnglish ? englishJokes : germanJokes;
-                chat.sendMessage(event.getChannel().getName(), jokes.get((int) (Math.random() * jokes.size())));
+                chat.sendMessage(getChannel(event), jokes.get((int) (Math.random() * jokes.size())));
             }
         });
     }

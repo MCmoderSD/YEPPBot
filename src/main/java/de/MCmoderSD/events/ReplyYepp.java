@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.InteractionHandler;
 
+import static de.MCmoderSD.utilities.Calculate.getChannel;
 import static de.MCmoderSD.utilities.Calculate.tagAuthor;
 
 public class ReplyYepp {
@@ -15,7 +16,7 @@ public class ReplyYepp {
         interactionHandler.registerEvent(new Event("yeppbot", "yepppbot", "@yeppbot", "@yepppbot") { // Event Name and Alias
             @Override
             public void execute(ChannelMessageEvent event) {
-                chat.sendMessage(event.getChannel().getName(), tagAuthor(event) + " YEPP");
+                chat.sendMessage(getChannel(event), tagAuthor(event) + " YEPP");
             }
         });
     }

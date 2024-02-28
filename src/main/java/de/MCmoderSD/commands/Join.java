@@ -4,17 +4,21 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
 
+import static de.MCmoderSD.utilities.Calculate.getChannel;
+
 public class Join {
 
     // Attributes
     private boolean firstJoin;
+    private boolean sentMessage;
     private String channel;
 
     // Constructor
     public Join(CommandHandler commandHandler, TwitchChat chat) {
 
         // Initialize attributes
-        revert();
+        sentMessage = false;
+        reset();
 
         // Register command
         commandHandler.registerCommand(new Command("join") { // Command name and aliases
@@ -22,31 +26,33 @@ public class Join {
             public void execute(ChannelMessageEvent event, String... args) {
                 if (!firstJoin) {
                     firstJoin = true;
-                    channel = event.getChannel().getName();
-                    timer();
+                    channel = getChannel(event);
+                    resetTimer(10);
                     return;
                 }
 
-                if (channel != null && channel.equals(event.getChannel().getName())) {
-                    chat.sendMessage(event.getChannel().getName(), "!join");
-                    revert();
+                if (!sentMessage && channel != null && channel.equals(getChannel(event))) {
+                    chat.sendMessage(channel, "!join");
+                    sentMessage = true;
+                    resetTimer(180);
                 }
             }
         });
     }
 
     // Reset attributes
-    private void revert() {
+    private void reset() {
         firstJoin = false;
         channel = null;
     }
 
     // Timer
-    private void timer() {
+    private void resetTimer(int seconds) {
         new Thread(() -> {
             try {
-                Thread.sleep(5000);
-                revert();
+                Thread.sleep(seconds * 1000L);
+                reset();
+                if (sentMessage) sentMessage = false;
             } catch (InterruptedException e) {
                 System.out.println("Error: " + e);
             }

@@ -7,6 +7,7 @@ import de.MCmoderSD.core.CommandHandler;
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.Calculate.getAuthor;
+import static de.MCmoderSD.utilities.Calculate.getChannel;
 
 public class Lurk {
 
@@ -17,13 +18,15 @@ public class Lurk {
         commandHandler.registerCommand(new Command("lurk", "lürk") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+                String author = getAuthor(event);
+                String channel = getChannel(event);
 
                 // Send message
-                //chat.sendMessage(event.getChannel().getName(), getAuthor(event) + " ist jetzt im Lurk!"); ToDo Temporary disabled
+                // chat.sendMessage(channel, author + " ist jetzt im Lurk!"); ToDo Temporary disabled
 
                 // Save data
-                lurkChannel.put(getAuthor(event), event.getChannel().getName());
-                lurkTime.put(event.getUser().getName(), System.currentTimeMillis());
+                lurkChannel.put(author, channel);
+                lurkTime.put(author, System.currentTimeMillis());
             }
         });
     }

@@ -4,8 +4,9 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
 
-import static de.MCmoderSD.utilities.Calculate.getAuthor;
-import static de.MCmoderSD.utilities.Calculate.tagAuthor;
+import java.util.Arrays;
+
+import static de.MCmoderSD.utilities.Calculate.*;
 
 public class LeaveChat {
     // Constructor
@@ -15,17 +16,19 @@ public class LeaveChat {
         commandHandler.registerCommand(new Command("leavechat", "removechat", "removefromchat", "delfromchat") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                if (tagAuthor(event).equals(event.getChannel().getName()))
-                    leave(event, chat, event.getChannel().getName());
-                else for (String admin : admins)
-                    if (getAuthor(event).equals(admin.toLowerCase())) leave(event, chat, args);
+                String channel = getChannel(event);
+
+                if (tagAuthor(event).equals(channel))
+                    leave(event, chat, channel); // Broadcaster
+                else if (Arrays.stream(admins).toList().contains(getAuthor(event).toLowerCase()))
+                    leave(event, chat, args[0]); // Admin
             }
         });
     }
 
     // Leave chat
     private void leave(ChannelMessageEvent event, TwitchChat chat, String... args) {
-        chat.sendMessage(event.getChannel().getName(), "Leaving " + args[0]);
+        chat.sendMessage(getChannel(event), "Leaving " + args[0]);
         chat.leaveChannel(args[0]);
     }
 }

@@ -15,11 +15,9 @@ public class InteractionHandler {
     private final HashMap<String, String> aliases;
     private final HashMap<String, String> lurkChannel;
     private final HashMap<String, Long> lurkTime;
-    private final String botName;
 
     // Constructor
     public InteractionHandler(String botName, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
-        this.botName = botName;
         this.lurkChannel = lurkChannel;
         this.lurkTime = lurkTime;
         interactions = new HashMap<>();
@@ -49,14 +47,14 @@ public class InteractionHandler {
             getInteraction(interaction).execute(event);
 
             // Log command execution
-            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, event.getChannel().getName(), interaction, BREAK, UNBOLD);
+            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), interaction, BREAK, UNBOLD);
         }
     }
 
-    public void handleInteraction(ChannelMessageEvent event) {
-        String message = event.getMessage();
+    public void handleInteraction(ChannelMessageEvent event, String botName) {
+        String message = getMessage(event);
 
-        if (event.getUser().getName().equals(botName)) return;
+        if (getAuthor(event).equals(botName)) return;
 
         for (String string : message.split(" ")) {
             if (interactions.containsKey(string.toLowerCase())) {
@@ -65,8 +63,8 @@ public class InteractionHandler {
             }
         }
 
-        if (lurkChannel.containsKey(event.getUser().getName())) {
-            if (lurkChannel.get(event.getUser().getName()).equals(event.getChannel().getName()))
+        if (lurkChannel.containsKey(getAuthor(event))) {
+            if (lurkChannel.get(getAuthor(event)).equals(getChannel(event)))
                 interactions.get("$stoppedlurk").execute(event);
         }
     }

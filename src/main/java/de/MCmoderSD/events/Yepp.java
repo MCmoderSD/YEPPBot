@@ -4,6 +4,8 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.InteractionHandler;
 
+import static de.MCmoderSD.utilities.Calculate.getChannel;
+
 public class Yepp {
 
     // Constructor
@@ -13,7 +15,7 @@ public class Yepp {
         interactionHandler.registerEvent(new Event("yepp") { // Event Name and Alias
             @Override
             public void execute(ChannelMessageEvent event) {
-                chat.sendMessage(event.getChannel().getName(), "YEPP");
+                chat.sendMessage(getChannel(event), "YEPP");
             }
         });
     }

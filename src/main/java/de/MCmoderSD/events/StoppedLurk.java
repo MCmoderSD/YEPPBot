@@ -6,8 +6,7 @@ import de.MCmoderSD.core.InteractionHandler;
 
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.Calculate.getAuthor;
-import static de.MCmoderSD.utilities.Calculate.tagAuthor;
+import static de.MCmoderSD.utilities.Calculate.*;
 
 public class StoppedLurk {
 
@@ -19,7 +18,7 @@ public class StoppedLurk {
             @Override
             public void execute(ChannelMessageEvent event) {
                 String timeInLurk = getLurkTime(lurkTime.get(getAuthor(event)));
-                chat.sendMessage(event.getChannel().getName(), tagAuthor(event) + " war " + timeInLurk + " im Lurk!");
+                chat.sendMessage(getChannel(event), tagAuthor(event) + " war " + timeInLurk + " im Lurk!");
                 lurkChannel.remove(getAuthor(event));
                 lurkTime.remove(getAuthor(event));
             }

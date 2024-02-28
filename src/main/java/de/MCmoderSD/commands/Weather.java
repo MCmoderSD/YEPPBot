@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.Calculate.formatUnixTimestamp;
+import static de.MCmoderSD.utilities.Calculate.getChannel;
 
 public class Weather {
 
@@ -38,7 +39,7 @@ public class Weather {
         commandHandler.registerCommand(new Command("weather", "wetter") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                chat.sendMessage(event.getChannel().getName(), generateResponse(args));
+                chat.sendMessage(getChannel(event), generateResponse(args));
             }
         });
     }

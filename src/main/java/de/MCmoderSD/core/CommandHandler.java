@@ -44,15 +44,15 @@ public class CommandHandler {
             getCommand(command).execute(event, args);
 
             // Log command execution
-            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, event.getChannel().getName(), command, BREAK, UNBOLD);
+            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command, BREAK, UNBOLD);
         }
     }
 
-    public void handleCommand(ChannelMessageEvent event) {
-        String message = event.getMessage();
+    public void handleCommand(ChannelMessageEvent event, String botName) {
+        String message = getMessage(event);
 
         // Check for prefix
-        if (!message.startsWith(prefix)) return;
+        if (!message.startsWith(prefix) || getAuthor(event).equals(botName)) return;
 
         // Convert message to command and arguments
         String[] split = message.split(" ");

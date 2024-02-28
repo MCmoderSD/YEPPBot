@@ -4,6 +4,11 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
 
+import java.util.Arrays;
+
+import static de.MCmoderSD.utilities.Calculate.getAuthor;
+import static de.MCmoderSD.utilities.Calculate.getChannel;
+
 public class Say {
 
     // Constructor
@@ -13,11 +18,8 @@ public class Say {
         commandHandler.registerCommand(new Command("say", "repeat") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                for (String admin : admins)
-                    if (event.getUser().getName().equals(admin.toLowerCase())) {
-                        chat.sendMessage(event.getChannel().getName(), String.join(" ", args));
-                        return;
-                    }
+                if (Arrays.stream(admins).toList().contains(getAuthor(event).toLowerCase()) || getAuthor(event).equals(getChannel(event)))
+                    chat.sendMessage(getChannel(event), String.join(" ", args));
             }
         });
     }
