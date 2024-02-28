@@ -2,6 +2,7 @@ package de.MCmoderSD.core;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.events.Event;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.HashMap;
 
@@ -10,6 +11,9 @@ import static de.MCmoderSD.utilities.Calculate.*;
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class InteractionHandler {
 
+    // Associations
+    private final MySQL mySQL;
+
     // Attributes
     private final HashMap<String, Event> interactions;
     private final HashMap<String, String> aliases;
@@ -17,7 +21,8 @@ public class InteractionHandler {
     private final HashMap<String, Long> lurkTime;
 
     // Constructor
-    public InteractionHandler(String botName, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
+    public InteractionHandler(MySQL mySQL, String botName, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
+        this.mySQL = mySQL;
         this.lurkChannel = lurkChannel;
         this.lurkTime = lurkTime;
         interactions = new HashMap<>();
@@ -48,6 +53,7 @@ public class InteractionHandler {
 
             // Log command execution
             System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), interaction, BREAK, UNBOLD);
+            mySQL.log(logDate(), logTime(), stripBrackets(COMMAND), getChannel(event), getAuthor(event), interaction);
         }
     }
 

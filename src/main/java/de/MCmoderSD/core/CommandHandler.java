@@ -2,6 +2,7 @@ package de.MCmoderSD.core;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.commands.Command;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.HashMap;
 
@@ -10,13 +11,17 @@ import static de.MCmoderSD.utilities.Calculate.*;
 @SuppressWarnings("ALL")
 public class CommandHandler {
 
+    // Associations
+    private final MySQL mySQL;
+
     // Attributes
     private final HashMap<String, Command> commands;
     private final HashMap<String, String> aliases;
     private final String prefix;
 
     // Constructor
-    public CommandHandler(String prefix) {
+    public CommandHandler(MySQL mySQL, String prefix) {
+        this.mySQL = mySQL;
         this.prefix = prefix;
         commands = new HashMap<>();
         aliases = new HashMap<>();
@@ -40,11 +45,15 @@ public class CommandHandler {
             // Check for alias
             if (aliases.containsKey(command)) command = aliases.get(command);
 
+            // Check for permission
+            // ToDo Black and Whitelist
+
             // Execute command
             getCommand(command).execute(event, args);
 
             // Log command execution
-            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command, BREAK, UNBOLD);
+            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + String.join(" ", args), BREAK, UNBOLD);
+            mySQL.log(logDate(), logTime(), stripBrackets(COMMAND), getChannel(event), getAuthor(event), command + String.join(" ", args));
         }
     }
 

@@ -1,6 +1,7 @@
 package de.MCmoderSD.main;
 
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 
@@ -23,8 +24,11 @@ public class Main {
         String[] channels = new String[channelList.getSize()];
         for (int i = 0; i < channelList.getSize(); i++) channels[i] = channelList.get("#" + i).asText();
 
+        // Load MySQL Config
+        MySQL mySQL = new MySQL(jsonUtility.load("/database/mySQL.json"));
+
         // Init Bot
-        new BotClient(botName, botToken, prefix, admins, channels);
+        new BotClient(botName, botToken, prefix, admins, channels, mySQL);
     }
 
     public static void main(String[] args) {

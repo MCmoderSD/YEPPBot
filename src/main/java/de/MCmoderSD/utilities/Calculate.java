@@ -2,6 +2,8 @@ package de.MCmoderSD.utilities;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
+import java.sql.Time;
+
 public class Calculate {
 
     // Constants
@@ -46,5 +48,20 @@ public class Calculate {
     // Log timestamp
     public static String logTimestamp() {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new java.util.Date()) + "]";
+    }
+
+    // Log date
+    public static java.sql.Date logDate() {
+        return new java.sql.Date(new java.util.Date().getTime());
+    }
+
+    // Log time
+    public static Time logTime() {
+        return new Time(new java.util.Date().getTime());
+    }
+
+    // Strip Brackets
+    public static String stripBrackets(String string) {
+        return string.replaceAll("[\\[\\]]", "");
     }
 }

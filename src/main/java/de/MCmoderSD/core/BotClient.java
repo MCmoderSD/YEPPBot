@@ -12,13 +12,17 @@ import de.MCmoderSD.commands.*;
 import de.MCmoderSD.events.ReplyYepp;
 import de.MCmoderSD.events.StoppedLurk;
 import de.MCmoderSD.events.Yepp;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.Calculate.*;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused", "CodeBlock2Expr"})
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class BotClient {
+
+    // Associations
+    private final MySQL mySQL;
 
     // Attributes
     private final TwitchClient client;
@@ -31,7 +35,10 @@ public class BotClient {
     private final HashMap<String, Long> lurkTime = new HashMap<>(); // Time
 
     // Constructor
-    public BotClient(String botName, String botToken, String prefix, String[] admins, String[] channels) {
+    public BotClient(String botName, String botToken, String prefix, String[] admins, String[] channels, MySQL mySQL) {
+
+        // Init MySQL
+        this.mySQL = mySQL;
 
         // Init Credential
         OAuth2Credential credential = new OAuth2Credential("twitch", botToken);
@@ -58,8 +65,8 @@ public class BotClient {
         }
 
         // Init CommandHandler
-        commandHandler = new CommandHandler(prefix);
-        interactionHandler = new InteractionHandler(botName, lurkChannel, lurkTime);
+        commandHandler = new CommandHandler(mySQL, prefix);
+        interactionHandler = new InteractionHandler(mySQL, botName, lurkChannel, lurkTime);
 
         // format admin names
         for (int i = 0; i < admins.length; i++) {
@@ -81,6 +88,9 @@ public class BotClient {
             // Console Output
             System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, getChannel(event), getAuthor(event), getMessage(event), BREAK);
 
+            // MySQL Log
+            mySQL.log(logDate(), logTime(), stripBrackets(MESSAGE), getChannel(event), getAuthor(event), getMessage(event));
+
             // Handle Interaction
             interactionHandler.handleInteraction(event, botName);
 
@@ -91,17 +101,20 @@ public class BotClient {
         // Follow Event
         eventManager.onEvent(ChannelFollowEvent.class, event -> {
             System.out.printf("%s %s <%s> %s -> Followed%s", logTimestamp(), FOLLOW, event.getBroadcasterUserName(), event.getUserName(), BREAK);
+            mySQL.log(logDate(), logTime(), stripBrackets(FOLLOW), event.getBroadcasterUserName(), event.getUserName(), "Followed");
         });
 
         // Sub Event
         eventManager.onEvent(ChannelSubscribeEvent.class, event -> {
             System.out.printf("%s %s <%s> %s -> Subscribed %s%s", logTimestamp(), SUBSCRIBE, event.getBroadcasterUserName(), event.getUserName(), event.getTier(), BREAK);
+            mySQL.log(logDate(), logTime(), stripBrackets(SUBSCRIBE), event.getBroadcasterUserName(), event.getUserName(), "Subscribed " + event.getTier());
         });
     }
 
     // Init Commands
     public void initCommands(String[] admins) {
         new Fact(commandHandler, chat);
+        new Insult(commandHandler, chat);
         new Join(commandHandler, chat);
         new JoinChat(commandHandler, chat, admins);
         new Joke(commandHandler, chat);
