@@ -52,8 +52,8 @@ public class CommandHandler {
             getCommand(command).execute(event, args);
 
             // Log command execution
-            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + String.join(" ", args), BREAK, UNBOLD);
-            mySQL.log(logDate(), logTime(), stripBrackets(COMMAND), getChannel(event), getAuthor(event), command + String.join(" ", args));
+            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + ": " + String.join(" ", args), BREAK, UNBOLD);
+            mySQL.log(logDate(), logTime(), stripBrackets(COMMAND), getChannel(event), getAuthor(event), command + ": " + String.join(" ", args));
         }
     }
 
