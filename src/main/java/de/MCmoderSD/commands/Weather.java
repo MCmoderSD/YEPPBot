@@ -17,8 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 
-import static de.MCmoderSD.utilities.Calculate.formatUnixTimestamp;
-import static de.MCmoderSD.utilities.Calculate.getChannel;
+import static de.MCmoderSD.utilities.Calculate.*;
 
 public class Weather {
 

@@ -4,8 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.InteractionHandler;
 
-import static de.MCmoderSD.utilities.Calculate.getChannel;
-import static de.MCmoderSD.utilities.Calculate.tagAuthor;
+import static de.MCmoderSD.utilities.Calculate.*;
 
 public class ReplyYepp {
 

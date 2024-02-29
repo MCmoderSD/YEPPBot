@@ -37,8 +37,8 @@ public abstract class Command {
         this.alias = command; // Alias
 
         // Set List
-        this.whitelist = whitelist;
-        this.blacklist = blacklist;
+        this.whitelist = whitelist; // Whitelist
+        this.blacklist = blacklist; // Blacklist
     }
 
 

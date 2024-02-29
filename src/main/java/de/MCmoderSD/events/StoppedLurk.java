@@ -33,7 +33,7 @@ public class StoppedLurk {
         long lurkedDays = lurkedHours / 24;
         long lurkedWeeks = lurkedDays / 7;
 
-        // Berechnung der verbleibenden Tage, Stunden, Minuten und Sekunden
+        // Calculate the time
         lurkedDays %= 7;
         lurkedHours %= 24;
         lurkedMinutes %= 60;

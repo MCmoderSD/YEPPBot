@@ -1,14 +1,17 @@
 package de.MCmoderSD.main;
 
+import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 
+import java.util.Arrays;
+
 public class Main {
 
     // Constructor
-    public Main() {
+    public Main(String... args) {
         JsonUtility jsonUtility = new JsonUtility();
 
         // Load Bot Config
@@ -29,9 +32,15 @@ public class Main {
 
         // Init Bot
         new BotClient(botName, botToken, prefix, admins, channels, mySQL);
+
+        // CLI check
+        if (args.length > 0 && args[0].equals("-cli") || args[0].equals("-nogui")) return;
+
+        // Init GUI
+        new Frame();
     }
 
     public static void main(String[] args) {
-        new Main();
+        new Main(args);
     }
 }

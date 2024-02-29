@@ -6,8 +6,7 @@ import de.MCmoderSD.core.CommandHandler;
 
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.Calculate.getAuthor;
-import static de.MCmoderSD.utilities.Calculate.getChannel;
+import static de.MCmoderSD.utilities.Calculate.*;
 
 public class Lurk {
 

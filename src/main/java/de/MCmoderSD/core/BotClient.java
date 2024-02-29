@@ -9,9 +9,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
 import de.MCmoderSD.commands.*;
-import de.MCmoderSD.events.ReplyYepp;
-import de.MCmoderSD.events.StoppedLurk;
-import de.MCmoderSD.events.Yepp;
+import de.MCmoderSD.events.*;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.HashMap;
@@ -87,8 +85,6 @@ public class BotClient {
 
             // Console Output
             System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, getChannel(event), getAuthor(event), getMessage(event), BREAK);
-
-            // MySQL Log
             mySQL.log(logDate(), logTime(), stripBrackets(MESSAGE), getChannel(event), getAuthor(event), getMessage(event));
 
             // Handle Interaction

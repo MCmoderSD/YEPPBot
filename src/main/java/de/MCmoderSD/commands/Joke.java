@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static de.MCmoderSD.utilities.Calculate.getChannel;
+import static de.MCmoderSD.utilities.Calculate.*;
 
 public class Joke {
 
