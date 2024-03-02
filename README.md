@@ -21,8 +21,8 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] Admin commands
 - [x] Debug Commands
 - [x] Database logging
-- [ ] Help command
-- [ ] Black and White list
+- [x] Help command
+- [x] Black and White list
 - [ ] ChatGPT command
 - [ ] Rank command
 - [ ] Graphical User Interface

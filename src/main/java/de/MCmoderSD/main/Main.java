@@ -23,7 +23,7 @@ public class Main {
         String[] admins = botConfig.get("admins").asText().split("; ");
 
         // Load Channel List
-        JsonNode channelList = jsonUtility.load("/config/ChannelList.json");
+        JsonNode channelList = jsonUtility.load("/config/ChannelList.json.disabled");
         String[] channels = new String[channelList.getSize()];
         for (int i = 0; i < channelList.getSize(); i++) channels[i] = channelList.get("#" + i).asText();
 
@@ -34,7 +34,7 @@ public class Main {
         new BotClient(botName, botToken, prefix, admins, channels, mySQL);
 
         // CLI check
-        if (args.length > 0 && args[0].equals("-cli") || args[0].equals("-nogui")) return;
+        if (args.length > 0 && (args[0].equals("-cli") || args[0].equals("-nogui"))) return;
 
         // Init GUI
         new Frame();

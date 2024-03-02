@@ -13,6 +13,8 @@ import de.MCmoderSD.commands.*;
 import de.MCmoderSD.events.*;
 
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.json.JsonNode;
+import de.MCmoderSD.utilities.json.JsonUtility;
 
 import java.util.HashMap;
 
@@ -31,8 +33,8 @@ public class BotClient {
     private final InteractionHandler interactionHandler;
 
     // Variables
-    private final HashMap<String, String> lurkChannel = new HashMap<>(); // Users
-    private final HashMap<String, Long> lurkTime = new HashMap<>(); // Time
+    private final HashMap<String, String> lurkChannel; // Users
+    private final HashMap<String, Long> lurkTime; // Time
 
     // Constructor
     public BotClient(String botName, String botToken, String prefix, String[] admins, String[] channels, MySQL mySQL) {
@@ -64,15 +66,24 @@ public class BotClient {
             }
         }
 
+        // Init Variables
+        lurkChannel = new HashMap<>();
+        lurkTime = new HashMap<>();
+
+        // Init White and Blacklist
+        JsonUtility jsonUtility = new JsonUtility();
+        JsonNode whiteList = jsonUtility.load("/config/whitelist.json");
+        JsonNode blackList = jsonUtility.load("/config/blacklist.json");
+
         // Init CommandHandler
-        commandHandler = new CommandHandler(mySQL, prefix);
-        interactionHandler = new InteractionHandler(mySQL, lurkChannel);
+        commandHandler = new CommandHandler(mySQL, whiteList, blackList, prefix);
+        interactionHandler = new InteractionHandler(mySQL, whiteList, blackList, lurkChannel);
 
         // Format admin names
         for (var i = 0; i < admins.length; i++) admins[i] = admins[i].toLowerCase();
 
         // Init Commands
-        initCommands(admins);
+        initCommands(admins, prefix, whiteList, blackList);
 
         // Init Interactions
         initInteractions();
@@ -108,8 +119,9 @@ public class BotClient {
     }
 
     // Init Commands
-    public void initCommands(String[] admins) {
+    public void initCommands(String[] admins, String prefix, JsonNode whiteList, JsonNode blackList) {
         new Fact(commandHandler, chat);
+        new Help(commandHandler, chat, whiteList, blackList, prefix);
         new Insult(commandHandler, chat);
         new Join(commandHandler, chat);
         new JoinChat(commandHandler, chat, admins);

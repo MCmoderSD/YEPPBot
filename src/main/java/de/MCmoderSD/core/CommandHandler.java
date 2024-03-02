@@ -1,11 +1,12 @@
 package de.MCmoderSD.core;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
 import de.MCmoderSD.commands.Command;
-
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.json.JsonNode;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.Calculate.*;
@@ -15,19 +16,29 @@ public class CommandHandler {
     // Associations
     private final MySQL mySQL;
 
+    // Constants
+    private final JsonNode whiteList;
+    private final JsonNode blackList;
+    private final String prefix;
+
     // Attributes
     private final HashMap<String, Command> commands;
     private final HashMap<String, String> aliases;
-    private final String prefix;
+    private final HashMap<Command, ArrayList<String>> whiteListMap;
+    private final HashMap<Command, ArrayList<String>> blackListMap;
 
     // Constructor
-    public CommandHandler(MySQL mySQL, String prefix) {
+    public CommandHandler(MySQL mySQL, JsonNode whiteList, JsonNode blackList, String prefix) {
 
-        // Init Associations and Attributes
+        // Init Constants and Attributes
         this.mySQL = mySQL;
         this.prefix = prefix;
+        this.whiteList = whiteList;
+        this.blackList = blackList;
         commands = new HashMap<>();
         aliases = new HashMap<>();
+        whiteListMap = new HashMap<>();
+        blackListMap = new HashMap<>();
     }
 
     // Register a command
@@ -39,6 +50,10 @@ public class CommandHandler {
 
         // Register aliases
         for (String alias : command.getAlias()) aliases.put(alias.toLowerCase(), name);
+
+        // White and Blacklist
+        if (whiteList.containsKey(name)) whiteListMap.put(command, new ArrayList<>(Arrays.asList(whiteList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
+        if (blackList.containsKey(name)) blackListMap.put(command, new ArrayList<>(Arrays.asList(blackList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
     }
 
     // Manually execute a command
@@ -48,11 +63,17 @@ public class CommandHandler {
             // Check for alias
             if (aliases.containsKey(command)) command = aliases.get(command);
 
-            // Check for permission
-            // ToDo Black and Whitelist
+            // Get Command
+            Command cmd = getCommand(command);
+
+            // Check for WhiteList
+            if (whiteListMap.containsKey(cmd) && !whiteListMap.get(cmd).contains(getChannel(event))) return;
+
+            // Check for BlackList
+            if (blackListMap.containsKey(cmd) && blackListMap.get(cmd).contains(getChannel(event))) return;
 
             // Execute command
-            getCommand(command).execute(event, args);
+            cmd.execute(event, args);
 
             // Log command execution
             System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + ": " + String.join(" ", args), BREAK, UNBOLD);
