@@ -2,6 +2,7 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.core.CommandHandler;
 
 import java.io.BufferedReader;
@@ -57,10 +58,10 @@ public class Fact {
         }
 
         // Split facts
-        int typeSize = types.size();
+        var typeSize = types.size();
         String[][] facts = new String[typeSize][];
 
-        for (int i = 0; i < typeSize; i++) {
+        for (var i = 0; i < typeSize; i++) {
             String[] split = types.get(i).split(";");
             facts[i] = split;
         }

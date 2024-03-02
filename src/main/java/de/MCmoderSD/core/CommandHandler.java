@@ -1,14 +1,15 @@
 package de.MCmoderSD.core;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.commands.Command;
+
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.Calculate.*;
 
-@SuppressWarnings("ALL")
 public class CommandHandler {
 
     // Associations
@@ -21,6 +22,8 @@ public class CommandHandler {
 
     // Constructor
     public CommandHandler(MySQL mySQL, String prefix) {
+
+        // Init Associations and Attributes
         this.mySQL = mySQL;
         this.prefix = prefix;
         commands = new HashMap<>();
@@ -71,7 +74,6 @@ public class CommandHandler {
 
         // Execute command
         executeCommand(event, command, args);
-
     }
 
     // Setter and Getter
@@ -83,6 +85,7 @@ public class CommandHandler {
         return commands.get(command);
     }
 
+    @SuppressWarnings("unused")
     public void removeCommand(String command) {
         commands.remove(command);
     }

@@ -5,18 +5,18 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+public class Rank {
 
-public class Status {
+        // Constructor
+    public Rank(CommandHandler commandHandler, TwitchChat chat) {
 
-    // Constructor
-    public Status(CommandHandler commandHandler, TwitchChat chat) {
+
 
         // Register command
-        commandHandler.registerCommand(new Command("status", "test") { // Command name and aliases
+        commandHandler.registerCommand(new Command("rank", "rang", "stats") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                chat.sendMessage(getChannel(event), "Bot ist aktiv!");
+
             }
         });
     }

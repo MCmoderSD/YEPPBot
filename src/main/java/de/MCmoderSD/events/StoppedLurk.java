@@ -2,6 +2,7 @@ package de.MCmoderSD.events;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.core.InteractionHandler;
 
 import java.util.HashMap;

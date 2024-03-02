@@ -1,14 +1,15 @@
 package de.MCmoderSD.core;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.events.Event;
+
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.Calculate.*;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class InteractionHandler {
 
     // Associations
@@ -18,13 +19,11 @@ public class InteractionHandler {
     private final HashMap<String, Event> interactions;
     private final HashMap<String, String> aliases;
     private final HashMap<String, String> lurkChannel;
-    private final HashMap<String, Long> lurkTime;
 
     // Constructor
-    public InteractionHandler(MySQL mySQL, String botName, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
+    public InteractionHandler(MySQL mySQL, HashMap<String, String> lurkChannel) {
         this.mySQL = mySQL;
         this.lurkChannel = lurkChannel;
-        this.lurkTime = lurkTime;
         interactions = new HashMap<>();
         aliases = new HashMap<>();
     }
@@ -84,6 +83,7 @@ public class InteractionHandler {
         return interactions.get(action);
     }
 
+    @SuppressWarnings("unused")
     public void removeInteraction(String action) {
         interactions.remove(action);
     }

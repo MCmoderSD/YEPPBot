@@ -2,7 +2,9 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.core.CommandHandler;
+
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -36,11 +38,10 @@ public class Wiki {
                         summary = summary.trim();
 
                     // Send summary
-                    if (summary.length() <= 500) {
-                        chat.sendMessage(channel, summary); // Send summary
-                    } else {
+                    if (summary.length() <= 500) chat.sendMessage(channel, summary); // Send summary
+                    else {
                         while (summary.length() > 500) {
-                            int endOfSentence = summary.lastIndexOf('.', 500);
+                            var endOfSentence = summary.lastIndexOf('.', 500);
                             if (endOfSentence == -1) endOfSentence = summary.lastIndexOf(' ', 500);
                             if (endOfSentence == -1) endOfSentence = 500;
                             chat.sendMessage(event.getChannel().getName(), summary.substring(0, endOfSentence + 1));
@@ -62,10 +63,7 @@ public class Wiki {
         JSONObject pages = json.getJSONObject("query").getJSONObject("pages");
         String firstPageKey = pages.keys().next();
         JSONObject page = pages.getJSONObject(firstPageKey);
-        if (page.has("extract")) {
-            return page.getString("extract");
-        } else {
-            throw new IOException("Keine Zusammenfassung für dieses Thema gefunden.");
-        }
+        if (page.has("extract")) return page.getString("extract");
+        else throw new IOException("Keine Zusammenfassung für dieses Thema gefunden.");
     }
 }

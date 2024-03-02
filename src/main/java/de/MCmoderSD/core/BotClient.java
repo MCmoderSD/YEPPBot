@@ -8,18 +8,20 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
+
 import de.MCmoderSD.commands.*;
 import de.MCmoderSD.events.*;
+
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.Calculate.*;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class BotClient {
 
     // Associations
+    @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private final MySQL mySQL;
 
     // Attributes
@@ -64,12 +66,10 @@ public class BotClient {
 
         // Init CommandHandler
         commandHandler = new CommandHandler(mySQL, prefix);
-        interactionHandler = new InteractionHandler(mySQL, botName, lurkChannel, lurkTime);
+        interactionHandler = new InteractionHandler(mySQL, lurkChannel);
 
-        // format admin names
-        for (int i = 0; i < admins.length; i++) {
-            admins[i] = admins[i].toLowerCase();
-        }
+        // Format admin names
+        for (var i = 0; i < admins.length; i++) admins[i] = admins[i].toLowerCase();
 
         // Init Commands
         initCommands(admins);
@@ -132,18 +132,22 @@ public class BotClient {
     }
 
     // Methods
+    @SuppressWarnings("unused")
     public void joinChannel(String channel) {
         chat.joinChannel(channel);
     }
 
+    @SuppressWarnings("unused")
     public void leaveChannel(String channel) {
         chat.leaveChannel(channel);
     }
 
+    @SuppressWarnings("unused")
     public void sendMessage(String channel, String message) {
         chat.sendMessage(channel, message);
     }
 
+    @SuppressWarnings("unused")
     public void close() {
         client.close();
     }

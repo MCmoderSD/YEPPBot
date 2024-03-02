@@ -2,6 +2,7 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.core.CommandHandler;
 
 import java.util.Arrays;
@@ -18,9 +19,7 @@ public class JoinChat {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 String channel = getChannel(event);
-
-                if (tagAuthor(event).equals(channel))
-                    join(event, chat, channel); // Broadcaster
+                if (getAuthor(event).equals(channel)) join(event, chat, channel); // Broadcaster
                 else if (Arrays.stream(admins).toList().contains(getAuthor(event).toLowerCase()))
                     join(event, chat, args[0]); // Admin
             }

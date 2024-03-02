@@ -2,9 +2,12 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.core.CommandHandler;
+
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -62,19 +65,19 @@ public class Weather {
 
         // Main weather data
         JSONObject main = jsonObject.getJSONObject("main");
-        double tempKelvin = main.getDouble("temp");                      // Kelvin
-        double tempCelsius = tempKelvin - 273.15;                             // Celsius
-        int tempRounded = Math.toIntExact(Math.round(tempCelsius));           // Rounded
-        int humidity = main.getInt("humidity");                          // %
-        int pressure = main.getInt("pressure");                          // hPa
+        var tempKelvin = main.getDouble("temp");                      // Kelvin
+        var tempCelsius = tempKelvin - 273.15;                             // Celsius
+        var tempRounded = Math.toIntExact(Math.round(tempCelsius));           // Rounded
+        var humidity = main.getInt("humidity");                          // %
+        var pressure = main.getInt("pressure");                          // hPa
 
         // Wind data
         JSONObject wind = jsonObject.getJSONObject("wind");
-        double windSpeed = wind.getDouble("speed");                      // m/s
+        var windSpeed = wind.getDouble("speed");                      // m/s
 
         // Clouds data
         JSONObject clouds = jsonObject.getJSONObject("clouds");
-        int cloudiness = clouds.getInt("all");                           // %
+        var cloudiness = clouds.getInt("all");                           // %
 
         // Visibility data
         String visibilityString;
@@ -89,8 +92,8 @@ public class Weather {
 
         // Sunrise and sunset data
         JSONObject sys = jsonObject.getJSONObject("sys");
-        long sunriseUnixTimestamp = sys.getLong("sunrise");              // Unix Timestamp
-        long sunsetUnixTimestamp = sys.getLong("sunset");                // Unix Timestamp
+        var sunriseUnixTimestamp = sys.getLong("sunrise");              // Unix Timestamp
+        var sunsetUnixTimestamp = sys.getLong("sunset");                // Unix Timestamp
         String sunrise = formatUnixTimestamp(sunriseUnixTimestamp); // HH:mm:ss
         String sunset = formatUnixTimestamp(sunsetUnixTimestamp);   // HH:mm:ss
 

@@ -2,6 +2,7 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.core.CommandHandler;
 
 import java.io.BufferedReader;
@@ -12,8 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static de.MCmoderSD.utilities.Calculate.getAuthor;
-import static de.MCmoderSD.utilities.Calculate.getChannel;
+import static de.MCmoderSD.utilities.Calculate.*;
 
 public class Insult {
 
