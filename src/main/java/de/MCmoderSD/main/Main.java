@@ -23,7 +23,7 @@ public class Main {
         String[] admins = botConfig.get("admins").asText().split("; ");
 
         // Load Channel List
-        JsonNode channelList = jsonUtility.load("/config/ChannelList.json.disabled");
+        JsonNode channelList = jsonUtility.load("/config/ChannelList.json");
         String[] channels = new String[channelList.getSize()];
         for (int i = 0; i < channelList.getSize(); i++) channels[i] = channelList.get("#" + i).asText();
 
