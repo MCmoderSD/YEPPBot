@@ -25,7 +25,7 @@ public class Prompt {
         commandHandler.registerCommand(new Command(description, "prompt", "gpt") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-
+                
             }
         });
     }

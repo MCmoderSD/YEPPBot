@@ -2,6 +2,8 @@ package de.MCmoderSD.utilities;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
+import javax.swing.*;
+import java.awt.*;
 import java.sql.Time;
 
 public class Calculate {
@@ -18,6 +20,14 @@ public class Calculate {
 
 
     // Methods
+
+    // Center JFrame
+    public static Point centerJFrame(JFrame frame) {
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (dim.width - frame.getWidth()) / 2;
+        int y = (dim.height - frame.getHeight()) / 2;
+        return new Point(x, y);
+    }
 
 
     // Format Unix Timestamp

@@ -16,12 +16,30 @@ import java.util.Objects;
 
 public class Main {
 
+    private static final String BOT_CONFIG = "/config/BotConfig.json";
+    private static final String CHANNEL_LIST = "/config/Channel.list";
+    private static final String MYSQL_CONFIG = "/database/mySQL.json";
+    private static final String DEV_CONFIG = "/config/BotConfig.json.dev";
+    private static final String DEV_LIST = "/config/Channel.list.dev";
+
     // Constructor
-    public Main(String... args) {
+    public Main(ArrayList<String> args) {
         JsonUtility jsonUtility = new JsonUtility();
 
+        String botConfigPath;
+        String channelListPath;
+
+        // Check if Dev Mode
+        if (args.contains("-dev")) {
+            botConfigPath = DEV_CONFIG;
+            channelListPath = DEV_LIST;
+        } else {
+            botConfigPath = BOT_CONFIG;
+            channelListPath = CHANNEL_LIST;
+        }
+
         // Load Bot Config
-        JsonNode botConfig = jsonUtility.load("/config/BotConfig.json");
+        JsonNode botConfig = jsonUtility.load(botConfigPath);
 
         String botName = botConfig.get("botName").asText();     // Get Bot Name
         String botToken = botConfig.get("botToken").asText();   // Get Bot Token
@@ -33,7 +51,7 @@ public class Main {
          try {
              ArrayList<String> lines = new ArrayList<>();
              ArrayList<String> names = new ArrayList<>();
-             InputStream inputStream = getClass().getResourceAsStream("/config/Channel.list");
+             InputStream inputStream = getClass().getResourceAsStream(channelListPath);
              BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
 
             String line;
@@ -48,19 +66,21 @@ public class Main {
          if (channels == null) throw new IllegalArgumentException("Channel List is empty!");
 
         // Load MySQL Config
-        MySQL mySQL = new MySQL(jsonUtility.load("/database/mySQL.json"));
+        MySQL mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG));
 
         // Init Bot
         new BotClient(botName, botToken, prefix, admins, channels, mySQL);
 
         // CLI check
-        if (args.length > 0 && (args[0].equals("-cli") || args[0].equals("-nogui"))) return;
+        if (args.contains("-cli") || args.contains("-nogui")) return;
 
         // Init GUI
         new Frame();
     }
 
     public static void main(String[] args) {
-        new Main(args);
+        ArrayList<String> arguments = new ArrayList<>();
+        for (String arg : args) if (arg.startsWith("-")) arguments.add(arg);
+        new Main(arguments);
     }
 }

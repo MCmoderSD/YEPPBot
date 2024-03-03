@@ -12,8 +12,7 @@ public abstract class Event {
     public Event(String... event) {
 
         // Null Check
-        if (event.length == 0)
-            throw new IllegalArgumentException("Event name missing!");
+        if (event.length == 0) throw new IllegalArgumentException("Event name missing!");
 
         // Set attributes
         this.event = event[0]; // Name
