@@ -14,8 +14,11 @@ public class Lurk {
     // Constructor
     public Lurk(CommandHandler commandHandler, TwitchChat chat, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
 
+        // Description
+        String description = "Sendet den Befehl " + commandHandler.getPrefix() + "lurk in den Chat, um im Lurk zu sein";
+
         // Register command
-        commandHandler.registerCommand(new Command("lurk", "lürk") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "lurk", "lürk") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 String author = getAuthor(event);

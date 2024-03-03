@@ -13,12 +13,16 @@ public class Prompt {
     // Constructor
     public Prompt(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Benutzt ChatGPT, um eine Antwort auf eine Frage zu generieren. Verwendung: " + commandHandler.getPrefix() + "prompt <Frage>";
+
+
         // ToDo - Connect to GPT
         JsonUtility jsonUtility = new JsonUtility();
         JsonNode config = jsonUtility.load("/api/ChatGPT.json");
 
         // Register command
-        commandHandler.registerCommand(new Command("prompt", "gpt") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "prompt", "gpt") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 

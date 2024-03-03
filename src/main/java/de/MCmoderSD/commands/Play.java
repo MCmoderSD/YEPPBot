@@ -17,12 +17,16 @@ public class Play {
     // Constructor
     public Play(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Sendet den Befehl " + commandHandler.getPrefix() + "play in den Chat, um Events beizutreten";
+
+
         // Initialize attributes
         sentMessage = false;
         reset();
 
         // Register command
-        commandHandler.registerCommand(new Command("play") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "play") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 if (!firstPlay) {

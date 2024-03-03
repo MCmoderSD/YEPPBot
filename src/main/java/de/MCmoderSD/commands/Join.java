@@ -17,12 +17,16 @@ public class Join {
     // Constructor
     public Join(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Sendet den Befehl " + commandHandler.getPrefix() + "join in den Chat, um Events beizutreten";
+
+
         // Initialize attributes
         sentMessage = false;
         reset();
 
         // Register command
-        commandHandler.registerCommand(new Command("join") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "join") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 if (!firstJoin) {

@@ -14,8 +14,12 @@ public class Say {
     // Constructor
     public Say(CommandHandler commandHandler, TwitchChat chat, String[] admins) {
 
+        // Description
+        String description = "Nur für Administratoren. Sendet eine Nachricht in den Chat. Verwendung: " + commandHandler.getPrefix() + "say <Nachricht>";
+
+
         // Register command
-        commandHandler.registerCommand(new Command("say", "repeat") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "say", "repeat") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 if (Arrays.stream(admins).toList().contains(getAuthor(event).toLowerCase()) || getAuthor(event).equals(getChannel(event)))

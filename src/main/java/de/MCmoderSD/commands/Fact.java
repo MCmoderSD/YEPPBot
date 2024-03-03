@@ -23,11 +23,15 @@ public class Fact {
     // Constructor
     public Fact(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Sendet einen zufälligen Fakt.";
+
+
         // Read facts
         germanFacts = readFacts("/assets/german.facts");
 
         // Register command
-        commandHandler.registerCommand(new Command("fact", "fakt") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "fact", "fakt") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 

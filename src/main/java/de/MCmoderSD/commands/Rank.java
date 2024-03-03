@@ -10,10 +10,12 @@ public class Rank {
         // Constructor
     public Rank(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Zeigt den Rank an. Verwendung: " + commandHandler.getPrefix() + "rank";
 
 
         // Register command
-        commandHandler.registerCommand(new Command("rank", "rang", "stats") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "rank", "rang", "stats") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 

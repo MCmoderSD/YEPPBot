@@ -83,7 +83,7 @@ public class BotClient {
         for (var i = 0; i < admins.length; i++) admins[i] = admins[i].toLowerCase();
 
         // Init Commands
-        initCommands(admins, prefix, whiteList, blackList);
+        initCommands(admins, whiteList, blackList);
 
         // Init Interactions
         initInteractions();
@@ -119,9 +119,9 @@ public class BotClient {
     }
 
     // Init Commands
-    public void initCommands(String[] admins, String prefix, JsonNode whiteList, JsonNode blackList) {
+    public void initCommands(String[] admins, JsonNode whiteList, JsonNode blackList) {
         new Fact(commandHandler, chat);
-        new Help(commandHandler, chat, whiteList, blackList, prefix);
+        new Help(commandHandler, chat, whiteList, blackList);
         new Insult(commandHandler, chat);
         new Join(commandHandler, chat);
         new JoinChat(commandHandler, chat, admins);

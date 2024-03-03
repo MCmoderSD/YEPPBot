@@ -23,12 +23,16 @@ public class Joke {
     // Constructor
     public Joke(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Sendet einen zufälligen Witz. Syntax: " + commandHandler.getPrefix() + "joke en/de";
+
+
         // Read jokes
         englishJokes = readJokes("/assets/english.jokes");
         germanJokes = readJokes("/assets/german.jokes");
 
         // Register command
-        commandHandler.registerCommand(new Command("joke", "witz") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "joke", "witz") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 

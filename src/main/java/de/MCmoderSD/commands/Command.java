@@ -7,9 +7,10 @@ public abstract class Command {
     // Attributes
     private final String command; // Name
     private final String[] alias; // Alias
+    private final String description; // Description
 
     // Constructor
-    public Command(String... command) {
+    public Command(String description, String... command) {
 
         // Null Check
         if (command.length == 0)
@@ -18,6 +19,7 @@ public abstract class Command {
         // Set attributes
         this.command = command[0]; // Name
         this.alias = command; // Alias
+        this.description = description; // Description
     }
 
     // Methods
@@ -31,4 +33,8 @@ public abstract class Command {
     public String[] getAlias() {
         return alias;
     } // Get the alias
+
+    public String getDescription() {
+        return description;
+    } // Get the description
 }

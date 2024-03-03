@@ -23,11 +23,15 @@ public class Insult {
     // Constructor
     public Insult(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Beleidigt einen Nutzer. Syntax: " + commandHandler.getPrefix() + "insult <Nutzer>.";
+
+
         // Read insults
         germanInsults = readInsults("/assets/german.insults");
 
         // Register command
-        commandHandler.registerCommand(new Command("insult", "beileidige", "mobbe", "mobbing") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "insult", "beleidige", "mobbe", "mobbing") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 

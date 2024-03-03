@@ -13,8 +13,12 @@ public class LeaveChat {
     // Constructor
     public LeaveChat(CommandHandler commandHandler, TwitchChat chat, String[] admins) {
 
+        // Description
+        String description = "Entfernt den Bot aus einem Chat. Nur der Broadcaster und Admins können diesen Befehl verwenden. Verwendung: " + commandHandler.getPrefix() + "leavechat <Channel>";
+
+
         // Register command
-        commandHandler.registerCommand(new Command("leavechat", "removechat", "removefromchat", "delfromchat") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "leavechat", "removechat", "removefromchat", "delfromchat") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 String channel = getChannel(event);

@@ -20,8 +20,12 @@ public class Wiki {
     // Constructor
     public Wiki(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. Verwendung: " + commandHandler.getPrefix() + "wiki <Thema>";
+
+
         // Register command
-        commandHandler.registerCommand(new Command("wiki", "wikipedia", "summarize", "zusammenfassung") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "wiki", "wikipedia", "summarize", "zusammenfassung") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 String channel = getChannel(event);

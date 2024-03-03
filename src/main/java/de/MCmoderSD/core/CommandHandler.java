@@ -101,6 +101,9 @@ public class CommandHandler {
     public HashMap<String, Command> getCommands() {
         return commands;
     }
+    public HashMap<String, String> getAliases() {
+        return aliases;
+    }
 
     public Command getCommand(String command) {
         return commands.get(command);
@@ -109,5 +112,9 @@ public class CommandHandler {
     @SuppressWarnings("unused")
     public void removeCommand(String command) {
         commands.remove(command);
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 }

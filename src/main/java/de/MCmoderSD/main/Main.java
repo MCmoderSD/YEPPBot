@@ -6,7 +6,13 @@ import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class Main {
 
@@ -23,9 +29,23 @@ public class Main {
         String[] admins = botConfig.get("admins").asText().split("; ");
 
         // Load Channel List
-        JsonNode channelList = jsonUtility.load("/config/ChannelList.json");
-        String[] channels = new String[channelList.getSize()];
-        for (int i = 0; i < channelList.getSize(); i++) channels[i] = channelList.get("#" + i).asText();
+        String[] channels = null;
+         try {
+             ArrayList<String> lines = new ArrayList<>();
+             ArrayList<String> names = new ArrayList<>();
+             InputStream inputStream = getClass().getResourceAsStream("/config/Channel.list");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
+
+            String line;
+            while ((line = reader.readLine()) != null) lines.add(line);
+            for (String name : lines) if (name.length() > 3) names.add(name.replace("\n", "").replace(" ", ""));
+            channels = new String[names.size()];
+            names.toArray(channels);
+         } catch (IOException e) {
+             System.err.println(e.getMessage());
+         }
+
+         if (channels == null) throw new IllegalArgumentException("Channel List is empty!");
 
         // Load MySQL Config
         MySQL mySQL = new MySQL(jsonUtility.load("/database/mySQL.json"));

@@ -31,6 +31,10 @@ public class Weather {
     // Constructor
     public Weather(CommandHandler commandHandler, TwitchChat chat) {
 
+        // Description
+        String description = "Zeigt das Wetter in einer Stadt an. Verwendung: " + commandHandler.getPrefix() + "weather <Stadt>";
+
+
         // Load API key
         JsonUtility jsonUtility = new JsonUtility();
         JsonNode config = jsonUtility.load("/api/OpenWeather.json");
@@ -38,7 +42,7 @@ public class Weather {
         apiKey = config.get("api_key").asText();
 
         // Register command
-        commandHandler.registerCommand(new Command("weather", "wetter") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "weather", "wetter") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 chat.sendMessage(getChannel(event), generateResponse(args));
