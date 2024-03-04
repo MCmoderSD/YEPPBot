@@ -1,10 +1,14 @@
 package de.MCmoderSD.utilities.database;
 
+import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.sql.*;
 
 public class MySQL {
+
+    // Associations
+    private final Frame frame;
 
     // Attributes
     private final String host;
@@ -18,7 +22,7 @@ public class MySQL {
     private Connection connection;
 
     // Constructor
-    public MySQL(JsonNode databaseConfig) {
+    public MySQL(JsonNode databaseConfig, Frame frame) {
         host = databaseConfig.get("host").asText();
         port = databaseConfig.get("port").asInt();
         database = databaseConfig.get("database").asText();
@@ -26,6 +30,7 @@ public class MySQL {
         username = databaseConfig.get("username").asText();
         password = databaseConfig.get("password").asText();
         connect();
+        this.frame = frame;
     }
 
 
@@ -40,6 +45,7 @@ public class MySQL {
     }
 
     // Disconnect from MySQL
+    @SuppressWarnings("unused")
     public void disconnect() {
         try {
             if (!isConnected()) return; // already disconnected
@@ -68,6 +74,8 @@ public class MySQL {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+
+        if (frame != null) frame.log(type, channel, author, message);
     }
 
     // Getter

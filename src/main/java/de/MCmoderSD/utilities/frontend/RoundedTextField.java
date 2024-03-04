@@ -8,11 +8,8 @@ import java.awt.geom.RoundRectangle2D;
 
 public class RoundedTextField extends JTextField {
 
-    private String templateText;
-
     public RoundedTextField(int columns, String templateText) {
         super(columns);
-        this.templateText = templateText;
         setText(templateText);
         setForeground(Color.GRAY);
         setOpaque(false);

@@ -23,6 +23,6 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] Database logging
 - [x] Help command
 - [x] Black and White list
+- [x] Graphical User Interface
 - [ ] ChatGPT command
 - [ ] Rank command
-- [ ] Graphical User Interface

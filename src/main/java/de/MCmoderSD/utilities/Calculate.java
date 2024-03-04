@@ -17,6 +17,10 @@ public class Calculate {
     public final static String MESSAGE = "[MSG]";
     public final static String FOLLOW = "[FLW]";
     public final static String SUBSCRIBE = "[SUB]";
+    public final static String USER = "[USR]";
+    public final static Color DARK = new Color(0x0e0e10);
+    public final static Color LIGHT = new Color(0x18181b);
+    public final static Color PURPLE = new Color(0x771fe2);
 
 
     // Methods

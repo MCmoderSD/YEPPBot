@@ -31,6 +31,7 @@ public class BotClient {
     private final TwitchChat chat;
     private final CommandHandler commandHandler;
     private final InteractionHandler interactionHandler;
+    private final String botName;
 
     // Variables
     private final HashMap<String, String> lurkChannel; // Users
@@ -38,6 +39,9 @@ public class BotClient {
 
     // Constructor
     public BotClient(String botName, String botToken, String prefix, String[] admins, String[] channels, MySQL mySQL) {
+
+        // Init Bot Name
+        this.botName = botName;
 
         // Init MySQL
         this.mySQL = mySQL;
@@ -144,7 +148,6 @@ public class BotClient {
     }
 
     // Methods
-    @SuppressWarnings("unused")
     public void joinChannel(String channel) {
         chat.joinChannel(channel);
     }
@@ -154,9 +157,14 @@ public class BotClient {
         chat.leaveChannel(channel);
     }
 
-    @SuppressWarnings("unused")
     public void sendMessage(String channel, String message) {
+        if (!chat.getChannels().contains(channel)) joinChannel(channel);
+        if (message.length() > 500) message = message.substring(0, 500);
+        if (message.isEmpty()) return;
+
         chat.sendMessage(channel, message);
+        System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
+        mySQL.log(logDate(), logTime(), stripBrackets(USER), channel, botName, message);
     }
 
     @SuppressWarnings("unused")

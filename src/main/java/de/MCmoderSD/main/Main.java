@@ -16,11 +16,17 @@ import java.util.Objects;
 
 public class Main {
 
+    // Constants
     private static final String BOT_CONFIG = "/config/BotConfig.json";
     private static final String CHANNEL_LIST = "/config/Channel.list";
     private static final String MYSQL_CONFIG = "/database/mySQL.json";
     private static final String DEV_CONFIG = "/config/BotConfig.json.dev";
     private static final String DEV_LIST = "/config/Channel.list.dev";
+
+    // Associations
+    private final Frame frame;
+    private final MySQL mySQL;
+    private final BotClient botClient;
 
     // Constructor
     public Main(ArrayList<String> args) {
@@ -38,6 +44,10 @@ public class Main {
             channelListPath = CHANNEL_LIST;
         }
 
+        // CLI check
+        if (!(args.contains("-cli") || args.contains("-nogui"))) frame = new Frame(this);
+        else frame = null;
+
         // Load Bot Config
         JsonNode botConfig = jsonUtility.load(botConfigPath);
 
@@ -48,39 +58,47 @@ public class Main {
 
         // Load Channel List
         String[] channels = null;
-         try {
-             ArrayList<String> lines = new ArrayList<>();
-             ArrayList<String> names = new ArrayList<>();
-             InputStream inputStream = getClass().getResourceAsStream(channelListPath);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
+        try {
+            ArrayList<String> lines = new ArrayList<>();
+            ArrayList<String> names = new ArrayList<>();
+            InputStream inputStream = getClass().getResourceAsStream(channelListPath);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
 
             String line;
             while ((line = reader.readLine()) != null) lines.add(line);
             for (String name : lines) if (name.length() > 3) names.add(name.replace("\n", "").replace(" ", ""));
             channels = new String[names.size()];
             names.toArray(channels);
-         } catch (IOException e) {
-             System.err.println(e.getMessage());
-         }
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
 
-         if (channels == null) throw new IllegalArgumentException("Channel List is empty!");
+        if (channels == null) throw new IllegalArgumentException("Channel List is empty!");
 
         // Load MySQL Config
-        MySQL mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG));
+        mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame);
 
         // Init Bot
-        new BotClient(botName, botToken, prefix, admins, channels, mySQL);
-
-        // CLI check
-        if (args.contains("-cli") || args.contains("-nogui")) return;
-
-        // Init GUI
-        new Frame();
+        botClient = new BotClient(botName, botToken, prefix, admins, channels, mySQL);
     }
 
+    // PSVM
     public static void main(String[] args) {
         ArrayList<String> arguments = new ArrayList<>();
         for (String arg : args) if (arg.startsWith("-")) arguments.add(arg);
         new Main(arguments);
+    }
+
+    // Getter
+    public Frame getFrame() {
+        return frame;
+    }
+
+    public MySQL getMySQL() {
+        return mySQL;
+    }
+
+    public BotClient getBotClient() {
+        return botClient;
     }
 }
