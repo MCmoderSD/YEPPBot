@@ -86,6 +86,6 @@ public class Prompt {
         String finalResponse = response.toString();
         while (finalResponse.endsWith(" ") || finalResponse.endsWith("\n")) finalResponse = finalResponse.trim();
         while (finalResponse.startsWith(" ") || finalResponse.startsWith("\n")) finalResponse = finalResponse.substring(1);
-        return finalResponse.replaceAll("YEPP[.,!?\\s]*", "YEPP ");
+        return finalResponse.replaceAll("(?i)YEPP[.,!?\\s]*", "YEPP ");
     }
 }
