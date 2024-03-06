@@ -8,7 +8,7 @@ in [Java 17](https://www.oracle.com/de/java/technologies/downloads/#java17) usin
 thr [Twitch4J library](https://twitch4j.github.io/).
 
 The bot is currently under active development and can change a lot in the future. <br>
-If you have any ideas or suggestions, feel free to open an issue or a pull request.
+If you have any ideas or suggestions, feel free to open an issue or a pull request. <br> <br>
 
 ## Table of Contents
 - [Description](#description)
@@ -16,6 +16,8 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [How to use](#how-to-use)
 - [Usage and commands](#usage-and-commands)
 - [Contributing](#contributing)
+
+<br>
 
 ## Features
 
@@ -35,6 +37,8 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] ChatGPT command
 - [x] Translate command
 - [ ] Rank command
+
+<br>
 
 ## How to use
 
