@@ -134,7 +134,7 @@ public class BotClient {
         new LeaveChat(commandHandler, chat, admins);
         new Lurk(commandHandler, chat, lurkChannel, lurkTime);
         new Play(commandHandler, chat);
-        // new Prompt(commandHandler, chat); ToDo Make it work
+        new Prompt(commandHandler, chat, botName);
         new Say(commandHandler, chat, admins);
         new Status(commandHandler, chat);
         new Weather(commandHandler, chat);

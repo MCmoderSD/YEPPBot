@@ -30,6 +30,13 @@
             <version>8.0.33</version>
         </dependency>
 
+        <!-- ChatGPT -->
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>service</artifactId>
+            <version>0.18.2</version>
+        </dependency>
+
         <!-- Json -->
         <dependency>
             <groupId>org.json</groupId>
