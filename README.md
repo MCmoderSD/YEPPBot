@@ -107,8 +107,6 @@ The file should have the following structure: <br>
   "api_key": "YOUR_API_KEY"
 }
 ```
-
-
 You can get the API key from [OpenWeatherMap](https://openweathermap.org/api). <br> <br>
 
 ### 5. MySQL Database for logging
@@ -127,6 +125,7 @@ The file should have the following structure: <br>
   "password": "PASSWORD"
 }
 ```
+<br>
 
 ### 6. Black and White list commands
 
@@ -163,7 +162,7 @@ You can use the ```!help COMMAND_NAME``` to get more information about a specifi
 You can use the ```!joinchat CHANNEL_NAME``` to make the bot join a specific channel. <br>
 You can use the ```!leavechat CHANNEL_NAME``` to make the bot leave a specific channel. <br>
 
-You can start the bot without the graphical user interface mode by running the bot with the ```-nogui``` argument. <br>
+You can start the bot without the graphical user interface mode by running the bot with the ```-nogui``` argument. <br> <br>
 
 ## Contributing
 If you have any ideas or suggestions, feel free to open an issue or a pull request. <br>
