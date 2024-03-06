@@ -60,7 +60,6 @@ public class InteractionHandler {
 
     // Manually execute a command
     public void executeInteracton(ChannelMessageEvent event, String interaction) {
-        System.out.println(interaction);
         if (interactions.containsKey(interaction) || aliases.containsKey(interaction)) {
 
             // Check for alias
