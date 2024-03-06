@@ -23,7 +23,6 @@ import static de.MCmoderSD.utilities.Calculate.*;
 public class BotClient {
 
     // Associations
-    @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private final MySQL mySQL;
 
     // Attributes
