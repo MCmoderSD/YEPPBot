@@ -16,7 +16,7 @@ import java.util.List;
 
 import static de.MCmoderSD.utilities.Calculate.*;
 
-public class Prompt {
+public class Translate {
 
     // Attributes
     private final String botName;
@@ -24,13 +24,12 @@ public class Prompt {
     private final String model;
     private final int maxTokens;
     private final double temperature;
-    private final ChatMessage instruction;
 
     // Constructor
-    public Prompt(CommandHandler commandHandler, TwitchChat chat, String botName) {
+    public Translate(CommandHandler commandHandler, TwitchChat chat, String botName) {
 
         // Description
-        String description = "Benutzt ChatGPT, um eine Antwort auf eine Frage zu generieren. Verwendung: " + commandHandler.getPrefix() + "prompt <Frage>";
+        String description = "Kann deine Sätze in jede erdenkliche Sprache übersetzen: " + commandHandler.getPrefix() + "translate <Sprache> <Frage>";
 
         this.botName = botName;
 
@@ -40,24 +39,31 @@ public class Prompt {
         openAI = new OpenAiService(config.get("apiKey").asText());
         model = config.get("model").asText();
         maxTokens = config.get("maxTokens").asInt();
-        temperature = config.get("temperature").asDouble();
-        instruction = new ChatMessage(ChatMessageRole.SYSTEM.value(), config.get("instruction").asText());
+        temperature = 0; // For more subtle responses
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "prompt", "gpt", "chatgpt", "ai", "question", "yeppbot", "yepppbot") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, "translator", "translate", "übersetzer", "übersetze") { // Command name and aliases
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                String question = String.join(" ", args);
-                chat.sendMessage(getChannel(event), prompt(question));
+                String language = args[0];
+                String text = String.join(" ", args).replace(language, "");
+                while (text.startsWith(" ") || text.startsWith("\n")) text = text.substring(1);
+                while (text.endsWith(" ") || text.endsWith("\n")) text = text.trim();
+                chat.sendMessage(getChannel(event), translate(language, text));
             }
         });
     }
 
-    private String prompt(String question) {
-        while (question.startsWith(" ") || question.startsWith("\n")) question = question.substring(1);
-        while (question.endsWith(" ") || question.endsWith("\n")) question = question.trim();
+    private String translate(String language, String text) {
+        while (language.startsWith(" ") || language.startsWith("\n")) language = language.substring(1);
+        while (language.endsWith(" ") || language.endsWith("\n")) language = language.trim();
+        language = "Please translate the following text into " + language + ":";
+        while (text.startsWith(" ") || text.startsWith("\n")) text = text.substring(1);
+        while (text.endsWith(" ") || text.endsWith("\n")) text = text.trim();
 
-        ChatMessage prompt = new ChatMessage(ChatMessageRole.USER.value(), question);
+        ChatMessage instruction = new ChatMessage(ChatMessageRole.SYSTEM.value(), language);
+        ChatMessage prompt = new ChatMessage(ChatMessageRole.USER.value(), text);
+
 
         List<ChatMessage> messages = new ArrayList<>();
         messages.add(instruction);
@@ -86,6 +92,6 @@ public class Prompt {
         String finalResponse = response.toString();
         while (finalResponse.endsWith(" ") || finalResponse.endsWith("\n")) finalResponse = finalResponse.trim();
         while (finalResponse.startsWith(" ") || finalResponse.startsWith("\n")) finalResponse = finalResponse.substring(1);
-        return finalResponse.replaceAll("YEPP[.,!?\\s]*", "YEPP ");
+        return finalResponse;
     }
 }

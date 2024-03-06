@@ -37,7 +37,7 @@ public class Weather {
 
         // Load API key
         JsonUtility jsonUtility = new JsonUtility();
-        JsonNode config = jsonUtility.load("/api/OpenWeather.json");
+        JsonNode config = jsonUtility.load("/api/OpenWeatherMap.json");
         url = config.get("url").asText();
         apiKey = config.get("api_key").asText();
 

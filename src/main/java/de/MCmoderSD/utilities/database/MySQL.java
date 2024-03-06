@@ -58,9 +58,7 @@ public class MySQL {
     // Write data to MySQL
     public void log(Date date, Time time, String type, String channel, String author, String message) {
         try {
-            if (!isConnected()) {
-                connect();
-            }
+            if (!isConnected()) connect();
 
             String query = "INSERT INTO " + table + " (date, time, type, channel, author, message) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);

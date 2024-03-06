@@ -136,6 +136,7 @@ public class BotClient {
         new Prompt(commandHandler, chat, botName);
         new Say(commandHandler, chat, admins);
         new Status(commandHandler, chat);
+        new Translate(commandHandler, chat, botName);
         new Weather(commandHandler, chat);
         new Wiki(commandHandler, chat);
     }
