@@ -130,6 +130,7 @@ public class BotClient {
         new Join(commandHandler, chat);
         new JoinChat(commandHandler, chat, admins);
         new Joke(commandHandler, chat);
+        new Key(commandHandler, chat);
         new LeaveChat(commandHandler, chat, admins);
         new Lurk(commandHandler, chat, lurkChannel, lurkTime);
         new Play(commandHandler, chat);

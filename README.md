@@ -24,5 +24,6 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] Help command
 - [x] Black and White list
 - [x] Graphical User Interface
+- [x] Key
 - [ ] ChatGPT command
 - [ ] Rank command

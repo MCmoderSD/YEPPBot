@@ -6,10 +6,13 @@ import de.MCmoderSD.utilities.frontend.RoundedTextField;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.util.ArrayList;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.Stack;
 
 import static de.MCmoderSD.utilities.Calculate.*;
 import static java.awt.Color.WHITE;
+import static java.awt.event.KeyEvent.*;
 
 public class MenuPanel extends JPanel {
 
@@ -21,7 +24,8 @@ public class MenuPanel extends JPanel {
     private final RoundedTextField textField;
 
     // Variables
-    private final ArrayList<String> messages;
+    private final Stack<String> messageHistory;
+    private String lastMessage;
     private int messageIndex;
 
     // Constructor
@@ -37,7 +41,7 @@ public class MenuPanel extends JPanel {
         this.frame = frame;
 
         Font font = new Font("Roboto", Font.PLAIN, 20);
-        messages = new ArrayList<>();
+        messageHistory = new Stack<>();
 
         // Channel Input
         channelField = new RoundedTextField(1, "Channel");
@@ -56,28 +60,33 @@ public class MenuPanel extends JPanel {
         textField.setBorder(new LineBorder(LIGHT, 5));
         add(textField);
 
-        // Key Listener
-        textField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) sendMessage();
-                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) textField.setText("");
-                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_TAB) channelField.requestFocus();
+            // Key Listener
+        textField.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent evt) {
+                int keyCode = evt.getKeyCode();
+                if (keyCode == VK_ENTER) sendMessage();
+                if (keyCode == VK_ESCAPE) textField.setText("");
+                if (keyCode == VK_TAB) channelField.requestFocus();
 
                 // Message History
-                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_UP) {
-                    if (messageIndex > 0) {
+                if (keyCode == VK_UP) {
+                    if (!messageHistory.isEmpty() && messageIndex > 0) {
                         messageIndex--;
-                        textField.setText(messages.get(messageIndex));
+                        textField.setText(messageHistory.get(messageIndex));
+                    } else if (messageIndex == 0) {
+                        textField.setText(lastMessage);
                     }
                 }
 
-                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DOWN) {
-                    if (messageIndex < messages.size() - 1) {
+                if (keyCode == VK_DOWN) {
+                    if (!messageHistory.isEmpty() && messageIndex < messageHistory.size() - 1) {
                         messageIndex++;
-                        textField.setText(messages.get(messageIndex));
+                        textField.setText(messageHistory.get(messageIndex));
+                    } else {
+                        lastMessage = textField.getText();
+                        textField.setText("");
                     }
                 }
-
             }
         });
 
@@ -111,8 +120,9 @@ public class MenuPanel extends JPanel {
             return;
         }
         frame.getBotClient().sendMessage(channel, message);
-        messages.add(message);
         textField.setText("");
+        messageHistory.push(message);
+        messageIndex = messageHistory.size();
     }
 
     // Get Channel
