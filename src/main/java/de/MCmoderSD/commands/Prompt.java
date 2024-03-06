@@ -2,15 +2,11 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
-import com.theokanning.openai.completion.CompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
-import de.MCmoderSD.UI.MenuPanel;
 import de.MCmoderSD.core.CommandHandler;
-
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 
@@ -18,8 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static de.MCmoderSD.utilities.Calculate.getChannel;
-import static de.MCmoderSD.utilities.Calculate.logTimestamp;
+import static de.MCmoderSD.utilities.Calculate.*;
 
 public class Prompt {
 
