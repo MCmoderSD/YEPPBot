@@ -5,7 +5,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Status {
 

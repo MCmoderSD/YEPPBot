@@ -10,7 +10,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Stack;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 import static java.awt.Color.WHITE;
 import static java.awt.event.KeyEvent.*;
 

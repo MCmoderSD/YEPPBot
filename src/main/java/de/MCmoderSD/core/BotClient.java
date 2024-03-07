@@ -15,15 +15,17 @@ import de.MCmoderSD.events.*;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
+import de.MCmoderSD.utilities.other.OpenAI;
 
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class BotClient {
 
     // Associations
     private final MySQL mySQL;
+    private final OpenAI openAI;
 
     // Attributes
     private final TwitchClient client;
@@ -37,13 +39,16 @@ public class BotClient {
     private final HashMap<String, Long> lurkTime; // Time
 
     // Constructor
-    public BotClient(String botName, String botToken, String prefix, String[] admins, String[] channels, MySQL mySQL) {
+    public BotClient(String botName, String botToken, String prefix, String[] admins, String[] channels, MySQL mySQL, OpenAI openAI) {
 
         // Init Bot Name
         this.botName = botName;
 
         // Init MySQL
         this.mySQL = mySQL;
+
+        // Init OpenAI
+        this.openAI = openAI;
 
         // Init Credential
         OAuth2Credential credential = new OAuth2Credential("twitch", botToken);
@@ -133,10 +138,10 @@ public class BotClient {
         new LeaveChat(commandHandler, chat, admins);
         new Lurk(commandHandler, chat, lurkChannel, lurkTime);
         new Play(commandHandler, chat);
-        new Prompt(commandHandler, chat, botName);
+        new Prompt(commandHandler, chat, openAI, botName);
         new Say(commandHandler, chat, admins);
         new Status(commandHandler, chat);
-        new Translate(commandHandler, chat, botName);
+        new Translate(commandHandler, chat, openAI, botName);
         new Weather(commandHandler, chat);
         new Wiki(commandHandler, chat);
     }

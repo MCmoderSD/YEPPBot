@@ -5,6 +5,7 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
+import de.MCmoderSD.utilities.other.OpenAI;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,12 +21,11 @@ public class Main {
     private static final String BOT_CONFIG = "/config/BotConfig.json";
     private static final String CHANNEL_LIST = "/config/Channel.list";
     private static final String MYSQL_CONFIG = "/database/mySQL.json";
+    private static final String OPENAI_CONFIG = "/api/ChatGPT.json";
     private static final String DEV_CONFIG = "/config/BotConfig.json.dev";
     private static final String DEV_LIST = "/config/Channel.list.dev";
 
     // Associations
-    private final Frame frame;
-    private final MySQL mySQL;
     private final BotClient botClient;
 
     // Constructor
@@ -45,8 +45,8 @@ public class Main {
         }
 
         // CLI check
+        Frame frame = null;
         if (!(args.contains("-cli") || args.contains("-nogui"))) frame = new Frame(this);
-        else frame = null;
 
         // Load Bot Config
         JsonNode botConfig = jsonUtility.load(botConfigPath);
@@ -76,10 +76,13 @@ public class Main {
         if (channels == null) throw new IllegalArgumentException("Channel List is empty!");
 
         // Load MySQL Config
-        mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame);
+        MySQL mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame);
+
+        // Load OpenAI Config
+        OpenAI openAI = new OpenAI(jsonUtility.load(OPENAI_CONFIG));
 
         // Init Bot
-        botClient = new BotClient(botName, botToken, prefix, admins, channels, mySQL);
+        botClient = new BotClient(botName, botToken, prefix, admins, channels, mySQL, openAI);
     }
 
     // PSVM
@@ -90,14 +93,6 @@ public class Main {
     }
 
     // Getter
-    public Frame getFrame() {
-        return frame;
-    }
-
-    public MySQL getMySQL() {
-        return mySQL;
-    }
-
     public BotClient getBotClient() {
         return botClient;
     }

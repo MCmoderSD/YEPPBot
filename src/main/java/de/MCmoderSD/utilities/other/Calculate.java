@@ -1,4 +1,4 @@
-package de.MCmoderSD.utilities;
+package de.MCmoderSD.utilities.other;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
@@ -32,7 +32,6 @@ public class Calculate {
         int y = (dim.height - frame.getHeight()) / 2;
         return new Point(x, y);
     }
-
 
     // Format Unix Timestamp
     public static String formatUnixTimestamp(long unixTimestamp) {

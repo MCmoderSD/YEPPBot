@@ -7,7 +7,7 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-import static de.MCmoderSD.utilities.Calculate.BREAK;
+import static de.MCmoderSD.utilities.other.Calculate.BREAK;
 
 public class RoundedTextArea extends JScrollPane {
 

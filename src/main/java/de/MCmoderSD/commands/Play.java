@@ -5,7 +5,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Play {
 
@@ -39,7 +39,7 @@ public class Play {
                 if (!sentMessage && channel != null && channel.equals(getChannel(event))) {
                     chat.sendMessage(channel, "!play");
                     sentMessage = true;
-                    resetTimer(180);
+                    resetTimer(120);
                 }
             }
         });

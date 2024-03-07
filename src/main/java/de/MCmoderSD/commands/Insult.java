@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Insult {
 

@@ -5,7 +5,7 @@ import de.MCmoderSD.utilities.frontend.RoundedTextArea;
 import javax.swing.*;
 import java.awt.*;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 import static java.awt.Color.WHITE;
 
 public class LogPanel extends JPanel {

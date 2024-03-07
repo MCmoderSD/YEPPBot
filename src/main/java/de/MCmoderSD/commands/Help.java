@@ -8,7 +8,7 @@ import de.MCmoderSD.utilities.json.JsonNode;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.Calculate.getChannel;
+import static de.MCmoderSD.utilities.other.Calculate.getChannel;
 
 public class Help {
 

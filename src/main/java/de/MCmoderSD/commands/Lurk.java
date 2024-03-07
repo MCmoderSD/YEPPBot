@@ -7,7 +7,7 @@ import de.MCmoderSD.core.CommandHandler;
 
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Lurk {
 

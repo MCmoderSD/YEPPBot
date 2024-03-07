@@ -7,7 +7,7 @@ import de.MCmoderSD.utilities.image.ImageReader;
 import javax.swing.*;
 import java.awt.*;
 
-import static de.MCmoderSD.utilities.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Frame extends JFrame {
 
