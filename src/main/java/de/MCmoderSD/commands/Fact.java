@@ -2,7 +2,6 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
 import de.MCmoderSD.core.CommandHandler;
 import de.MCmoderSD.utilities.database.MySQL;
 
@@ -12,7 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
