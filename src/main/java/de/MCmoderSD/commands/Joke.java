@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,9 +22,10 @@ public class Joke {
     private final ArrayList<String> englishJokes, germanJokes;
 
     // Constructor
-    public Joke(CommandHandler commandHandler, TwitchChat chat) {
+    public Joke(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
-        // Description
+        // About
+        String[] name = {"joke", "witz"};
         String description = "Sendet einen zufälligen Witz. Syntax: " + commandHandler.getPrefix() + "joke en/de";
 
 
@@ -32,7 +34,7 @@ public class Joke {
         germanJokes = readJokes("/assets/german.jokes");
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "joke", "witz") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 
@@ -41,7 +43,13 @@ public class Joke {
                 if (args.length > 0)
                     isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
                 ArrayList<String> jokes = isEnglish ? englishJokes : germanJokes;
-                chat.sendMessage(getChannel(event), jokes.get((int) (Math.random() * jokes.size())));
+
+                // Send message
+                String response = trimMessage(jokes.get((int) (Math.random() * jokes.size())));
+                chat.sendMessage(getChannel(event), response);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

@@ -4,19 +4,25 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.InteractionHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class ReplyYepp {
 
     // Constructor
-    public ReplyYepp(InteractionHandler interactionHandler, TwitchChat chat) {
+    public ReplyYepp(MySQL mySQL, InteractionHandler interactionHandler, TwitchChat chat) {
+
+        // About
+        String[] name = {"yeppbot", "yepppbot", "@yeppbot", "@yepppbot"};
 
         // Register Event
-        interactionHandler.registerEvent(new Event("yeppbot", "yepppbot", "@yeppbot", "@yepppbot") { // Event Name and Alias
+        interactionHandler.registerEvent(new Event(name) {
             @Override
             public void execute(ChannelMessageEvent event) {
-                chat.sendMessage(getChannel(event), tagAuthor(event) + " YEPP");
+                String response = tagAuthor(event) + " YEPP";
+                chat.sendMessage(getChannel(event), response);
+                mySQL.logResponse(event, getEvent(), "", response);
             }
         });
     }

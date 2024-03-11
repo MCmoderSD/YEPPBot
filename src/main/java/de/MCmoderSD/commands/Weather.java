@@ -5,6 +5,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
 
+import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 
@@ -29,9 +30,10 @@ public class Weather {
     private final String apiKey;
 
     // Constructor
-    public Weather(CommandHandler commandHandler, TwitchChat chat) {
+    public Weather(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
-        // Description
+        // About
+        String[] name = {"weather", "wetter"};
         String description = "Zeigt das Wetter in einer Stadt an. Verwendung: " + commandHandler.getPrefix() + "weather <Stadt>";
 
 
@@ -42,10 +44,16 @@ public class Weather {
         apiKey = config.get("api_key").asText();
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "weather", "wetter") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                chat.sendMessage(getChannel(event), generateResponse(args));
+
+                // Send message
+                String response = trimMessage(generateResponse(args));
+                chat.sendMessage(getChannel(event), response);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

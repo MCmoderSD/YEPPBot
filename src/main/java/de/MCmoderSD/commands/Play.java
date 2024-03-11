@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -15,9 +16,10 @@ public class Play {
     private String channel;
 
     // Constructor
-    public Play(CommandHandler commandHandler, TwitchChat chat) {
+    public Play(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
-        // Description
+        // About
+        String[] name = {"play"};
         String description = "Sendet den Befehl " + commandHandler.getPrefix() + "play in den Chat, um Events beizutreten";
 
 
@@ -26,7 +28,7 @@ public class Play {
         reset();
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "play") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 if (!firstPlay) {
@@ -37,7 +39,15 @@ public class Play {
                 }
 
                 if (!sentMessage && channel != null && channel.equals(getChannel(event))) {
-                    chat.sendMessage(channel, "!play");
+
+                    // Send message
+                    String response = commandHandler.getPrefix() + "play";
+                    chat.sendMessage(channel, response);
+
+                    // Log response
+                    mySQL.logResponse(event, getCommand(), processArgs(args), response);
+
+                    // Reset attributes
                     sentMessage = true;
                     resetTimer(120);
                 }

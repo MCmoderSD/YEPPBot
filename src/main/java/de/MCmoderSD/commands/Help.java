@@ -3,12 +3,14 @@ package de.MCmoderSD.commands;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.getChannel;
+import static de.MCmoderSD.utilities.other.Calculate.processArgs;
 
 public class Help {
 
@@ -18,11 +20,11 @@ public class Help {
     private final JsonNode blacklist;
 
     // Constructor
-    public Help(CommandHandler commandHandler, TwitchChat chat, JsonNode whitelist, JsonNode blacklist) {
+    public Help(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, JsonNode whitelist, JsonNode blacklist) {
 
-        // Description
+        // About
+        String[] name = {"help", "hilfe"};
         String description = "Um die verfügbaren Befehle zu sehen, schreibe: " + commandHandler.getPrefix() + "help commands. Um ein hilfe bei einem Befehl zu erhalten, schreibe: " + commandHandler.getPrefix() + "help <Befehl>.";
-
 
         // Init Attributes
         this.commandHandler = commandHandler;
@@ -30,16 +32,23 @@ public class Help {
         this.blacklist = blacklist;
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "help", "hilfe") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 String channel = getChannel(event);
                 String arg = args.length > 0 ? args[0].toLowerCase() : "";
 
                 // Help Commands
-                if (arg.equals("commands") || arg.equals("command") || arg.equals("befehle") || arg.equals("befehl")) chat.sendMessage(channel, helpCommands(channel)); // Help Commands
-                else if (getCommandDescription(channel, arg) != null) chat.sendMessage(channel, getCommandDescription(channel, arg)); // Command Description
-                else chat.sendMessage(channel, getDescription()); // Help Description (Default)
+                String response;
+                if (arg.equals("commands") || arg.equals("command") || arg.equals("befehle") || arg.equals("befehl")) response = helpCommands(channel); // Help Commands
+                else if (getCommandDescription(channel, arg) != null) response = getCommandDescription(channel, arg); // Command Description
+                else response = getDescription(); // Help Description (Default)
+
+                // Send message
+                chat.sendMessage(channel, response);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.Arrays;
 
@@ -12,18 +13,29 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Say {
 
     // Constructor
-    public Say(CommandHandler commandHandler, TwitchChat chat, String[] admins) {
+    public Say(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, String[] admins) {
 
-        // Description
+        // About
+        String[] name = {"say", "repeat"};
         String description = "Nur für Administratoren. Sendet eine Nachricht in den Chat. Verwendung: " + commandHandler.getPrefix() + "say <Nachricht>";
 
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "say", "repeat") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                if (Arrays.stream(admins).toList().contains(getAuthor(event).toLowerCase()) || getAuthor(event).equals(getChannel(event)))
-                    chat.sendMessage(getChannel(event), String.join(" ", args));
+                String channel = getChannel(event);
+                String author = getAuthor(event);
+
+                String response;
+                if (Arrays.stream(admins).toList().contains(author) || author.equals(channel)) response = processArgs(args);
+                else return;
+
+                // Send Message
+                chat.sendMessage(channel, response);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

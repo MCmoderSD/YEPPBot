@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static de.MCmoderSD.utilities.other.Calculate.*;
+
 public class OpenAI {
 
     // Attributes
@@ -29,14 +31,6 @@ public class OpenAI {
         messages = new ArrayList<>();
     }
 
-    // Methods
-    public static String processText(String text) {
-        if (text == null) return "";
-        while (text.startsWith(" ") || text.startsWith("\n")) text = text.substring(1);
-        while (text.endsWith(" ") || text.endsWith("\n")) text = text.trim();
-        return text;
-    }
-
     private String contentGrabber(ChatCompletionChoice completion) {
         String content = completion.getMessage().getContent();
         return content == null ? "" : content;
@@ -48,7 +42,7 @@ public class OpenAI {
     }
 
     public void addMessage(String text, boolean system) {
-        messages.add(new ChatMessage(system ? ChatMessageRole.SYSTEM.value() : ChatMessageRole.USER.value(), processText(text)));
+        messages.add(new ChatMessage(system ? ChatMessageRole.SYSTEM.value() : ChatMessageRole.USER.value(), trimMessage(text)));
     }
 
     // Getter
@@ -86,7 +80,7 @@ public class OpenAI {
         service.streamChatCompletion(chatCompletionRequest).doOnError(Throwable::printStackTrace).blockingForEach(chatCompletionChunk -> chatCompletionChunk.getChoices().forEach(completion -> response.append(contentGrabber(completion))));
 
         // Return result
-        String result = processText(response.toString());
+        String result = trimMessage(response.toString());
         return result.replaceAll("(?i)YEPP[.,!?\\s]*", "YEPP ");
     }
 

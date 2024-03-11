@@ -58,6 +58,16 @@ public class Calculate {
         return event.getChannel().getName();
     }
 
+    // Get Channel ID
+    public static int getChannelID(ChannelMessageEvent event) {
+        return Integer.parseInt(event.getChannel().getId());
+    }
+
+    // Get User ID
+    public static int getUserID(ChannelMessageEvent event) {
+        return Integer.parseInt(event.getUser().getId());
+    }
+
     // Log timestamp
     public static String logTimestamp() {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new java.util.Date()) + "]";
@@ -76,5 +86,17 @@ public class Calculate {
     // Strip Brackets
     public static String stripBrackets(String string) {
         return string.replaceAll("[\\[\\]]", "");
+    }
+
+    // Trim Message
+    public static String trimMessage(String message) {
+        while (message.startsWith(" ") || message.startsWith("\n")) message = message.substring(1);
+        while (message.endsWith(" ") || message.endsWith("\n")) message = message.trim();
+        return message;
+    }
+
+    // Trim Args
+    public static String processArgs(String... args) {
+        return trimMessage(String.join(" ", args)).trim();
     }
 }

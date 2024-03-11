@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.InteractionHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.HashMap;
 
@@ -12,16 +13,24 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class StoppedLurk {
 
     // Constructor
-    public StoppedLurk(InteractionHandler interactionHandler, TwitchChat chat, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
+    public StoppedLurk(MySQL mySQL, InteractionHandler interactionHandler, TwitchChat chat, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
 
         // Register Event
-        interactionHandler.registerEvent(new Event("$stoppedlurk") { // Event Name and Alias
+        interactionHandler.registerEvent(new Event("$stoppedlurk") {
             @Override
             public void execute(ChannelMessageEvent event) {
-                String timeInLurk = getLurkTime(lurkTime.get(getAuthor(event)));
-                chat.sendMessage(getChannel(event), tagAuthor(event) + " war " + timeInLurk + " im Lurk!");
-                lurkChannel.remove(getAuthor(event));
-                lurkTime.remove(getAuthor(event));
+                String author = getAuthor(event);
+
+                // Send message
+                String response = tagAuthor(event) + " war " + getLurkTime(lurkTime.get(author)) + " im Lurk!";
+                chat.sendMessage(getChannel(event), response);
+
+                // Log response
+                mySQL.logResponse(event, getEvent(), "", response);
+
+                // Remove user from lurk list
+                lurkChannel.remove(author);
+                lurkTime.remove(author);
             }
         });
     }

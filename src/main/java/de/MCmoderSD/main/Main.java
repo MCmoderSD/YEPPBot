@@ -54,7 +54,7 @@ public class Main {
         String botName = botConfig.get("botName").asText();     // Get Bot Name
         String botToken = botConfig.get("botToken").asText();   // Get Bot Token
         String prefix = botConfig.get("prefix").asText();       // Get Prefix
-        String[] admins = botConfig.get("admins").asText().split("; ");
+        String[] admins = botConfig.get("admins").asText().toLowerCase().split("; ");
 
         // Load Channel List
         String[] channels = null;

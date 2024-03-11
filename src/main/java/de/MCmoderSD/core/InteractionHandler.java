@@ -74,12 +74,14 @@ public class InteractionHandler {
             // Check for blacklist
             if (blackListMap.containsKey(interactionEvent) && blackListMap.get(interactionEvent).contains(getChannel(event))) return;
 
+            // Log command execution
+            mySQL.logCommand(event, interactionEvent.getEvent(), "");
+
             // Execute command
             interactionEvent.execute(event);
 
-            // Log command execution
+            // Output to console
             System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), interaction, BREAK, UNBOLD);
-            mySQL.log(logDate(), logTime(), stripBrackets(COMMAND), getChannel(event), getAuthor(event), interaction);
         }
     }
 

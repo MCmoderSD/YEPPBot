@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -21,9 +23,10 @@ public class Fact {
     private final String[][] germanFacts;
 
     // Constructor
-    public Fact(CommandHandler commandHandler, TwitchChat chat) {
+    public Fact(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
-        // Description
+        // About
+        String[] name = {"fact", "fakt"};
         String description = "Sendet einen zufälligen Fakt.";
 
 
@@ -31,16 +34,20 @@ public class Fact {
         germanFacts = readFacts("/assets/german.facts");
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "fact", "fakt") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 
                 // Generate fact
                 StringBuilder fact = new StringBuilder();
-                for (String[] word : germanFacts)
-                    fact.append(word[(int) (Math.random() * word.length)]).append(" "); // Random fact
+                for (String[] word : germanFacts) fact.append(word[(int) (Math.random() * word.length)]).append(" "); // Random fact
 
-                chat.sendMessage(getChannel(event), fact.toString().trim() + '.');
+                // Send message
+                String response = trimMessage(fact.toString());
+                chat.sendMessage(getChannel(event), response);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

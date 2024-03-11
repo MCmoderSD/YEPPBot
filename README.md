@@ -31,11 +31,13 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] Debug Commands
 - [x] Database logging
 - [x] Help command
-- [x] Black and White list
-- [x] Graphical User Interface
+- [x] Gif command
 - [x] Key
 - [x] ChatGPT command
 - [x] Translate command
+- [x] Join and Leave chat command
+- [x] Black and White list
+- [x] Graphical User Interface
 - [ ] Rank command
 
 <br>
@@ -100,7 +102,7 @@ The temperature is the randomness of the text. <br>
 The lowest is 0 and the highest is 2. The higher the value, the more random the text will be. Lower values will make the text more subtile. <br>
 The instruction is the way the bot should behave and how he should reply to the prompt. <br> <br>
 
-### 4. Add an OpenWeatherMap API key
+### 5. Add an OpenWeatherMap API key
 
 You need to create a file called ```OpenWeatherMap.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
@@ -113,7 +115,22 @@ The file should have the following structure: <br>
 ```
 You can get the API key from [OpenWeatherMap](https://openweathermap.org/api). <br> <br>
 
-### 5. MySQL Database for logging
+### 5. Add a Giphy API key
+
+You need to create a file called ```Giphy.json``` in the ```/src/main/resources/api/``` folder. <br>
+The file should have the following structure: <br>
+
+```json
+{
+  "url": "https://api.giphy.com/v1/gifs/random?api_key=",
+  "api_key": "YOUR_API_KEY",
+  "query": "&tag="
+}
+```
+
+You can get the API key from [Giphy](https://developers.giphy.com/). <br> <br>
+
+### 6. MySQL Database for logging
 
 You need to have your own MySQL database to log the chat messages or contact me and can give you access to mine. <br>
 You need to create a file called ```mySQL.json``` in the ```/src/main/resources/database/``` folder. <br>
@@ -124,14 +141,13 @@ The file should have the following structure: <br>
   "host": "localhost",
   "port": "3306",
   "database": "DATABASE_NAME",
-  "table": "TABLE_NAME",
   "username": "USERNAME",
   "password": "PASSWORD"
 }
 ```
 <br>
 
-### 6. Black and White list commands
+### 7. Black and White list commands
 
 You can edit the ```blacklist.json``` and ```whitelist.json```  files in the ```/src/main/resources/config/``` folder. <br>
 
@@ -147,11 +163,11 @@ It should have the following structure: <br>
 You can add as many channels or commands as you want. <br>
 The way for black and whitelist works the same. <br> <br>
 
-### 7. Compile the bot
+### 8. Compile the bot
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
 ```java -jar NAME_OF_THE_JAR_FILE.jar``` <br> <br>
 
-### 8. Edit source code (optional)
+### 9. Edit source code (optional)
 
 Before you compile the bot, you can edit the source code to add your own commands or features. <br>
 You can disable the registration of the commands in the ```BotClient``` class in ```/src/main/java/de/MCmoderSD/core/BotClient.java``` <br>

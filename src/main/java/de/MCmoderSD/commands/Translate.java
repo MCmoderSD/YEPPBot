@@ -3,6 +3,7 @@ package de.MCmoderSD.commands;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.other.OpenAI;
 
@@ -15,9 +16,10 @@ public class Translate {
     private final double temperature;
 
     // Constructor
-    public Translate(CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
+    public Translate(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
 
-        // Description
+        // About
+        String[] name = {"translator", "translate", "übersetzer", "übersetze"};
         String description = "Kann deine Sätze in jede erdenkliche Sprache übersetzen: " + commandHandler.getPrefix() + "translate <Sprache> <Frage>";
 
         // Load Config
@@ -26,7 +28,7 @@ public class Translate {
         temperature = 0;
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "translator", "translate", "übersetzer", "übersetze") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 
@@ -34,11 +36,15 @@ public class Translate {
                 String language = args[0];
 
                 // Process text
-                String text = String.join(" ", args).replace(language, "");
-                String instruction = OpenAI.processText("Please translate the following text into " + language + ":");
+                String text = trimMessage(processArgs(args)).replace(language, "");
+                String instruction = trimMessage("Please translate the following text into " + language + ":");
 
                 // Send message
-                chat.sendMessage(getChannel(event), openAI.prompt(botName, instruction, text, maxTokens, temperature));
+                String response = openAI.prompt(botName, instruction, text, maxTokens, temperature);
+                chat.sendMessage(getChannel(event), response);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

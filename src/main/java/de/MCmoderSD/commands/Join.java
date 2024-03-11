@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -15,9 +16,10 @@ public class Join {
     private String channel;
 
     // Constructor
-    public Join(CommandHandler commandHandler, TwitchChat chat) {
+    public Join(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
-        // Description
+        // About
+        String[] name = {"join"};
         String description = "Sendet den Befehl " + commandHandler.getPrefix() + "join in den Chat, um Events beizutreten";
 
 
@@ -26,7 +28,7 @@ public class Join {
         reset();
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "join") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 if (!firstJoin) {
@@ -37,7 +39,15 @@ public class Join {
                 }
 
                 if (!sentMessage && channel != null && channel.equals(getChannel(event))) {
-                    chat.sendMessage(channel, "!join");
+
+                    // Send message
+                    String response = commandHandler.getPrefix() + "join";
+                    chat.sendMessage(channel, response);
+
+                    // Log response
+                    mySQL.logResponse(event, getCommand(), processArgs(args), response);
+
+                    // Reset attributes
                     sentMessage = true;
                     resetTimer(120);
                 }

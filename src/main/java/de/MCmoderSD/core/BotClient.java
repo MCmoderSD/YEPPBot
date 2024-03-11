@@ -102,9 +102,11 @@ public class BotClient {
         // Message Event
         eventManager.onEvent(ChannelMessageEvent.class, event -> {
 
+            // Log to MySQL
+            mySQL.logMessage(event);
+
             // Console Output
             System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, getChannel(event), getAuthor(event), getMessage(event), BREAK);
-            mySQL.log(logDate(), logTime(), stripBrackets(MESSAGE), getChannel(event), getAuthor(event), getMessage(event));
 
             // Handle Interaction
             interactionHandler.handleInteraction(event, botName);
@@ -116,41 +118,40 @@ public class BotClient {
         // Follow Event
         eventManager.onEvent(ChannelFollowEvent.class, event -> {
             System.out.printf("%s %s <%s> %s -> Followed%s", logTimestamp(), FOLLOW, event.getBroadcasterUserName(), event.getUserName(), BREAK);
-            mySQL.log(logDate(), logTime(), stripBrackets(FOLLOW), event.getBroadcasterUserName(), event.getUserName(), "Followed");
         });
 
         // Sub Event
         eventManager.onEvent(ChannelSubscribeEvent.class, event -> {
             System.out.printf("%s %s <%s> %s -> Subscribed %s%s", logTimestamp(), SUBSCRIBE, event.getBroadcasterUserName(), event.getUserName(), event.getTier(), BREAK);
-            mySQL.log(logDate(), logTime(), stripBrackets(SUBSCRIBE), event.getBroadcasterUserName(), event.getUserName(), "Subscribed " + event.getTier());
         });
     }
 
     // Init Commands
     public void initCommands(String[] admins, JsonNode whiteList, JsonNode blackList) {
-        new Fact(commandHandler, chat);
-        new Help(commandHandler, chat, whiteList, blackList);
-        new Insult(commandHandler, chat);
-        new Join(commandHandler, chat);
-        new JoinChat(commandHandler, chat, admins);
-        new Joke(commandHandler, chat);
-        new Key(commandHandler, chat);
-        new LeaveChat(commandHandler, chat, admins);
-        new Lurk(commandHandler, chat, lurkChannel, lurkTime);
-        new Play(commandHandler, chat);
-        new Prompt(commandHandler, chat, openAI, botName);
-        new Say(commandHandler, chat, admins);
-        new Status(commandHandler, chat);
-        new Translate(commandHandler, chat, openAI, botName);
-        new Weather(commandHandler, chat);
-        new Wiki(commandHandler, chat);
+        new Fact(mySQL, commandHandler, chat);
+        new Gif(mySQL, commandHandler, chat);
+        new Help(mySQL, commandHandler, chat, whiteList, blackList);
+        new Insult(mySQL, commandHandler, chat);
+        new Join(mySQL, commandHandler, chat);
+        new JoinChat(mySQL, commandHandler, chat, admins);
+        new Joke(mySQL, commandHandler, chat);
+        new Key(mySQL, commandHandler, chat);
+        new LeaveChat(mySQL, commandHandler, chat, admins);
+        new Lurk(mySQL, commandHandler, chat, lurkChannel, lurkTime);
+        new Play(mySQL, commandHandler, chat);
+        new Prompt(mySQL, commandHandler, chat, openAI, botName);
+        new Say(mySQL, commandHandler, chat, admins);
+        new Status(mySQL, commandHandler, chat);
+        new Translate(mySQL, commandHandler, chat, openAI, botName);
+        new Weather(mySQL, commandHandler, chat);
+        new Wiki(mySQL, commandHandler, chat);
     }
 
     // Init Interactions
     public void initInteractions() {
-        new ReplyYepp(interactionHandler, chat);
-        new StoppedLurk(interactionHandler, chat, lurkChannel, lurkTime);
-        new Yepp(interactionHandler, chat);
+        new ReplyYepp(mySQL, interactionHandler, chat);
+        new StoppedLurk(mySQL, interactionHandler, chat, lurkChannel, lurkTime);
+        new Yepp(mySQL, interactionHandler, chat);
     }
 
     // Methods
@@ -170,7 +171,7 @@ public class BotClient {
 
         chat.sendMessage(channel, message);
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
-        mySQL.log(logDate(), logTime(), stripBrackets(USER), channel, botName, message);
+        mySQL.messageSent(channel, botName, message);
     }
 
     @SuppressWarnings("unused")

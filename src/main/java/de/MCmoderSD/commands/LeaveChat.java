@@ -4,34 +4,46 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class LeaveChat {
-    // Constructor
-    public LeaveChat(CommandHandler commandHandler, TwitchChat chat, String[] admins) {
 
-        // Description
+    // Constructor
+    public LeaveChat(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, String[] admins) {
+
+        // About
+        String[] name = {"leavechat", "removechat", "removefromchat", "delfromchat"};
         String description = "Entfernt den Bot aus einem Chat. Nur der Broadcaster und Admins können diesen Befehl verwenden. Verwendung: " + commandHandler.getPrefix() + "leavechat <Channel>";
 
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "leavechat", "removechat", "removefromchat", "delfromchat") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 String channel = getChannel(event);
+                String author = getAuthor(event);
 
-                if (getAuthor(event).equals(channel)) leave(event, chat, channel); // Broadcaster
-                else if (Arrays.stream(admins).toList().contains(getAuthor(event).toLowerCase())) leave(event, chat, args[0]); // Admin
+                String response;
+                if (author.equals(channel)) response = leave(chat, channel); // Broadcaster
+                else if (Arrays.stream(admins).toList().contains(author)) response = leave(chat, args[0]); // Admin
+                else return;
+
+                // Send Message
+                chat.sendMessage(channel, response);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }
 
     // Leave chat
-    private void leave(ChannelMessageEvent event, TwitchChat chat, String... args) {
-        chat.sendMessage(getChannel(event), "Leaving " + args[0]);
+    private String leave(TwitchChat chat, String... args) {
         chat.leaveChannel(args[0]);
+        return "Leaving " + args[0];
     }
 }

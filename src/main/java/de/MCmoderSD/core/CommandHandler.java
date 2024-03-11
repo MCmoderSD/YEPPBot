@@ -72,12 +72,14 @@ public class CommandHandler {
             // Check for BlackList
             if (blackListMap.containsKey(cmd) && blackListMap.get(cmd).contains(getChannel(event))) return;
 
+            // MySQL Log
+            mySQL.logCommand(event, cmd.getCommand(), String.join(" ", args));
+
+            // Console Log
+            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + ": " + String.join(" ", args), BREAK, UNBOLD);
+
             // Execute command
             cmd.execute(event, args);
-
-            // Log command execution
-            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + ": " + String.join(" ", args), BREAK, UNBOLD);
-            mySQL.log(logDate(), logTime(), stripBrackets(COMMAND), getChannel(event), getAuthor(event), command + ": " + String.join(" ", args));
         }
     }
 

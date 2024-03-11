@@ -5,6 +5,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
 
+import de.MCmoderSD.utilities.database.MySQL;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,28 +19,25 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Wiki {
 
     // Constructor
-    public Wiki(CommandHandler commandHandler, TwitchChat chat) {
+    public Wiki(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
-        // Description
+        // About
+        String[] name = {"wiki", "wikipedia", "summarize", "zusammenfassung"};
         String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. Verwendung: " + commandHandler.getPrefix() + "wiki <Thema>";
 
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "wiki", "wikipedia", "summarize", "zusammenfassung") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 String channel = getChannel(event);
 
                 // Query Wikipedia
-                String topic = String.join(" ", args);
+                String topic = processArgs(args);
                 while (topic.charAt(topic.length() - 1) == ' ') topic = topic.trim(); // Remove leading spaces
                 String summary;
                 try {
-                    summary = getWikipediaSummary(topic);
-
-                    // Remove trailing newlines
-                    while (summary.charAt(summary.length() - 1) == '\n' || summary.charAt(summary.length() - 1) == ' ')
-                        summary = summary.trim();
+                    summary = trimMessage(getWikipediaSummary(topic)); // Get Wikipedia summary
 
                     // Send summary
                     if (summary.length() <= 500) chat.sendMessage(channel, summary); // Send summary
@@ -48,7 +46,15 @@ public class Wiki {
                             var endOfSentence = summary.lastIndexOf('.', 500);
                             if (endOfSentence == -1) endOfSentence = summary.lastIndexOf(' ', 500);
                             if (endOfSentence == -1) endOfSentence = 500;
-                            chat.sendMessage(event.getChannel().getName(), summary.substring(0, endOfSentence + 1));
+
+                            // Send message
+                            String response = summary.substring(0, endOfSentence + 1);
+                            chat.sendMessage(event.getChannel().getName(), response);
+
+                            // Log response
+                            mySQL.logResponse(event, getCommand(), processArgs(args), response);
+
+                            // Update summary
                             summary = summary.substring(endOfSentence + 1);
                         }
                     }

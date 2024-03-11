@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,9 +22,10 @@ public class Insult {
     private final ArrayList<String> germanInsults;
 
     // Constructor
-    public Insult(CommandHandler commandHandler, TwitchChat chat) {
+    public Insult(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
-        // Description
+        // About
+        String[] name = {"insult", "beleidige", "mobbe", "mobbing"};
         String description = "Beleidigt einen Nutzer. Syntax: " + commandHandler.getPrefix() + "insult <Nutzer>.";
 
 
@@ -31,7 +33,7 @@ public class Insult {
         germanInsults = readInsults("/assets/german.insults");
 
         // Register command
-        commandHandler.registerCommand(new Command(description, "insult", "beleidige", "mobbe", "mobbing") { // Command name and aliases
+        commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 
@@ -41,7 +43,12 @@ public class Insult {
                 if (target.startsWith("@")) target = target.substring(1);
                 String message = insult.replace("%member%", '@' + target);
 
+                // Send message
+                String response = trimMessage(message);
                 chat.sendMessage(getChannel(event), message);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }
