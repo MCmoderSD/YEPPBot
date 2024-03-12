@@ -11,20 +11,6 @@
 		</encoder>
 	</appender>
 
-	<!-- Appender Configuration [File] -->
-	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<encoder>
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-		</encoder>
-		<file>client.log</file>
-		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-			<fileNamePattern>client.%i.log</fileNamePattern>
-		</rollingPolicy>
-		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-			<MaxFileSize>10MB</MaxFileSize>
-		</triggeringPolicy>
-	</appender>
-
 	<!-- Appender Output Configuration -->
 	<root level="OFF">
 		<appender-ref ref="CONSOLE"/>
