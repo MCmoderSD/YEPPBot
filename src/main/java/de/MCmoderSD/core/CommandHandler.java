@@ -1,7 +1,9 @@
 package de.MCmoderSD.core;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.commands.Command;
+
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 
@@ -73,10 +75,10 @@ public class CommandHandler {
             if (blackListMap.containsKey(cmd) && blackListMap.get(cmd).contains(getChannel(event))) return;
 
             // MySQL Log
-            mySQL.logCommand(event, cmd.getCommand(), String.join(" ", args));
+            if (mySQL != null) mySQL.logCommand(event, cmd.getCommand(), processArgs(args));
 
             // Console Log
-            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + ": " + String.join(" ", args), BREAK, UNBOLD);
+            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + ": " + processArgs(args), BREAK, UNBOLD);
 
             // Execute command
             cmd.execute(event, args);

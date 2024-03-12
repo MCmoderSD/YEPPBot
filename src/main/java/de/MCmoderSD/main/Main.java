@@ -2,6 +2,7 @@ package de.MCmoderSD.main;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
+
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
@@ -48,6 +49,11 @@ public class Main {
         Frame frame = null;
         if (!(args.contains("-cli") || args.contains("-nogui"))) frame = new Frame(this);
 
+        // Check if logging is disabled
+        MySQL mySQL;
+        if (args.contains("-nolog")) mySQL = null;
+        else mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame);
+
         // Load Bot Config
         JsonNode botConfig = jsonUtility.load(botConfigPath);
 
@@ -74,9 +80,6 @@ public class Main {
         }
 
         if (channels == null) throw new IllegalArgumentException("Channel List is empty!");
-
-        // Load MySQL Config
-        MySQL mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame);
 
         // Load OpenAI Config
         OpenAI openAI = new OpenAI(jsonUtility.load(OPENAI_CONFIG));

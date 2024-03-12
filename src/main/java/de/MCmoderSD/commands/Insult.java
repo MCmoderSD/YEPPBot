@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.io.BufferedReader;
@@ -48,7 +49,7 @@ public class Insult {
                 chat.sendMessage(getChannel(event), message);
 
                 // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

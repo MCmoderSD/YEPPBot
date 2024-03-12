@@ -2,16 +2,16 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.core.CommandHandler;
+
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.other.Calculate.getChannel;
-import static de.MCmoderSD.utilities.other.Calculate.processArgs;
-
+import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Help {
 
     // Attributes
@@ -48,7 +48,7 @@ public class Help {
                 chat.sendMessage(channel, response);
 
                 // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

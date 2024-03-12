@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class Say {
                 chat.sendMessage(channel, response);
 
                 // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

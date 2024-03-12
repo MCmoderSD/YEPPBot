@@ -6,6 +6,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
+
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -52,7 +53,7 @@ public class Wiki {
                             chat.sendMessage(event.getChannel().getName(), response);
 
                             // Log response
-                            mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                            if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
 
                             // Update summary
                             summary = summary.substring(endOfSentence + 1);

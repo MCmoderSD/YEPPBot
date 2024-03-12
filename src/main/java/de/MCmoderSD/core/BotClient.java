@@ -103,7 +103,7 @@ public class BotClient {
         eventManager.onEvent(ChannelMessageEvent.class, event -> {
 
             // Log to MySQL
-            mySQL.logMessage(event);
+            if (mySQL != null) mySQL.logMessage(event);
 
             // Console Output
             System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, getChannel(event), getAuthor(event), getMessage(event), BREAK);
@@ -116,14 +116,10 @@ public class BotClient {
         });
 
         // Follow Event
-        eventManager.onEvent(ChannelFollowEvent.class, event -> {
-            System.out.printf("%s %s <%s> %s -> Followed%s", logTimestamp(), FOLLOW, event.getBroadcasterUserName(), event.getUserName(), BREAK);
-        });
+        eventManager.onEvent(ChannelFollowEvent.class, event -> System.out.printf("%s %s <%s> %s -> Followed%s", logTimestamp(), FOLLOW, event.getBroadcasterUserName(), event.getUserName(), BREAK));
 
         // Sub Event
-        eventManager.onEvent(ChannelSubscribeEvent.class, event -> {
-            System.out.printf("%s %s <%s> %s -> Subscribed %s%s", logTimestamp(), SUBSCRIBE, event.getBroadcasterUserName(), event.getUserName(), event.getTier(), BREAK);
-        });
+        eventManager.onEvent(ChannelSubscribeEvent.class, event -> System.out.printf("%s %s <%s> %s -> Subscribed %s%s", logTimestamp(), SUBSCRIBE, event.getBroadcasterUserName(), event.getUserName(), event.getTier(), BREAK));
     }
 
     // Init Commands
@@ -171,7 +167,7 @@ public class BotClient {
 
         chat.sendMessage(channel, message);
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
-        mySQL.messageSent(channel, botName, message);
+        if (mySQL != null) mySQL.messageSent(channel, botName, message);
     }
 
     @SuppressWarnings("unused")

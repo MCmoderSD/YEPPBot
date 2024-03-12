@@ -22,7 +22,7 @@ public class ReplyYepp {
             public void execute(ChannelMessageEvent event) {
                 String response = tagAuthor(event) + " YEPP";
                 chat.sendMessage(getChannel(event), response);
-                mySQL.logResponse(event, getEvent(), "", response);
+                if (mySQL != null) mySQL.logResponse(event, getEvent(), "", response);
             }
         });
     }

@@ -26,7 +26,7 @@ public class StoppedLurk {
                 chat.sendMessage(getChannel(event), response);
 
                 // Log response
-                mySQL.logResponse(event, getEvent(), "", response);
+                if (mySQL != null) mySQL.logResponse(event, getEvent(), "", response);
 
                 // Remove user from lurk list
                 lurkChannel.remove(author);

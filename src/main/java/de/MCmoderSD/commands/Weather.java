@@ -53,7 +53,7 @@ public class Weather {
                 chat.sendMessage(getChannel(event), response);
 
                 // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

@@ -35,28 +35,6 @@ public class MySQL {
         this.frame = frame;
     }
 
-
-    // Connect to MySQL
-    public void connect() {
-        try {
-            if (isConnected()) return; // already connected
-            connection = java.sql.DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password); // connect
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
-    // Disconnect from MySQL
-    @SuppressWarnings("unused")
-    public void disconnect() {
-        try {
-            if (!isConnected()) return; // already disconnected
-            connection.close(); // disconnect
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
     // Checks Channels
     @SuppressWarnings("JpaQueryApiInspection")
     private void checkChannel(ChannelMessageEvent event) {
@@ -121,7 +99,7 @@ public class MySQL {
 
             String query = "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setDate(1, logDate());
+            preparedStatement.setTimestamp(1, getTimestamp());
             preparedStatement.setInt(2, channelID);
             preparedStatement.setInt(3, userID);
             preparedStatement.setString(4, message);
@@ -146,7 +124,7 @@ public class MySQL {
 
             String query = "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setDate(1, logDate());
+            preparedStatement.setTimestamp(1, getTimestamp());
             preparedStatement.setInt(2, channelID);
             preparedStatement.setInt(3, userID);
             preparedStatement.setString(4, command);
@@ -172,7 +150,7 @@ public class MySQL {
 
             String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setDate(1, logDate());
+            preparedStatement.setTimestamp(1, getTimestamp());
             preparedStatement.setInt(2, channelID);
             preparedStatement.setInt(3, userID);
             preparedStatement.setString(4, command);
@@ -186,13 +164,14 @@ public class MySQL {
         if (frame != null) frame.log(SYSTEM, getChannel(event), getAuthor(event), response);
     }
 
+    // Log Message Sent
     public void messageSent(String channel, String botName, String message) {
         try {
             if (!isConnected()) connect();
 
             String query = "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setDate(1, logDate());
+            preparedStatement.setTimestamp(1, getTimestamp());
             preparedStatement.setInt(2, queryChannelID(channel));
             preparedStatement.setInt(3, queryUserID(botName));
             preparedStatement.setString(4, message);
@@ -204,11 +183,7 @@ public class MySQL {
         if (frame != null) frame.log(MESSAGE, channel, botName, message);
     }
 
-    // Getter
-    public boolean isConnected() {
-        return connection != null;
-    }
-
+    // Query Channel ID
     public int queryChannelID(String channel) {
         try {
             if (!isConnected()) connect();
@@ -224,6 +199,7 @@ public class MySQL {
         return -1;
     }
 
+    // Query User ID
     public int queryUserID(String user) {
         try {
             if (!isConnected()) connect();
@@ -239,6 +215,7 @@ public class MySQL {
         return -1;
     }
 
+    // Query Channel
     public String queryChannel(int id) {
         try {
             if (!isConnected()) connect();
@@ -254,6 +231,7 @@ public class MySQL {
         return null;
     }
 
+    // Query User
     public String queryUser(int id) {
         try {
             if (!isConnected()) connect();
@@ -267,5 +245,30 @@ public class MySQL {
             System.err.println(e.getMessage());
         }
         return null;
+    }
+
+    // Getter
+    public boolean isConnected() {
+        return connection != null;
+    }
+
+    // Setter
+    public void connect() {
+        try {
+            if (isConnected()) return; // already connected
+            connection = java.sql.DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password); // connect
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void disconnect() {
+        try {
+            if (!isConnected()) return; // already disconnected
+            connection.close(); // disconnect
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 }

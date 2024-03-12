@@ -4,7 +4,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Time;
+import java.sql.Timestamp;
 
 public class Calculate {
 
@@ -73,21 +73,6 @@ public class Calculate {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new java.util.Date()) + "]";
     }
 
-    // Log date
-    public static java.sql.Date logDate() {
-        return new java.sql.Date(new java.util.Date().getTime());
-    }
-
-    // Log time
-    public static Time logTime() {
-        return new Time(new java.util.Date().getTime());
-    }
-
-    // Strip Brackets
-    public static String stripBrackets(String string) {
-        return string.replaceAll("[\\[\\]]", "");
-    }
-
     // Trim Message
     public static String trimMessage(String message) {
         while (message.startsWith(" ") || message.startsWith("\n")) message = message.substring(1);
@@ -98,5 +83,10 @@ public class Calculate {
     // Trim Args
     public static String processArgs(String... args) {
         return trimMessage(String.join(" ", args)).trim();
+    }
+
+    // Get Timestamp
+    public static Timestamp getTimestamp() {
+        return new Timestamp(new java.util.Date().getTime());
     }
 }
