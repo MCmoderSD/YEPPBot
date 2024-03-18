@@ -22,7 +22,7 @@ public class Yepp {
             public void execute(ChannelMessageEvent event) {
                 String response = "YEPP";
                 chat.sendMessage(getChannel(event), response);
-                if (mySQL != null) mySQL.logResponse(event, getEvent(), "", response);
+                mySQL.logResponse(event, getEvent(), "", response);
             }
         });
     }

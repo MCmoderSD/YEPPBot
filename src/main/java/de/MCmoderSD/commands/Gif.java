@@ -51,7 +51,7 @@ public class Gif {
                 chat.sendMessage(getChannel(event), response);
 
                 // Log response
-                if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

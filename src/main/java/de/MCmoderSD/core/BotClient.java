@@ -103,7 +103,7 @@ public class BotClient {
         eventManager.onEvent(ChannelMessageEvent.class, event -> {
 
             // Log to MySQL
-            if (mySQL != null) mySQL.logMessage(event);
+            mySQL.logMessage(event);
 
             // Console Output
             System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, getChannel(event), getAuthor(event), getMessage(event), BREAK);
@@ -131,11 +131,12 @@ public class BotClient {
         new Join(mySQL, commandHandler, chat);
         new JoinChat(mySQL, commandHandler, chat, admins);
         new Joke(mySQL, commandHandler, chat);
-        new Key(mySQL, commandHandler, chat);
+        // new Key(mySQL, commandHandler, chat); ToDo Fix
         new LeaveChat(mySQL, commandHandler, chat, admins);
         new Lurk(mySQL, commandHandler, chat, lurkChannel, lurkTime);
         new Play(mySQL, commandHandler, chat);
         new Prompt(mySQL, commandHandler, chat, openAI, botName);
+        // new Rank(mySQL, commandHandler, chat); ToDo Fix
         new Say(mySQL, commandHandler, chat, admins);
         new Status(mySQL, commandHandler, chat);
         new Translate(mySQL, commandHandler, chat, openAI, botName);
@@ -167,7 +168,7 @@ public class BotClient {
 
         chat.sendMessage(channel, message);
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
-        if (mySQL != null) mySQL.messageSent(channel, botName, message);
+        mySQL.messageSent(channel, botName, message);
     }
 
     @SuppressWarnings("unused")

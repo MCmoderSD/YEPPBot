@@ -20,6 +20,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Insult {
 
     // Attributes
+    private final ArrayList<String> englishInsults;
     private final ArrayList<String> germanInsults;
 
     // Constructor
@@ -31,6 +32,7 @@ public class Insult {
 
 
         // Read insults
+        englishInsults = readInsults("/assets/english.insults");
         germanInsults = readInsults("/assets/german.insults");
 
         // Register command
@@ -38,8 +40,14 @@ public class Insult {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 
+                // Determine language
+                boolean isEnglish = false;
+                if (args.length > 0)
+                    isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
+                ArrayList<String> insults = isEnglish ? englishInsults : germanInsults;
+
                 // Generate Insult
-                String insult = germanInsults.get((int) (Math.random() * germanInsults.size())); // Random insult
+                String insult = insults.get((int) (Math.random() * insults.size())); // Random insult
                 String target = args.length > 0 ? args[0] : getAuthor(event);
                 if (target.startsWith("@")) target = target.substring(1);
                 String message = insult.replace("%member%", '@' + target);
@@ -49,13 +57,12 @@ public class Insult {
                 chat.sendMessage(getChannel(event), message);
 
                 // Log response
-                if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }
 
     // Read insults
-    @SuppressWarnings("SameParameterValue")
     private ArrayList<String> readInsults(String path) {
         ArrayList<String> insults = new ArrayList<>();
         try {

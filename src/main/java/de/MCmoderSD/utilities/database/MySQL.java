@@ -16,44 +16,79 @@ public class MySQL {
 
     // Attributes
     private final String host;
-    private final int port;
+    private final Integer port;
     private final String database;
     private final String username;
     private final String password;
+    private final boolean isActive;
 
     // Variables
     private Connection connection;
 
     // Constructor
     public MySQL(JsonNode databaseConfig, Frame frame) {
+
+        // Set Attributes
         host = databaseConfig.get("host").asText();
         port = databaseConfig.get("port").asInt();
         database = databaseConfig.get("database").asText();
         username = databaseConfig.get("username").asText();
         password = databaseConfig.get("password").asText();
+
+        // Check if active
+        isActive = host != null && database != null && username != null && password != null;
+
+        // Connect to database
         connect();
+
+        // Set Frame
+        this.frame = frame;
+    }
+
+    public MySQL(Frame frame) {
+
+        // Set Attributes
+        host = null;
+        port = null;
+        database = null;
+        username = null;
+        password = null;
+
+        // Check if active
+        isActive = false;
+
+        // Set Frame
         this.frame = frame;
     }
 
     // Checks Channels
     @SuppressWarnings("JpaQueryApiInspection")
     private void checkChannel(ChannelMessageEvent event) {
+
+        // Return if not active
+        if (!isActive) return;
+
+        // Set Variables
         int id = getChannelID(event);
         String name = getChannel(event);
 
+        // Check Channel
         try {
-            if (!isConnected()) connect();
+            if (!isConnected()) connect(); // connect
 
+            // Check Channel
             String query = "SELECT * FROM " + "channels" + " WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add Channel
             if (!resultSet.next()) {
                 query = "INSERT INTO " + "channels" + " (id, name) VALUES (?, ?)";
                 preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setInt(1, id);
-                preparedStatement.setString(2, name);
-                preparedStatement.executeUpdate();
+                preparedStatement.setInt(1, id); // set id
+                preparedStatement.setString(2, name); // set name
+                preparedStatement.executeUpdate(); // execute
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -63,22 +98,31 @@ public class MySQL {
     // Checks Users
     @SuppressWarnings("JpaQueryApiInspection")
     private void checkUser(ChannelMessageEvent event) {
+
+        // Return if not active
+        if (!isActive) return;
+
+        // Set Variables
         int id = getUserID(event);
         String name = getAuthor(event);
 
+        // Check User
         try {
-            if (!isConnected()) connect();
+            if (!isConnected()) connect(); // connect
 
+            // Check User
             String query = "SELECT * FROM " + "users" + " WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add User
             if (!resultSet.next()) {
                 query = "INSERT INTO " + "users" + " (id, name) VALUES (?, ?)";
                 preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setInt(1, id);
-                preparedStatement.setString(2, name);
-                preparedStatement.executeUpdate();
+                preparedStatement.setInt(1, id); // set id
+                preparedStatement.setString(2, name); // set name
+                preparedStatement.executeUpdate(); // execute
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -87,100 +131,134 @@ public class MySQL {
 
     // Log Message
     public void logMessage(ChannelMessageEvent event) {
-        checkChannel(event);
-        checkUser(event);
 
+        // Set Variables
         int channelID = getChannelID(event);
         int userID = getUserID(event);
         String message = getMessage(event);
 
-        try {
-            if (!isConnected()) connect();
+        // Update Frame
+        if (frame != null) frame.log(MESSAGE, getChannel(event), getAuthor(event), message);
 
+        // Return if not active
+        if (!isActive) return;
+
+        // Check Channel and User
+        checkChannel(event);
+        checkUser(event);
+
+        // Log message
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
             String query = "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setTimestamp(1, getTimestamp());
-            preparedStatement.setInt(2, channelID);
-            preparedStatement.setInt(3, userID);
-            preparedStatement.setString(4, message);
-            preparedStatement.executeUpdate();
+            preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+            preparedStatement.setInt(2, channelID); // set channel
+            preparedStatement.setInt(3, userID); // set user
+            preparedStatement.setString(4, message); // set message
+            preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-
-        if (frame != null) frame.log(MESSAGE, getChannel(event), getAuthor(event), message);
     }
 
     // Log Command
     public void logCommand(ChannelMessageEvent event, String command, String args) {
-        checkChannel(event);
-        checkUser(event);
 
+        // Set Variables
         int channelID = getChannelID(event);
         int userID = getUserID(event);
 
-        try {
-            if (!isConnected()) connect();
+        // Update Frame
+        if (frame != null) frame.log(COMMAND, getChannel(event), getAuthor(event), command);
 
+        // Return if not active
+        if (!isActive) return;
+
+        // Check Channel and User
+        checkChannel(event);
+        checkUser(event);
+
+        // Log Command
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
             String query = "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setTimestamp(1, getTimestamp());
-            preparedStatement.setInt(2, channelID);
-            preparedStatement.setInt(3, userID);
-            preparedStatement.setString(4, command);
-            preparedStatement.setString(5, args);
-            preparedStatement.executeUpdate();
+            preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+            preparedStatement.setInt(2, channelID); // set channel
+            preparedStatement.setInt(3, userID); // set user
+            preparedStatement.setString(4, command); // set command
+            preparedStatement.setString(5, args); // set args
+            preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-
-        if (frame != null) frame.log(COMMAND, getChannel(event), getAuthor(event), command);
     }
 
     // Log Response
     public void logResponse(ChannelMessageEvent event, String command, String args, String response) {
-        checkChannel(event);
-        checkUser(event);
 
+        // Set Variables
         int channelID = getChannelID(event);
         int userID = getUserID(event);
 
-        try {
-            if (!isConnected()) connect();
+        // Update Frame
+        if (frame != null) frame.log(SYSTEM, getChannel(event), getAuthor(event), response);
 
+        // Return if not active
+        if (!isActive) return;
+
+        // Check Channel and User
+        checkChannel(event);
+        checkUser(event);
+
+        // Log Response
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
             String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setTimestamp(1, getTimestamp());
-            preparedStatement.setInt(2, channelID);
-            preparedStatement.setInt(3, userID);
-            preparedStatement.setString(4, command);
-            preparedStatement.setString(5, args);
-            preparedStatement.setString(6, response);
-            preparedStatement.executeUpdate();
+            preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+            preparedStatement.setInt(2, channelID); // set channel
+            preparedStatement.setInt(3, userID); // set user
+            preparedStatement.setString(4, command); // set command
+            preparedStatement.setString(5, args); // set args
+            preparedStatement.setString(6, response); // set response
+            preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-
-        if (frame != null) frame.log(SYSTEM, getChannel(event), getAuthor(event), response);
     }
 
     // Log Message Sent
     public void messageSent(String channel, String botName, String message) {
-        try {
-            if (!isConnected()) connect();
 
+        // Update Frame
+        if (frame != null) frame.log(MESSAGE, channel, botName, message);
+
+        // Return if not active
+        if (!isActive) return;
+
+        // Log Message Sent
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
             String query = "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setTimestamp(1, getTimestamp());
-            preparedStatement.setInt(2, queryChannelID(channel));
-            preparedStatement.setInt(3, queryUserID(botName));
-            preparedStatement.setString(4, message);
-            preparedStatement.executeUpdate();
+            preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+            preparedStatement.setInt(2, queryChannelID(channel)); // set channel
+            preparedStatement.setInt(3, queryUserID(botName)); // set user
+            preparedStatement.setString(4, message); // set message
+            preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-
-        if (frame != null) frame.log(MESSAGE, channel, botName, message);
     }
 
     // Query Channel ID
@@ -254,6 +332,7 @@ public class MySQL {
 
     // Setter
     public void connect() {
+        if (!isActive) return;
         try {
             if (isConnected()) return; // already connected
             connection = java.sql.DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password); // connect
@@ -264,6 +343,7 @@ public class MySQL {
 
     @SuppressWarnings("unused")
     public void disconnect() {
+        if (!isActive) return;
         try {
             if (!isConnected()) return; // already disconnected
             connection.close(); // disconnect

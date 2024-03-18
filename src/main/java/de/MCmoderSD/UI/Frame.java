@@ -19,7 +19,7 @@ public class Frame extends JFrame {
     // Constructor
     public Frame(Main main) {
         super();
-        setTitle("MCmoderSD");
+        setTitle("YEPPBot v2.0");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);

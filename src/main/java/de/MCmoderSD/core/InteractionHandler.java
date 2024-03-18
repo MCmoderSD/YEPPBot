@@ -75,7 +75,7 @@ public class InteractionHandler {
             if (blackListMap.containsKey(interactionEvent) && blackListMap.get(interactionEvent).contains(getChannel(event))) return;
 
             // Log command execution
-            if (mySQL != null) mySQL.logCommand(event, interactionEvent.getEvent(), "");
+            mySQL.logCommand(event, interactionEvent.getEvent(), "");
 
             // Execute command
             interactionEvent.execute(event);

@@ -32,13 +32,13 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] Database logging
 - [x] Help command
 - [x] Gif command
-- [x] Key
 - [x] ChatGPT command
 - [x] Translate command
 - [x] Join and Leave chat command
 - [x] Black and White list
 - [x] Graphical User Interface
 - [ ] Rank command
+- [ ] Key
 
 <br>
 
@@ -133,7 +133,6 @@ You can get the API key from [Giphy](https://developers.giphy.com/). <br> <br>
 ### 6. MySQL Database for logging
 
 If you don't want to log the chat messages, you have to start the bot with the ```-nolog``` argument. <br>
-But then the front end will currently not work. <br>
 You need to have your own MySQL database to log the chat messages or contact me and can give you access to mine. <br>
 You need to create a file called ```mySQL.json``` in the ```/src/main/resources/database/``` folder. <br>
 The file should have the following structure: <br>

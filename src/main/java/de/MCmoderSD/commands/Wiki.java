@@ -53,7 +53,7 @@ public class Wiki {
                             chat.sendMessage(event.getChannel().getName(), response);
 
                             // Log response
-                            if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                            mySQL.logResponse(event, getCommand(), processArgs(args), response);
 
                             // Update summary
                             summary = summary.substring(endOfSentence + 1);

@@ -20,16 +20,18 @@ public class Fact {
 
     // Attributes
     private final String[][] germanFacts;
+    private final String[][] englishFacts;
 
     // Constructor
     public Fact(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
         // About
         String[] name = {"fact", "fakt"};
-        String description = "Sendet einen zufälligen Fakt.";
+        String description = "Sendet einen zufälligen Fakt. Syntax: " + commandHandler.getPrefix() + "fact en/de";
 
 
         // Read facts
+        englishFacts = readFacts("/assets/english.facts");
         germanFacts = readFacts("/assets/german.facts");
 
         // Register command
@@ -37,22 +39,27 @@ public class Fact {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 
+                // Determine language
+                boolean isEnglish = false;
+                if (args.length > 0)
+                    isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
+                String[][] facts = isEnglish ? englishFacts : germanFacts;
+
                 // Generate fact
                 StringBuilder fact = new StringBuilder();
-                for (String[] word : germanFacts) fact.append(word[(int) (Math.random() * word.length)]).append(" "); // Random fact
+                for (String[] word : facts) fact.append(word[(int) (Math.random() * word.length)]).append(" "); // Random fact
 
                 // Send message
                 String response = trimMessage(fact.toString());
                 chat.sendMessage(getChannel(event), response);
 
                 // Log response
-                if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }
 
     // Read facts
-    @SuppressWarnings("SameParameterValue")
     private String[][] readFacts(String path) {
         ArrayList<String> types = new ArrayList<>();
 

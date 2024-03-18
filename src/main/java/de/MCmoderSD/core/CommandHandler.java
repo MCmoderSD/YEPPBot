@@ -75,7 +75,7 @@ public class CommandHandler {
             if (blackListMap.containsKey(cmd) && blackListMap.get(cmd).contains(getChannel(event))) return;
 
             // MySQL Log
-            if (mySQL != null) mySQL.logCommand(event, cmd.getCommand(), processArgs(args));
+            mySQL.logCommand(event, cmd.getCommand(), processArgs(args));
 
             // Console Log
             System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, getChannel(event), command + ": " + processArgs(args), BREAK, UNBOLD);

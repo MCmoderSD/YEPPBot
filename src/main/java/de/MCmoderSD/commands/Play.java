@@ -46,7 +46,7 @@ public class Play {
                     chat.sendMessage(channel, response);
 
                     // Log response
-                    if (mySQL != null) mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                    mySQL.logResponse(event, getCommand(), processArgs(args), response);
 
                     // Reset attributes
                     sentMessage = true;
