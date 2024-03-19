@@ -119,6 +119,7 @@ public class MenuPanel extends JPanel {
             new JOptionPane("Message must be at least 1 character long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
             return;
         }
+
         frame.getBotClient().sendMessage(channel, message);
         textField.setText("");
         messageHistory.push(message);

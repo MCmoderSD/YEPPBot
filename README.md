@@ -132,7 +132,7 @@ You can get the API key from [Giphy](https://developers.giphy.com/). <br> <br>
 
 ### 6. MySQL Database for logging
 
-If you don't want to log the chat messages, you have to start the bot with the ```-nolog``` argument. <br>
+If you want to log the chat messages, you have to start the bot with the ```-log``` argument. <br>
 You need to have your own MySQL database to log the chat messages or contact me and can give you access to mine. <br>
 You need to create a file called ```mySQL.json``` in the ```/src/main/resources/database/``` folder. <br>
 The file should have the following structure: <br>

@@ -41,7 +41,7 @@ public class LogPanel extends JPanel {
 
     // Setter
     public void appendText(String type, String channel, String author, String message) {
-        if (frame.getChannel().equals(channel)) logArea.appendText("[" + type + "] <" + channel + "> " + author + ": " + message);
-        if (frame.getChannel().length() < 3) logArea.appendText("[" + type + "] <" + channel + "> " + author + ": " + message);
+        if (frame.getChannel().equals(channel)) logArea.appendText(type + " <" + channel + "> " + author + ": " + message);
+        if (frame.getChannel().length() < 3) logArea.appendText(type + " <" + channel + "> " + author + ": " + message);
     }
 }
