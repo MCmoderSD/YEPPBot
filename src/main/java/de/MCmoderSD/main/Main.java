@@ -49,7 +49,7 @@ public class Main {
         Frame frame = null;
         if (!(args.contains("-cli") || args.contains("-nogui"))) frame = new Frame(this);
 
-        // Check if logging is disabled
+        // Logging check
         MySQL mySQL;
         if (args.contains("-log")) mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame);
         else mySQL = new MySQL(frame);

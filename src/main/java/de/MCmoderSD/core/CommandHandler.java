@@ -68,7 +68,7 @@ public class CommandHandler {
             if (aliases.containsKey(command)) command = aliases.get(command);
 
             // Get Command
-            Command cmd = getCommand(command);
+            Command cmd = commands.get(command);
 
             // Check for WhiteList
             if (whiteListMap.containsKey(cmd) && !whiteListMap.get(cmd).contains(getChannel(event))) return;
@@ -114,10 +114,6 @@ public class CommandHandler {
 
     public HashMap<String, String> getAliases() {
         return aliases;
-    }
-
-    public Command getCommand(String command) {
-        return commands.get(command);
     }
 
     @SuppressWarnings("unused")
