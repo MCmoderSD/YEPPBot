@@ -97,7 +97,7 @@ public class MySQL {
                     preparedStatement = connection.prepareStatement(query);
                     preparedStatement.setInt(1, id); // set id
                     preparedStatement.setString(2, name); // set name
-                    // preparedStatement.executeUpdate(); // execute
+                    preparedStatement.executeUpdate(); // execute
                 }
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
