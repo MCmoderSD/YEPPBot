@@ -63,17 +63,6 @@ public class BotClient {
 
         chat = client.getChat();
 
-        // Register the Bot into all channels
-        for (String channel : channels) {
-            try {
-                chat.joinChannel(channel);
-                System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel, BREAK, UNBOLD);
-                Thread.sleep(250); // Prevent rate limit
-            } catch (InterruptedException e) {
-                System.out.println("Error: " + e);
-            }
-        }
-
         // Init Variables
         lurkChannel = new HashMap<>();
         lurkTime = new HashMap<>();
@@ -95,6 +84,19 @@ public class BotClient {
 
         // Init Interactions
         initInteractions();
+
+        // Register the Bot into all channels
+        new Thread(() -> {
+            for (String channel : channels) {
+                try {
+                    chat.joinChannel(channel);
+                    System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel, BREAK, UNBOLD);
+                    Thread.sleep(250); // Prevent rate limit
+                } catch (InterruptedException e) {
+                    System.err.println(e.getMessage());
+                }
+            }
+        }).start();
 
         // Init the EventListener
         EventManager eventManager = client.getEventManager();

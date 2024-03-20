@@ -54,8 +54,10 @@ public class CommandHandler {
         for (String alias : command.getAlias()) aliases.put(alias.toLowerCase(), name);
 
         // White and Blacklist
-        if (whiteList.containsKey(name)) whiteListMap.put(command, new ArrayList<>(Arrays.asList(whiteList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
-        if (blackList.containsKey(name)) blackListMap.put(command, new ArrayList<>(Arrays.asList(blackList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
+        if (whiteList.containsKey(name))
+            whiteListMap.put(command, new ArrayList<>(Arrays.asList(whiteList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
+        if (blackList.containsKey(name))
+            blackListMap.put(command, new ArrayList<>(Arrays.asList(blackList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
     }
 
     // Manually execute a command
@@ -86,25 +88,30 @@ public class CommandHandler {
     }
 
     public void handleCommand(ChannelMessageEvent event, String botName) {
-        String message = getMessage(event);
+        new Thread(() -> {
 
-        // Check for prefix
-        if (!message.startsWith(prefix) || getAuthor(event).equals(botName)) return;
+            // Get message
+            String message = getMessage(event);
 
-        // Convert message to command and arguments
-        String[] split = message.split(" ");
-        String command = split[0].substring(1).toLowerCase();
-        String[] args = new String[split.length - 1];
-        System.arraycopy(split, 1, args, 0, split.length - 1);
+            // Check for prefix
+            if (!message.startsWith(prefix) || getAuthor(event).equals(botName)) return;
 
-        // Execute command
-        executeCommand(event, command, args);
+            // Convert message to command and arguments
+            String[] split = message.split(" ");
+            String command = split[0].substring(1).toLowerCase();
+            String[] args = new String[split.length - 1];
+            System.arraycopy(split, 1, args, 0, split.length - 1);
+
+            // Execute command
+            executeCommand(event, command, args);
+        }).start();
     }
 
     // Setter and Getter
     public HashMap<String, Command> getCommands() {
         return commands;
     }
+
     public HashMap<String, String> getAliases() {
         return aliases;
     }

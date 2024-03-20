@@ -2,8 +2,11 @@ package de.MCmoderSD.utilities.other;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.Color;
 import java.sql.Timestamp;
 
 public class Calculate {

@@ -3,9 +3,13 @@ package de.MCmoderSD.UI;
 import de.MCmoderSD.utilities.frontend.RoundedButton;
 import de.MCmoderSD.utilities.frontend.RoundedTextField;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Dimension;
+import java.awt.BorderLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Stack;
@@ -60,7 +64,7 @@ public class MenuPanel extends JPanel {
         textField.setBorder(new LineBorder(LIGHT, 5));
         add(textField);
 
-            // Key Listener
+        // Key Listener
         textField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent evt) {
                 int keyCode = evt.getKeyCode();

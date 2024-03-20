@@ -27,7 +27,7 @@ public class InteractionHandler {
     private final HashMap<String, String> aliases;
     private final HashMap<String, String> lurkChannel;
     private final HashMap<Event, ArrayList<String>> whiteListMap;
-    private final HashMap<Event, ArrayList<String >> blackListMap;
+    private final HashMap<Event, ArrayList<String>> blackListMap;
 
     // Constructor
     public InteractionHandler(MySQL mySQL, JsonNode whiteList, JsonNode blackList, HashMap<String, String> lurkChannel) {
@@ -54,8 +54,10 @@ public class InteractionHandler {
         for (String alias : event.getAlias()) aliases.put(alias.toLowerCase(), name);
 
         // White and Blacklist
-        if (whiteList.containsKey(name)) whiteListMap.put(event, new ArrayList<>(Arrays.asList(whiteList.get(name).asText().toLowerCase().split("; "))));
-        if (blackList.containsKey(name)) blackListMap.put(event, new ArrayList<>(Arrays.asList(blackList.get(name).asText().toLowerCase().split("; "))));
+        if (whiteList.containsKey(name))
+            whiteListMap.put(event, new ArrayList<>(Arrays.asList(whiteList.get(name).asText().toLowerCase().split("; "))));
+        if (blackList.containsKey(name))
+            blackListMap.put(event, new ArrayList<>(Arrays.asList(blackList.get(name).asText().toLowerCase().split("; "))));
     }
 
     // Manually execute a command
@@ -69,10 +71,12 @@ public class InteractionHandler {
             Event interactionEvent = getInteraction(interaction);
 
             // Check for whitelist
-            if (whiteListMap.containsKey(interactionEvent) && !whiteListMap.get(interactionEvent).contains(getChannel(event))) return;
+            if (whiteListMap.containsKey(interactionEvent) && !whiteListMap.get(interactionEvent).contains(getChannel(event)))
+                return;
 
             // Check for blacklist
-            if (blackListMap.containsKey(interactionEvent) && blackListMap.get(interactionEvent).contains(getChannel(event))) return;
+            if (blackListMap.containsKey(interactionEvent) && blackListMap.get(interactionEvent).contains(getChannel(event)))
+                return;
 
             // Log command execution
             mySQL.logCommand(event, interactionEvent.getEvent(), "");
@@ -86,21 +90,26 @@ public class InteractionHandler {
     }
 
     public void handleInteraction(ChannelMessageEvent event, String botName) {
-        String message = getMessage(event);
+        new Thread(() -> {
 
-        if (getAuthor(event).equals(botName)) return;
+            // Get message
+            String message = getMessage(event);
 
-        for (String string : message.split(" ")) {
-            if (interactions.containsKey(string.toLowerCase())) {
-                executeInteracton(event, string.toLowerCase());
-                return;
+            // Check for bot
+            if (getAuthor(event).equals(botName)) return;
+
+            // Process message and check for interactions
+            for (String string : message.split(" ")) {
+                if (interactions.containsKey(string.toLowerCase())) {
+                    executeInteracton(event, string.toLowerCase());
+                    return;
+                }
             }
-        }
 
-        if (lurkChannel.containsKey(getAuthor(event))) {
-            if (lurkChannel.get(getAuthor(event)).equals(getChannel(event)))
+            // Check for lurk
+            if (lurkChannel.containsKey(getAuthor(event)) && lurkChannel.get(getAuthor(event)).equals(getChannel(event)))
                 interactions.get("$stoppedlurk").execute(event);
-        }
+        }).start();
     }
 
     // Setter and Getter

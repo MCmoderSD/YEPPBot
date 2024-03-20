@@ -2,10 +2,11 @@ package de.MCmoderSD.UI;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.main.Main;
+
 import de.MCmoderSD.utilities.image.ImageReader;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import java.awt.BorderLayout;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 

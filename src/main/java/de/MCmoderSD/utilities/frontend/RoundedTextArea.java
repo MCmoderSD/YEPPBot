@@ -1,10 +1,18 @@
 package de.MCmoderSD.utilities.frontend;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JScrollPane;
+import javax.swing.JScrollBar;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultCaret;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 
 import static de.MCmoderSD.utilities.other.Calculate.BREAK;

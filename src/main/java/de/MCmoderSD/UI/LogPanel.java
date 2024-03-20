@@ -2,8 +2,10 @@ package de.MCmoderSD.UI;
 
 import de.MCmoderSD.utilities.frontend.RoundedTextArea;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 import static java.awt.Color.WHITE;
@@ -41,7 +43,7 @@ public class LogPanel extends JPanel {
 
     // Setter
     public void appendText(String type, String channel, String author, String message) {
-        if (frame.getChannel().equals(channel)) logArea.appendText(type + " <" + channel + "> " + author + ": " + message);
-        if (frame.getChannel().length() < 3) logArea.appendText(type + " <" + channel + "> " + author + ": " + message);
+        if (frame.getChannel().equals(channel) || frame.getChannel().length() < 3)
+            logArea.appendText(type + " <" + channel + "> " + author + ": " + trimMessage(message));
     }
 }

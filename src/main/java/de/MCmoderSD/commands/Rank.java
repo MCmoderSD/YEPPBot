@@ -4,11 +4,12 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+
 import de.MCmoderSD.utilities.database.MySQL;
 
 public class Rank {
 
-        // Constructor
+    // Constructor
     public Rank(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
         // About
