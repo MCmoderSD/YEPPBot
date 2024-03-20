@@ -28,11 +28,15 @@ public class Lurk {
                 String channel = getChannel(event);
 
                 // Send message
-                // chat.sendMessage(channel, author + " ist jetzt im Lurk!"); ToDo Temporary disabled
+                String response = author + " ist jetzt im Lurk!";
+                // chat.sendMessage(channel, response); ToDo Temporary disabled
 
                 // Save data
                 lurkChannel.put(author, channel);
                 lurkTime.put(author, System.currentTimeMillis());
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

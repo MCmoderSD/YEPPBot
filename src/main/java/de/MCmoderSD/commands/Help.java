@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
+
 public class Help {
 
     // Attributes
@@ -40,8 +41,10 @@ public class Help {
 
                 // Help Commands
                 String response;
-                if (arg.equals("commands") || arg.equals("command") || arg.equals("befehle") || arg.equals("befehl")) response = helpCommands(channel); // Help Commands
-                else if (getCommandDescription(channel, arg) != null) response = getCommandDescription(channel, arg); // Command Description
+                if (arg.equals("commands") || arg.equals("command") || arg.equals("befehle") || arg.equals("befehl"))
+                    response = helpCommands(channel); // Help Commands
+                else if (getCommandDescription(channel, arg) != null)
+                    response = getCommandDescription(channel, arg); // Command Description
                 else response = getDescription(); // Help Description (Default)
 
                 // Send message
@@ -66,9 +69,11 @@ public class Help {
         // Filter available commands
         for (String command : commands.keySet()) {
             if (whitelist.containsKey(command.toLowerCase())) {
-                if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel)) message.append(prefix).append(command).append(", ");
+                if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
+                    message.append(prefix).append(command).append(", ");
             } else if (blacklist.containsKey(command.toLowerCase())) {
-                if (!Arrays.stream(blacklist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel)) message.append(prefix).append(command).append(", ");
+                if (!Arrays.stream(blacklist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
+                    message.append(prefix).append(command).append(", ");
             } else message.append(prefix).append(command).append(", ");
         }
 
@@ -84,10 +89,13 @@ public class Help {
 
         // Get description if command is available
         if (whitelist.containsKey(command.toLowerCase())) {
-            if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel)) return commandHandler.getCommands().get(command).getDescription();
+            if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
+                return commandHandler.getCommands().get(command).getDescription();
         } else if (blacklist.containsKey(command.toLowerCase())) {
-            if (!Arrays.stream(blacklist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel)) return commandHandler.getCommands().get(command).getDescription();
-        } else if (commandHandler.getCommands().containsKey(command)) return commandHandler.getCommands().get(command).getDescription();
+            if (!Arrays.stream(blacklist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
+                return commandHandler.getCommands().get(command).getDescription();
+        } else if (commandHandler.getCommands().containsKey(command))
+            return commandHandler.getCommands().get(command).getDescription();
         return null;
     }
 }

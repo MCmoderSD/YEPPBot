@@ -14,7 +14,6 @@ import java.sql.SQLException;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-@SuppressWarnings("unused")
 public class MySQL {
 
     // Associations
@@ -316,6 +315,7 @@ public class MySQL {
     }
 
     // Query Channel
+    @SuppressWarnings("unused")
     public String queryChannel(int id) {
         try {
             if (!isConnected()) connect();
@@ -332,6 +332,7 @@ public class MySQL {
     }
 
     // Query User
+    @SuppressWarnings("unused")
     public String queryUser(int id) {
         try {
             if (!isConnected()) connect();
