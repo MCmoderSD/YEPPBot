@@ -11,6 +11,7 @@ The bot is currently under active development and can change a lot in the future
 If you have any ideas or suggestions, feel free to open an issue or a pull request. <br> <br>
 
 ## Table of Contents
+
 - [Description](#description)
 - [Features](#features)
 - [How to use](#how-to-use)
@@ -65,8 +66,8 @@ The first file is ```BotConfig.json``` and it should have the following structur
 {
   "botName": "YOUR_BOT_NAME",
   "botToken": "YOUR_BOT_TOKEN",
-  "prefix": "!", 
-  "admins": "ADMIN_NAME"
+  "prefix": "!",
+  "admins": "ADMIN_NAME; OTHER_ADMIN_NAME"
 }
 ```
 
@@ -99,7 +100,8 @@ You can get the API key from [OpenAI](https://platform.openai.com/signup). <br>
 The model is the model that the bot will use to generate the text. <br>
 You can set the max tokens as high as you want. <br>
 The temperature is the randomness of the text. <br>
-The lowest is 0 and the highest is 2. The higher the value, the more random the text will be. Lower values will make the text more subtile. <br>
+The lowest is 0 and the highest is 2. The higher the value, the more random the text will be. Lower values will make the
+text more subtile. <br>
 The instruction is the way the bot should behave and how he should reply to the prompt. <br> <br>
 
 ### 5. Add an OpenWeatherMap API key
@@ -113,6 +115,7 @@ The file should have the following structure: <br>
   "api_key": "YOUR_API_KEY"
 }
 ```
+
 You can get the API key from [OpenWeatherMap](https://openweathermap.org/api). <br> <br>
 
 ### 5. Add a Giphy API key
@@ -146,11 +149,13 @@ The file should have the following structure: <br>
   "password": "PASSWORD"
 }
 ```
+
 <br>
 
 ### 7. Black and White list commands
 
-You can edit the ```blacklist.json``` and ```whitelist.json```  files in the ```/src/main/resources/config/``` folder. <br>
+You can edit the ```blacklist.json``` and ```whitelist.json```  files in the ```/src/main/resources/config/```
+folder. <br>
 
 It should have the following structure: <br>
 
@@ -165,13 +170,15 @@ You can add as many channels or commands as you want. <br>
 The way for black and whitelist works the same. <br> <br>
 
 ### 8. Compile the bot
+
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
 ```java -jar NAME_OF_THE_JAR_FILE.jar``` <br> <br>
 
 ### 9. Edit source code (optional)
 
 Before you compile the bot, you can edit the source code to add your own commands or features. <br>
-You can disable the registration of the commands in the ```BotClient``` class in ```/src/main/java/de/MCmoderSD/core/BotClient.java``` <br>
+You can disable the registration of the commands in the ```BotClient``` class
+in ```/src/main/java/de/MCmoderSD/core/BotClient.java``` <br>
 You can simply delete the line of the command you want to disable. <br>
 The commands are registered in the ```initCommands()``` method. <br> <br>
 
@@ -183,14 +190,19 @@ You can use the ```!help COMMAND_NAME``` to get more information about a specifi
 You can use the ```!joinchat CHANNEL_NAME``` to make the bot join a specific channel. <br>
 You can use the ```!leavechat CHANNEL_NAME``` to make the bot leave a specific channel. <br>
 
-You can start the bot without the graphical user interface mode by running the bot with the ```-nogui``` argument. <br> <br>
+You can start the bot without the graphical user interface mode by running the bot with the ```-nogui```
+argument. <br> <br>
 
 ## Contributing
-If you have any ideas or suggestions, feel free to open an issue or a pull request. <br>
-You can also contact me on [Discord](https://www.mcmodersd.de/dc) or [Twitch](https://www.twitch.tv/mcmodersd). 
 
-Lot of thanks to [Twitch4J](https://twitch4j.github.io/) for the amazing library and to [OpenAI](https://platform.openai.com/signup) for the ChatGPT API. <br>
+If you have any ideas or suggestions, feel free to open an issue or a pull request. <br>
+You can also contact me on [Discord](https://www.mcmodersd.de/dc) or [Twitch](https://www.twitch.tv/mcmodersd).
+
+Lot of thanks to [Twitch4J](https://twitch4j.github.io/) for the amazing library and
+to [OpenAI](https://platform.openai.com/signup) for the ChatGPT API. <br>
 Also thanks to [OpenWeatherMap](https://openweathermap.org/api) for the weather API. <br>
 
-Especially thanks to [FoxxHimself](https://github.com/lennartfu) for the original bot and the idea to rewrite it in Java. <br>
-Lot of thanks to [RedSmileTV](https://github.com/redsmiletv) and [Rebix](https://github.com/reebix) for the help with the bot and api's and libraries. <br>
+Especially thanks to [FoxxHimself](https://github.com/lennartfu) for the original bot and the idea to rewrite it in
+Java. <br>
+Lot of thanks to [RedSmileTV](https://github.com/redsmiletv) and [Rebix](https://github.com/reebix) for the help with
+the bot and api's and libraries. <br>

@@ -4,12 +4,12 @@ import de.MCmoderSD.utilities.frontend.RoundedButton;
 import de.MCmoderSD.utilities.frontend.RoundedTextField;
 
 import javax.swing.JPanel;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.JOptionPane;
 import javax.swing.border.LineBorder;
-import java.awt.Font;
-import java.awt.Dimension;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Stack;
@@ -33,35 +33,36 @@ public class MenuPanel extends JPanel {
     private int messageIndex;
 
     // Constructor
-    public MenuPanel(Frame frame) {
+    public MenuPanel(Frame frame, Dimension size) {
         super();
         setLayout(null);
-        setPreferredSize(new Dimension(1000, 80));
+        setPreferredSize(size);
         setBackground(DARK);
         setForeground(PURPLE);
         setVisible(true);
-        frame.add(this, BorderLayout.SOUTH);
-        frame.pack();
-        this.frame = frame;
 
-        Font font = new Font("Roboto", Font.PLAIN, 20);
+        // Variables
+        int fontSize = size.width / 50;
+        int padding = size.width / 100;
+
+        Font font = new Font("Roboto", Font.PLAIN, fontSize);
         messageHistory = new Stack<>();
 
         // Channel Input
         channelField = new RoundedTextField(1, "Channel");
-        channelField.setBounds(10, 10, 180, 50);
+        channelField.setBounds(padding, padding, size.width / 5 - 2 * padding, size.height - 3 * padding);
         channelField.setFont(font);
         channelField.setHorizontalAlignment(JTextField.CENTER);
         channelField.setBackground(LIGHT);
-        channelField.setBorder(new LineBorder(LIGHT, 5));
+        channelField.setBorder(new LineBorder(LIGHT, padding / 2));
         add(channelField);
 
         // Text Input
         textField = new RoundedTextField(1, "Message");
-        textField.setBounds(200, 10, 650, 50);
+        textField.setBounds(size.width / 5, padding, Math.toIntExact(Math.round(size.width / 1.6)) + 2 * padding, size.height - 3 * padding);
         textField.setFont(font);
         textField.setBackground(LIGHT);
-        textField.setBorder(new LineBorder(LIGHT, 5));
+        textField.setBorder(new LineBorder(LIGHT, padding / 2));
         add(textField);
 
         // Key Listener
@@ -96,15 +97,16 @@ public class MenuPanel extends JPanel {
 
         // Send Button
         RoundedButton sendButton = new RoundedButton("Send");
-        sendButton.setBounds(frame.getWidth() - 155, 10, 130, 50);
+        sendButton.setBounds(Math.toIntExact(Math.round(size.width - size.width / 6.25 + 2 * padding)), padding, Math.toIntExact(Math.round(size.width / 6.25 - 4 * padding)), size.height - 3 * padding);
         sendButton.setFont(font);
         sendButton.setBackground(PURPLE);
         sendButton.setForeground(WHITE);
         sendButton.addActionListener(e -> sendMessage());
         add(sendButton);
 
-        frame.add(this);
+        frame.add(this, BorderLayout.SOUTH);
         frame.pack();
+        this.frame = frame;
     }
 
     // Send Message
