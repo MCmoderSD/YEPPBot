@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -27,6 +28,10 @@ public class MySQL {
     private final String password;
     private final boolean isActive;
 
+    // Cache Lists
+    private final HashMap<Integer, String> channelCache;
+    private final HashMap<Integer, String> userCache;
+
     // Variables
     private Connection connection;
 
@@ -40,11 +45,19 @@ public class MySQL {
         username = databaseConfig.get("username").asText();
         password = databaseConfig.get("password").asText();
 
+        // Initialize Cache Lists
+        channelCache = new HashMap<>();
+        userCache = new HashMap<>();
+
         // Check if active
         isActive = host != null && database != null && username != null && password != null;
 
         // Connect to database
         new Thread(this::connect).start();
+
+        // Load Cache
+        loadChannelCache();
+        loadUserCache();
 
         // Set Frame
         this.frame = frame;
@@ -59,6 +72,10 @@ public class MySQL {
         username = null;
         password = null;
 
+        // Initialize Cache Lists
+        channelCache = new HashMap<>();
+        userCache = new HashMap<>();
+
         // Check if active
         isActive = false;
 
@@ -66,9 +83,8 @@ public class MySQL {
         this.frame = frame;
     }
 
-    // Checks Channels
-    @SuppressWarnings("JpaQueryApiInspection")
-    private void checkChannel(ChannelMessageEvent event) {
+    // Load Channel Cache
+    private void loadChannelCache() {
 
         // Return if not active
         if (!isActive) return;
@@ -76,9 +92,56 @@ public class MySQL {
         // New Thread
         new Thread(() -> {
 
-            // Set Variables
-            int id = getChannelID(event);
-            String name = getChannel(event);
+            // Load Channel Cache
+            try {
+                if (!isConnected()) connect(); // connect
+
+                String query = "SELECT * FROM " + "channels";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) channelCache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
+
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
+    }
+
+    // Load User Cache
+    private void loadUserCache() {
+
+        // Return if not active
+        if (!isActive) return;
+
+        // New Thread
+        new Thread(() -> {
+
+            // Load User Cache
+            try {
+                if (!isConnected()) connect(); // connect
+
+                String query = "SELECT * FROM " + "users";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) userCache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
+
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
+    }
+
+    // Checks Channels
+    @SuppressWarnings("JpaQueryApiInspection")
+    private void checkChannel(int id, String name) {
+
+        // Return if not active
+        if (!isActive) return;
+
+        if (channelCache.containsKey(id)) return;
+
+        // New Thread
+        new Thread(() -> {
 
             // Check Channel
             try {
@@ -98,6 +161,10 @@ public class MySQL {
                     preparedStatement.setString(2, name); // set name
                     preparedStatement.executeUpdate(); // execute
                 }
+
+                // Add to Cache
+                channelCache.put(id, name);
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -106,17 +173,16 @@ public class MySQL {
 
     // Checks Users
     @SuppressWarnings("JpaQueryApiInspection")
-    private void checkUser(ChannelMessageEvent event) {
+    private void checkUser(int id, String name) {
 
         // Return if not active
         if (!isActive) return;
 
+        // Return if in Cache
+        if (userCache.containsKey(id)) return;
+
         // New Thread
         new Thread(() -> {
-
-            // Set Variables
-            int id = getUserID(event);
-            String name = getAuthor(event);
 
             // Check User
             try {
@@ -136,6 +202,10 @@ public class MySQL {
                     preparedStatement.setString(2, name); // set name
                     preparedStatement.executeUpdate(); // execute
                 }
+
+                // Add to Cache
+                userCache.put(id, name);
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -158,8 +228,8 @@ public class MySQL {
             if (!isActive) return;
 
             // Check Channel and User
-            checkChannel(event);
-            checkUser(event);
+            checkChannel(channelID, getChannel(event));
+            checkUser(userID, getAuthor(event));
 
             // Log message
             try {
@@ -194,8 +264,8 @@ public class MySQL {
             if (!isActive) return;
 
             // Check Channel and User
-            checkChannel(event);
-            checkUser(event);
+            checkChannel(channelID, getChannel(event));
+            checkUser(userID, getAuthor(event));
 
             // Log Command
             try {
@@ -231,8 +301,8 @@ public class MySQL {
             if (!isActive) return;
 
             // Check Channel and User
-            checkChannel(event);
-            checkUser(event);
+            checkChannel(channelID, getChannel(event));
+            checkUser(userID, getAuthor(event));
 
             // Log Response
             try {
