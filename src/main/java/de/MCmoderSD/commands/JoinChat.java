@@ -7,14 +7,14 @@ import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class JoinChat {
 
     // Constructor
-    public JoinChat(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, String[] admins) {
+    public JoinChat(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, ArrayList<String> admins) {
 
         // About
         String[] name = {"joinchat", "addchat", "addtochat"};
@@ -30,7 +30,7 @@ public class JoinChat {
 
                 String response;
                 if (author.equals(args[0])) response = join(chat, args[0]); // Broadcaster
-                else if (Arrays.stream(admins).toList().contains(author)) response = join(chat, args[0]); // Admin
+                else if (admins.contains(author)) response = join(chat, args[0]); // Admin
                 else return;
 
                 // Send Message

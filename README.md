@@ -36,6 +36,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] ChatGPT command
 - [x] Translate command
 - [x] Join and Leave chat command
+- [x] Ping command
 - [x] Black and White list
 - [x] Graphical User Interface
 - [ ] Rank command

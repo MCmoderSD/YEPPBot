@@ -7,33 +7,28 @@ import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
 
-import java.util.ArrayList;
-
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-public class Say {
+public class Ping {
 
     // Constructor
-    public Say(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, ArrayList<String> admins) {
+    public Ping(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
         // About
-        String[] name = {"say", "repeat"};
-        String description = "Nur für Administratoren. Sendet eine Nachricht in den Chat. Verwendung: " + commandHandler.getPrefix() + "say <Nachricht>";
+        String[] name = {"ping", "latency"};
+        String description = "Sendet eine Nachricht mit der Latenz des Bots zurück.";
 
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                String channel = getChannel(event);
-                String author = getAuthor(event);
 
-                String response;
-                if (admins.contains(author) || author.equals(channel)) response = processArgs(args);
-                else return;
+                // Check latency
+                String response = "Latency: " + chat.getLatency() + "ms";
 
                 // Send Message
-                chat.sendMessage(channel, response);
+                chat.sendMessage(getChannel(event), response);
 
                 // Log response
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);

@@ -7,14 +7,14 @@ import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class LeaveChat {
 
     // Constructor
-    public LeaveChat(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, String[] admins) {
+    public LeaveChat(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, ArrayList<String> admins) {
 
         // About
         String[] name = {"leavechat", "removechat", "removefromchat", "delfromchat"};
@@ -30,7 +30,7 @@ public class LeaveChat {
 
                 String response;
                 if (author.equals(channel)) response = leave(chat, channel); // Broadcaster
-                else if (Arrays.stream(admins).toList().contains(author)) response = leave(chat, args[0]); // Admin
+                else if (admins.contains(author)) response = leave(chat, args[0]); // Admin
                 else return;
 
                 // Send Message

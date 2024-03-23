@@ -2,13 +2,13 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import org.json.JSONObject;
 
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
