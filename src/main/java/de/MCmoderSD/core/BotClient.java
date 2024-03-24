@@ -164,8 +164,14 @@ public class BotClient {
         client.close();
     }
 
+    // Getter
     @SuppressWarnings("unused")
     public ArrayList<String> getChannels() {
         return new ArrayList<>(chat.getChannels());
+    }
+
+    @SuppressWarnings("unused")
+    public boolean isChannelJoined(String channel) {
+        return chat.getChannels().contains(channel);
     }
 }
