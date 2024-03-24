@@ -41,6 +41,7 @@ public class Joke {
 
                 // Determine language
                 boolean isEnglish = false;
+                //todo: array of languages
                 if (args.length > 0)
                     isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
                 ArrayList<String> jokes = isEnglish ? englishJokes : germanJokes;
@@ -56,6 +57,7 @@ public class Joke {
     }
 
     // Read jokes
+    //todo: remove duplicate code
     private ArrayList<String> readJokes(String path) {
         ArrayList<String> jokes = new ArrayList<>();
         try {

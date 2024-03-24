@@ -22,6 +22,7 @@ public class JoinChat {
 
 
         // Register command
+        //todo: duplicate with LeaveChat
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {

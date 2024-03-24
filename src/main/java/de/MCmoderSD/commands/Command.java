@@ -1,6 +1,7 @@
 package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import org.apache.commons.lang.IncompleteArgumentException;
 
 public abstract class Command {
 
@@ -14,7 +15,7 @@ public abstract class Command {
 
         // Null Check
         if (command.length == 0)
-            throw new IllegalArgumentException("Command name missing!");
+            throw new IncompleteArgumentException("Command name missing!");
 
         // Set attributes
         this.command = command[0]; // Name

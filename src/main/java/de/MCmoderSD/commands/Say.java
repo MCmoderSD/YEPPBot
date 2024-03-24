@@ -32,10 +32,8 @@ public class Say {
                 if (admins.contains(author) || author.equals(channel)) response = processArgs(args);
                 else return;
 
-                // Send Message
+                // Send Message and log
                 chat.sendMessage(channel, response);
-
-                // Log response
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });

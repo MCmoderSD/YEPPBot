@@ -30,12 +30,13 @@ public class Join {
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
+            //todo: duplicate with Play
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 if (!firstJoin) {
                     firstJoin = true;
                     channel = getChannel(event);
-                    resetTimer(10);
+                    startResetTimer(10);
                     return;
                 }
 
@@ -50,7 +51,7 @@ public class Join {
 
                     // Reset attributes
                     sentMessage = true;
-                    resetTimer(120);
+                    startResetTimer(120);
                 }
             }
         });
@@ -63,7 +64,7 @@ public class Join {
     }
 
     // Timer
-    private void resetTimer(int seconds) {
+    private void startResetTimer(int seconds) {
         new Thread(() -> {
             try {
                 Thread.sleep(seconds * 1000L);

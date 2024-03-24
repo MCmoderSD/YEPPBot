@@ -64,7 +64,7 @@ public class Gif {
             conn.setRequestMethod("GET");
             conn.connect();
             int responseCode = conn.getResponseCode();
-            if (responseCode != 200) return "Fehler: " + responseCode;
+            if (responseCode != 200) return "Error code: " + responseCode;
             Scanner scannerResponse = new Scanner(url.openStream());
             StringBuilder responseBody = new StringBuilder();
             while (scannerResponse.hasNext()) responseBody.append(scannerResponse.nextLine());
@@ -74,7 +74,7 @@ public class Gif {
             return data.getString("url");
         } catch (IOException e) {
             System.err.println(e.getMessage());
-            return "Fehler beim Abrufen des GIFs.";
+            return "An Error occurred. While trying to get a GIF.";
         }
     }
 }

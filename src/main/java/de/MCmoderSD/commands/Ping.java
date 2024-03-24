@@ -21,9 +21,9 @@ public class Ping {
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
+            //todo: remove unnecessary comments (they make it harder to read)
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-
                 // Check latency
                 String response = "Latency: " + chat.getLatency() + "ms";
 

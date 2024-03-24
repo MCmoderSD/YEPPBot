@@ -46,12 +46,9 @@ public class Weather {
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-
-                // Send message
+                // Send message and log response
                 String response = trimMessage(generateResponse(args));
                 chat.sendMessage(getChannel(event), response);
-
-                // Log response
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });

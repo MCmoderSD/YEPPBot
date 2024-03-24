@@ -40,6 +40,7 @@ public class Wiki {
                     summary = trimMessage(getWikipediaSummary(topic)); // Get Wikipedia summary
 
                     // Send summary
+                    //todo: make work for summaries longer than 1.000 characters
                     if (summary.length() <= 500) chat.sendMessage(channel, summary); // Send summary
                     else {
                         while (summary.length() > 500) {
@@ -47,11 +48,9 @@ public class Wiki {
                             if (endOfSentence == -1) endOfSentence = summary.lastIndexOf(' ', 500);
                             if (endOfSentence == -1) endOfSentence = 500;
 
-                            // Send message
+                            // Send message and log response
                             String response = summary.substring(0, endOfSentence + 1);
                             chat.sendMessage(event.getChannel().getName(), response);
-
-                            // Log response
                             mySQL.logResponse(event, getCommand(), processArgs(args), response);
 
                             // Update summary

@@ -42,12 +42,14 @@ public class Insult {
 
                 // Determine language
                 boolean isEnglish = false;
+                //todo: array of languages
                 if (args.length > 0)
                     isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
                 ArrayList<String> insults = isEnglish ? englishInsults : germanInsults;
 
                 // Generate Insult
                 String insult = insults.get((int) (Math.random() * insults.size())); // Random insult
+                // Gets target, insults the author if no target is provided
                 String target = args.length > 0 ? args[0] : getAuthor(event);
                 if (target.startsWith("@")) target = target.substring(1);
                 String message = insult.replace("%member%", '@' + target);
@@ -62,7 +64,9 @@ public class Insult {
         });
     }
 
+
     // Read insults
+    //todo: remove duplicate code
     private ArrayList<String> readInsults(String path) {
         ArrayList<String> insults = new ArrayList<>();
         try {

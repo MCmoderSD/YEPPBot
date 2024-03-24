@@ -19,6 +19,7 @@ public class Key {
         String description = "Zeigt dir wo du das Spiel am Günstigen bekommst. Verwende " + commandHandler.getPrefix() + "key <Spiel>.";
 
         // Register command
+        // todo: make work with affiliate link
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
