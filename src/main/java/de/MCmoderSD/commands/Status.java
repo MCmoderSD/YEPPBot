@@ -23,12 +23,9 @@ public class Status {
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+                // Report status
                 String response = "Bot ist aktiv!";
-
-                // Send message
                 chat.sendMessage(getChannel(event), response);
-
-                // Log response
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });

@@ -36,11 +36,9 @@ public class Prompt {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
 
-                // Send message
+                // Send message and log
                 String response = openAI.prompt(botName, instruction, trimMessage(processArgs(args)), maxTokens, temperature);
                 chat.sendMessage(getChannel(event), response);
-
-                // Log response
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });

@@ -29,6 +29,7 @@ public class Lurk {
 
                 // Send message
                 String response = author + " ist jetzt im Lurk!";
+                //todo: remove todo
                 // chat.sendMessage(channel, response); ToDo Temporary disabled
 
                 // Save data

@@ -33,6 +33,7 @@ public class Translate {
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+                //todo: check for argument exceptions
 
                 // Check for language
                 String language = args[0];
@@ -41,11 +42,9 @@ public class Translate {
                 String text = trimMessage(processArgs(args)).replace(language, "");
                 String instruction = trimMessage("Please translate the following text into " + language + ":");
 
-                // Send message
+                // Send message and log response
                 String response = openAI.prompt(botName, instruction, text, maxTokens, temperature);
                 chat.sendMessage(getChannel(event), response);
-
-                // Log response
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });

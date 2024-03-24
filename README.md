@@ -5,9 +5,9 @@
 The YEPPBot is a Twitch bot that provides a variety of features to entertain your Twitch channel. <br>
 Originally created by [FoxxHimself](https://github.com/lennartfu) in Python and now being rewritten
 in [Java 17](https://www.oracle.com/de/java/technologies/downloads/#java17) using
-thr [Twitch4J library](https://twitch4j.github.io/).
+the [Twitch4J](https://twitch4j.github.io/) library.
 
-The bot is currently under active development and can change a lot in the future. <br>
+The bot is currently under active development and it's features can change a lot in the future. <br>
 If you have any ideas or suggestions, feel free to open an issue or a pull request. <br> <br>
 
 ## Table of Contents
@@ -46,11 +46,10 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 
 ## How to use
 
-You need to have Java 17 installed in your computer, you can download it
-from [here](https://www.oracle.com/uk/java/technologies/downloads/#java17). <br>
-You need the Twitch Account Token of the Twitch Bot, you can get it from [here](https://twitchapps.com/tmi/).<br> <br>
+You need to have Java 17 installed in your computer, a download link can be found [here](https://www.oracle.com/uk/java/technologies/downloads/#java17). <br>
+You need the Twitch Account Token of the Twitch Bot which you can get from [here](https://twitchapps.com/tmi/).<br> <br>
 Keep in mind that the token can change from to time. <br>
-But remember **don't EVER POST or SHARE the token anywhere**!!! <br> <br>
+But remember **DON'T POST** or **SHARE** the token anywhere!!! <br> <br>
 
 ### 1. Clone the repository
 
@@ -59,8 +58,8 @@ Clone the repository using the following command: <br>
 ```git clone https://www.github.com/MCmoderSD/YEPPBot.git ``` <br> <br>
 
 ### 2. Edit the bot config file
-
-You need to create two JSON files in ```/src/main/resources/config/``` folder. <br> <br>
+[comment]: <> (TODO: implement a config generator)
+You currently need to create two JSON files in ```/src/main/resources/config/``` folder. <br> <br>
 The first file is ```BotConfig.json``` and it should have the following structure: <br>
 
 ```json
@@ -102,11 +101,11 @@ The model is the model that the bot will use to generate the text. <br>
 You can set the max tokens as high as you want. <br>
 The temperature is the randomness of the text. <br>
 The lowest is 0 and the highest is 2. The higher the value, the more random the text will be. Lower values will make the
-text more subtile. <br>
+text weirder. <br>
 The instruction is the way the bot should behave and how he should reply to the prompt. <br> <br>
 
 ### 5. Add an OpenWeatherMap API key
-
+[comment]: <> (TODO: implement a config generator)
 You need to create a file called ```OpenWeatherMap.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
 
@@ -120,7 +119,7 @@ The file should have the following structure: <br>
 You can get the API key from [OpenWeatherMap](https://openweathermap.org/api). <br> <br>
 
 ### 5. Add a Giphy API key
-
+[comment]: <> (TODO: implement a config generator)
 You need to create a file called ```Giphy.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
 

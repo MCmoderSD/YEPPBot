@@ -39,6 +39,7 @@ public class Help {
                 String channel = getChannel(event);
                 String arg = args.length > 0 ? args[0].toLowerCase() : "";
 
+                //todo: array of commands
                 // Help Commands
                 String response;
                 if (arg.equals("commands") || arg.equals("command") || arg.equals("befehle") || arg.equals("befehl"))
@@ -58,7 +59,7 @@ public class Help {
 
     // Gets all available commands
     private String helpCommands(String channel) {
-        StringBuilder message = new StringBuilder("Die verfügbaren Befehle sind: ");
+        StringBuilder message = new StringBuilder("Available commands: ");
 
         // Get prefix
         String prefix = commandHandler.getPrefix();
@@ -67,6 +68,7 @@ public class Help {
         HashMap<String, Command> commands = commandHandler.getCommands();
 
         // Filter available commands
+        //todo: eh unclean
         for (String command : commands.keySet()) {
             if (whitelist.containsKey(command.toLowerCase())) {
                 if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
@@ -88,6 +90,7 @@ public class Help {
         if (commandHandler.getAliases().containsKey(command)) command = commandHandler.getAliases().get(command);
 
         // Get description if command is available
+        //todo: eh unclean
         if (whitelist.containsKey(command.toLowerCase())) {
             if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
                 return commandHandler.getCommands().get(command).getDescription();

@@ -42,6 +42,7 @@ public class Fact {
 
                 // Determine language
                 boolean isEnglish = false;
+                //todo: array of languages
                 if (args.length > 0)
                     isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
                 String[][] facts = isEnglish ? englishFacts : germanFacts;
@@ -61,6 +62,7 @@ public class Fact {
     }
 
     // Read facts
+    //todo: remove duplicate code
     private String[][] readFacts(String path) {
         ArrayList<String> types = new ArrayList<>();
 
