@@ -6,14 +6,9 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.other.Reader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -32,8 +27,9 @@ public class Insult {
 
 
         // Read insults
-        englishInsults = readInsults("/assets/english.insults");
-        germanInsults = readInsults("/assets/german.insults");
+        Reader reader = new Reader();
+        englishInsults = reader.lineRead("/assets/english.insults");
+        germanInsults = reader.lineRead("/assets/german.insults");
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
@@ -42,13 +38,12 @@ public class Insult {
 
                 // Determine language
                 boolean isEnglish = false;
-                //todo: array of languages
-                if (args.length > 0)
-                    isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
+                if (args.length > 0) isEnglish = args[0].toLowerCase().startsWith("en");
                 ArrayList<String> insults = isEnglish ? englishInsults : germanInsults;
 
                 // Generate Insult
                 String insult = insults.get((int) (Math.random() * insults.size())); // Random insult
+
                 // Gets target, insults the author if no target is provided
                 String target = args.length > 0 ? args[0] : getAuthor(event);
                 if (target.startsWith("@")) target = target.substring(1);
@@ -62,22 +57,5 @@ public class Insult {
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
-    }
-
-
-    // Read insults
-    //todo: remove duplicate code
-    private ArrayList<String> readInsults(String path) {
-        ArrayList<String> insults = new ArrayList<>();
-        try {
-            InputStream inputStream = getClass().getResourceAsStream(path);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
-
-            String line;
-            while ((line = reader.readLine()) != null) insults.add(line);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-        return insults;
     }
 }

@@ -2,19 +2,13 @@ package de.MCmoderSD.main;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
-
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.OpenAI;
+import de.MCmoderSD.utilities.other.Reader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class Main {
 
@@ -63,23 +57,12 @@ public class Main {
         String[] admins = botConfig.get("admins").asText().toLowerCase().split("; ");
 
         // Load Channel List
-        String[] channels = null;
-        try {
-            ArrayList<String> lines = new ArrayList<>();
-            ArrayList<String> names = new ArrayList<>();
-            InputStream inputStream = getClass().getResourceAsStream(channelListPath);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
-
-            String line;
-            while ((line = reader.readLine()) != null) lines.add(line);
-            for (String name : lines) if (name.length() > 3) names.add(name.replace("\n", "").replace(" ", ""));
-            channels = new String[names.size()];
-            names.toArray(channels);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-
-        if (channels == null) throw new IllegalArgumentException("Channel List is empty!");
+        Reader reader = new Reader();
+        String[] channels;
+        ArrayList<String> names = new ArrayList<>();
+        for (String name : reader.lineRead(channelListPath)) if (name.length() > 3) names.add(name.replace("\n", "").replace(" ", ""));
+        channels = new String[names.size()];
+        channels = names.toArray(channels);
 
         // Load OpenAI Config
         OpenAI openAI = new OpenAI(jsonUtility.load(OPENAI_CONFIG));

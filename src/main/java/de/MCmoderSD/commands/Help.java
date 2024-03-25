@@ -2,16 +2,15 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
 import de.MCmoderSD.core.CommandHandler;
-
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.getChannel;
+import static de.MCmoderSD.utilities.other.Calculate.processArgs;
 
 public class Help {
 
@@ -39,13 +38,10 @@ public class Help {
                 String channel = getChannel(event);
                 String arg = args.length > 0 ? args[0].toLowerCase() : "";
 
-                //todo: array of commands
                 // Help Commands
                 String response;
-                if (arg.equals("commands") || arg.equals("command") || arg.equals("befehle") || arg.equals("befehl"))
-                    response = helpCommands(channel); // Help Commands
-                else if (getCommandDescription(channel, arg) != null)
-                    response = getCommandDescription(channel, arg); // Command Description
+                if (Arrays.asList("commands", "command", "befehle", "befehl").contains(arg)) response = helpCommands(channel); // Help Commands
+                else if (getCommandDescription(channel, arg) != null) response = getCommandDescription(channel, arg); // Command Description
                 else response = getDescription(); // Help Description (Default)
 
                 // Send message

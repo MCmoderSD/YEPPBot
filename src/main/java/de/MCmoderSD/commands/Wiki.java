@@ -8,7 +8,9 @@ import org.jsoup.nodes.Document;
 
 import de.MCmoderSD.core.CommandHandler;
 
+import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.other.OpenAI;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -18,13 +20,21 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Wiki {
 
+    // Attributes
+    private final int maxTokens;
+    private final double temperature;
+
     // Constructor
-    public Wiki(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
+    public Wiki(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
 
         // About
         String[] name = {"wiki", "wikipedia", "summarize", "zusammenfassung"};
         String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. Verwendung: " + commandHandler.getPrefix() + "wiki <Thema>";
 
+        // Load Config
+        JsonNode config = openAI.getConfig();
+        maxTokens = config.get("maxTokens").asInt();
+        temperature = 0;
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
@@ -34,32 +44,27 @@ public class Wiki {
 
                 // Query Wikipedia
                 String topic = processArgs(args);
-                while (topic.charAt(topic.length() - 1) == ' ') topic = topic.trim(); // Remove leading spaces
-                String summary;
+
+                String response;
+
                 try {
-                    summary = trimMessage(getWikipediaSummary(topic)); // Get Wikipedia summary
 
-                    // Send summary
-                    //todo: make work for summaries longer than 1.000 characters
-                    if (summary.length() <= 500) chat.sendMessage(channel, summary); // Send summary
-                    else {
-                        while (summary.length() > 500) {
-                            var endOfSentence = summary.lastIndexOf('.', 500);
-                            if (endOfSentence == -1) endOfSentence = summary.lastIndexOf(' ', 500);
-                            if (endOfSentence == -1) endOfSentence = 500;
+                    // Get Wikipedia summary
+                    String summary = trimMessage(getWikipediaSummary(topic)); // Get Wikipedia summary
 
-                            // Send message and log response
-                            String response = summary.substring(0, endOfSentence + 1);
-                            chat.sendMessage(event.getChannel().getName(), response);
-                            mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                    // Check if summary is too long
+                    if (summary.length() <= 500) response = summary;
+                    else response = trimMessage(openAI.prompt(botName, "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, maxTokens, temperature));
 
-                            // Update summary
-                            summary = summary.substring(endOfSentence + 1);
-                        }
-                    }
                 } catch (IOException e) {
-                    chat.sendMessage(channel, "Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage()); // Send error message
+                    response = trimMessage("Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage());
                 }
+
+                // Send message and log response
+                chat.sendMessage(channel, response);
+
+                // Log response
+                mySQL.logResponse(event, getCommand(), topic, response);
             }
         });
     }

@@ -7,7 +7,6 @@ import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
 
-//todo: implement rank command
 public class Rank {
 
     // Constructor

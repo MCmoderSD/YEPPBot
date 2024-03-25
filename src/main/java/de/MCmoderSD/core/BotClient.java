@@ -81,18 +81,18 @@ public class BotClient {
         new Join(mySQL, commandHandler, chat);
         new JoinChat(mySQL, commandHandler, chat, adminList);
         new Joke(mySQL, commandHandler, chat);
-        // new Key(mySQL, commandHandler, chat); ToDo Fix
+        // new Key(mySQL, commandHandler, chat); ToDo Make it work
         new LeaveChat(mySQL, commandHandler, chat, adminList);
         new Lurk(mySQL, commandHandler, chat, lurkChannel, lurkTime);
         new Ping(mySQL, commandHandler, chat);
         new Play(mySQL, commandHandler, chat);
         new Prompt(mySQL, commandHandler, chat, openAI, botName);
-        // new Rank(mySQL, commandHandler, chat); ToDo Fix
+        // new Rank(mySQL, commandHandler, chat); ToDo Make it work
         new Say(mySQL, commandHandler, chat, adminList);
         new Status(mySQL, commandHandler, chat);
         new Translate(mySQL, commandHandler, chat, openAI, botName);
         new Weather(mySQL, commandHandler, chat);
-        new Wiki(mySQL, commandHandler, chat);
+        new Wiki(mySQL, commandHandler, chat ,openAI, botName);
 
         // Init Interactions
         new ReplyYepp(mySQL, interactionHandler, chat);

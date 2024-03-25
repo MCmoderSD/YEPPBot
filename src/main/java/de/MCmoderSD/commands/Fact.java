@@ -6,14 +6,9 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.other.Reader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -32,8 +27,9 @@ public class Fact {
 
 
         // Read facts
-        englishFacts = readFacts("/assets/english.facts");
-        germanFacts = readFacts("/assets/german.facts");
+        Reader reader = new Reader();
+        englishFacts = readFacts(reader, "/assets/english.facts");
+        germanFacts = readFacts(reader, "/assets/german.facts");
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
@@ -42,9 +38,7 @@ public class Fact {
 
                 // Determine language
                 boolean isEnglish = false;
-                //todo: array of languages
-                if (args.length > 0)
-                    isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
+                if (args.length > 0) isEnglish = args[0].toLowerCase().startsWith("en");
                 String[][] facts = isEnglish ? englishFacts : germanFacts;
 
                 // Generate fact
@@ -62,30 +56,11 @@ public class Fact {
     }
 
     // Read facts
-    //todo: remove duplicate code
-    private String[][] readFacts(String path) {
-        ArrayList<String> types = new ArrayList<>();
+    private String[][] readFacts(Reader reader, String path) {
+        ArrayList<String> lines = reader.lineRead(path);
 
-        // Read file
-        try {
-            InputStream inputStream = getClass().getResourceAsStream(path);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
-
-            String line;
-            while ((line = reader.readLine()) != null) types.add(line);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-
-        // Split facts
-        var typeSize = types.size();
-        String[][] facts = new String[typeSize][];
-
-        for (var i = 0; i < typeSize; i++) {
-            String[] split = types.get(i).split(";");
-            facts[i] = split;
-        }
-
+        String[][] facts = new String[lines.size()][];
+        for (int i = 0; i < lines.size(); i++) facts[i] = lines.get(i).split(";");
         return facts;
     }
 }

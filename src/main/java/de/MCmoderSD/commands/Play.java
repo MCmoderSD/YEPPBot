@@ -30,7 +30,6 @@ public class Play {
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
-            //todo: duplicate with Join
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 if (!firstPlay) {

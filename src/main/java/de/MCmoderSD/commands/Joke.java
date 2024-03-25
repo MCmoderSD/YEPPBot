@@ -6,6 +6,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.other.Reader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,8 +32,9 @@ public class Joke {
 
 
         // Read jokes
-        englishJokes = readJokes("/assets/english.jokes");
-        germanJokes = readJokes("/assets/german.jokes");
+        Reader reader = new Reader();
+        englishJokes = reader.lineRead("/assets/english.jokes");
+        germanJokes = reader.lineRead("/assets/german.jokes");
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
@@ -54,21 +56,5 @@ public class Joke {
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
-    }
-
-    // Read jokes
-    //todo: remove duplicate code
-    private ArrayList<String> readJokes(String path) {
-        ArrayList<String> jokes = new ArrayList<>();
-        try {
-            InputStream inputStream = getClass().getResourceAsStream(path);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
-
-            String line;
-            while ((line = reader.readLine()) != null) jokes.add(line);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-        return jokes;
     }
 }
