@@ -28,6 +28,7 @@ public class InteractionHandler {
     private final HashMap<String, String> lurkChannel;
     private final HashMap<Event, ArrayList<String>> whiteListMap;
     private final HashMap<Event, ArrayList<String>> blackListMap;
+    private final HashMap<Event, ArrayList<String>> mySQLBlackList;
 
     // Constructor
     public InteractionHandler(MySQL mySQL, JsonNode whiteList, JsonNode blackList, HashMap<String, String> lurkChannel) {
@@ -41,6 +42,7 @@ public class InteractionHandler {
         aliases = new HashMap<>();
         whiteListMap = new HashMap<>();
         blackListMap = new HashMap<>();
+        mySQLBlackList = new HashMap<>();
     }
 
     // Register a command
@@ -58,6 +60,25 @@ public class InteractionHandler {
             whiteListMap.put(event, new ArrayList<>(Arrays.asList(whiteList.get(name).asText().toLowerCase().split("; "))));
         if (blackList.containsKey(name))
             blackListMap.put(event, new ArrayList<>(Arrays.asList(blackList.get(name).asText().toLowerCase().split("; "))));
+
+        updateBlackList();
+    }
+
+    // Update BlackList
+    public void updateBlackList() {
+
+        // Clear BlackList
+        mySQLBlackList.clear();
+        HashMap<String, ArrayList<String>> tempMap = mySQL.getBlacklist();
+
+        // Update BlackList
+        for (Event event : interactions.values()) {
+            String name = event.getEvent();
+            if (tempMap.containsKey(name)) {
+                ArrayList<String> channels = tempMap.get(name);
+                mySQLBlackList.put(event, channels);
+            }
+        }
     }
 
     // Manually execute a command
@@ -75,8 +96,8 @@ public class InteractionHandler {
                 return;
 
             // Check for blacklist
-            if (blackListMap.containsKey(interactionEvent) && blackListMap.get(interactionEvent).contains(getChannel(event)))
-                return;
+            if (blackListMap.containsKey(interactionEvent) && blackListMap.get(interactionEvent).contains(getChannel(event))) return;
+            if (mySQLBlackList.containsKey(interactionEvent) && mySQLBlackList.get(interactionEvent).contains(getChannel(event))) return;
 
             // Log command execution
             mySQL.logCommand(event, interactionEvent.getEvent(), "");

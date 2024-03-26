@@ -61,6 +61,11 @@ public class Calculate {
         return event.getChannel().getName();
     }
 
+    // Tag the channel
+    public static String tagChannel(ChannelMessageEvent event) {
+        return "@" + getChannel(event);
+    }
+
     // Get Channel ID
     public static int getChannelID(ChannelMessageEvent event) {
         return Integer.parseInt(event.getChannel().getId());

@@ -36,7 +36,7 @@ public class BotClient {
     private final String botName;
 
     // Constructor
-    public BotClient(String botName, String botToken, String prefix, String[] admins, String[] channels, MySQL mySQL, OpenAI openAI) {
+    public BotClient(String botName, String botToken, String prefix, String[] admins, ArrayList<String> channels, MySQL mySQL, OpenAI openAI) {
 
         // Init Bot Name
         this.botName = botName;
@@ -67,23 +67,23 @@ public class BotClient {
         JsonNode blackList = jsonUtility.load("/config/blacklist.json");
 
         // Init CommandHandler
-        commandHandler = new CommandHandler(mySQL, whiteList, blackList, prefix);
+        commandHandler = new CommandHandler(mySQL, chat, whiteList, blackList, prefix);
         interactionHandler = new InteractionHandler(mySQL, whiteList, blackList, lurkChannel);
 
         // Format admin names
         ArrayList <String> adminList = new ArrayList<>(Arrays.stream(admins).toList());
 
         // Init Commands
+        new CustomCommand(mySQL, commandHandler, chat, adminList);
         new Fact(mySQL, commandHandler, chat);
         new Gif(mySQL, commandHandler, chat);
         new Help(mySQL, commandHandler, chat, whiteList, blackList);
         new Insult(mySQL, commandHandler, chat);
         new Join(mySQL, commandHandler, chat);
-        new JoinChat(mySQL, commandHandler, chat, adminList);
         new Joke(mySQL, commandHandler, chat);
         // new Key(mySQL, commandHandler, chat); ToDo Make it work
-        new LeaveChat(mySQL, commandHandler, chat, adminList);
         new Lurk(mySQL, commandHandler, chat, lurkChannel, lurkTime);
+        new Moderate(mySQL, commandHandler, chat, adminList);
         new Ping(mySQL, commandHandler, chat);
         new Play(mySQL, commandHandler, chat);
         new Prompt(mySQL, commandHandler, chat, openAI, botName);
@@ -136,6 +136,9 @@ public class BotClient {
 
         // Sub Event
         eventManager.onEvent(ChannelSubscribeEvent.class, event -> System.out.printf("%s %s <%s> %s -> Subscribed %s%s", logTimestamp(), SUBSCRIBE, event.getBroadcasterUserName(), event.getUserName(), event.getTier(), BREAK));
+
+        // Set MySQL associations
+        mySQL.setAssociation(commandHandler, interactionHandler);
     }
 
     // Methods

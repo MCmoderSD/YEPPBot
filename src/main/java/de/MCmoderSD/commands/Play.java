@@ -32,7 +32,7 @@ public class Play {
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                if (!firstPlay) {
+                if (!firstPlay && !sentMessage) {
                     firstPlay = true;
                     channel = getChannel(event);
                     startResetTimer(10);
@@ -50,7 +50,7 @@ public class Play {
 
                     // Reset attributes
                     sentMessage = true;
-                    startResetTimer(120);
+                    startResetTimer(90);
                 }
             }
         });

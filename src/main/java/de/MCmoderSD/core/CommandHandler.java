@@ -1,5 +1,6 @@
 package de.MCmoderSD.core;
 
+import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.commands.Command;
@@ -10,6 +11,7 @@ import de.MCmoderSD.utilities.json.JsonNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -24,16 +26,19 @@ public class CommandHandler {
     private final String prefix;
 
     // Attributes
+    private final TwitchChat chat;
     private final HashMap<String, Command> commands;
     private final HashMap<String, String> aliases;
     private final HashMap<Command, ArrayList<String>> whiteListMap;
     private final HashMap<Command, ArrayList<String>> blackListMap;
+    private final HashMap<Command, ArrayList<String>> mySQLBlackList;
 
     // Constructor
-    public CommandHandler(MySQL mySQL, JsonNode whiteList, JsonNode blackList, String prefix) {
+    public CommandHandler(MySQL mySQL, TwitchChat chat, JsonNode whiteList, JsonNode blackList, String prefix) {
 
         // Init Constants and Attributes
         this.mySQL = mySQL;
+        this.chat = chat;
         this.prefix = prefix;
         this.whiteList = whiteList;
         this.blackList = blackList;
@@ -41,6 +46,7 @@ public class CommandHandler {
         aliases = new HashMap<>();
         whiteListMap = new HashMap<>();
         blackListMap = new HashMap<>();
+        mySQLBlackList = new HashMap<>();
     }
 
     // Register a command
@@ -60,6 +66,23 @@ public class CommandHandler {
             blackListMap.put(command, new ArrayList<>(Arrays.asList(blackList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
     }
 
+    // Update BlackList
+    public void updateBlackList() {
+
+        // Clear BlackList
+        mySQLBlackList.clear();
+        HashMap<String, ArrayList<String>> tempMap = mySQL.getBlacklist();
+
+        // Update BlackList
+        for (Command command : commands.values()) {
+            String name = command.getCommand();
+            if (tempMap.containsKey(name)) {
+                ArrayList<String> channels = tempMap.get(name);
+                mySQLBlackList.put(command, channels);
+            }
+        }
+    }
+
     // Manually execute a command
     public void executeCommand(ChannelMessageEvent event, String command, String... args) {
         if (commands.containsKey(command) || aliases.containsKey(command)) {
@@ -75,6 +98,7 @@ public class CommandHandler {
 
             // Check for BlackList
             if (blackListMap.containsKey(cmd) && blackListMap.get(cmd).contains(getChannel(event))) return;
+            if (mySQLBlackList.containsKey(cmd) && mySQLBlackList.get(cmd).contains(getChannel(event))) return;
 
             // MySQL Log
             mySQL.logCommand(event, cmd.getCommand(), processArgs(args));
@@ -84,6 +108,58 @@ public class CommandHandler {
 
             // Execute command
             cmd.execute(event, args);
+        } else {
+
+            // Variables
+            String channel = getChannel(event);
+
+            // Check for channel command
+            ArrayList<String> channelCommands = mySQL.getCommands(event, false);
+            HashMap<String, String> channelAliases = mySQL.getAliases(event, false);
+
+            // Get response
+            String response = null;
+            if (channelCommands.contains(command)) response = mySQL.getResponse(event, command);
+            else if (channelAliases.containsKey(command)) {
+                command = channelAliases.get(command);
+                response = mySQL.getResponse(event, command);
+            }
+
+            // Regex
+            if (response != null) {
+                if (response.contains("%random%")) {
+                    Random random = new Random();
+                    response = response.replaceAll("%random%", random.nextInt(100) + "%");
+                }
+
+                if (response.contains("%user%") || response.contains("%author%")) {
+                    response = response.replaceAll("%user%", tagAuthor(event));
+                    response = response.replaceAll("%author%", tagAuthor(event));
+                }
+
+                if (response.contains("%tagged%")) {
+                    String tagged;
+
+                    if (args.length > 0) tagged = args[0].startsWith("@") ? args[0] : "@" + args[0];
+                    else tagged = tagAuthor(event);
+
+                    response = response.replaceAll("%tagged%", tagged);
+                }
+
+                if (response.contains("%channel%")) response = response.replaceAll("%channel%", tagChannel(event));
+            }
+
+            // Send response
+            if (response != null) {
+
+                // Log Execution
+                mySQL.logCommand(event, command, processArgs(args));
+                System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + processArgs(args), BREAK, UNBOLD);
+
+                // Send Message
+                chat.sendMessage(channel, response);
+                mySQL.logResponse(event, command, processArgs(args), response);
+            }
         }
     }
 

@@ -3,6 +3,8 @@ package de.MCmoderSD.utilities.database;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.UI.Frame;
+import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.core.InteractionHandler;
 
 import de.MCmoderSD.utilities.json.JsonNode;
 
@@ -10,8 +12,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.List;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -19,6 +22,8 @@ public class MySQL {
 
     // Associations
     private final Frame frame;
+    private CommandHandler commandHandler;
+    private InteractionHandler interactionHandler;
 
     // Attributes
     private final String host;
@@ -217,8 +222,8 @@ public class MySQL {
         new Thread(() -> {
 
             // Set Variables
-            int channelID = getChannelID(event);
-            int userID = getUserID(event);
+            var channelID = getChannelID(event);
+            var userID = getUserID(event);
             String message = getMessage(event);
 
             // Update Frame
@@ -254,8 +259,8 @@ public class MySQL {
         new Thread(() -> {
 
             // Set Variables
-            int channelID = getChannelID(event);
-            int userID = getUserID(event);
+            var channelID = getChannelID(event);
+            var userID = getUserID(event);
 
             // Update Frame
             if (frame != null) frame.log(COMMAND, getChannel(event), getAuthor(event), command);
@@ -291,8 +296,8 @@ public class MySQL {
         new Thread(() -> {
 
             // Set Variables
-            int channelID = getChannelID(event);
-            int userID = getUserID(event);
+            var channelID = getChannelID(event);
+            var userID = getUserID(event);
 
             // Update Frame
             if (frame != null) frame.log(SYSTEM, getChannel(event), getAuthor(event), response);
@@ -350,6 +355,316 @@ public class MySQL {
                 System.err.println(e.getMessage());
             }
         }).start();
+    }
+
+    // Edit Blacklist
+    @SuppressWarnings("JpaQueryApiInspection")
+    public String editBlacklist(String channel, String command, boolean isBlocked) {
+
+        // Return if not active
+        if (!isActive) return "Error: Database not active";
+
+        // Check Channel
+        if (!channelCache.containsValue(channel)) checkChannel(queryChannelID(channel), channel);
+
+        // Edit Blacklist
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT blacklist FROM " + "channels" + " WHERE name = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, channel);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) return "Error: Channel not found";
+            String blacklist = resultSet.getString("blacklist");
+            if (blacklist == null) blacklist = "";
+            ArrayList<String> list = new ArrayList<>(List.of(blacklist.split("; ")));
+            if (isBlocked && !list.contains(command)) list.add(command);
+            else if (!isBlocked) list.remove(command);
+            list.remove("");
+
+            // Prepare statement
+            query = "UPDATE " + "channels" + " SET blacklist = ? WHERE name = ?";
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, String.join("; ", list));
+            preparedStatement.setString(2, channel);
+            preparedStatement.executeUpdate();
+
+            // Update Blacklist
+            if (commandHandler != null) commandHandler.updateBlackList();
+            if (interactionHandler != null) interactionHandler.updateBlackList();
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return (isBlocked ? "Blocking " : "Unblocking ") + command + " in " + channel;
+    }
+
+    // Edit Channel
+    public String editChannel(String channel, boolean isActive) {
+
+        // Return if not active
+        if (!this.isActive) return "Error: Database not active";
+
+        // Edit Channel
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "UPDATE " + "channels" + " SET active = ? WHERE name = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, isActive ? 1 : 0); // set active
+            preparedStatement.setString(2, channel); // set channel
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return (isActive ? "Joining " : "Leaving ") + channel;
+    }
+
+    // Edit Command
+    public String editCommand(ChannelMessageEvent event, String command, boolean isEnabled) {
+
+        // Return if not active
+        if (!isActive) return "Error: Database not active";
+
+        // Set Variables
+        var channelID = getChannelID(event);
+        if (!getCommands(event, true).contains(command)) command = getAliases(event, true).get(command);
+
+        // Edit Command
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "UPDATE " + "CustomCommands" + " SET isEnabled = ? WHERE channel_id = ? AND command_name = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, isEnabled ? 1 : 0); // set isEnabled
+            preparedStatement.setInt(2, channelID); // set channel
+            preparedStatement.setString(3, command); // set command
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return command + " command " + (isEnabled ? "enabled" : "disabled");
+    }
+
+    // Delete Command
+    public String deleteCommand(ChannelMessageEvent event, String command) {
+
+        // Return if not active
+        if (!isActive) return "Error: Database not active";
+
+        // Set Variables
+        var channelID = getChannelID(event);
+        if (!getCommands(event, true).contains(command)) command = getAliases(event, true).get(command);
+
+
+        // Delete Command
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "DELETE FROM " + "CustomCommands" + " WHERE channel_id = ? AND command_name = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setString(2, command); // set command
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return command + " command removed";
+    }
+
+    // Create Command
+    public String createCommand(ChannelMessageEvent event, String command, ArrayList<String> aliases, String commandResponse) {
+
+        // Return if not active
+        if (!isActive) return "Error: Database not active";
+
+        // Set Variables
+        var channelID = getChannelID(event);
+        String aliasesString = String.join("; ", aliases);
+
+        // Prepare aliases
+        aliasesString = aliasesString.isEmpty() ? "" : aliasesString;
+        while (aliasesString.startsWith("; ")) aliasesString = aliasesString.substring(2);
+        while (aliasesString.endsWith("; ")) aliasesString = aliasesString.trim();
+
+        // Create Command
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "INSERT INTO " + "CustomCommands" + " (channel_id, command_name, command_alias, command_response, isEnabled) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setString(2, command); // set command
+            preparedStatement.setString(3, aliasesString); // set aliases
+            preparedStatement.setString(4, commandResponse); // set response
+            preparedStatement.setBoolean(5, true); // set isEnabled
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+        return command + " command created";
+    }
+
+    // Get Commands
+    public ArrayList<String> getCommands(ChannelMessageEvent event, boolean all) {
+
+        // Return if not active
+        if (!isActive) return null;
+
+        // Set Variables
+        var channelID = getChannelID(event);
+        ArrayList<String> commands = new ArrayList<>();
+
+        // Get Commands
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT command_name, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? "" : " AND isEnabled = 1");
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) commands.add(resultSet.getString("command_name"));
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return commands;
+    }
+
+    // Get Aliases
+    public HashMap<String, String> getAliases(ChannelMessageEvent event, boolean all) {
+
+        // Return if not active
+        if (!isActive) return null;
+
+        // Set Variables
+        var channelID = getChannelID(event);
+        HashMap<String, String> aliases = new HashMap<>();
+
+        // Get Aliases
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT command_alias, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? "" : " AND isEnabled = 1");
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to List
+            while (resultSet.next()) aliases.put(resultSet.getString("command_alias"), resultSet.getString("command_name"));
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return aliases;
+    }
+
+    // Get Response
+    public String getResponse(ChannelMessageEvent event, String command) {
+
+        // Return if not active
+        if (!isActive) return null;
+
+        // Set Variables
+        var channelID = getChannelID(event);
+        String response = null;
+
+        // Get Response
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT command_response FROM " + "CustomCommands" + " WHERE channel_id = ? AND command_name = ? AND isEnabled = 1";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setString(2, command); // set command
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Set Response
+            if (resultSet.next()) response = resultSet.getString("command_response");
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+
+        return response;
+    }
+
+    // Get Active Channels
+    public ArrayList<String> getActiveChannels() {
+
+        // Return if not active
+        if (!isActive) return null;
+
+        ArrayList<String> channels = new ArrayList<>();
+        try {
+            if (!isConnected()) connect();
+            String query = "SELECT name FROM " + "channels" + " WHERE active = 1";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) channels.add(resultSet.getString("name"));
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return channels;
+    }
+
+    // Get Blacklist
+    public HashMap<String, ArrayList<String>> getBlacklist() {
+
+        // Return if not active
+        if (!isActive) return null;
+
+        HashMap<String, ArrayList<String>> blacklist = new HashMap<>();
+        HashMap<String, ArrayList<String>> tempList = new HashMap<>();
+
+        // Get Blacklist
+        try {
+            if (!isConnected()) connect();
+
+            // Get blacklist from database
+            String query = "SELECT name, blacklist FROM " + "channels";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String channel = resultSet.getString("name");
+                if (resultSet.getString("blacklist") == null) continue; // skip if null
+                ArrayList<String> list = new ArrayList<>(List.of(resultSet.getString("blacklist").split("; ")));
+                tempList.put(channel, list);
+            }
+
+            // Convert tempList to blacklist
+            for (HashMap.Entry<String, ArrayList<String>> entry : tempList.entrySet()) {
+                String channel = entry.getKey();
+                ArrayList<String> commands = entry.getValue();
+                for (String command : commands) {
+                    if (!blacklist.containsKey(command)) blacklist.put(command, new ArrayList<>());
+                    blacklist.get(command).add(channel);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return blacklist;
     }
 
     // Query Channel ID
@@ -443,5 +758,10 @@ public class MySQL {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+    }
+
+    public void setAssociation(CommandHandler commandHandler, InteractionHandler interactionHandler) {
+        this.commandHandler = commandHandler;
+        this.interactionHandler = interactionHandler;
     }
 }

@@ -32,7 +32,7 @@ public class Join {
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                if (!firstJoin) {
+                if (!firstJoin && !sentMessage) {
                     firstJoin = true;
                     channel = getChannel(event);
                     startResetTimer(10);
@@ -50,7 +50,7 @@ public class Join {
 
                     // Reset attributes
                     sentMessage = true;
-                    startResetTimer(120);
+                    startResetTimer(90);
                 }
             }
         });

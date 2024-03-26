@@ -60,7 +60,7 @@ public class Fact {
         ArrayList<String> lines = reader.lineRead(path);
 
         String[][] facts = new String[lines.size()][];
-        for (int i = 0; i < lines.size(); i++) facts[i] = lines.get(i).split(";");
+        for (var i = 0; i < lines.size(); i++) facts[i] = lines.get(i).split(";");
         return facts;
     }
 }

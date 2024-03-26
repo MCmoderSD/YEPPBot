@@ -63,7 +63,7 @@ public class Gif {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
-            int responseCode = conn.getResponseCode();
+            var responseCode = conn.getResponseCode();
             if (responseCode != 200) return "Error code: " + responseCode;
             Scanner scannerResponse = new Scanner(url.openStream());
             StringBuilder responseBody = new StringBuilder();

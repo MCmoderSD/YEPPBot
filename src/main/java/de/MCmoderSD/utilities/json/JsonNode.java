@@ -104,7 +104,7 @@ public class JsonNode {
         String[] keyValuePairs = content.split(",\\s*");
 
         for (String pair : keyValuePairs) {
-            int colonIndex = pair.indexOf(":");
+            var colonIndex = pair.indexOf(":");
             if (colonIndex != -1) {
                 String key = pair.substring(0, colonIndex).trim().replaceAll("\"", "");
                 String rawValue = pair.substring(colonIndex + 1).trim();
@@ -201,7 +201,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, JsonValue[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], values[i]);
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], values[i]);
     }
 
     public void set(String key, String value) {
@@ -209,7 +209,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, String[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(values[i]));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(values[i]));
     }
 
     public void set(String key, byte value) {
@@ -217,7 +217,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, byte[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, short value) {
@@ -225,7 +225,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, short[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, int value) {
@@ -233,7 +233,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, int[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, long value) {
@@ -241,7 +241,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, long[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, float value) {
@@ -249,7 +249,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, float[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, double value) {
@@ -257,7 +257,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, double[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, boolean value) {
@@ -265,7 +265,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, boolean[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, char[] value) {
@@ -273,7 +273,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, char[][] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, char value, int index) {
@@ -281,7 +281,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, char[] values, int[] indexes) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[indexes[i]])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[indexes[i]])));
     }
 
     public void set(String key, JsonNode value) {
@@ -289,7 +289,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, JsonNode[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, Color value) {
@@ -297,7 +297,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, Color[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, HashMap<String, JsonValue> value) {
@@ -305,7 +305,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, HashMap<String, JsonValue>[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
+        for (var i = 0; i < keys.length; i++) jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i])));
     }
 
     public void set(String key, HashMap<String, JsonValue> value, String valueKey) {
@@ -313,7 +313,7 @@ public class JsonNode {
     }
 
     public void set(String[] keys, HashMap<String, JsonValue>[] values, String[] valueKeys) {
-        for (int i = 0; i < keys.length; i++)
+        for (var i = 0; i < keys.length; i++)
             jsonMap.put(keys[i], new JsonValue(String.valueOf(values[i].get(valueKeys[i]))));
     }
 
@@ -324,7 +324,7 @@ public class JsonNode {
     }
 
     public void replace(String[] keys, JsonValue[] values) {
-        for (int i = 0; i < keys.length; i++) jsonMap.replace(keys[i], values[i]);
+        for (var i = 0; i < keys.length; i++) jsonMap.replace(keys[i], values[i]);
     }
 
     public void replace(String key, JsonValue value) {

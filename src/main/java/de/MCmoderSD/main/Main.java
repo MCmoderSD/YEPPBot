@@ -58,11 +58,9 @@ public class Main {
 
         // Load Channel List
         Reader reader = new Reader();
-        String[] channels;
-        ArrayList<String> names = new ArrayList<>();
-        for (String name : reader.lineRead(channelListPath)) if (name.length() > 3) names.add(name.replace("\n", "").replace(" ", ""));
-        channels = new String[names.size()];
-        channels = names.toArray(channels);
+        ArrayList<String> channels = new ArrayList<>();
+        for (String channel : reader.lineRead(channelListPath)) if (channel.length() > 3) channels.add(channel.replace("\n", "").replace(" ", ""));
+        if (!args.contains("-dev")) channels.addAll(mySQL.getActiveChannels());
 
         // Load OpenAI Config
         OpenAI openAI = new OpenAI(jsonUtility.load(OPENAI_CONFIG));

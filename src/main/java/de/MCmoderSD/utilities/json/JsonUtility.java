@@ -72,7 +72,7 @@ public class JsonUtility {
 
     public JsonNode[] load(String[] paths) {
         JsonNode[] jsonNodes = new JsonNode[paths.length];
-        for (int i = 0; i < paths.length; i++) {
+        for (var i = 0; i < paths.length; i++) {
             if (jsonCache.containsKey(paths[i])) jsonNodes[i] = jsonCache.get(paths[i]);
             else {
                 JsonNode jsonNode = url != null ? new JsonNode(url, paths[i]) : new JsonNode(paths[i], isAbsolute);
@@ -94,7 +94,7 @@ public class JsonUtility {
 
     public JsonNode[] load(String url, String[] paths) {
         JsonNode[] jsonNodes = new JsonNode[paths.length];
-        for (int i = 0; i < paths.length; i++) {
+        for (var i = 0; i < paths.length; i++) {
             if (jsonCache.containsKey(paths[i])) jsonNodes[i] = jsonCache.get(paths[i]);
             else {
                 JsonNode jsonNode = new JsonNode(url, paths[i]);
@@ -107,7 +107,7 @@ public class JsonUtility {
 
     public JsonNode[] load(String[] urls, String[] paths) {
         JsonNode[] jsonNodes = new JsonNode[paths.length];
-        for (int i = 0; i < paths.length; i++) {
+        for (var i = 0; i < paths.length; i++) {
             if (jsonCache.containsKey(paths[i])) jsonNodes[i] = jsonCache.get(paths[i]);
             else {
                 JsonNode jsonNode = new JsonNode(urls[i], paths[i]);
@@ -129,7 +129,7 @@ public class JsonUtility {
 
     public JsonNode[] load(String[] paths, boolean isAbsolute) {
         JsonNode[] jsonNodes = new JsonNode[paths.length];
-        for (int i = 0; i < paths.length; i++) {
+        for (var i = 0; i < paths.length; i++) {
             if (jsonCache.containsKey(paths[i])) jsonNodes[i] = jsonCache.get(paths[i]);
             else {
                 JsonNode jsonNode = new JsonNode(paths[i], isAbsolute);

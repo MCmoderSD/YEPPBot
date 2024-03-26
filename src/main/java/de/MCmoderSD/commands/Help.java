@@ -2,15 +2,16 @@ package de.MCmoderSD.commands;
 
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
 import de.MCmoderSD.core.CommandHandler;
+
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.other.Calculate.getChannel;
-import static de.MCmoderSD.utilities.other.Calculate.processArgs;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Help {
 
@@ -40,7 +41,7 @@ public class Help {
 
                 // Help Commands
                 String response;
-                if (Arrays.asList("commands", "command", "befehle", "befehl").contains(arg)) response = helpCommands(channel); // Help Commands
+                if (Arrays.asList("commands", "command", "befehle", "befehl").contains(arg)) response = helpCommands(event, mySQL); // Help Commands
                 else if (getCommandDescription(channel, arg) != null) response = getCommandDescription(channel, arg); // Command Description
                 else response = getDescription(); // Help Description (Default)
 
@@ -54,8 +55,11 @@ public class Help {
     }
 
     // Gets all available commands
-    private String helpCommands(String channel) {
+    private String helpCommands(ChannelMessageEvent event, MySQL mySQL) {
         StringBuilder message = new StringBuilder("Available commands: ");
+
+        // Get channel
+        String channel = getChannel(event);
 
         // Get prefix
         String prefix = commandHandler.getPrefix();
@@ -64,7 +68,6 @@ public class Help {
         HashMap<String, Command> commands = commandHandler.getCommands();
 
         // Filter available commands
-        //todo: eh unclean
         for (String command : commands.keySet()) {
             if (whitelist.containsKey(command.toLowerCase())) {
                 if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
@@ -74,6 +77,9 @@ public class Help {
                     message.append(prefix).append(command).append(", ");
             } else message.append(prefix).append(command).append(", ");
         }
+
+        // Add custom commands
+        for (String command : mySQL.getCommands(event, false)) message.append(prefix).append(command).append(", ");
 
         // Return message
         return message.substring(0, message.length() - 2) + '.';
