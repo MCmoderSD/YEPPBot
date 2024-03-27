@@ -8,13 +8,7 @@ import de.MCmoderSD.core.CommandHandler;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.other.Reader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -43,9 +37,7 @@ public class Joke {
 
                 // Determine language
                 boolean isEnglish = false;
-                //todo: array of languages
-                if (args.length > 0)
-                    isEnglish = args[0].equalsIgnoreCase("en") || args[0].equalsIgnoreCase("english") || args[0].equalsIgnoreCase("eng") || args[0].equalsIgnoreCase("englisch");
+                if (args.length > 0) isEnglish = args[0].toLowerCase().startsWith("en");
                 ArrayList<String> jokes = isEnglish ? englishJokes : germanJokes;
 
                 // Send message

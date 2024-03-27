@@ -74,6 +74,7 @@ public class BotClient {
         ArrayList <String> adminList = new ArrayList<>(Arrays.stream(admins).toList());
 
         // Init Commands
+        new Counter(mySQL, commandHandler, chat, adminList);
         new CustomCommand(mySQL, commandHandler, chat, adminList);
         new Fact(mySQL, commandHandler, chat);
         new Gif(mySQL, commandHandler, chat);
@@ -136,9 +137,6 @@ public class BotClient {
 
         // Sub Event
         eventManager.onEvent(ChannelSubscribeEvent.class, event -> System.out.printf("%s %s <%s> %s -> Subscribed %s%s", logTimestamp(), SUBSCRIBE, event.getBroadcasterUserName(), event.getUserName(), event.getTier(), BREAK));
-
-        // Set MySQL associations
-        mySQL.setAssociation(commandHandler, interactionHandler);
     }
 
     // Methods

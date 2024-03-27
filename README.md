@@ -38,8 +38,9 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] Moderate command
 - [x] Ping command
 - [x] Black and White list
-- [x] Graphical User Interface
+- [x] Cheap GUI
 - [x] Custom Commands
+- [x] Counter command
 - [ ] Web UI
 - [ ] Rank command
 - [ ] Key
@@ -106,7 +107,7 @@ The lowest is 0 and the highest is 2. The higher the value, the more random the 
 text weirder. <br>
 The instruction is the way the bot should behave and how he should reply to the prompt. <br> <br>
 
-### 5. Add an OpenWeatherMap API key
+### 4. Add an OpenWeatherMap API key
 [comment]: <> (TODO: implement a config generator)
 You need to create a file called ```OpenWeatherMap.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
@@ -135,26 +136,7 @@ The file should have the following structure: <br>
 
 You can get the API key from [Giphy](https://developers.giphy.com/). <br> <br>
 
-### 6. MySQL Database for logging
-
-If you want to log the chat messages, you have to start the bot with the ```-log``` argument. <br>
-You need to have your own MySQL database to log the chat messages or contact me and can give you access to mine. <br>
-You need to create a file called ```mySQL.json``` in the ```/src/main/resources/database/``` folder. <br>
-The file should have the following structure: <br>
-
-```json
-{
-  "host": "localhost",
-  "port": "3306",
-  "database": "DATABASE_NAME",
-  "username": "USERNAME",
-  "password": "PASSWORD"
-}
-```
-
-<br>
-
-### 7. Black and White list commands
+### 6. Black and White list commands
 
 You can edit the ```blacklist.json``` and ```whitelist.json```  files in the ```/src/main/resources/config/```
 folder. <br>
@@ -169,28 +151,39 @@ It should have the following structure: <br>
 ```
 
 You can add as many channels or commands as you want. <br>
+Otherwise you can use the ```!moderate block/unblock``` command. <br>
 The way for black and whitelist works the same. <br> <br>
+
+
+### 7. MySQL Database for logging
+
+You need to have your own MySQL database to use certain features, or contact me and can give you access to mine. <br>
+If you don't want to use a database, you have to remove those features from the source code. <br> <br>
+
 
 ### 8. Compile the bot
 
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
 ```java -jar NAME_OF_THE_JAR_FILE.jar``` <br> <br>
 
-### 9. Edit source code (optional)
-
-Before you compile the bot, you can edit the source code to add your own commands or features. <br>
-You can disable the registration of the commands in the ```BotClient``` class
-in ```/src/main/java/de/MCmoderSD/core/BotClient.java``` <br>
-You can simply delete the line of the command you want to disable. <br>
-The commands are registered in the ```initCommands()``` method. <br> <br>
-
 ## Usage and commands
 
 The bot has a variety of commands that you can use. <br>
+
 You can use the ```!help``` command to get a list of all the commands. <br>
 You can use the ```!help COMMAND_NAME``` to get more information about a specific command. <br>
-You can use the ```!joinchat CHANNEL_NAME``` to make the bot join a specific channel. <br>
-You can use the ```!leavechat CHANNEL_NAME``` to make the bot leave a specific channel. <br>
+
+You can use the ```!moderate join/leave CHANNEL_NAME``` to make the bot join or leave a specific channel. <br>
+You can use the ```!moderate block/unblock``` to blacklist commands. <br>
+
+You can use the ```!CustomCommand``` command to create and manage custom commands. <br>
+You can also use variables in the custom commands. <br>
+%author% - will be replaced with the username of the person who executes the command<br>
+%channel% - will be replaced with the channel name where the command was executed<br>
+%tagged% - will be replaced by the first word after the command<br>
+%random% - will be replaced by a random percentage between 0 and 100<br>
+
+You can use the ```!Counter``` command to create and manage counter commands. <br>
 
 You can start the bot without the graphical user interface mode by running the bot with the ```-nogui```
 argument. <br> <br>

@@ -108,6 +108,21 @@ public class CommandHandler {
 
             // Execute command
             cmd.execute(event, args);
+        } else if (mySQL.getCounters(event).containsKey(command)) {
+
+            // Variables
+            String channel = getChannel(event);
+            var currentValue = mySQL.getCounters(event).get(command);
+            String response = mySQL.editCounter(event, command, currentValue + 1);
+
+            // Log Execution
+            System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, "Counter: " + command + ": " + processArgs(args), BREAK, UNBOLD);
+            mySQL.logCommand(event, "Counter: " + command, processArgs(args));
+
+            // Send Message
+            chat.sendMessage(channel, response);
+            mySQL.logResponse(event, "Counter: " + command, processArgs(args), response);
+
         } else {
 
             // Variables

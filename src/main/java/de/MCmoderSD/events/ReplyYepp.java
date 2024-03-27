@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.InteractionHandler;
+
 import de.MCmoderSD.utilities.database.MySQL;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -22,7 +23,7 @@ public class ReplyYepp {
             public void execute(ChannelMessageEvent event) {
                 String response = tagAuthor(event) + " YEPP";
                 chat.sendMessage(getChannel(event), response);
-                mySQL.logResponse(event, getEvent(), "", response);
+                mySQL.logResponse(event, getEvent(), getMessage(event), response);
             }
         });
     }

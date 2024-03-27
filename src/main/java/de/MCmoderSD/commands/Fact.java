@@ -43,7 +43,7 @@ public class Fact {
 
                 // Generate fact
                 StringBuilder fact = new StringBuilder();
-                for (String[] word : facts) fact.append(word[(int) (Math.random() * word.length)]).append(" "); // Random fact
+                for (String[] strings : facts) fact.append(strings[(int) (Math.random() * strings.length)]).append(" "); // Random fact
 
                 // Send message
                 String response = trimMessage(fact.toString());

@@ -2,6 +2,7 @@ package de.MCmoderSD.main;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
+
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
@@ -44,9 +45,7 @@ public class Main {
         if (!(args.contains("-cli") || args.contains("-nogui"))) frame = new Frame(this);
 
         // Logging check
-        MySQL mySQL;
-        if (args.contains("-log")) mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame);
-        else mySQL = new MySQL(frame);
+        MySQL mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame, args.contains("-nolog"));
 
         // Load Bot Config
         JsonNode botConfig = jsonUtility.load(botConfigPath);

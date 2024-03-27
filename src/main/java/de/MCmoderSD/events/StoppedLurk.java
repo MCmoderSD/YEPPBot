@@ -21,13 +21,25 @@ public class StoppedLurk {
             @Override
             public void execute(ChannelMessageEvent event) {
                 String author = getAuthor(event);
+                String channel = getChannel(event);
+                String lurk = lurkChannel.get(author);
+                String response;
 
-                // Send message
-                String response = tagAuthor(event) + " war " + getLurkTime(lurkTime.get(author)) + " im Lurk!";
-                chat.sendMessage(getChannel(event), response);
+                if (lurk.equals(channel)) {
+
+                    // Send message
+                    response = tagAuthor(event) + " war " + getLurkTime(lurkTime.get(author)) + " im Lurk!";
+                    chat.sendMessage(getChannel(event), response);
+
+                } else { // Snitch on lurked channel
+
+                    // Send message
+                    response = tagAuthor(event) + " ist ein verräter, hab den kek gerade im chat von " + tagChannel(event) + " gesehen!";
+                    chat.sendMessage(lurk, response);
+                }
 
                 // Log response
-                mySQL.logResponse(event, getEvent(), "", response);
+                mySQL.logResponse(event, getEvent(), getMessage(event), response);
 
                 // Remove user from lurk list
                 lurkChannel.remove(author);
@@ -38,7 +50,7 @@ public class StoppedLurk {
 
     // Calculate the time the user was lurking
     private String getLurkTime(long time) {
-        long lurkedSeconds = (System.currentTimeMillis() - time) / 1000;
+        long lurkedSeconds = (System.nanoTime() - time) / 1000000000;
         long lurkedMinutes = lurkedSeconds / 60;
         long lurkedHours = lurkedMinutes / 60;
         long lurkedDays = lurkedHours / 24;

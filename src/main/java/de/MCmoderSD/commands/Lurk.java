@@ -14,6 +14,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Lurk {
 
     // Constructor
+    @SuppressWarnings("unused")
     public Lurk(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
 
         // About
@@ -33,7 +34,7 @@ public class Lurk {
 
                 // Save data
                 lurkChannel.put(author, channel);
-                lurkTime.put(author, System.currentTimeMillis());
+                lurkTime.put(author, System.nanoTime());
 
                 // Log response
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
