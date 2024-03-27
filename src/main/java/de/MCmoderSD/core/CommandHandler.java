@@ -83,9 +83,9 @@ public class CommandHandler {
         }
     }
 
-    // Manually execute a command
+    // Execute Command
     public void executeCommand(ChannelMessageEvent event, String command, String... args) {
-        if (commands.containsKey(command) || aliases.containsKey(command)) {
+        if (commands.containsKey(command) || aliases.containsKey(command)) { // Check for command
 
             // Check for alias
             if (aliases.containsKey(command)) command = aliases.get(command);
@@ -108,7 +108,7 @@ public class CommandHandler {
 
             // Execute command
             cmd.execute(event, args);
-        } else if (mySQL.getCounters(event).containsKey(command)) {
+        } else if (mySQL.getCounters(event).containsKey(command)) { // Check for counter
 
             // Variables
             String channel = getChannel(event);
@@ -123,7 +123,7 @@ public class CommandHandler {
             chat.sendMessage(channel, response);
             mySQL.logResponse(event, "Counter: " + command, processArgs(args), response);
 
-        } else {
+        } else { // Check for channel command
 
             // Variables
             String channel = getChannel(event);
@@ -178,6 +178,7 @@ public class CommandHandler {
         }
     }
 
+    // Handle message event and execute command
     public void handleCommand(ChannelMessageEvent event, String botName) {
         new Thread(() -> {
 
@@ -205,11 +206,6 @@ public class CommandHandler {
 
     public HashMap<String, String> getAliases() {
         return aliases;
-    }
-
-    @SuppressWarnings("unused")
-    public void removeCommand(String command) {
-        commands.remove(command);
     }
 
     public String getPrefix() {

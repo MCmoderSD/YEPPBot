@@ -60,7 +60,7 @@ public class InteractionHandler {
             blackListMap.put(event, new ArrayList<>(Arrays.asList(blackList.get(name).asText().toLowerCase().split("; "))));
     }
 
-    // Manually execute a command
+    // Execute interaction
     public void executeInteracton(ChannelMessageEvent event, String interaction) {
         if (interactions.containsKey(interaction) || aliases.containsKey(interaction)) {
 
@@ -88,6 +88,7 @@ public class InteractionHandler {
         }
     }
 
+    // Handle message event and check for interactions
     public void handleInteraction(ChannelMessageEvent event, String botName) {
         new Thread(() -> {
 
@@ -111,16 +112,7 @@ public class InteractionHandler {
     }
 
     // Setter and Getter
-    public HashMap<String, Event> getEvents() {
-        return interactions;
-    }
-
     public Event getInteraction(String action) {
         return interactions.get(action);
-    }
-
-    @SuppressWarnings("unused")
-    public void removeInteraction(String action) {
-        interactions.remove(action);
     }
 }

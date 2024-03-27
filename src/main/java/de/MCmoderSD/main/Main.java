@@ -50,7 +50,7 @@ public class Main {
         // Load Bot Config
         JsonNode botConfig = jsonUtility.load(botConfigPath);
 
-        String botName = botConfig.get("botName").asText();     // Get Bot Name
+        String botName = botConfig.get("botName").asText().toLowerCase();     // Get Bot Name
         String botToken = botConfig.get("botToken").asText();   // Get Bot Token
         String prefix = botConfig.get("prefix").asText();       // Get Prefix
         String[] admins = botConfig.get("admins").asText().toLowerCase().split("; ");

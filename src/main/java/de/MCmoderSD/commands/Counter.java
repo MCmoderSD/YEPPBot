@@ -35,9 +35,6 @@ public class Counter {
                 String author = getAuthor(event);
                 String response = syntax;
 
-                // Check permissions
-                if (!(admins.contains(author) || channel.equals(author))) return;
-
                 HashMap<String, Integer> counters = mySQL.getCounters(event);
 
                 if (args.length > 0 && args[0].equalsIgnoreCase("list")) {
@@ -69,21 +66,25 @@ public class Counter {
                 switch (verb) {
                     case "create":
                     case "add":
+                        if (!(admins.contains(author) || channel.equals(author))) return;
                         response = mySQL.createCounter(event, counterName);
                         break;
                     case "delete":
                     case "remove":
                     case "del":
                     case "rm":
+                        if (!(admins.contains(author) || channel.equals(author))) return;
                         response = mySQL.deleteCounter(event, counterName);
                         break;
                     case "reset":
+                        if (!(admins.contains(author) || channel.equals(author))) return;
                         response = mySQL.editCounter(event, counterName, 0);
                         break;
                     case "show":
                         response = "Counter " + counterName + ": " + counters.get(counterName);
                         break;
                     case "set":
+                        if (!(admins.contains(author) || channel.equals(author))) return;
                         if (args.length > 2)
                             response = mySQL.editCounter(event, counterName, Integer.parseInt(args[2]));
                         else response = "Syntax: " + syntax;
