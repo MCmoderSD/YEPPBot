@@ -21,9 +21,12 @@ public class Fact {
     // Constructor
     public Fact(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "fact en/de";
+
         // About
         String[] name = {"fact", "fakt"};
-        String description = "Sendet einen zufälligen Fakt. Syntax: " + commandHandler.getPrefix() + "fact en/de";
+        String description = "Sendet einen zufälligen Fakt. " + syntax;
 
 
         // Read facts

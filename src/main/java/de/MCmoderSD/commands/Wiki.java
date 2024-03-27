@@ -27,9 +27,12 @@ public class Wiki {
     // Constructor
     public Wiki(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "wiki <Thema>";
+
         // About
         String[] name = {"wiki", "wikipedia", "summarize", "zusammenfassung"};
-        String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. Verwendung: " + commandHandler.getPrefix() + "wiki <Thema>";
+        String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. " + syntax;
 
         // Load Config
         JsonNode config = openAI.getConfig();
@@ -41,30 +44,34 @@ public class Wiki {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
                 String channel = getChannel(event);
-
-                // Query Wikipedia
-                String topic = processArgs(args);
-
                 String response;
 
-                try {
+                // Check for topic
+                if (args.length < 1) response = syntax;
+                else {
 
-                    // Get Wikipedia summary
-                    String summary = trimMessage(getWikipediaSummary(topic)); // Get Wikipedia summary
+                    // Query Wikipedia
+                    String topic = processArgs(args);
+                    try {
 
-                    // Check if summary is too long
-                    if (summary.length() <= 500) response = summary;
-                    else response = trimMessage(openAI.prompt(botName, "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, maxTokens, temperature));
+                        // Get Wikipedia summary
+                        String summary = trimMessage(getWikipediaSummary(topic)); // Get Wikipedia summary
 
-                } catch (IOException e) {
-                    response = trimMessage("Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage());
+                        // Check if summary is too long
+                        if (summary.length() <= 500) response = summary;
+                        else
+                            response = trimMessage(openAI.prompt(botName, "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, maxTokens, temperature));
+
+                    } catch (IOException e) {
+                        response = trimMessage("Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage());
+                    }
                 }
 
                 // Send message and log response
                 chat.sendMessage(channel, response);
 
                 // Log response
-                mySQL.logResponse(event, getCommand(), topic, response);
+                mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }
         });
     }

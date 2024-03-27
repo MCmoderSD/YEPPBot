@@ -152,6 +152,7 @@ public class BotClient {
 
     // Setter
     public void joinChannel(String channel) {
+        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel, BREAK, UNBOLD);
         chat.joinChannel(channel);
     }
 

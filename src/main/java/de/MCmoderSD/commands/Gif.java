@@ -27,9 +27,12 @@ public class Gif {
     // Constructor
     public Gif(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "gif <Thema>";
+
         // About
         String[] name = {"gif", "giphy", "gify"};
-        String description = "Sendet ein GIF zu einem bestimmten Thema. Verwendung: " + commandHandler.getPrefix() + "gif <Thema>";
+        String description = "Sendet ein GIF zu einem bestimmten Thema. " + syntax;
 
         // Load API key
         JsonUtility jsonUtility = new JsonUtility();

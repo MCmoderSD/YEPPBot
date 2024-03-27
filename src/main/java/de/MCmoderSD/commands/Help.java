@@ -23,9 +23,13 @@ public class Help {
     // Constructor
     public Help(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, JsonNode whitelist, JsonNode blacklist) {
 
+        // Syntax
+        String prefix = commandHandler.getPrefix();
+        String syntax = prefix + "help commands oder " + prefix + "help <Befehl>";
+
         // About
         String[] name = {"help", "hilfe"};
-        String description = "Um die verfügbaren Befehle zu sehen, schreibe: " + commandHandler.getPrefix() + "help commands. Um ein hilfe bei einem Befehl zu erhalten, schreibe: " + commandHandler.getPrefix() + "help <Befehl>.";
+        String description = "Um die verfügbaren Befehle zu sehen, schreibe: " + syntax;
 
         // Init Attributes
         this.commandHandler = commandHandler;

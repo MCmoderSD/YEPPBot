@@ -21,9 +21,12 @@ public class Prompt {
     // Constructor
     public Prompt(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "prompt <Frage>";
+
         // About
         String[] name = {"prompt", "gpt", "chatgpt", "ai", "question", "yeppbot", "yepppbot"}; // Command name and aliases
-        String description = "Benutzt ChatGPT, um eine Antwort auf eine Frage zu generieren. Verwendung: " + commandHandler.getPrefix() + "prompt <Frage>";
+        String description = "Benutzt ChatGPT, um eine Antwort auf eine Frage zu generieren. " + syntax;
 
         // Set Attributes
         JsonNode config = openAI.getConfig();

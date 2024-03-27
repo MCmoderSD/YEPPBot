@@ -12,9 +12,13 @@ public class Rank {
     // Constructor
     public Rank(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "rank <Game>, <Rank>, <Stats>";
+
+
         // About
         String[] name = {"rank", "rang", "stats"};
-        String description = "Zeigt den Rank an. Verwendung: " + commandHandler.getPrefix() + "rank";
+        String description = "Zeigt den Rank an. " + syntax;
 
 
         // Register command

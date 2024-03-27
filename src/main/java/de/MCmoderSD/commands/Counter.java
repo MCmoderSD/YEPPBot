@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.ArrayList;
@@ -83,7 +84,8 @@ public class Counter {
                         response = "Counter " + counterName + ": " + counters.get(counterName);
                         break;
                     case "set":
-                        if (args.length > 2) response = mySQL.editCounter(event, counterName, Integer.parseInt(args[2]));
+                        if (args.length > 2)
+                            response = mySQL.editCounter(event, counterName, Integer.parseInt(args[2]));
                         else response = "Syntax: " + syntax;
                         break;
                     default:

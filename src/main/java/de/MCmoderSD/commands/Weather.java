@@ -31,10 +31,12 @@ public class Weather {
     // Constructor
     public Weather(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "weather <Stadt>";
+
         // About
         String[] name = {"weather", "wetter"};
-        String description = "Zeigt das Wetter in einer Stadt an. Verwendung: " + commandHandler.getPrefix() + "weather <Stadt>";
-
+        String description = "Zeigt das Wetter in einer Stadt an. " + syntax;
 
         // Load API key
         JsonUtility jsonUtility = new JsonUtility();
@@ -46,8 +48,12 @@ public class Weather {
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+
+                String response;
+                if (args.length < 1) response = syntax;
+                else response = trimMessage(generateResponse(args));
+
                 // Send message and log response
-                String response = trimMessage(generateResponse(args));
                 chat.sendMessage(getChannel(event), response);
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }

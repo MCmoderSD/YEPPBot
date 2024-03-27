@@ -16,9 +16,12 @@ public class Say {
     // Constructor
     public Say(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, ArrayList<String> admins) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "say <Nachricht>";
+
         // About
         String[] name = {"say", "repeat"};
-        String description = "Nur für Administratoren. Sendet eine Nachricht in den Chat. Verwendung: " + commandHandler.getPrefix() + "say <Nachricht>";
+        String description = "Nur für Administratoren. Sendet eine Nachricht in den Chat. " + syntax;
 
 
         // Register command

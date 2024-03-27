@@ -20,9 +20,12 @@ public class Joke {
     // Constructor
     public Joke(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "joke en/de";
+
         // About
         String[] name = {"joke", "witz"};
-        String description = "Sendet einen zufälligen Witz. Syntax: " + commandHandler.getPrefix() + "joke en/de";
+        String description = "Sendet einen zufälligen Witz. " + syntax;
 
 
         // Read jokes

@@ -23,6 +23,7 @@ public class Ping {
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+
                 // Check latency
                 String response = "Pong " + chat.getLatency() + "ms";
 

@@ -31,6 +31,10 @@ public class StoppedLurk {
                     response = tagAuthor(event) + " war " + getLurkTime(lurkTime.get(author)) + " im Lurk!";
                     chat.sendMessage(getChannel(event), response);
 
+                    // Remove user from lurk list
+                    lurkChannel.remove(author);
+                    lurkTime.remove(author);
+
                 } else { // Snitch on lurked channel
 
                     // Send message
@@ -40,10 +44,6 @@ public class StoppedLurk {
 
                 // Log response
                 mySQL.logResponse(event, getEvent(), getMessage(event), response);
-
-                // Remove user from lurk list
-                lurkChannel.remove(author);
-                lurkTime.remove(author);
             }
         });
     }

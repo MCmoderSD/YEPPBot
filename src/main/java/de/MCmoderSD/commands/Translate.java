@@ -20,9 +20,12 @@ public class Translate {
     // Constructor
     public Translate(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "translate <Sprache> <Text>";
+
         // About
         String[] name = {"translator", "translate", "übersetzer", "übersetze"};
-        String description = "Kann deine Sätze in jede erdenkliche Sprache übersetzen: " + commandHandler.getPrefix() + "translate <Sprache> <Frage>";
+        String description = "Kann deine Sätze in jede erdenkliche Sprache übersetzen. " + syntax;
 
         // Load Config
         JsonNode config = openAI.getConfig();
@@ -33,17 +36,23 @@ public class Translate {
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
-                //todo: check for argument exceptions
 
-                // Check for language
-                String language = args[0];
+                String response;
+                if (args.length < 2) response = syntax;
+                else {
 
-                // Process text
-                String text = trimMessage(processArgs(args)).replace(language, "");
-                String instruction = trimMessage("Please translate the following text into " + language + ":");
+                    // Check for language
+                    String language = args[0];
 
-                // Send message and log response
-                String response = openAI.prompt(botName, instruction, text, maxTokens, temperature);
+                    // Process text
+                    String text = trimMessage(processArgs(args)).replace(language, "");
+                    String instruction = trimMessage("Please translate the following text into " + language + ":");
+
+                    // Translate
+                    response = openAI.prompt(botName, instruction, text, maxTokens, temperature);
+                }
+
+                // Send message and log
                 chat.sendMessage(getChannel(event), response);
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);
             }

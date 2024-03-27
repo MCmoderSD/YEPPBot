@@ -1,5 +1,7 @@
 package de.MCmoderSD.UI;
 
+import de.MCmoderSD.core.BotClient;
+
 import de.MCmoderSD.utilities.frontend.RoundedButton;
 import de.MCmoderSD.utilities.frontend.RoundedTextField;
 
@@ -111,22 +113,23 @@ public class MenuPanel extends JPanel {
 
     // Send Message
     private void sendMessage() {
-        String channel = channelField.getText().replace(" ", "").toLowerCase();
-        String message = textField.getText();
-        while (message.startsWith(" ")) message = message.substring(1);
-        while (message.endsWith(" ")) message = message.substring(0, message.length() - 1);
+        BotClient botClient = frame.getBotClient();
+
+        String channel = getChannel();
+        String message = trimMessage(textField.getText());
 
         if (getChannel().length() < 3) {
             new JOptionPane("Channel must be at least 3 characters long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
             return;
         }
 
-        if (message.isEmpty()) {
-            new JOptionPane("Message must be at least 1 character long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
+        if (message.equalsIgnoreCase("message") || message.isEmpty()) {
+            if (message.isEmpty()) new JOptionPane("Message must be at least 1 character long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
+            botClient.joinChannel(channel);
             return;
         }
 
-        frame.getBotClient().sendMessage(channel, message);
+        botClient.sendMessage(channel, message);
         textField.setText("");
         messageHistory.push(message);
         messageIndex = messageHistory.size();
@@ -134,7 +137,7 @@ public class MenuPanel extends JPanel {
 
     // Get Channel
     public String getChannel() {
-        String channel = channelField.getText().replace(" ", "").toLowerCase();
+        String channel = channelField.getText().replaceAll(" ", "").toLowerCase();
         return channel.length() < 3 ? "" : channel.equalsIgnoreCase("channel") ? "" : channel;
     }
 }

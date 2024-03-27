@@ -769,8 +769,12 @@ public class MySQL {
 
     // Getter
     public boolean isConnected() {
-        return connection != null;
+    try {
+        return connection != null && connection.isValid(0);
+    } catch (SQLException e) {
+        return false;
     }
+}
 
     @SuppressWarnings("unused")
     public boolean isLoggingEnabled() {

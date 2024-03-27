@@ -21,9 +21,12 @@ public class Insult {
     // Constructor
     public Insult(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "insult <Nutzer>";
+
         // About
         String[] name = {"insult", "beleidige", "mobbe", "mobbing"};
-        String description = "Beleidigt einen Nutzer. Syntax: " + commandHandler.getPrefix() + "insult <Nutzer>.";
+        String description = "Beleidigt einen Nutzer. " + syntax;
 
 
         // Read insults

@@ -26,10 +26,12 @@ public class Moderate {
         this.mySQL = mySQL;
         this.commandHandler = commandHandler;
 
+        // Syntax
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "moderate join/leave/block/unblock command/channel";
 
         // About
         String[] name = {"moderate", "moderrate","mod"};
-        String description = "Syntax: " + commandHandler.getPrefix() + "moderate join/leave/block/unblock command/channel";
+        String description = "Ändert die Einstellungen des Bots. " + syntax;
 
 
         // Register command
@@ -60,20 +62,20 @@ public class Moderate {
                 // Response
                 switch (verb) {
                     case "join":
-                        if (author.equals(channel) && args.length < 2) response = join(chat, author); // Broadcaster
-                        else if (admins.contains(author) && args.length > 1) response = join(chat, args[1].toLowerCase()); // Admin
+                        if (args.length < 2) response = join(chat, author); // Broadcaster
+                        else if (admins.contains(author)) response = join(chat, args[1].toLowerCase()); // Admin
                         break;
                     case "leave":
-                        if (author.equals(channel) && args.length < 2) response = leave(chat, author); // Broadcaster
-                        else if (admins.contains(author) && args.length > 1) response = leave(chat, args[1].toLowerCase()); // Admin
+                        if (args.length < 2) response = leave(chat, author); // Broadcaster
+                        else if (admins.contains(author)) response = leave(chat, args[1].toLowerCase()); // Admin
                         break;
                     case "block":
-                        if (author.equals(args[0]) && args.length < 3) response = editBlacklist(author, args[1].toLowerCase(), true); // Broadcaster
-                        else if (admins.contains(author) && args.length > 2) response = editBlacklist(args[2], args[1].toLowerCase(), true); // Admin
+                        if (args.length < 3) response = editBlacklist(author, args[1].toLowerCase(), true); // Broadcaster
+                        else if (admins.contains(author)) response = editBlacklist(args[2], args[1].toLowerCase(), true); // Admin
                         break;
                     case "unblock":
-                        if (author.equals(args[0]) && args.length < 3) response = editBlacklist(author, args[1].toLowerCase(), false); // Broadcaster
-                        else if (admins.contains(author) && args.length > 2) response = editBlacklist(args[2], args[1].toLowerCase(), false); // Admin
+                        if (args.length < 3) response = editBlacklist(author, args[1].toLowerCase(), false); // Broadcaster
+                        else if (admins.contains(author)) response = editBlacklist(args[2], args[1].toLowerCase(), false); // Admin
                         break;
                     default:
                         sendMessage(chat, event, getCommand(), channel, response, args);
