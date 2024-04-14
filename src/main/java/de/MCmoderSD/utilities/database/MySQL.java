@@ -1,8 +1,10 @@
 package de.MCmoderSD.utilities.database;
 
+import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.UI.Frame;
+import de.MCmoderSD.objects.Timer;
 
 import de.MCmoderSD.utilities.json.JsonNode;
 
@@ -437,6 +439,33 @@ public class MySQL {
         return counter + " counter: " + value;
     }
 
+    // Edit Custom Timer
+    public String editCustomTimer(ChannelMessageEvent event, String name, String time, String response, boolean isEnabled) {
+
+            // Set Variables
+            var channelID = getChannelID(event);
+
+            // Edit Custom Timer
+            try {
+                if (!isConnected()) connect(); // connect
+
+                // Prepare statement
+                String query = "UPDATE " + "CustomTimers" + " SET time = ?, response = ?, isEnabled = ? WHERE channel_id = ? AND name = ?";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setString(1, time); // set time
+                preparedStatement.setString(2, response); // set response
+                preparedStatement.setInt(3, isEnabled ? 1 : 0); // set isEnabled
+                preparedStatement.setInt(4, channelID); // set channel
+                preparedStatement.setString(5, name); // set name
+                preparedStatement.executeUpdate(); // execute
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+                return "Error: Database error";
+            }
+
+            return name + " custom timer " + (isEnabled ? "enabled" : "disabled");
+    }
+
     // Delete Command
     public String deleteCommand(ChannelMessageEvent event, String command) {
 
@@ -540,6 +569,55 @@ public class MySQL {
         }
 
         return counter + " counter removed";
+    }
+
+    // Create Custom Timer
+    public String createCustomTimer(ChannelMessageEvent event, String name, String time, String response) {
+
+        // Set Variables
+        var channelID = getChannelID(event);
+
+        // Create Custom Timer
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "INSERT INTO " + "CustomTimers" + " (channel_id, name, time, response) VALUES (?, ?, ?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setString(2, name); // set name
+            preparedStatement.setString(3, time); // set time
+            preparedStatement.setString(4, response); // set response
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+        return name + " custom timer created";
+    }
+
+    // Delete Custom Timer
+    public String deleteCustomTimer(ChannelMessageEvent event, String name) {
+
+        // Set Variables
+        var channelID = getChannelID(event);
+
+        // Delete Custom Timer
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "DELETE FROM " + "CustomTimers" + " WHERE channel_id = ? AND name = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setString(2, name); // set name
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return name + " custom timer removed";
     }
 
     // Get Commands
@@ -699,6 +777,67 @@ public class MySQL {
             System.err.println(e.getMessage());
         }
         return counters;
+    }
+
+    // Get Custom Timers
+    public HashMap<String, Timer> getCustomTimers(ChannelMessageEvent event, TwitchChat chat) {
+
+        // Set Variables
+        var channelID = getChannelID(event);
+        HashMap<String, Timer> customTimers = new HashMap<>();
+
+        // Get Custom Timers
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT name, time, response FROM " + "CustomTimers" + " WHERE channel_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to List
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                String time = resultSet.getString("time");
+                String response = resultSet.getString("response");
+                customTimers.put(name, new Timer(chat, this, queryChannel(channelID), name, time, response));
+            }
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return customTimers;
+    }
+
+    public ArrayList<Timer> getActiveCustomTimers(TwitchChat chat) {
+
+            // Variables
+            ArrayList<Timer> customTimers = new ArrayList<>();
+
+            // Get Custom Timers
+            try {
+                if (!isConnected()) connect(); // connect
+
+                // Prepare statement
+                String query = "SELECT channel_id, name, time, response FROM " + "CustomTimers WHERE isEnabled = 1";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                // Add to List
+                while (resultSet.next()) {
+                    String channel = queryChannel(resultSet.getInt("channel_id"));
+                    String name = resultSet.getString("name");
+                    String time = resultSet.getString("time");
+                    String response = resultSet.getString("response");
+                    customTimers.add(new Timer(chat, this, channel, name, time, response));
+                }
+
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+
+            return customTimers;
     }
 
     // Query Channel ID

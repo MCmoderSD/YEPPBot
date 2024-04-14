@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.commands.Command;
+import de.MCmoderSD.objects.Timer;
 
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonNode;
@@ -32,6 +33,7 @@ public class CommandHandler {
     private final HashMap<Command, ArrayList<String>> whiteListMap;
     private final HashMap<Command, ArrayList<String>> blackListMap;
     private final HashMap<Command, ArrayList<String>> mySQLBlackList;
+    private final ArrayList<Timer> customTimers;
 
     // Constructor
     public CommandHandler(MySQL mySQL, TwitchChat chat, JsonNode whiteList, JsonNode blackList, String prefix) {
@@ -47,6 +49,8 @@ public class CommandHandler {
         whiteListMap = new HashMap<>();
         blackListMap = new HashMap<>();
         mySQLBlackList = new HashMap<>();
+        customTimers = new ArrayList<>();
+        updateCustomTimers();
     }
 
     // Register a command
@@ -82,6 +86,12 @@ public class CommandHandler {
             }
         }
     }
+
+    // Update Custom Timers
+    public void updateCustomTimers() {
+        customTimers.clear();
+        customTimers.addAll(mySQL.getActiveCustomTimers(chat));
+}
 
     // Execute Command
     public void executeCommand(ChannelMessageEvent event, String command, String... args) {
@@ -182,7 +192,7 @@ public class CommandHandler {
     public void handleCommand(ChannelMessageEvent event, String botName) {
         new Thread(() -> {
 
-            // Get message
+            // Get Message
             String message = getMessage(event);
 
             // Check for prefix
@@ -196,6 +206,12 @@ public class CommandHandler {
 
             // Execute command
             executeCommand(event, command, args);
+        }).start();
+    }
+
+    public void handleCustomTimers(ChannelMessageEvent event, String botName) {
+        if (!getAuthor(event).equals(botName)) new Thread(() -> {
+            for (Timer timer : customTimers) timer.trigger(event);
         }).start();
     }
 

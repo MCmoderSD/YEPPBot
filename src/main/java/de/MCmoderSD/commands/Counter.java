@@ -52,7 +52,7 @@ public class Counter {
 
                 String counterName = args[1].toLowerCase();
 
-                if (!Arrays.asList("create", "add", "delete", "remove", "del", "rm", "reset", "show", "set").contains(verb)) {
+                if (!Arrays.asList("create", "add", "delete", "remove", "del", "rm", "reset", "show", "set", "edit").contains(verb)) {
                     sendMessage(mySQL, chat, event, getCommand(), channel, response, args);
                     return;
                 }
@@ -84,6 +84,7 @@ public class Counter {
                         response = "Counter " + counterName + ": " + counters.get(counterName);
                         break;
                     case "set":
+                    case "edit":
                         if (!(admins.contains(author) || channel.equals(author))) return;
                         if (args.length > 2)
                             response = mySQL.editCounter(event, counterName, Integer.parseInt(args[2]));

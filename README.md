@@ -41,6 +41,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [x] Cheap GUI
 - [x] Custom Commands
 - [x] Counter command
+- [x] Custom Timers
 - [ ] Web UI
 - [ ] Rank command
 - [ ] Key

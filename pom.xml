@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.github.twitch4j</groupId>
             <artifactId>twitch4j</artifactId>
-            <version>1.19.0</version>
+            <version>1.20.0</version>
         </dependency>
 
 
@@ -60,11 +60,18 @@
             <version>1.17.2</version>
         </dependency>
 
+        <!-- Apache HttpClient -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+        </dependency>
+
         <!-- Logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>1.5.5</version>
         </dependency>
 
     </dependencies>

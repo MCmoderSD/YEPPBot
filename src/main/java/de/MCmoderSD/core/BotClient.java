@@ -76,6 +76,7 @@ public class BotClient {
         // Init Commands
         new Counter(mySQL, commandHandler, chat, adminList);
         new CustomCommand(mySQL, commandHandler, chat, adminList);
+        new CustomTimer(mySQL, commandHandler, chat, adminList);
         new Fact(mySQL, commandHandler, chat);
         new Gif(mySQL, commandHandler, chat);
         new Help(mySQL, commandHandler, chat, whiteList, blackList);
@@ -130,6 +131,9 @@ public class BotClient {
 
             // Handle Command
             commandHandler.handleCommand(event, botName);
+
+            // Execute Custom Timers
+            commandHandler.handleCustomTimers(event, botName);
         });
 
         // Follow Event
