@@ -4,10 +4,9 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.core.InteractionHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
-
-import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -15,7 +14,7 @@ public class Lurk {
 
     // Constructor
     @SuppressWarnings("unused")
-    public Lurk(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, HashMap<String, String> lurkChannel, HashMap<String, Long> lurkTime) {
+    public Lurk(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, InteractionHandler interactionHandler) {
 
         // About
         String[] name = {"lurk", "lürk", "afk"}; // Command name and aliases
@@ -28,13 +27,12 @@ public class Lurk {
                 String author = getAuthor(event);
                 String channel = getChannel(event);
 
+                // Save data
+                mySQL.saveLurk(event, getTimestamp(), interactionHandler);
+
                 // Send message
                 String response = author + " ist jetzt im Lurk!";
                 // chat.sendMessage(channel, response); ToDo Temporary disabled
-
-                // Save data
-                lurkChannel.put(author, channel);
-                lurkTime.put(author, System.nanoTime());
 
                 // Log response
                 mySQL.logResponse(event, getCommand(), processArgs(args), response);

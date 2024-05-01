@@ -19,7 +19,6 @@ import de.MCmoderSD.utilities.other.OpenAI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -57,10 +56,6 @@ public class BotClient {
 
         chat = client.getChat();
 
-        // Init Variables
-        HashMap<String, String> lurkChannel = new HashMap<>();  // Channel, User
-        HashMap<String, Long> lurkTime = new HashMap<>();       // Channel, Time
-
         // Init White and Blacklist
         JsonUtility jsonUtility = new JsonUtility();
         JsonNode whiteList = jsonUtility.load("/config/whitelist.json");
@@ -68,7 +63,7 @@ public class BotClient {
 
         // Init CommandHandler
         commandHandler = new CommandHandler(mySQL, chat, whiteList, blackList, prefix);
-        interactionHandler = new InteractionHandler(mySQL, whiteList, blackList, lurkChannel);
+        interactionHandler = new InteractionHandler(mySQL, whiteList, blackList);
 
         // Format admin names
         ArrayList <String> adminList = new ArrayList<>(Arrays.stream(admins).toList());
@@ -84,7 +79,7 @@ public class BotClient {
         new Join(mySQL, commandHandler, chat);
         new Joke(mySQL, commandHandler, chat);
         // new Key(mySQL, commandHandler, chat); ToDo Make it work
-        new Lurk(mySQL, commandHandler, chat, lurkChannel, lurkTime);
+        new Lurk(mySQL, commandHandler, chat, interactionHandler);
         new Moderate(mySQL, commandHandler, chat, adminList);
         new Ping(mySQL, commandHandler, chat);
         new Play(mySQL, commandHandler, chat);
@@ -98,7 +93,7 @@ public class BotClient {
 
         // Init Interactions
         new ReplyYepp(mySQL, interactionHandler, chat);
-        new StoppedLurk(mySQL, interactionHandler, chat, lurkChannel, lurkTime);
+        new StoppedLurk(mySQL, interactionHandler, chat);
         new Yepp(mySQL, interactionHandler, chat);
 
         // Register the Bot into all channels

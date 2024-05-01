@@ -25,22 +25,24 @@ public class InteractionHandler {
     // Attributes
     private final HashMap<String, Event> interactions;
     private final HashMap<String, String> aliases;
-    private final HashMap<String, String> lurkChannel;
     private final HashMap<Event, ArrayList<String>> whiteListMap;
     private final HashMap<Event, ArrayList<String>> blackListMap;
 
+    // Variables
+    private HashMap<Integer, Integer> lurkList;
+
     // Constructor
-    public InteractionHandler(MySQL mySQL, JsonNode whiteList, JsonNode blackList, HashMap<String, String> lurkChannel) {
+    public InteractionHandler(MySQL mySQL, JsonNode whiteList, JsonNode blackList) {
 
         // Init Constants and Attributes
         this.mySQL = mySQL;
-        this.lurkChannel = lurkChannel;
         this.whiteList = whiteList;
         this.blackList = blackList;
         interactions = new HashMap<>();
         aliases = new HashMap<>();
         whiteListMap = new HashMap<>();
         blackListMap = new HashMap<>();
+        updateLurkList();
     }
 
     // Register a command
@@ -107,11 +109,15 @@ public class InteractionHandler {
             }
 
             // Check for lurk
-            if (lurkChannel.containsKey(getAuthor(event))) interactions.get("$stoppedlurk").execute(event);
+            if (lurkList.containsKey(getUserID(event))) interactions.get("$stoppedlurk").execute(event);
         }).start();
     }
 
     // Setter and Getter
+    public void updateLurkList() {
+        lurkList = mySQL.getLurkList();
+    }
+
     public Event getInteraction(String action) {
         return interactions.get(action);
     }

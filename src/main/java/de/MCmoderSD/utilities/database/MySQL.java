@@ -4,6 +4,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.UI.Frame;
+import de.MCmoderSD.core.InteractionHandler;
 import de.MCmoderSD.objects.Timer;
 
 import de.MCmoderSD.utilities.json.JsonNode;
@@ -12,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -840,6 +842,135 @@ public class MySQL {
             return customTimers;
     }
 
+    public void saveLurk(ChannelMessageEvent event, Timestamp startTime, InteractionHandler interactionHandler) {
+        new Thread(() -> {
+
+            // Set Variables
+            var channelID = getChannelID(event);
+            var userID = getUserID(event);
+
+            // Check Channel and User
+            checkChannel(channelID, getChannel(event));
+            checkUser(userID, getAuthor(event));
+
+            // Log message
+            try {
+                if (!isConnected()) connect(); // connect
+
+                // Prepare statement
+                String query = "INSERT INTO " + "lurkList" + " (user_id, lurkChannel_ID, startTime) VALUES (?, ?, ?)";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setInt(1, userID); // set user
+                preparedStatement.setInt(2, channelID); // set channel
+                preparedStatement.setTimestamp(3, startTime); // set timestamp
+                preparedStatement.executeUpdate(); // execute
+                interactionHandler.updateLurkList();
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
+    }
+
+    public void removeLurker(int userID, InteractionHandler interactionHandler) {
+        new Thread(() -> {
+
+            // Log message
+            try {
+                if (!isConnected()) connect(); // connect
+
+                // Prepare statement
+                String query = "DELETE FROM " + "lurkList" + " WHERE user_id = ?";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setInt(1, userID); // set user
+                preparedStatement.executeUpdate(); // execute
+                interactionHandler.updateLurkList();
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
+    }
+
+    public void addTraitor(int userID, String traitors) {
+        new Thread(() -> {
+
+            // Log message
+            try {
+                if (!isConnected()) connect(); // connect
+
+                // Prepare statement
+                String query = "UPDATE " + "lurkList" + " SET traitorChannel = ? WHERE user_id = ?";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setString(1, traitors); // set traitor
+                preparedStatement.setInt(2, userID); // set user
+                preparedStatement.executeUpdate(); // execute
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
+    }
+
+    public HashMap<Integer, Integer> getLurkList() {
+
+        // Variables
+        HashMap<Integer, Integer> lurkList = new HashMap<>();
+
+        // Get Custom Timers
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT user_id, lurkChannel_ID FROM " + "lurkList";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to List
+            while (resultSet.next()) lurkList.put(resultSet.getInt("user_id"), resultSet.getInt("lurkChannel_ID"));
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return lurkList;
+    }
+
+    public HashMap<Timestamp, ArrayList<Integer>> getLurkTime(int userID) {
+
+        // Variables
+        HashMap<Timestamp, ArrayList<Integer>> lurkTime = new HashMap<>();
+        ArrayList<Integer> channels = new ArrayList<>();
+
+        // Get Custom Timers
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT startTime, lurkChannel_ID, traitorChannel FROM " + "lurkList WHERE user_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, userID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to List
+            while (resultSet.next()) {
+                // Get Start Time
+                Timestamp startTime = resultSet.getTimestamp("startTime");
+
+                // Get Lurk Channel
+                var channel = resultSet.getInt("lurkChannel_ID");
+                channels.add(channel);
+                lurkTime.put(startTime, channels);
+
+                // Get TraitorChannel
+                    if (resultSet.getString("traitorChannel") == null) return lurkTime;
+                    String[] traitorChannel = resultSet.getString("traitorChannel").split("\t");
+                    if (traitorChannel.length == 0 || traitorChannel[0].isEmpty()) return lurkTime;
+                    for (String name : traitorChannel) if (!name.isEmpty()) channels.add(Integer.parseInt(name));
+            }
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return lurkTime;
+    }
+
     // Query Channel ID
     public int queryChannelID(String channel) {
         try {
@@ -908,19 +1039,17 @@ public class MySQL {
 
     // Getter
     public boolean isConnected() {
-    try {
-        return connection != null && connection.isValid(0);
-    } catch (SQLException e) {
-        return false;
+        try {
+            return connection != null && connection.isValid(0);
+        } catch (SQLException e) {
+            return false;
+        }
     }
-}
 
     @SuppressWarnings("unused")
     public boolean isLoggingEnabled() {
         return noLog;
     }
-
-
 
     // Setter
     public void connect() {
