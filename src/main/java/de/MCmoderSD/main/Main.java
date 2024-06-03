@@ -10,6 +10,7 @@ import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.OpenAI;
 import de.MCmoderSD.utilities.other.Reader;
 
+import java.awt.HeadlessException;
 import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -45,7 +46,11 @@ public class Main {
 
         // CLI check
         Frame frame = null;
-        if (!(args.contains("-cli") || args.contains("-nogui"))) frame = new Frame(this);
+        try {
+            if (!(args.contains("-cli") || args.contains("-nogui"))) frame = new Frame(this);
+        } catch (HeadlessException e) {
+            System.err.println(BOLD + "No display found: " + UNBOLD + e.getMessage());
+        }
 
         // Logging check
         MySQL mySQL = new MySQL(jsonUtility.load(MYSQL_CONFIG), frame, args.contains("-nolog"));

@@ -92,14 +92,13 @@ public class MySQL {
                             "id INT PRIMARY KEY, " +
                             "name VARCHAR(25) NOT NULL, " +
                             "blacklist TEXT, " +
-                            "active BIT NOT NULL DEFAULT 1, " +
-                            "FOREIGN KEY (id) REFERENCES users(id)" +
+                            "active BIT NOT NULL DEFAULT 1" +
                             ")"));
 
             // SQL statement for creating the message log table
             tables.add(
                     connection.prepareStatement(condition + "MessageLog (" +
-                            "timestamp DATETIME PRIMARY KEY DEFAULT CURRENT_TIMESTAMP, " +
+                            "timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
                             "channel_id INT NOT NULL, " +
                             "user_id INT NOT NULL, " +
                             "message VARCHAR(500), " +
@@ -110,7 +109,7 @@ public class MySQL {
             // SQL statement for creating the command log table
             tables.add(
                     connection.prepareStatement(condition + "CommandLog (" +
-                            "timestamp DATETIME PRIMARY KEY DEFAULT CURRENT_TIMESTAMP, " +
+                            "timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
                             "channel_id INT NOT NULL, " +
                             "user_id INT NOT NULL, " +
                             "command TEXT NOT NULL, " +
@@ -122,7 +121,7 @@ public class MySQL {
             // SQL statement for creating the response log table
             tables.add(
                     connection.prepareStatement(condition + "ResponseLog (" +
-                            "timestamp DATETIME PRIMARY KEY DEFAULT CURRENT_TIMESTAMP, " +
+                            "timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
                             "channel_id INT NOT NULL, " +
                             "user_id INT NOT NULL, " +
                             "command TEXT NOT NULL, " +
@@ -139,14 +138,13 @@ public class MySQL {
                             "lurkChannel_ID INT NOT NULL, " +
                             "startTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
                             "traitorChannel TEXT, " +
-                            "FOREIGN KEY (user_id) REFERENCES users(id), " +
                             "FOREIGN KEY (lurkChannel_ID) REFERENCES channels(id)" +
                             ")"));
 
             // SQL statement for creating the custom timers table
             tables.add(
                     connection.prepareStatement(condition + "CustomTimers (" +
-                            "channel_id INT PRIMARY KEY, " +
+                            "channel_id INT NOT NULL, " +
                             "name TEXT NOT NULL, " +
                             "time TEXT NOT NULL, " +
                             "response VARCHAR(500) NOT NULL, " +
@@ -157,7 +155,7 @@ public class MySQL {
             // SQL statement for creating the custom commands table
             tables.add(
                     connection.prepareStatement(condition + "CustomCommands (" +
-                            "channel_id INT PRIMARY KEY, " +
+                            "channel_id INT NOT NULL, " +
                             "command_name TEXT NOT NULL, " +
                             "command_alias TEXT NOT NULL, " +
                             "command_response VARCHAR(500) NOT NULL, " +
@@ -168,7 +166,7 @@ public class MySQL {
             // SQL statement for creating the counters table
             tables.add(
                     connection.prepareStatement(condition + "Counters (" +
-                            "channel_id INT PRIMARY KEY, " +
+                            "channel_id INT NOT NULL, " +
                             "name TEXT NOT NULL, " +
                             "value INT NOT NULL, " +
                             "FOREIGN KEY (channel_id) REFERENCES channels(id)" +
@@ -176,7 +174,6 @@ public class MySQL {
 
             // Execute each SQL statement in the list tables
             for (PreparedStatement table : tables) table.execute();
-            System.out.println("Initialized tables");
         }
         catch (SQLException e) {
             System.err.println(e.getMessage());
