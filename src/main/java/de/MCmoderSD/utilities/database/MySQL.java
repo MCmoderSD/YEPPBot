@@ -60,6 +60,7 @@ public class MySQL {
 
         // Connect to database
         new Thread(this::connect).start();
+        init();
 
         // Load Cache
         loadChannelCache();
@@ -67,6 +68,107 @@ public class MySQL {
 
         // Set Frame
         this.frame = frame;
+    }
+
+    public void init() {
+        try {
+            if (!isConnected()) connect();
+
+            // List of tables to be created
+            ArrayList<String> tables = new ArrayList<>();
+
+            // Condition for creating tables
+            String condition = "CREATE TABLE IF NOT EXISTS ";
+
+            // SQL statement for creating the channels table
+            tables.add(condition + "channels (" +
+                    "id INT PRIMARY KEY, " +
+                    "name TEXT, " +
+                    "blacklist TEXT, " +
+                    "active INT" +
+                    ")");
+
+            // SQL statement for creating the users table
+            tables.add(condition + "users (" +
+                    "id INT PRIMARY KEY, " +
+                    "name TEXT" +
+                    ")");
+
+            // SQL statement for creating the message log table
+            tables.add(condition + "MessageLog (" +
+                    "timestamp datetime, " +
+                    "channel_id INT, " +
+                    "user_id INT, " +
+                    "message TEXT" +
+                    ")");
+
+            // SQL statement for creating the command log table
+            tables.add(condition + "CommandLog (" +
+                    "timestamp datetime, " +
+                    "channel_id INT, " +
+                    "user_id INT, " +
+                    "command TEXT, " +
+                    "args TEXT" +
+                    ")");
+
+            // SQL statement for creating the response log table
+            tables.add(condition + "ResponseLog (" +
+                    "timestamp datetime, " +
+                    "channel_id INT, " +
+                    "user_id INT, " +
+                    "command TEXT, " +
+                    "args TEXT, " +
+                    "response TEXT" +
+                    ")");
+
+            // SQL statement for creating the lurk list table
+            tables.add(condition + "lurkList (" +
+                    "user_id INT, " +
+                    "lurkChannel_ID INT, " +
+                    "startTime DATETIME, " +
+                    "traitorChannel TEXT" +
+                    ")");
+
+            // SQL statement for creating the custom timers table
+            tables.add(condition + "CustomTimers (" +
+                    "channel_id INT, " +
+                    "name TEXT, " +
+                    "time TEXT, " +
+                    "response TEXT, " +
+                    "isEnabled TINYINT" +
+                    ")");
+
+            // SQL statement for creating the custom commands table
+            tables.add(condition + "CustomCommands (" +
+                    "channel_id INT, " +
+                    "command_name TEXT, " +
+                    "command_alias TEXT, " +
+                    "command_response TEXT, " +
+                    "isEnabled TINYINT" +
+                    ")");
+
+            // SQL statement for creating the counters table
+            tables.add(condition + "Counters (" +
+                    "channel_id INT, " +
+                    "name TEXT, " +
+                    "value INT" +
+                    ")");
+
+            // Execute each SQL statement in the list tables
+            for (String table : tables) {
+                executeStatement(table);
+            }
+            System.out.println("Initialized tables");
+        }
+        catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+    }
+
+    private void executeStatement(String sql) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.execute();
     }
 
     // Load Channel Cache
@@ -444,28 +546,28 @@ public class MySQL {
     // Edit Custom Timer
     public String editCustomTimer(ChannelMessageEvent event, String name, String time, String response, boolean isEnabled) {
 
-            // Set Variables
-            var channelID = getChannelID(event);
+        // Set Variables
+        var channelID = getChannelID(event);
 
-            // Edit Custom Timer
-            try {
-                if (!isConnected()) connect(); // connect
+        // Edit Custom Timer
+        try {
+            if (!isConnected()) connect(); // connect
 
-                // Prepare statement
-                String query = "UPDATE " + "CustomTimers" + " SET time = ?, response = ?, isEnabled = ? WHERE channel_id = ? AND name = ?";
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1, time); // set time
-                preparedStatement.setString(2, response); // set response
-                preparedStatement.setInt(3, isEnabled ? 1 : 0); // set isEnabled
-                preparedStatement.setInt(4, channelID); // set channel
-                preparedStatement.setString(5, name); // set name
-                preparedStatement.executeUpdate(); // execute
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-                return "Error: Database error";
-            }
+            // Prepare statement
+            String query = "UPDATE " + "CustomTimers" + " SET time = ?, response = ?, isEnabled = ? WHERE channel_id = ? AND name = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, time); // set time
+            preparedStatement.setString(2, response); // set response
+            preparedStatement.setInt(3, isEnabled ? 1 : 0); // set isEnabled
+            preparedStatement.setInt(4, channelID); // set channel
+            preparedStatement.setString(5, name); // set name
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
 
-            return name + " custom timer " + (isEnabled ? "enabled" : "disabled");
+        return name + " custom timer " + (isEnabled ? "enabled" : "disabled");
     }
 
     // Delete Command
@@ -814,32 +916,32 @@ public class MySQL {
 
     public ArrayList<Timer> getActiveCustomTimers(TwitchChat chat) {
 
-            // Variables
-            ArrayList<Timer> customTimers = new ArrayList<>();
+        // Variables
+        ArrayList<Timer> customTimers = new ArrayList<>();
 
-            // Get Custom Timers
-            try {
-                if (!isConnected()) connect(); // connect
+        // Get Custom Timers
+        try {
+            if (!isConnected()) connect(); // connect
 
-                // Prepare statement
-                String query = "SELECT channel_id, name, time, response FROM " + "CustomTimers WHERE isEnabled = 1";
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                ResultSet resultSet = preparedStatement.executeQuery();
+            // Prepare statement
+            String query = "SELECT channel_id, name, time, response FROM " + "CustomTimers WHERE isEnabled = 1";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
-                // Add to List
-                while (resultSet.next()) {
-                    String channel = queryChannel(resultSet.getInt("channel_id"));
-                    String name = resultSet.getString("name");
-                    String time = resultSet.getString("time");
-                    String response = resultSet.getString("response");
-                    customTimers.add(new Timer(chat, this, channel, name, time, response));
-                }
-
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
+            // Add to List
+            while (resultSet.next()) {
+                String channel = queryChannel(resultSet.getInt("channel_id"));
+                String name = resultSet.getString("name");
+                String time = resultSet.getString("time");
+                String response = resultSet.getString("response");
+                customTimers.add(new Timer(chat, this, channel, name, time, response));
             }
 
-            return customTimers;
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return customTimers;
     }
 
     public void saveLurk(ChannelMessageEvent event, Timestamp startTime, InteractionHandler interactionHandler) {
@@ -959,10 +1061,10 @@ public class MySQL {
                 lurkTime.put(startTime, channels);
 
                 // Get TraitorChannel
-                    if (resultSet.getString("traitorChannel") == null) return lurkTime;
-                    String[] traitorChannel = resultSet.getString("traitorChannel").split("\t");
-                    if (traitorChannel.length == 0 || traitorChannel[0].isEmpty()) return lurkTime;
-                    for (String name : traitorChannel) if (!name.isEmpty()) channels.add(Integer.parseInt(name));
+                if (resultSet.getString("traitorChannel") == null) return lurkTime;
+                String[] traitorChannel = resultSet.getString("traitorChannel").split("\t");
+                if (traitorChannel.length == 0 || traitorChannel[0].isEmpty()) return lurkTime;
+                for (String name : traitorChannel) if (!name.isEmpty()) channels.add(Integer.parseInt(name));
             }
 
         } catch (SQLException e) {
