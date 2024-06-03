@@ -157,9 +157,11 @@ public class CustomTimer {
         long timeValue = Long.parseLong(time.substring(0, time.length() - 1));
         char timeType = time.charAt(time.length() - 1);
 
-        if (!(timeType == 'M' || timeType == 'h' || timeType == 'm' || timeType == 's')) return false;
+        //if (!(timeType == 'M' || timeType == 'h' || timeType == 'm' || timeType == 's')) return false; ToDo Fix for all
+        if (!(timeType == 'M')) return false;
 
         switch (timeType) {
+            //noinspection DataFlowIssue ToDo Fix
             case 'M', 's':
                 return timeValue > 9223372036854775806L;
             /*case 'h':

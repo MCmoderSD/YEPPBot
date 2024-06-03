@@ -8,6 +8,8 @@ in [Java 17](https://www.oracle.com/de/java/technologies/downloads/#java17) usin
 the [Twitch4J](https://twitch4j.github.io/) library.
 
 The bot is currently under active development and it's features can change a lot in the future. <br>
+You can use the project to create your own bot, but you have to add a MySQL database and for some features you need a config with an API key. <br>
+If you don't have access to the API the bot will still work, but without those features, but the database is necessary. <br>
 If you have any ideas or suggestions, feel free to open an issue or a pull request. <br> <br>
 
 ## Table of Contents
@@ -156,10 +158,25 @@ Otherwise you can use the ```!moderate block/unblock``` command. <br>
 The way for black and whitelist works the same. <br> <br>
 
 
-### 7. MySQL Database for logging
+### 7. MySQL Database
 
-You need to have your own MySQL database to use certain features, or contact me and can give you access to mine. <br>
-If you don't want to use a database, you have to remove those features from the source code. <br> <br>
+You need to have your own MySQL database to run and use the bot. <br>
+The Bot creates the tables and everything by itself, but you have to create a config. <br>
+You need to create a file called ```mySQL.json``` in the ```/src/main/resources/database/``` folder. <br>
+The file should have the following structure: <br>
+
+```json
+{
+  "host": "localhost",
+  "port": "3306",
+  "database": "DATABASE_NAME",
+  "username": "USER_NAME",
+  "password": "USER_PASSWORD"
+}
+```
+
+You have to give the user full permission over the whole database. <bR>
+If you don't want to use a database, you have to remove certain features from the source code. <br> <br>
 
 
 ### 8. Compile the bot

@@ -1,5 +1,6 @@
 package de.MCmoderSD.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
@@ -7,7 +8,6 @@ import de.MCmoderSD.commands.Command;
 import de.MCmoderSD.objects.Timer;
 
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,9 +64,9 @@ public class CommandHandler {
         for (String alias : command.getAlias()) aliases.put(alias.toLowerCase(), name);
 
         // White and Blacklist
-        if (whiteList.containsKey(name))
+        if (whiteList.has(name))
             whiteListMap.put(command, new ArrayList<>(Arrays.asList(whiteList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
-        if (blackList.containsKey(name))
+        if (blackList.has(name))
             blackListMap.put(command, new ArrayList<>(Arrays.asList(blackList.get(name.toLowerCase()).asText().toLowerCase().split("; "))));
     }
 

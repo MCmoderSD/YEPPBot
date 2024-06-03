@@ -1,15 +1,18 @@
 package de.MCmoderSD.main;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
 
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.OpenAI;
 import de.MCmoderSD.utilities.other.Reader;
 
 import java.util.ArrayList;
+
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Main {
 
@@ -65,7 +68,12 @@ public class Main {
         }
 
         // Load OpenAI Config
-        OpenAI openAI = new OpenAI(jsonUtility.load(OPENAI_CONFIG));
+        OpenAI openAI = null;
+        try {
+            openAI = new OpenAI(jsonUtility.load(OPENAI_CONFIG));
+        } catch (NullPointerException e) {
+            System.err.println(BOLD + "OpenAI API missing: " + UNBOLD + e.getMessage());
+        }
 
         // Init Bot
         botClient = new BotClient(botName, botToken, prefix, admins, channels, mySQL, openAI);

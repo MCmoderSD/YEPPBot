@@ -1,5 +1,6 @@
 package de.MCmoderSD.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.core.EventManager;
 import com.github.twitch4j.TwitchClient;
@@ -13,7 +14,6 @@ import de.MCmoderSD.commands.*;
 import de.MCmoderSD.events.*;
 
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.OpenAI;
 
@@ -61,6 +61,13 @@ public class BotClient {
         JsonNode whiteList = jsonUtility.load("/config/whitelist.json");
         JsonNode blackList = jsonUtility.load("/config/blacklist.json");
 
+        // Init API Checks
+        boolean giphy = jsonUtility.load("/api/Giphy.json") != null;
+        boolean weather = jsonUtility.load("/api/Giphy.json") != null;
+        if (!giphy) System.err.println(BOLD + "Giphy API missing" + UNBOLD);
+        if (!weather) System.err.println(BOLD + "OpenWeatherMap API missing" + UNBOLD);
+
+
         // Init CommandHandler
         commandHandler = new CommandHandler(mySQL, chat, whiteList, blackList, prefix);
         interactionHandler = new InteractionHandler(mySQL, whiteList, blackList);
@@ -73,7 +80,7 @@ public class BotClient {
         new CustomCommand(mySQL, commandHandler, chat, adminList);
         new CustomTimer(mySQL, commandHandler, chat, adminList);
         new Fact(mySQL, commandHandler, chat);
-        new Gif(mySQL, commandHandler, chat);
+        if (giphy) new Gif(mySQL, commandHandler, chat);
         new Help(mySQL, commandHandler, chat, whiteList, blackList);
         new Insult(mySQL, commandHandler, chat);
         new Join(mySQL, commandHandler, chat);
@@ -83,13 +90,13 @@ public class BotClient {
         new Moderate(mySQL, commandHandler, chat, adminList);
         new Ping(mySQL, commandHandler, chat);
         new Play(mySQL, commandHandler, chat);
-        new Prompt(mySQL, commandHandler, chat, openAI, botName);
+        if (openAI != null) new Prompt(mySQL, commandHandler, chat, openAI, botName);
         // new Rank(mySQL, commandHandler, chat); ToDo Make it work
         new Say(mySQL, commandHandler, chat, adminList);
         new Status(mySQL, commandHandler, chat);
-        new Translate(mySQL, commandHandler, chat, openAI, botName);
-        new Weather(mySQL, commandHandler, chat);
-        new Wiki(mySQL, commandHandler, chat ,openAI, botName);
+        if (openAI != null) new Translate(mySQL, commandHandler, chat, openAI, botName);
+        if (weather) new Weather(mySQL, commandHandler, chat);
+        if (openAI != null) new Wiki(mySQL, commandHandler, chat, openAI, botName);
 
         // Init Interactions
         new ReplyYepp(mySQL, interactionHandler, chat);

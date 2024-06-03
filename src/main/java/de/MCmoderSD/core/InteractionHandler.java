@@ -1,11 +1,11 @@
 package de.MCmoderSD.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.events.Event;
 
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,10 +56,8 @@ public class InteractionHandler {
         for (String alias : event.getAlias()) aliases.put(alias.toLowerCase(), name);
 
         // White and Blacklist
-        if (whiteList.containsKey(name))
-            whiteListMap.put(event, new ArrayList<>(Arrays.asList(whiteList.get(name).asText().toLowerCase().split("; "))));
-        if (blackList.containsKey(name))
-            blackListMap.put(event, new ArrayList<>(Arrays.asList(blackList.get(name).asText().toLowerCase().split("; "))));
+        if (whiteList.has(name)) whiteListMap.put(event, new ArrayList<>(Arrays.asList(whiteList.get(name).asText().toLowerCase().split("; "))));
+        if (blackList.has(name)) blackListMap.put(event, new ArrayList<>(Arrays.asList(blackList.get(name).asText().toLowerCase().split("; "))));
     }
 
     // Execute interaction

@@ -1,12 +1,12 @@
 package de.MCmoderSD.commands;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -73,10 +73,10 @@ public class Help {
 
         // Filter available commands
         for (String command : commands.keySet()) {
-            if (whitelist.containsKey(command.toLowerCase())) {
+            if (whitelist.has(command.toLowerCase())) {
                 if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
                     message.append(prefix).append(command).append(", ");
-            } else if (blacklist.containsKey(command.toLowerCase())) {
+            } else if (blacklist.has(command.toLowerCase())) {
                 if (!Arrays.stream(blacklist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
                     message.append(prefix).append(command).append(", ");
             } else message.append(prefix).append(command).append(", ");
@@ -97,10 +97,10 @@ public class Help {
 
         // Get description if command is available
         //todo: eh unclean
-        if (whitelist.containsKey(command.toLowerCase())) {
+        if (whitelist.has(command.toLowerCase())) {
             if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
                 return commandHandler.getCommands().get(command).getDescription();
-        } else if (blacklist.containsKey(command.toLowerCase())) {
+        } else if (blacklist.has(command.toLowerCase())) {
             if (!Arrays.stream(blacklist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
                 return commandHandler.getCommands().get(command).getDescription();
         } else if (commandHandler.getCommands().containsKey(command))

@@ -1,5 +1,14 @@
 package de.MCmoderSD.utilities.json;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 @SuppressWarnings("unused")
@@ -44,29 +53,21 @@ public class JsonUtility {
         this.jsonCache = jsonUtility.getJsonCache();
     }
 
-    public JsonUtility(JsonNode jsonNode) {
-        this.url = null;
-        this.isAbsolute = jsonNode.isAbsolute();
-        this.jsonCache = new HashMap<>();
-
-        jsonCache.put(jsonNode.getPath(), jsonNode);
-    }
-
-    public JsonUtility(JsonNode[] jsonNodes) {
-        this.url = null;
-        this.isAbsolute = false;
-        this.jsonCache = new HashMap<>();
-
-        for (JsonNode jsonNode : jsonNodes) jsonCache.put(jsonNode.getPath(), jsonNode);
-    }
-
     // Methods
     public JsonNode load(String path) {
         if (jsonCache.containsKey(path)) return jsonCache.get(path);
         else {
-            JsonNode jsonNode = url != null ? new JsonNode(url, path) : new JsonNode(path, isAbsolute);
-            jsonCache.put(path, jsonNode);
-            return jsonNode;
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                if (isAbsolute) return load(path, true);
+                InputStream inputStream = getClass().getResourceAsStream(path);
+                if (inputStream == null) return null;
+                JsonNode jsonNode = mapper.readTree(inputStream);
+                jsonCache.put(path, jsonNode);
+                return jsonNode;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -75,7 +76,7 @@ public class JsonUtility {
         for (var i = 0; i < paths.length; i++) {
             if (jsonCache.containsKey(paths[i])) jsonNodes[i] = jsonCache.get(paths[i]);
             else {
-                JsonNode jsonNode = url != null ? new JsonNode(url, paths[i]) : new JsonNode(paths[i], isAbsolute);
+                JsonNode jsonNode = load(paths[i]);
                 jsonCache.put(paths[i], jsonNode);
                 jsonNodes[i] = jsonNode;
             }
@@ -86,9 +87,16 @@ public class JsonUtility {
     public JsonNode load(String url, String path) {
         if (jsonCache.containsKey(path)) return jsonCache.get(path);
         else {
-            JsonNode jsonNode = new JsonNode(url, path);
-            jsonCache.put(path, jsonNode);
-            return jsonNode;
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                InputStream inputStream = new URL(url + path).openStream();
+                if (inputStream == null) return null;
+                JsonNode jsonNode = mapper.readTree(inputStream);
+                jsonCache.put(path, jsonNode);
+                return jsonNode;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -97,7 +105,7 @@ public class JsonUtility {
         for (var i = 0; i < paths.length; i++) {
             if (jsonCache.containsKey(paths[i])) jsonNodes[i] = jsonCache.get(paths[i]);
             else {
-                JsonNode jsonNode = new JsonNode(url, paths[i]);
+                JsonNode jsonNode = load(url, paths[i]);
                 jsonCache.put(paths[i], jsonNode);
                 jsonNodes[i] = jsonNode;
             }
@@ -110,7 +118,7 @@ public class JsonUtility {
         for (var i = 0; i < paths.length; i++) {
             if (jsonCache.containsKey(paths[i])) jsonNodes[i] = jsonCache.get(paths[i]);
             else {
-                JsonNode jsonNode = new JsonNode(urls[i], paths[i]);
+                JsonNode jsonNode = load(urls[i], paths[i]);
                 jsonCache.put(paths[i], jsonNode);
                 jsonNodes[i] = jsonNode;
             }
@@ -121,9 +129,15 @@ public class JsonUtility {
     public JsonNode load(String path, boolean isAbsolute) {
         if (jsonCache.containsKey(path)) return jsonCache.get(path);
         else {
-            JsonNode jsonNode = new JsonNode(path, isAbsolute);
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+            InputStream inputStream = Files.newInputStream(Paths.get(path));
+            JsonNode jsonNode = mapper.readTree(inputStream);
             jsonCache.put(path, jsonNode);
             return jsonNode;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -132,7 +146,7 @@ public class JsonUtility {
         for (var i = 0; i < paths.length; i++) {
             if (jsonCache.containsKey(paths[i])) jsonNodes[i] = jsonCache.get(paths[i]);
             else {
-                JsonNode jsonNode = new JsonNode(paths[i], isAbsolute);
+                JsonNode jsonNode = load(paths[i], true);
                 jsonCache.put(paths[i], jsonNode);
                 jsonNodes[i] = jsonNode;
             }
@@ -187,35 +201,6 @@ public class JsonUtility {
 
     public void remove(String[] json) {
         for (String path : json) jsonCache.remove(path);
-    }
-
-    public void remove(JsonNode jsonNode) {
-        jsonCache.remove(jsonNode.getPath());
-    }
-
-    public void remove(JsonNode[] jsonNodes) {
-        for (JsonNode jsonNode : jsonNodes) jsonCache.remove(jsonNode.getPath());
-    }
-
-    // Add
-    public void add(String path) {
-        if (isAbsolute) jsonCache.put(path, new JsonNode(path, true));
-        else jsonCache.put(path, new JsonNode(path));
-    }
-
-    public void add(String[] json) {
-        for (String path : json) {
-            if (isAbsolute) jsonCache.put(path, new JsonNode(path, true));
-            else jsonCache.put(path, new JsonNode(path));
-        }
-    }
-
-    public void add(JsonNode jsonNode) {
-        jsonCache.put(jsonNode.getPath(), jsonNode);
-    }
-
-    public void add(JsonNode[] jsonNodes) {
-        for (JsonNode jsonNode : jsonNodes) jsonCache.put(jsonNode.getPath(), jsonNode);
     }
 
     public void add(HashMap<String, JsonNode> jsonCache) {

@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import org.json.JSONArray;
@@ -8,7 +9,6 @@ import org.json.JSONObject;
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 
 import java.io.BufferedReader;
@@ -27,6 +27,7 @@ public class Weather {
     // Attributes
     private final String url;
     private final String apiKey;
+    private final boolean isNull;
 
     // Constructor
     public Weather(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
@@ -41,13 +42,19 @@ public class Weather {
         // Load API key
         JsonUtility jsonUtility = new JsonUtility();
         JsonNode config = jsonUtility.load("/api/OpenWeatherMap.json");
-        url = config.get("url").asText();
-        apiKey = config.get("api_key").asText();
+
+        // Init Attributes
+        isNull = config == null;
+        url = isNull ? null : config.get("url").asText();
+        apiKey = isNull ? null : config.get("api_key").asText();
+        if (isNull) System.err.println(BOLD + "OpenWeatherMap API missing" + UNBOLD);
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+
+                if (isNull) return;
 
                 String response;
                 if (args.length < 1) response = syntax;

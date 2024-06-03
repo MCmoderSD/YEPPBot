@@ -1,12 +1,11 @@
 package de.MCmoderSD.utilities.other;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
-
-import de.MCmoderSD.utilities.json.JsonNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;

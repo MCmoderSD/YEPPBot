@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import org.json.JSONObject;
@@ -7,7 +8,6 @@ import org.json.JSONObject;
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonNode;
 import de.MCmoderSD.utilities.json.JsonUtility;
 
 import java.io.IOException;
@@ -23,6 +23,7 @@ public class Gif {
     private final String url;
     private final String apiKey;
     private final String query;
+    private final boolean isNull;
 
     // Constructor
     public Gif(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
@@ -37,14 +38,20 @@ public class Gif {
         // Load API key
         JsonUtility jsonUtility = new JsonUtility();
         JsonNode config = jsonUtility.load("/api/Giphy.json");
-        url = config.get("url").asText();
-        apiKey = config.get("api_key").asText();
-        query = config.get("query").asText();
+
+        // Init Attributes
+        isNull = config == null;
+        url = isNull ? null : config.get("url").asText();
+        apiKey = isNull ? null : config.get("api_key").asText();
+        query = isNull ? null : config.get("query").asText();
+        if (isNull) System.err.println(BOLD + "Giphy API missing" + UNBOLD);
 
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
             @Override
             public void execute(ChannelMessageEvent event, String... args) {
+
+                if (isNull) return;
 
                 // Check arguments
                 String topic = trimMessage(processArgs(args));
