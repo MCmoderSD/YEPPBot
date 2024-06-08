@@ -28,7 +28,7 @@ public class CustomCommand {
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
             @Override
-                public void execute(ChannelMessageEvent event, String... args) {
+            public void execute(ChannelMessageEvent event, String... args) {
 
                 // Get author and channel
                 String author = getAuthor(event);
@@ -82,8 +82,9 @@ public class CustomCommand {
                             if (!message.containsKey(":")) response = "Syntax: " + syntax;
                             else if (mySQL.getCommands(event, true).contains(commandName) || mySQL.getAliases(event, true).containsKey(commandName)) response = "Command already exists";
                             else {
-                                // Get command aliases
-                                ArrayList<String> aliases = new ArrayList<>(Arrays.asList(args).subList(message.get(":") + 1, args.length));
+
+                                // Get command aliases;
+                                ArrayList<String> aliases = new ArrayList<>(Arrays.asList(args).subList(2, message.get(":")));
                                 aliases.replaceAll(String::toLowerCase);
 
                                 // Get command response
@@ -111,6 +112,7 @@ public class CustomCommand {
 
     // Methods
     private void sendMessage(MySQL mySQL, TwitchChat chat, ChannelMessageEvent event, String command, String channel, String response, String... args) {
+
         // Send message
         chat.sendMessage(channel, response);
 

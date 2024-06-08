@@ -175,11 +175,16 @@ The file should have the following structure: <br>
 }
 ```
 
-You have to give the user full permission over the whole database. <bR>
+You have to give the user full permission over the whole database. <br>
 If you don't want to use a database, you have to remove certain features from the source code. <br> <br>
 
+### 8. Add assets to database
 
-### 8. Compile the bot
+For the fact, insult and joke command you need to add the assets to the database. <br>
+You can import the existing ones to the database from the .tsv files in the ```/storage/assets/``` folder. <br> <br>
+You can also add your own assets to the database, just pay attention to the format. <br>
+
+### 9. Compile the bot
 
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
 ```java -jar NAME_OF_THE_JAR_FILE.jar``` <br> <br>

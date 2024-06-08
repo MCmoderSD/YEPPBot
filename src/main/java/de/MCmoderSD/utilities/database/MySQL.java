@@ -157,7 +157,7 @@ public class MySQL {
                     connection.prepareStatement(condition + "CustomCommands (" +
                             "channel_id INT NOT NULL, " +
                             "command_name TEXT NOT NULL, " +
-                            "command_alias TEXT NOT NULL, " +
+                            "command_alias TEXT, " +
                             "command_response VARCHAR(500) NOT NULL, " +
                             "isEnabled BIT NOT NULL DEFAULT 1, " +
                             "FOREIGN KEY (channel_id) REFERENCES channels(id)" +
@@ -170,6 +170,40 @@ public class MySQL {
                             "name TEXT NOT NULL, " +
                             "value INT NOT NULL, " +
                             "FOREIGN KEY (channel_id) REFERENCES channels(id)" +
+                            ")"));
+
+            // SQL statement for creating the fact list table
+            tables.add(
+                    connection.prepareStatement(condition + "factList (" +
+                            "fact_id INT PRIMARY KEY AUTO_INCREMENT, " +
+                            "en_percent varchar(500), " +
+                            "en_people varchar(500), " +
+                            "en_verb varchar(500), " +
+                            "en_frequency varchar(500), " +
+                            "en_verbing varchar(500), " +
+                            "en_object varchar(500), " +
+                            "de_percent varchar(500), " +
+                            "de_people varchar(500), " +
+                            "de_verb varchar(500), " +
+                            "de_frequency varchar(500), " +
+                            "de_verbing varchar(500), " +
+                            "de_object varchar(500)" +
+                            ")"));
+
+            // SQL statement for creating the joke list table
+            tables.add(
+                    connection.prepareStatement(condition + "jokeList (" +
+                            "joke_id INT PRIMARY KEY AUTO_INCREMENT, " +
+                            "en varchar(500), " +
+                            "de varchar(500)" +
+                            ")"));
+
+            // SQL statement for creating the insult list table
+            tables.add(
+                    connection.prepareStatement(condition + "insultList (" +
+                            "insult_id INT PRIMARY KEY AUTO_INCREMENT, " +
+                            "en varchar(500) NOT NULL, " +
+                            "de varchar(500) NOT NULL" +
                             ")"));
 
             // Execute each SQL statement in the list tables
@@ -626,12 +660,14 @@ public class MySQL {
 
         // Set Variables
         var channelID = getChannelID(event);
-        String aliasesString = String.join("; ", aliases);
+        String aliasesString = null;
+        if (!aliases.isEmpty()) aliasesString = String.join("; ", aliases);
 
         // Prepare aliases
-        aliasesString = aliasesString.isEmpty() ? "" : aliasesString;
-        while (aliasesString.startsWith("; ")) aliasesString = aliasesString.substring(2);
-        while (aliasesString.endsWith("; ")) aliasesString = aliasesString.trim();
+        if (aliasesString != null && !aliasesString.isEmpty()) {
+            while (aliasesString.startsWith("; ")) aliasesString = aliasesString.substring(2);
+            while (aliasesString.endsWith("; ")) aliasesString = aliasesString.trim();
+        }
 
         // Create Command
         try {
@@ -792,7 +828,14 @@ public class MySQL {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             // Add to List
-            while (resultSet.next()) aliases.put(resultSet.getString("command_alias"), resultSet.getString("command_name"));
+            while (resultSet.next()) {
+                var alias = resultSet.getString("command_alias");
+                var command = resultSet.getString("command_name");
+                if (alias == null) continue;
+
+                String[] aliasList = alias.split("; ");
+                for (String name : aliasList) aliases.put(name, command);
+            }
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -940,6 +983,7 @@ public class MySQL {
         return customTimers;
     }
 
+    // Get Active Custom Commands
     public ArrayList<Timer> getActiveCustomTimers(TwitchChat chat) {
 
         // Variables
@@ -970,6 +1014,7 @@ public class MySQL {
         return customTimers;
     }
 
+    // Add Lurker
     public void saveLurk(ChannelMessageEvent event, Timestamp startTime, InteractionHandler interactionHandler) {
         new Thread(() -> {
 
@@ -999,6 +1044,7 @@ public class MySQL {
         }).start();
     }
 
+    // Remove Lurker
     public void removeLurker(int userID, InteractionHandler interactionHandler) {
         new Thread(() -> {
 
@@ -1018,6 +1064,7 @@ public class MySQL {
         }).start();
     }
 
+    // Add Traitor
     public void addTraitor(int userID, String traitors) {
         new Thread(() -> {
 
@@ -1037,6 +1084,7 @@ public class MySQL {
         }).start();
     }
 
+    // Get Lurk List
     public HashMap<Integer, Integer> getLurkList() {
 
         // Variables
@@ -1060,6 +1108,7 @@ public class MySQL {
         return lurkList;
     }
 
+    // Get Lurk Time
     public HashMap<Timestamp, ArrayList<Integer>> getLurkTime(int userID) {
 
         // Variables
@@ -1097,6 +1146,146 @@ public class MySQL {
             System.err.println(e.getMessage());
         }
         return lurkTime;
+    }
+
+    // Get Fact
+    public String getFact(String language) {
+
+        // Set language
+        String lang;
+        switch (language) {
+            case "en":
+                lang = "en";
+                break;
+            case "de":
+                lang = "de";
+                break;
+            default:
+                return "Error: Invalid language";
+        }
+
+        StringBuilder fact = new StringBuilder();
+
+        String[] parts = new String[] {"_percent", "_people", "_verb", "_frequency", "_verbing", "_object"};
+
+        // Generate fact
+        for (String part : parts) {
+            try {
+                if (!isConnected()) connect();
+
+                // Get the total number of fact parts
+                String countQuery = "SELECT COUNT(*) FROM factList WHERE " + lang + part + " IS NOT NULL";
+                PreparedStatement countStatement = connection.prepareStatement(countQuery);
+                ResultSet countResult = countStatement.executeQuery();
+
+                // Get the total number of fact parts
+                countResult.next();
+                var totalFacts = countResult.getInt(1);
+
+                // Get the fact part at the random index
+                String factQuery = "SELECT " + lang + part + " FROM factList WHERE fact_id = ?";
+                PreparedStatement factStatement = connection.prepareStatement(factQuery);
+                factStatement.setInt(1, (int) (totalFacts * Math.random() + 1));
+                ResultSet factResult = factStatement.executeQuery();
+
+                // Get the fact part
+                factResult.next();
+                fact.append(factResult.getString(lang + part)).append(" ");
+
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+
+        return trimMessage(fact.toString());
+    }
+
+    // Get Insult
+    public String getInsult(String language) {
+
+        // Set language
+        String lang;
+        switch (language) {
+            case "en":
+                lang = "en";
+                break;
+            case "de":
+                lang = "de";
+                break;
+            default:
+                return "Error: Invalid language";
+        }
+
+        try {
+            if (!isConnected()) connect();
+
+            // Get the total number of insults
+            String countQuery = "SELECT COUNT(*) FROM insultList WHERE " + lang + " IS NOT NULL";
+            PreparedStatement countStatement = connection.prepareStatement(countQuery);
+            ResultSet countResult = countStatement.executeQuery();
+
+            // Get the total number of insults
+            countResult.next();
+            var totalInsults = countResult.getInt(1);
+
+            // Get the insult at the random index
+            String insultQuery = "SELECT " + lang + " FROM insultList WHERE insult_id = ?";
+            PreparedStatement insultStatement = connection.prepareStatement(insultQuery);
+            insultStatement.setInt(1, (int) (totalInsults * Math.random() + 1));
+            ResultSet insultResult = insultStatement.executeQuery();
+
+            // Get the insult
+            insultResult.next();
+            return insultResult.getString(lang);
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return "Error: Database error";
+    }
+
+    // Get Joke
+    public String getJoke(String language) {
+
+        // Set language
+        String lang;
+        switch (language) {
+            case "en":
+                lang = "en";
+                break;
+            case "de":
+                lang = "de";
+                break;
+            default:
+                return "Error: Invalid language";
+        }
+
+        try {
+            if (!isConnected()) connect();
+
+            // Get the total number of jokes
+            String countQuery = "SELECT COUNT(*) FROM jokeList WHERE " + lang + " IS NOT NULL";
+            PreparedStatement countStatement = connection.prepareStatement(countQuery);
+            ResultSet countResult = countStatement.executeQuery();
+
+            // Get the total number of jokes
+            countResult.next();
+            var totalJokes = countResult.getInt(1);
+
+            // Get the joke at the random index
+            String jokeQuery = "SELECT " + lang + " FROM jokeList WHERE joke_id = ?";
+            PreparedStatement jokeStatement = connection.prepareStatement(jokeQuery);
+            jokeStatement.setInt(1, (int) (totalJokes * Math.random() + 1));
+            ResultSet jokeResult = jokeStatement.executeQuery();
+
+            // Get the jokes
+            jokeResult.next();
+            return jokeResult.getString(lang);
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return "Error: Database error";
     }
 
     // Query Channel ID

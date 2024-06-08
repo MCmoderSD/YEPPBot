@@ -6,16 +6,10 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import de.MCmoderSD.core.CommandHandler;
 
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.other.Reader;
-
-import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Joke {
-
-    // Attributes
-    private final ArrayList<String> englishJokes, germanJokes;
 
     // Constructor
     public Joke(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
@@ -27,12 +21,6 @@ public class Joke {
         String[] name = {"joke", "witz"};
         String description = "Sendet einen zufälligen Witz. " + syntax;
 
-
-        // Read jokes
-        Reader reader = new Reader();
-        englishJokes = reader.lineRead("/assets/english.jokes");
-        germanJokes = reader.lineRead("/assets/german.jokes");
-
         // Register command
         commandHandler.registerCommand(new Command(description, name) {
             @Override
@@ -41,10 +29,9 @@ public class Joke {
                 // Determine language
                 boolean isEnglish = false;
                 if (args.length > 0) isEnglish = args[0].toLowerCase().startsWith("en");
-                ArrayList<String> jokes = isEnglish ? englishJokes : germanJokes;
 
                 // Send message
-                String response = trimMessage(jokes.get((int) (Math.random() * jokes.size())));
+                String response = trimMessage(mySQL.getJoke(isEnglish ? "en" : "de"));
                 chat.sendMessage(getChannel(event), response);
 
                 // Log response
