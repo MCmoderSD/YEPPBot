@@ -4,12 +4,12 @@
 
 The YEPPBot is a Twitch bot that provides a variety of features to entertain your Twitch channel. <br>
 Originally created by [FoxxHimself](https://github.com/lennartfu) in Python and now being rewritten
-in [Java 17](https://www.oracle.com/de/java/technologies/downloads/#java17) using
+in [Java 21](https://www.oracle.com/de/java/technologies/downloads/#java21) using
 the [Twitch4J](https://twitch4j.github.io/) library.
 
 The bot is currently under active development and it's features can change a lot in the future. <br>
 You can use the project to create your own bot, but you have to add a MySQL database and for some features you need a config with an API key. <br>
-If you don't have access to the API the bot will still work, but without those features, but the database is necessary. <br>
+If you don't have access to the API, the bot will still work, but without those features, but the database is necessary. <br>
 If you have any ideas or suggestions, feel free to open an issue or a pull request. <br> <br>
 
 ## Table of Contents
@@ -52,14 +52,14 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 
 ## How to use
 
-You need to have Java 17 installed in your computer, a download link can be found [here](https://www.oracle.com/uk/java/technologies/downloads/#java17). <br>
+You need to have Java 21 installed on your computer a download link can be found [here](https://www.oracle.com/uk/java/technologies/downloads/#java21). <br>
 You need the Twitch Account Token of the Twitch Bot which you can get from [here](https://twitchapps.com/tmi/).<br> <br>
 Keep in mind that the token can change from to time. <br>
 But remember **DON'T POST** or **SHARE** the token anywhere!!! <br> <br>
 
 ### 1. Clone the repository
 
-You need to have Git installed in your computer, you can download it from [here](https://git-scm.com/downloads). <br>
+You need to have Git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
 Clone the repository using the following command: <br>
 ```git clone https://www.github.com/MCmoderSD/YEPPBot.git ``` <br> <br>
 
@@ -178,7 +178,7 @@ The file should have the following structure: <br>
 You have to give the user full permission over the whole database. <br>
 If you don't want to use a database, you have to remove certain features from the source code. <br> <br>
 
-### 8. Add assets to database
+### 8. Add assets to the database
 
 For the fact, insult and joke command you need to add the assets to the database. <br>
 You can import the existing ones to the database from the .tsv files in the ```/storage/assets/``` folder. <br> <br>
@@ -220,7 +220,6 @@ Lot of thanks to [Twitch4J](https://twitch4j.github.io/) for the amazing library
 to [OpenAI](https://platform.openai.com/signup) for the ChatGPT API. <br>
 Also thanks to [OpenWeatherMap](https://openweathermap.org/api) for the weather API. <br>
 
-Especially thanks to [FoxxHimself](https://github.com/lennartfu) for the original bot and the idea to rewrite it in
-Java. <br>
+Especially thanks to [FoxxHimself](https://github.com/lennartfu) for the original bot and the idea to rewrite it in Java. <br>
 Lot of thanks to [RedSmileTV](https://github.com/redsmiletv) and [Rebix](https://github.com/reebix) for the help with
 the bot and api's and libraries. <br>
