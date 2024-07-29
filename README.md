@@ -37,7 +37,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 
 
 - Admin Commands:
-  -[x] Block/Unblock
+  - [x] Block/Unblock
   - [x] Help
   - [x] Join/Leave
   - [x] Ping
