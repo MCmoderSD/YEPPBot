@@ -192,11 +192,19 @@ public class CommandHandler {
     public void handleCommand(ChannelMessageEvent event, String botName) {
         new Thread(() -> {
 
-            // Get Message
+            // Get Message and format
             String message = getMessage(event);
 
             // Check for prefix
             if (!message.startsWith(prefix) || getAuthor(event).equals(botName)) return;
+
+            // If autocorrect is enabled and messes up the message so there is no space between prefix and command
+            for (int i = 1; i < message.length(); i++) {
+                if (message.charAt(i) != ' ') {
+                    message = "!" + message.substring(i);
+                    break;
+                }
+            }
 
             // Convert message to command and arguments
             String[] split = message.split(" ");
