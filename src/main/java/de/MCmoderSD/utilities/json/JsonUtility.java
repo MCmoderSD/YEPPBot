@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -89,12 +90,12 @@ public class JsonUtility {
         else {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                InputStream inputStream = new URL(url + path).openStream();
+                InputStream inputStream = new URI(url + path).toURL().openStream();
                 if (inputStream == null) return null;
                 JsonNode jsonNode = mapper.readTree(inputStream);
                 jsonCache.put(path, jsonNode);
                 return jsonNode;
-            } catch (IOException e) {
+            } catch (IOException | URISyntaxException e) {
                 throw new RuntimeException(e);
             }
         }

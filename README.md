@@ -24,31 +24,40 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 
 ## Features
 
-- [x] Fact command
-- [x] Insult command
-- [x] Lurk command with timer
-- [x] Joke command
-- [x] Weather command
-- [x] Wiki command
-- [x] Admin commands
-- [x] Debug Commands
-- [x] Database logging
-- [x] Help command
-- [x] Gif command
-- [x] ChatGPT command
-- [x] Translate command
-- [x] Moderate command
-- [x] Ping command
-- [x] Black and White list
-- [x] Cheap GUI
-- [x] Custom Commands
-- [x] Counter command
-- [x] Custom Timers
-- [ ] Web UI
-- [ ] Rank command
-- [ ] Key
+- Commands:
+  - [x] ChatGPT
+  - [x] Fact
+  - [x] Gif
+  - [x] Insult
+  - [x] Joke
+  - [x] Lurk (with timer)
+  - [x] Translate
+  - [x] Weather
+  - [x] Wiki
 
-<br>
+
+- Admin Commands:
+  -[x] Block/Unblock
+  - [x] Help
+  - [x] Join/Leave
+  - [x] Ping
+  - [x] Say
+  - [x] Status
+  
+
+- Features:
+  - [x] Custom Commands
+  - [x] Custom Counters
+  - [x] Custom Timers
+  - [x] Database Logging
+  - [x] User Intercae
+
+
+- Planned Features:
+  - [ ] Web UI
+  - [ ] Rank
+  - [ ] Key
+  
 
 ## How to use
 
@@ -95,7 +104,7 @@ The file should have the following structure: <br>
 ```json
 {
   "apiKey": "YOUR_API_KEY",
-  "model": "gpt-3.5-turbo",
+  "model": "gpt-4o-mini",
   "maxTokens": 120,
   "temperature": 1,
   "instruction": "You are the best TwitchBot that ever existed!"

@@ -30,7 +30,7 @@ public class Moderate {
         String syntax = "Syntax: " + commandHandler.getPrefix() + "moderate join/leave/block/unblock command/channel";
 
         // About
-        String[] name = {"moderate", "moderrate","mod"};
+        String[] name = {"moderate","mod"};
         String description = "Ändert die Einstellungen des Bots. " + syntax;
 
 

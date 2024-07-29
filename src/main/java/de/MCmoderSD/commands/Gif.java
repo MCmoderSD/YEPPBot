@@ -12,7 +12,8 @@ import de.MCmoderSD.utilities.json.JsonUtility;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Scanner;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -69,20 +70,20 @@ public class Gif {
     // Get GIF
     private String gif(String topic) {
         try {
-            URL url = new URL(this.url + apiKey + query + topic);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            URI uri = new URI(this.url + apiKey + query + topic);
+            HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
             var responseCode = conn.getResponseCode();
             if (responseCode != 200) return "Error code: " + responseCode;
-            Scanner scannerResponse = new Scanner(url.openStream());
+            Scanner scannerResponse = new Scanner(conn.getInputStream());
             StringBuilder responseBody = new StringBuilder();
             while (scannerResponse.hasNext()) responseBody.append(scannerResponse.nextLine());
             scannerResponse.close();
             JSONObject jsonResponse = new JSONObject(responseBody.toString());
             JSONObject data = jsonResponse.getJSONObject("data");
             return data.getString("url");
-        } catch (IOException e) {
+        } catch (URISyntaxException | IOException e) {
             System.err.println(e.getMessage());
             return "An Error occurred. While trying to get a GIF.";
         }

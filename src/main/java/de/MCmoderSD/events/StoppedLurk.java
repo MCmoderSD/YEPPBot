@@ -29,7 +29,7 @@ public class StoppedLurk {
                 Timestamp start = lurker.keySet().iterator().next();
                 ArrayList<Integer> lurkChannel = lurker.get(start);
 
-                if (channelID == lurkChannel.get(0)) { // Stop lurking
+                if (channelID == lurkChannel.getFirst()) { // Stop lurking
 
                     // Remove user from lurk list
                     mySQL.removeLurker(getUserID(event), interactionHandler);
@@ -51,7 +51,7 @@ public class StoppedLurk {
 
                     // Send message
                     response = tagAuthor(event) + " ist ein verräter, hab den kek gerade im chat von " + tagChannel(event) + " gesehen!";
-                    chat.sendMessage(mySQL.queryChannel(lurkChannel.get(0)), response);
+                    chat.sendMessage(mySQL.queryChannel(lurkChannel.getFirst()), response);
 
                     // Log response
                     mySQL.logResponse(event, getEvent(), getMessage(event), response);

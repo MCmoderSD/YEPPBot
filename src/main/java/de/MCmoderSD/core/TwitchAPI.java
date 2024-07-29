@@ -12,7 +12,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @SuppressWarnings("unused")
 public class TwitchAPI {
@@ -27,8 +28,8 @@ public class TwitchAPI {
 
     public int getUserID(String username) {
         try {
-            URL url = new URL("https://api.twitch.tv/helix/users" + "?login=" + username);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            URI uri = new URI("https://api.twitch.tv/helix/users" + "?login=" + username);
+            HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Client-ID", clientId);
             connection.setRequestProperty("Authorization", "Bearer " + getOAuthToken(clientId, clientSecret));
@@ -45,7 +46,7 @@ public class TwitchAPI {
             var endIndex = jsonResponse.indexOf("\"", startIndex);
             var userID = jsonResponse.substring(startIndex, endIndex);
             if (userID.matches("[0-9]+")) return Integer.parseInt(userID);
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             System.err.println(e.getMessage());
         }
         return -1;

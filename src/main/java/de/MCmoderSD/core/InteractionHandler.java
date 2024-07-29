@@ -61,7 +61,7 @@ public class InteractionHandler {
     }
 
     // Execute interaction
-    public void executeInteracton(ChannelMessageEvent event, String interaction) {
+    public void executeInteraction(ChannelMessageEvent event, String interaction) {
         if (interactions.containsKey(interaction) || aliases.containsKey(interaction)) {
 
             // Check for alias
@@ -101,7 +101,7 @@ public class InteractionHandler {
             // Process message and check for interactions
             for (String string : message.split(" ")) {
                 if (interactions.containsKey(string.toLowerCase())) {
-                    executeInteracton(event, string.toLowerCase());
+                    executeInteraction(event, string.toLowerCase());
                     return;
                 }
             }

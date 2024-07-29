@@ -5,7 +5,8 @@ import javax.swing.ImageIcon;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @SuppressWarnings("unused")
 public class ImageStreamer extends ImageUtility {
@@ -30,9 +31,9 @@ public class ImageStreamer extends ImageUtility {
         BufferedImage image = null;
 
         try {
-            if (this.url != null && !resource.contains(this.url)) image = ImageIO.read(new URL(this.url + resource));
-            else image = ImageIO.read(new URL(resource));
-        } catch (IOException e) {
+            if (this.url != null && !resource.contains(this.url)) image = ImageIO.read(new URI(this.url + resource).toURL());
+            else image = ImageIO.read(new URI(resource).toURL());
+        } catch (URISyntaxException | IOException e) {
             System.err.println(e.getMessage());
         }
 
@@ -55,10 +56,9 @@ public class ImageStreamer extends ImageUtility {
         ImageIcon imageIcon; // Load the Animation
 
         try {
-            if (this.url != null && !resource.contains(this.url))
-                imageIcon = new ImageIcon(new URL(this.url + resource));
-            else imageIcon = new ImageIcon(new URL(resource));
-        } catch (MalformedURLException e) {
+            if (this.url != null && !resource.contains(this.url)) imageIcon = new ImageIcon(new URI(this.url + resource).toURL());
+            else imageIcon = new ImageIcon(new URI(resource).toURL());
+        } catch (URISyntaxException | MalformedURLException e) {
             throw new RuntimeException(e);
         }
 

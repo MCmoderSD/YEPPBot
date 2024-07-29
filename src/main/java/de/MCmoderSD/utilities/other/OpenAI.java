@@ -87,4 +87,7 @@ public class OpenAI {
     public JsonNode getConfig() {
         return config;
     }
+    public boolean isActive() {
+        return service != null;
+    }
 }

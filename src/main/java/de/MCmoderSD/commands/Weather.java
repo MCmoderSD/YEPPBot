@@ -17,7 +17,8 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -129,14 +130,14 @@ public class Weather {
             String encodedCityName = cityName.replace(" ", "+");
             while (encodedCityName.charAt(encodedCityName.length() - 1) == '+')
                 encodedCityName = encodedCityName.trim();
-            URL url = new URL(this.url + encodedCityName + this.apiKey);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            URI uri = new URI(this.url + encodedCityName + this.apiKey);
+            HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) response.append(line);
             reader.close();
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             System.err.println(e.getMessage());
             return null;
         }

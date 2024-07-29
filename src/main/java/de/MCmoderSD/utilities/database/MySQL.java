@@ -180,13 +180,13 @@ public class MySQL {
                             "en_people varchar(500), " +
                             "en_verb varchar(500), " +
                             "en_frequency varchar(500), " +
-                            "en_verbing varchar(500), " +
+                            "en_adjective varchar(500), " +
                             "en_object varchar(500), " +
                             "de_percent varchar(500), " +
                             "de_people varchar(500), " +
                             "de_verb varchar(500), " +
                             "de_frequency varchar(500), " +
-                            "de_verbing varchar(500), " +
+                            "de_adjective varchar(500), " +
                             "de_object varchar(500)" +
                             ")"));
 
@@ -1166,7 +1166,7 @@ public class MySQL {
 
         StringBuilder fact = new StringBuilder();
 
-        String[] parts = new String[] {"_percent", "_people", "_verb", "_frequency", "_verbing", "_object"};
+        String[] parts = new String[] {"_percent", "_people", "_verb", "_frequency", "_adjective", "_object"};
 
         // Generate fact
         for (String part : parts) {
