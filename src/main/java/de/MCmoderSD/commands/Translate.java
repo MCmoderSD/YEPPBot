@@ -29,6 +29,7 @@ public class Translate {
 
         // Load Config
         JsonNode config = openAI.getConfig();
+
         maxTokens = config.get("maxTokens").asInt();
         temperature = 0;
 

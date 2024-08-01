@@ -131,6 +131,7 @@ The file should have the following structure: <br>
 }
 ```
 
+You need a ChatGPT API key to use the weather command. <br>
 You can get the API key from [OpenWeatherMap](https://openweathermap.org/api). <br> <br>
 
 ### 5. Add a Giphy API key

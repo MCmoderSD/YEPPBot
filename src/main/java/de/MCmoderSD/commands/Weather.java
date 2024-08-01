@@ -3,6 +3,7 @@ package de.MCmoderSD.commands;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import de.MCmoderSD.utilities.other.OpenAI;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -19,7 +20,6 @@ import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -29,12 +29,16 @@ public class Weather {
     private final String url;
     private final String apiKey;
     private final boolean isNull;
+    private final OpenAI openAI;
+    private final String botName;
+    private final int maxTokens;
+    private final double temperature;
 
     // Constructor
-    public Weather(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
+    public Weather(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
 
         // Syntax
-        String syntax = "Syntax: " + commandHandler.getPrefix() + "weather <Stadt>";
+        String syntax = "Syntax: " + commandHandler.getPrefix() + "weather <city>, <language>";
 
         // About
         String[] name = {"weather", "wetter"};
@@ -44,8 +48,14 @@ public class Weather {
         JsonUtility jsonUtility = new JsonUtility();
         JsonNode config = jsonUtility.load("/api/OpenWeatherMap.json");
 
+        // Load Config
+        this.openAI = openAI;
+        this.botName = botName;
+        maxTokens = openAI.getConfig().get("maxTokens").asInt();
+        temperature = 0;
+
         // Init Attributes
-        isNull = config == null;
+        isNull = config == null || openAI.getConfig().isNull();
         url = isNull ? null : config.get("url").asText();
         apiKey = isNull ? null : config.get("api_key").asText();
         if (isNull) System.err.println(BOLD + "OpenWeatherMap API missing" + UNBOLD);
@@ -59,7 +69,7 @@ public class Weather {
 
                 String response;
                 if (args.length < 1) response = syntax;
-                else response = trimMessage(generateResponse(args));
+                else response = trimMessage(generateFormattedResponse(args));
 
                 // Send message and log response
                 chat.sendMessage(getChannel(event), response);
@@ -69,62 +79,88 @@ public class Weather {
     }
 
     // Generate response
-    private String generateResponse(String... args) {
+    private String generateFormattedResponse(String... args) {
+
+        // Split Input
+        String language = "de"; // Default
+        var parts = 0;
+        for (String arg : args) {
+            if (arg.contains(",")) break;
+            if (!arg.isBlank() || !arg.isEmpty()) parts++;
+        }
+
+        // Remove comma
+        for (var i = 0; i < args.length; i++) args[i] = args[i].replace(",", "");
+
+        // Check language
+        if (parts + 1 < args.length) {
+            StringBuilder lang = new StringBuilder();
+            for (var i = parts + 1; i < args.length; i++) lang.append(args[i]).append(" ");
+            language = lang.toString();
+        }
 
         // Build city name
         StringBuilder cityName = new StringBuilder();
-        Arrays.stream(args).forEach(arg -> cityName.append(arg).append(" "));
+        for (var i = 0; i < parts; i++) cityName.append(args[i]).append(" ");
         while (cityName.charAt(cityName.length() - 1) == ' ') cityName.deleteCharAt(cityName.length() - 1);
+        String finalCityName = cityName.toString();
 
         // Query weather data
-        JSONObject jsonObject = query(cityName.toString());
-        if (jsonObject == null) return "Fehler beim Abrufen der Wetterdaten.";
-        JSONArray weatherArray = jsonObject.getJSONArray("weather");
-        JSONObject weather = weatherArray.getJSONObject(0);
+        String response = query(finalCityName);
+        if (response == null || response.isEmpty() || response.isBlank()) return "Fehler beim Abrufen der Wetterdaten.";
+        String formattedWeatherData = formatWeatherData(finalCityName, response);
 
-        // Weather Description
-        String weatherDescription = weather.getString("description");    // English
+        return openAI.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, maxTokens, temperature);
+    }
 
-        // Main weather data
-        JSONObject main = jsonObject.getJSONObject("main");
-        var tempKelvin = main.getDouble("temp");                      // Kelvin
-        var tempCelsius = tempKelvin - 273.15;                             // Celsius
-        var tempRounded = Math.toIntExact(Math.round(tempCelsius));           // Rounded
-        var humidity = main.getInt("humidity");                          // %
-        var pressure = main.getInt("pressure");                          // hPa
+    private String formatWeatherData(String cityName, String response){
 
-        // Wind data
-        JSONObject wind = jsonObject.getJSONObject("wind");
-        var windSpeed = wind.getDouble("speed");                      // m/s
+            // Weather Description
+            JSONObject data = new JSONObject(response);
+            JSONArray weatherArray = data.getJSONArray("weather");
+            JSONObject weather = weatherArray.getJSONObject(0);
+            String weatherDescription = weather.getString("description");    // English
 
-        // Clouds data
-        JSONObject clouds = jsonObject.getJSONObject("clouds");
-        var cloudiness = clouds.getInt("all");                           // %
+            // Main weather data
+            JSONObject main = data.getJSONObject("main");
+            var tempKelvin = main.getDouble("temp");                      // Kelvin
+            var tempCelsius = tempKelvin - 273.15;                             // Celsius
+            var tempRounded = Math.toIntExact(Math.round(tempCelsius));           // Rounded
+            var humidity = main.getInt("humidity");                          // %
+            var pressure = main.getInt("pressure");                          // hPa
 
-        // Visibility data
-        String visibilityString;
-        BigDecimal visibility = jsonObject.getBigDecimal("visibility");  // Meter
-        if (visibility.intValue() == 10000) visibilityString = "";
-        else if (visibility.intValue() >= 1000 && visibility.intValue() % 100 == 0) {
-            visibility = visibility.divide(new BigDecimal(1000), 2, RoundingMode.HALF_UP);
-            visibilityString = visibility + " km Sichtweite, ";
-        } else {
-            visibilityString = visibility + " m Sichtweite, ";
-        }
+            // Wind data
+            JSONObject wind = data.getJSONObject("wind");
+            var windSpeed = wind.getDouble("speed");                      // m/s
 
-        // Sunrise and sunset data
-        JSONObject sys = jsonObject.getJSONObject("sys");
-        var sunriseUnixTimestamp = sys.getLong("sunrise");              // Unix Timestamp
-        var sunsetUnixTimestamp = sys.getLong("sunset");                // Unix Timestamp
-        String sunrise = formatUnixTimestamp(sunriseUnixTimestamp); // HH:mm:ss
-        String sunset = formatUnixTimestamp(sunsetUnixTimestamp);   // HH:mm:ss
+            // Clouds data
+            JSONObject clouds = data.getJSONObject("clouds");
+            var cloudiness = clouds.getInt("all");                           // %
 
-        // Build response
-        return "Wetter in " + cityName + ": " + weatherDescription + ", bei " + tempRounded + "°C, Luftfeuchtigkeit bei " + humidity + "%, Luftdruck bei " + pressure + " hPa, Windgeschwindigkeit bei " + windSpeed + " m/s , zu " + cloudiness + "% bewölkt, " + visibilityString + "Sonnenaufgang: " + sunrise + ", Sonnenuntergang: " + sunset + " (lokale Zeit)";
+            // Visibility data
+            String visibilityString;
+            BigDecimal visibility = data.getBigDecimal("visibility");  // Meter
+            if (visibility.intValue() == 10000) visibilityString = "";
+            else if (visibility.intValue() >= 1000 && visibility.intValue() % 100 == 0) {
+                visibility = visibility.divide(new BigDecimal(1000), 2, RoundingMode.HALF_UP);
+                visibilityString = visibility + " km Sichtweite, ";
+            } else {
+                visibilityString = visibility + " m Sichtweite, ";
+            }
+
+            // Sunrise and sunset data
+            JSONObject sys = data.getJSONObject("sys");
+            var sunriseUnixTimestamp = sys.getLong("sunrise");              // Unix Timestamp
+            var sunsetUnixTimestamp = sys.getLong("sunset");                // Unix Timestamp
+            String sunrise = formatUnixTimestamp(sunriseUnixTimestamp); // HH:mm:ss
+            String sunset = formatUnixTimestamp(sunsetUnixTimestamp);   // HH:mm:ss
+
+            // Build response
+            return "Wetter in " + cityName + ": " + weatherDescription + ", bei " + tempRounded + "°C, Luftfeuchtigkeit bei " + humidity + "%, Luftdruck bei " + pressure + " hPa, Windgeschwindigkeit bei " + windSpeed + " m/s , zu " + cloudiness + "% bewölkt, " + visibilityString + "Sonnenaufgang: " + sunrise + ", Sonnenuntergang: " + sunset + " (lokale Zeit)";
     }
 
     // Query weather data
-    private JSONObject query(String cityName) {
+    private String query(String cityName) {
         StringBuilder response = new StringBuilder();
         try {
             String encodedCityName = cityName.replace(" ", "+");
@@ -142,6 +178,6 @@ public class Weather {
             return null;
         }
 
-        return new JSONObject(response.toString());
+        return response.toString();
     }
 }

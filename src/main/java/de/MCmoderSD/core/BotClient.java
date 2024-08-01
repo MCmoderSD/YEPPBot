@@ -95,7 +95,7 @@ public class BotClient {
         new Say(mySQL, commandHandler, chat, adminList);
         new Status(mySQL, commandHandler, chat);
         if (openAI != null) new Translate(mySQL, commandHandler, chat, openAI, botName);
-        if (weather) new Weather(mySQL, commandHandler, chat);
+        if (openAI != null && weather) new Weather(mySQL, commandHandler, chat, openAI, botName);
         if (openAI != null) new Wiki(mySQL, commandHandler, chat, openAI, botName);
 
         // Init Interactions
