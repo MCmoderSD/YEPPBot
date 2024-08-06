@@ -37,11 +37,11 @@ public class OpenAI {
     }
 
     // Setter
-    public void clearMessages() {
+    private void clearMessages() {
         messages.clear();
     }
 
-    public void addMessage(String text, boolean system) {
+    private void addMessage(String text, boolean system) {
         messages.add(new ChatMessage(system ? ChatMessageRole.SYSTEM.value() : ChatMessageRole.USER.value(), trimMessage(text)));
     }
 
