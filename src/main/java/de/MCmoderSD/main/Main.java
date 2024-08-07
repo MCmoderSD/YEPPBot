@@ -192,26 +192,26 @@ public class Main {
         HashMap<String, Boolean> result = new HashMap<>();
 
         // Format args
-        for (String arg : args) if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replace("/", "-").replace("-", "").toLowerCase());
+        for (String arg : args) if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replaceAll("/", "-").replaceAll("-", "").toLowerCase());
 
         // Dev & CLI & Log
-        result.put("dev", arguments.contains("dev") || arguments.contains("development") || arguments.contains("debug") || arguments.contains("test"));
-        result.put("cli", arguments.contains("nogui") || arguments.contains("no-gui") || arguments.contains("console") || arguments.contains("terminal"));
-        result.put("log", !(arguments.contains("nolog") || arguments.contains("no-log") || arguments.contains("disable-log") || arguments.contains("disablelog")));
+        result.put("dev", listContainsEither(arguments, "dev", "development", "debug", "test"));
+        result.put("cli", listContainsEither(arguments, "nogui", "no-gui", "console", "terminal"));
+        result.put("log", !listContainsEither(arguments, "nolog", "no-log", "disable-log", "disablelog"));
 
         // Info
-        result.put("help", arguments.contains("help") || arguments.contains("?"));
-        result.put("version", arguments.contains("version") || arguments.contains("ver") || arguments.contains("v"));
+        result.put("help", listContainsEither(arguments, "help", "?"));
+        result.put("version", listContainsEither(arguments, "version", "ver", "v"));
 
         // Bot Config
-        result.put("botconfig", arguments.contains("botconfig") || arguments.contains("bot-config"));
-        result.put("channellist", arguments.contains("channellist") || arguments.contains("channel-list"));
-        result.put("mysqlconfig", arguments.contains("mysqlconfig") || arguments.contains("mysql-config"));
+        result.put("botconfig", listContainsEither(arguments, "botconfig", "bot-config"));
+        result.put("channellist", listContainsEither(arguments, "channellist", "channel-list"));
+        result.put("mysqlconfig", listContainsEither(arguments, "mysqlconfig", "mysql-config"));
 
         // API Config
-        result.put("openaiconfig", arguments.contains("openaiconfig") || arguments.contains("openai-config") || arguments.contains("chatgptconfig") || arguments.contains("chatgpt-config"));
-        result.put("weatherconfig", arguments.contains("weatherconfig") || arguments.contains("weather-config") || arguments.contains("weatherapi") || arguments.contains("weather-api"));
-        result.put("giphyconfig", arguments.contains("giphyconfig") || arguments.contains("giphy-config") || arguments.contains("gifconfig") || arguments.contains("gif-config"));
+        result.put("openaiconfig", listContainsEither(arguments, "openaiconfig", "openai-config", "chatgptconfig", "chatgpt-config"));
+        result.put("weatherconfig", listContainsEither(arguments, "weatherconfig", "weather-config", "weatherapi", "weather-api"));
+        result.put("giphyconfig", listContainsEither(arguments, "giphyconfig", "giphy-config", "gifconfig", "gif-config"));
 
         // Return
         return result;
@@ -219,27 +219,42 @@ public class Main {
 
     private void help() {
         // Info
-        System.out.println("\n Info:");
-        System.out.println("  -help: Show Help");
-        System.out.println("  -version: Show Version");
+        System.out.println(
+        """
+        \n
+        Info:
+            -help: Show Help
+            -version: Show Version
+        """);
 
         // Modes
-        System.out.println("\n Modes:");
-        System.out.println("  -dev: Development Mode");
-        System.out.println("  -cli: CLI Mode (No GUI)");
-        System.out.println("  -nolog: Disable Logging");
+        System.out.println(
+        """ 
+        Modes:
+            -dev: Development Mode
+            -cli: CLI Mode (No GUI)
+            -nolog: Disable Logging
+        """);
 
         // Bot Config
-        System.out.println("\n Bot Config:");
-        System.out.println("  -botconfig: Path to Bot Config");
-        System.out.println("  -channellist: Path to Channel List");
-        System.out.println("  -mysqlconfig: Path to MySQL Config");
+        System.out.println(
+        """
+        Bot Config:
+            -botconfig: Path to Bot Config
+            -channellist: Path to Channel List
+            -mysqlconfig: Path to MySQL Config
+        """);
 
         // API Config
-        System.out.println("\n API Config:");
-        System.out.println("  -openaiconfig: Path to OpenAI Config");
-        System.out.println("  -weatherconfig: Path to Weather Config");
-        System.out.println("  -giphyconfig: Path to Giphy Config");
+        System.out.println(
+        """
+        API Config:
+            -openaiconfig: Path to OpenAI Config
+            -weatherconfig: Path to Weather Config
+            -giphyconfig: Path to Giphy Config
+        """);
+
+        // Exit
         System.exit(0);
     }
 

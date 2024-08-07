@@ -12,13 +12,14 @@ import com.github.twitch4j.eventsub.events.*;
 import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.UI.Frame;
-import de.MCmoderSD.commands.Ping;
+import de.MCmoderSD.commands.*;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -28,6 +29,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class BotClient {
 
     // Associations
+    private final Main main;
     private final MySQL mySQL;
     private final Frame frame;
 
@@ -53,6 +55,7 @@ public class BotClient {
         Credentials credentials = main.getCredentials();
         mySQL = main.getMySQL();
         frame = main.getFrame();
+        this.main = main;
 
         // Get Utilities
         jsonUtility = main.getJsonUtility();
@@ -82,7 +85,7 @@ public class BotClient {
 
         // Join Channels
         ArrayList<String> channelList = new ArrayList<>();
-        if (main.getArg("dev")) channelList.addAll(credentials.getDevList());
+        if (getArg("dev")) channelList.addAll(credentials.getDevList());
         else {
             if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
             channelList.addAll(mySQL.getActiveChannels());
@@ -98,6 +101,7 @@ public class BotClient {
         eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
 
         // Initialize Commands
+        new Join(this, messageHandler);
         new Ping(this, messageHandler);
     }
 
@@ -105,7 +109,7 @@ public class BotClient {
     public void write(String channel, String message) {
 
         // Update Frame
-        frame.log(USER, channel, botName, message);
+        if (!getArg("cli")) frame.log(USER, channel, botName, message);
 
         // Log
         mySQL.logResponse(channel, botName, message);
@@ -121,7 +125,7 @@ public class BotClient {
         var channel = event.getChannel();
 
         // Update Frame
-        frame.log(RESPONSE, channel, botName, message);
+        if (!getArg("cli")) frame.log(RESPONSE, channel, botName, message);
 
         // Log
         mySQL.logResponse(event, command, message);
@@ -172,7 +176,25 @@ public class BotClient {
         client.close();
     }
 
-    // Association Getter
+
+    // Getter
+    public String getBotName() {
+        return botName;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public boolean getArg(String arg) {
+        return main.getArg(arg);
+    }
+
+    public boolean isAdmin(String user) {
+        return admins.contains(user);
+    }
+
+    // Module Getter
     public TwitchClient getClient() {
         return client;
     }

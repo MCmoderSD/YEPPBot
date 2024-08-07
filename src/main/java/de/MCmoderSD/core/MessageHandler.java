@@ -64,7 +64,7 @@ public class MessageHandler {
             // Log Message
             mySQL.logMessage(event);
             event.logToConsole();
-            frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
+            if (!botClient.getArg("cli")) frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
 
             // Handle Timers;
             handleTimers(event);
@@ -80,7 +80,7 @@ public class MessageHandler {
 
             // Reply YEPP
             if (event.hasBotName()) {
-                botClient.respond(event, "@" + BotClient.botName, tagUser(event) + " YEPP");
+                botClient.respond(event, "@" + botClient.getBotName(), tagUser(event) + " YEPP");
                 return;
             }
 
@@ -135,8 +135,8 @@ public class MessageHandler {
         String message = event.getMessage();
 
         // Find Start
-        if (message.indexOf(BotClient.prefix) == 0) message = message.substring(1);
-        else message = message.substring(message.indexOf(" " + BotClient.prefix) + 2);
+        if (message.indexOf(botClient.getPrefix()) == 0) message = message.substring(1);
+        else message = message.substring(message.indexOf(" " + botClient.getPrefix()) + 2);
 
         // Split Command
         String[] split = trimMessage(message).split(" ");

@@ -80,7 +80,7 @@ public class Credentials {
         return DevList;
     }
 
-    // validateations
+    // Validations
     public boolean validateBotConfig() {
         return BotConfig != null;
     }

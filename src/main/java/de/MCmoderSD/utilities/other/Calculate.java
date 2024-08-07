@@ -9,6 +9,8 @@ import java.awt.Toolkit;
 import java.awt.Color;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Calculate {
 
@@ -75,8 +77,8 @@ public class Calculate {
         return new Timestamp(new java.util.Date().getTime());
     }
 
-    public String getSubTier(int tier) {
-        if (tier != 0) return "TIER" + tier;
-        else return "NONE";
+    // List Contains either
+    public static boolean listContainsEither(List<String> list, String... keys) {
+        return Arrays.stream(keys).anyMatch(list::contains);
     }
 }
