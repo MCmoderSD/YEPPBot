@@ -104,7 +104,7 @@ public class BotClient {
         frame.log(USER, channel, botName, message);
 
         // Log
-        // ToDo MySQL log response
+        mySQL.logResponse(channel, botName, message);
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
@@ -129,8 +129,8 @@ public class BotClient {
     }
 
     public void joinChannel(String channel) {
-        chat.joinChannel(channel);
         System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        chat.joinChannel(channel);
     }
 
     public void joinChannel(ArrayList<String> channels) {
@@ -147,6 +147,7 @@ public class BotClient {
     }
 
     public void leaveChannel(String channel) {
+        System.out.printf("%s%s %s Leave Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
         chat.leaveChannel(channel);
     }
 

@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 @SuppressWarnings("unused")
 public class MySQL {
@@ -358,6 +357,35 @@ public class MySQL {
                 preparedStatement.setString(4, command); // set command
                 preparedStatement.setString(5, event.getMessage()); // set args
                 preparedStatement.setString(6, response); // set response
+                preparedStatement.executeUpdate(); // execute
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
+    }
+
+    public void logResponse(String channel, String user, String message) {
+        if (log) new Thread(() -> {
+
+            // Variables
+            var channelID = queryChannelID(channel);
+            var userID = queryUserID(user);
+
+            checkChannel(channelID, channel); // check channel
+            checkUser(userID, user); // check user
+
+            try {
+                if (!isConnected()) connect(); // connect
+
+                // Prepare statement
+                String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+                preparedStatement.setInt(2, channelID); // set channel
+                preparedStatement.setInt(3, userID); // set user
+                preparedStatement.setString(4, USER); // set command
+                preparedStatement.setString(5, USER); // set args
+                preparedStatement.setString(6, message); // set response
                 preparedStatement.executeUpdate(); // execute
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
