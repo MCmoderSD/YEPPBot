@@ -34,6 +34,7 @@ public class Main {
     // Dev Credentials
     public static final String DEV_CONFIG = "/config/BotConfig.json.dev";
     public static final String DEV_LIST = "/config/Channel.list.dev";
+    public static final String DEV_MYSQL = "/database/dev.json";
 
     // Utilities
     private final JsonUtility jsonUtility;
@@ -155,9 +156,11 @@ public class Main {
         if (argMap.get("dev")) {
             botConfigPath = DEV_CONFIG;
             channelListPath = DEV_LIST;
+            mysqlConfigPath = DEV_MYSQL;
         } else {
             if (botConfigPath == null) botConfigPath = BOT_CONFIG;
             if (channelListPath == null) channelListPath = CHANNEL_LIST;
+            if (mysqlConfigPath == null) mysqlConfigPath = MYSQL_CONFIG;
         }
 
         // Initialize Credentials
