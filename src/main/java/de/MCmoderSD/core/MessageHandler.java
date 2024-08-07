@@ -7,6 +7,7 @@ import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -19,6 +20,7 @@ public class MessageHandler {
     private final Frame frame;
 
     // Attributes
+    private final HashMap<Integer, ArrayList<String>> blackList;
     private final HashMap<String, Command> commandList;
     private final HashMap<String, String> aliasList;
     private final ArrayList<Integer> lurkList;
@@ -32,9 +34,28 @@ public class MessageHandler {
         this.frame = frame;
 
         // Initialize Attributes
+        blackList = new HashMap<>();
         commandList = new HashMap<>();
         aliasList = new HashMap<>();
         lurkList = new ArrayList<>();
+
+        // Update Black List
+        updateBlackList();
+    }
+
+    public void addCommand(Command command) {
+
+        // Register command
+        String name = command.getCommand().toLowerCase();
+        commandList.put(name, command);
+
+        // Register aliases
+        for (String alias : command.getAlias()) aliasList.put(alias.toLowerCase(), name);
+    }
+
+    public void updateBlackList() {
+        blackList.clear();
+        blackList.putAll(mySQL.getBlackList());
     }
 
     public void handleMessage(TwitchMessageEvent event) {
@@ -84,12 +105,21 @@ public class MessageHandler {
 
         // Check for Alias
         if (aliasList.containsKey(trigger)) {
-            commandList.get(aliasList.get(trigger));
+            trigger = aliasList.get(trigger);
+            parts.set(0, trigger);
         }
 
         // Check for Command
         if (commandList.containsKey(trigger)) {
-            commandList.get(trigger);
+            if (isBlackListed(event, trigger)) return;
+            Command command = commandList.get(trigger);
+            parts.removeFirst();
+
+            // Log Command
+            mySQL.logCommand(event, trigger, processArgs(parts));
+
+            // Execute Command
+            command.execute(event, parts);
         }
 
         // Check for Custom Command
@@ -109,7 +139,12 @@ public class MessageHandler {
         else message = message.substring(message.indexOf(" " + BotClient.prefix) + 2);
 
         // Split Command
-        String[] split = message.split(" ");
+        String[] split = trimMessage(message).split(" ");
         return new ArrayList<>(Arrays.asList(split));
+    }
+
+    private boolean isBlackListed(TwitchMessageEvent event, String command) {
+        if (!blackList.containsKey(event.getChannelId())) return false;
+        else return blackList.get(event.getChannelId()).contains(command.toLowerCase());
     }
 }

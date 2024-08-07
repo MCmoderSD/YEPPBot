@@ -12,6 +12,7 @@ import com.github.twitch4j.eventsub.events.*;
 import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.UI.Frame;
+import de.MCmoderSD.commands.Ping;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -95,6 +96,9 @@ public class BotClient {
         eventManager.onEvent(ChannelMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
         eventManager.onEvent(ChannelCheerEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
         eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
+
+        // Initialize Commands
+        new Ping(this, messageHandler);
     }
 
     // Setter

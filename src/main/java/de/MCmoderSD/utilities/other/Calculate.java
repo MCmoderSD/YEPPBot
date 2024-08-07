@@ -8,6 +8,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Color;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 public class Calculate {
 
@@ -65,7 +66,7 @@ public class Calculate {
     }
 
     // Trim Args
-    public static String processArgs(String... args) {
+    public static String processArgs(ArrayList<String> args) {
         return trimMessage(String.join(" ", args)).trim();
     }
 
