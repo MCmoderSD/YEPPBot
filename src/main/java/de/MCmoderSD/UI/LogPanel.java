@@ -20,23 +20,31 @@ public class LogPanel extends JPanel {
 
     // Constructor
     public LogPanel(Frame frame, Dimension size) {
+
+        // Init Panel
         super();
         setLayout(null);
-        setPreferredSize(size);
         setBackground(DARK);
         setForeground(PURPLE);
-        setVisible(true);
+
+        // Set Frame
+        this.frame = frame;
+
+        // Set Size
+        var height = Math.toIntExact(Math.round(size.height * 0.9));
+        Dimension panelSize = new Dimension(size.width, height);
+        setPreferredSize(panelSize);
 
         // Variables
-        int fontSize = size.width / 50;
-        int padding = size.width / 100;
+        var fontSize = panelSize.width / 50;
+        var padding = panelSize.width / 100;
 
         // Font
         Font font = new Font("Roboto", Font.PLAIN, fontSize);
 
         // Log Area
         logArea = new RoundedTextArea();
-        logArea.setBounds(padding, padding, size.width - 2 * padding, size.height - 2 * padding);
+        logArea.setBounds(padding, padding, panelSize.width - 2 * padding, panelSize.height - 2 * padding);
         logArea.setBackground(LIGHT);
         logArea.setForeground(WHITE);
         logArea.setFont(font);
@@ -45,7 +53,6 @@ public class LogPanel extends JPanel {
         // Add to Frame
         frame.add(this, BorderLayout.NORTH);
         frame.pack();
-        this.frame = frame;
     }
 
     // Setter
