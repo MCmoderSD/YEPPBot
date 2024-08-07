@@ -18,6 +18,7 @@ public class Calculate {
     public final static String SYSTEM = "[SYS]";
     public final static String USER = "[USR]";
     public final static String COMMAND = "[CMD]";
+    public final static String RESPONSE = "[RSP]";
     public final static String MESSAGE = "[MSG]";
     public final static String CHEER = "[CHR]";
     public final static String SUBSCRIBE = "[SUB]";

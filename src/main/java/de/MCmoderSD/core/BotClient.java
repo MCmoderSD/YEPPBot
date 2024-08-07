@@ -18,9 +18,6 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -29,10 +26,15 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 @SuppressWarnings({"unused"})
 public class BotClient {
 
-    private static final Logger log = LoggerFactory.getLogger(BotClient.class);
+    // Associations
     private final MySQL mySQL;
     private final Frame frame;
 
+    // Utilities
+    private final JsonUtility jsonUtility;
+    private final Reader reader;
+
+    // Constants
     public static String botName;
     public static String prefix;
     public static ArrayList<String> admins;
@@ -43,30 +45,25 @@ public class BotClient {
     private final TwitchHelix helix;
     private final EventManager eventManager;
 
-    // Utilities
-    private final JsonUtility jsonUtility;
-    private final Reader reader;
-
-
     // Constructor
     public BotClient(Main main) {
-
-        // Get Utilities
-        jsonUtility = main.getJsonUtility();
-        reader = main.getReader();
 
         // Get Associations
         Credentials credentials = main.getCredentials();
         mySQL = main.getMySQL();
         frame = main.getFrame();
 
+        // Get Utilities
+        jsonUtility = main.getJsonUtility();
+        reader = main.getReader();
+
         // Load Bot Config
         JsonNode botConfig = credentials.getBotConfig();
-        botName = botConfig.get("botName").asText();
+        botName = botConfig.get("botName").asText().toLowerCase();
         prefix = botConfig.get("prefix").asText();
         admins = new ArrayList<>(Arrays.asList(botConfig.get("admins").asText().split("; ")));
 
-        // Init Credential
+        // Init Bot Credential
         OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
 
         // Init Client
@@ -101,14 +98,31 @@ public class BotClient {
     }
 
     // Setter
-    public void sendMessage(String channel, String message) {
+    public void write(String channel, String message) {
 
         // Update Frame
-        frame.log(USER, channel, botName.toLowerCase(), message);
+        frame.log(USER, channel, botName, message);
 
         // Log
         // ToDo MySQL log response
-        System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName.toLowerCase(), message, BREAK);
+        System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
+
+        // Send Message
+        chat.sendMessage(channel, message);
+    }
+
+    public void respond(TwitchMessageEvent event, String command, String message) {
+
+        // Variables
+        var channel = event.getChannel();
+
+        // Update Frame
+        frame.log(RESPONSE, channel, botName, message);
+
+        // Log
+        mySQL.logResponse(event, command, message);
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
+        System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
         // Send Message
         chat.sendMessage(channel, message);

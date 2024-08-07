@@ -4,7 +4,10 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.utilities.database.MySQL;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -13,7 +16,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class TwitchMessageEvent {
 
     // Constants
-    private final Timestamp timestamp = new Timestamp(System.nanoTime());
+    private final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
     // ID
     private final int channelId;
@@ -91,6 +94,37 @@ public class TwitchMessageEvent {
         subStreak = event.getStreakMonths();
         subTier = event.getTier().ordinalName();
         bits = null;
+    }
+
+    // Methods
+    public void logToMySQL(MySQL mySQL) {
+        new Thread(() -> {
+
+            // Check Channel and User
+            mySQL.checkChannel(channelId, channel);
+            mySQL.checkUser(userId, user);
+
+            // Log message
+            try {
+                if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+                // Prepare statement
+                String query = "INSERT INTO " + "MessageLog" + " (timestamp, type, channel_id, user_id, message) VALUES (?, ?, ?, ?, ?)";
+                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                preparedStatement.setTimestamp(1, timestamp); // set timestamp
+                preparedStatement.setString(2, getType()); // set type
+                preparedStatement.setInt(3, channelId); // set channel
+                preparedStatement.setInt(4, userId); // set user
+                preparedStatement.setString(5, message); // set message
+                preparedStatement.executeUpdate(); // execute
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
+    }
+
+    public void logToConsole() {
+        System.out.println(getLog());
     }
 
     // Getter

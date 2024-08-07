@@ -168,7 +168,7 @@ public class Main {
         else System.err.println(BOLD + "OpenAI Config missing: " + UNBOLD + "OpenAI will not be available");
 
         // Initialize MySQL
-        if (credentials.validateMySQLConfig()) mySQL = new MySQL(this, args.contains("nolog"));
+        if (credentials.validateMySQLConfig()) mySQL = new MySQL(this);
         else {
             System.err.println(BOLD + "MySQL Config missing: Stopping Bot" + UNBOLD);
             System.exit(0);
@@ -194,7 +194,7 @@ public class Main {
         // Dev & CLI & Log
         result.put("dev", arguments.contains("dev") || arguments.contains("development") || arguments.contains("debug") || arguments.contains("test"));
         result.put("cli", arguments.contains("nogui") || arguments.contains("no-gui") || arguments.contains("console") || arguments.contains("terminal"));
-        result.put("log", arguments.contains("nolog") || arguments.contains("no-log") || arguments.contains("disable-log") || arguments.contains("disablelog"));
+        result.put("log", !(arguments.contains("nolog") || arguments.contains("no-log") || arguments.contains("disable-log") || arguments.contains("disablelog")));
 
         // Info
         result.put("help", arguments.contains("help") || arguments.contains("?"));

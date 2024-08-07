@@ -134,7 +134,7 @@ public class MenuPanel extends JPanel {
             return;
         }
 
-        botClient.sendMessage(channel, message);
+        botClient.write(channel, message);
         textField.setText("");
         messageHistory.push(message);
         messageIndex = messageHistory.size();

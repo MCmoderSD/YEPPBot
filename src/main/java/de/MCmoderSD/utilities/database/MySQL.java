@@ -12,8 +12,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
-
 @SuppressWarnings("unused")
 public class MySQL {
 
@@ -30,10 +28,10 @@ public class MySQL {
 
     // Variables
     private Connection connection;
-    private boolean noLog;
+    private boolean log;
 
     // Constructor
-    public MySQL(Main main, boolean noLog) {
+    public MySQL(Main main) {
 
         // Set Associations
         JsonNode databaseConfig = main.getCredentials().getMySQLConfig();
@@ -46,7 +44,7 @@ public class MySQL {
         password = databaseConfig.get("password").asText();
 
         // Set Logging
-        this.noLog = noLog;
+        log = main.getArg("log");
 
         // Initialize Cache Lists
         channelCache = new HashMap<>();
@@ -91,6 +89,7 @@ public class MySQL {
             tables.add(
                     connection.prepareStatement(condition + "MessageLog (" +
                             "timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+                            "type VARCHAR(5) NOT NULL, " +
                             "channel_id INT NOT NULL, " +
                             "user_id INT NOT NULL, " +
                             "message VARCHAR(500), " +
@@ -248,7 +247,7 @@ public class MySQL {
     }
 
     // Checks Channels
-    private void checkChannel(int id, String name) {
+    public void checkChannel(int id, String name) {
         if (channelCache.containsKey(id)) return;
 
         // New Thread
@@ -288,7 +287,7 @@ public class MySQL {
     }
 
     // Checks Users
-    private void checkUser(int id, String name) {
+    public void checkUser(int id, String name) {
 
         // Return if in Cache
         if (userCache.containsKey(id)) return;
@@ -331,27 +330,34 @@ public class MySQL {
 
     // Log Message
     public void logMessage(TwitchMessageEvent event) {
+        if (log) event.logToMySQL(this); // log to MySQL
+    }
 
-        // Return if logging is disabled
-        if (noLog) return;
+    // Log Response
+    public void logResponse(TwitchMessageEvent event, String command, String response) {
+        if (log) new Thread(() -> {
 
-        new Thread(() -> {
+            // Variables
+            var channelID = event.getChannelId();
+            var userID = event.getUserId();
+            var channel = event.getChannel();
+            var user = event.getUser();
 
-            // Check Channel and User
-            checkChannel(event.getChannelId(), event.getChannel());
-            checkUser(event.getChannelId(), event.getUser());
+            checkChannel(channelID, channel); // check channel
+            checkUser(userID, user); // check user
 
-            // Log message
             try {
                 if (!isConnected()) connect(); // connect
 
                 // Prepare statement
-                String query = "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message) VALUES (?, ?, ?, ?)";
+                String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
-                preparedStatement.setInt(2, event.getChannelId()); // set channel
-                preparedStatement.setInt(3, event.getUserId()); // set user
-                preparedStatement.setString(4, event.getMessage()); // set message
+                preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
+                preparedStatement.setInt(2, channelID); // set channel
+                preparedStatement.setInt(3, userID); // set user
+                preparedStatement.setString(4, command); // set command
+                preparedStatement.setString(5, event.getMessage()); // set args
+                preparedStatement.setString(6, response); // set response
                 preparedStatement.executeUpdate(); // execute
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
@@ -362,9 +368,12 @@ public class MySQL {
     // Get Active Channels
     public ArrayList<String> getActiveChannels() {
 
+        // Variables
         ArrayList<String> channels = new ArrayList<>();
+
         try {
             if (!isConnected()) connect();
+
             String query = "SELECT name FROM " + "channels" + " WHERE active = 1";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -449,7 +458,11 @@ public class MySQL {
     }
 
     public boolean isLoggingEnabled() {
-        return noLog;
+        return log;
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 
     // Setter
@@ -472,6 +485,6 @@ public class MySQL {
     }
 
     public void loggingEnabled(boolean loggingEnabled) {
-        this.noLog = loggingEnabled;
+        this.log = loggingEnabled;
     }
 }
