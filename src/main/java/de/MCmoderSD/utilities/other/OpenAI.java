@@ -13,6 +13,7 @@ import java.util.List;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
+@SuppressWarnings("unused")
 public class OpenAI {
 
     // Attributes
@@ -87,6 +88,7 @@ public class OpenAI {
     public JsonNode getConfig() {
         return config;
     }
+
     public boolean isActive() {
         return service != null;
     }

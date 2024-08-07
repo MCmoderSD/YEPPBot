@@ -20,13 +20,18 @@ public class Frame extends JFrame {
 
     // Constructor
     public Frame(Main main) {
-        super();
-        setTitle("YEPPBot v2.0");
+
+        // Init Frame
+        super("YEPPBot v" + Main.VERSION);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+
+        // Set Colors
         setBackground(DARK);
         setForeground(PURPLE);
+
+        // Set Layout
         setLayout(new BorderLayout());
         this.main = main;
 

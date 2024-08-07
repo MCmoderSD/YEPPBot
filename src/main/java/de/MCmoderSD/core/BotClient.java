@@ -7,179 +7,175 @@ import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
-import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
+import com.github.twitch4j.eventsub.events.*;
 
-import de.MCmoderSD.commands.*;
-import de.MCmoderSD.events.*;
+import com.github.twitch4j.helix.TwitchHelix;
 
+import de.MCmoderSD.UI.Frame;
+import de.MCmoderSD.main.Credentials;
+import de.MCmoderSD.main.Main;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonUtility;
-import de.MCmoderSD.utilities.other.OpenAI;
+import de.MCmoderSD.utilities.other.Reader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
+@SuppressWarnings({"unused"})
 public class BotClient {
 
-    // Associations
+    private static final Logger log = LoggerFactory.getLogger(BotClient.class);
     private final MySQL mySQL;
+    private final Frame frame;
+
+    public static String botName;
+    public static String prefix;
+    public static ArrayList<String> admins;
 
     // Attributes
     private final TwitchClient client;
     private final TwitchChat chat;
-    private final CommandHandler commandHandler;
-    private final InteractionHandler interactionHandler;
-    private final String botName;
+    private final TwitchHelix helix;
+    private final EventManager eventManager;
+
+    // Utilities
+    private final JsonUtility jsonUtility;
+    private final Reader reader;
+
 
     // Constructor
-    public BotClient(String botName, String botToken, String prefix, String[] admins, ArrayList<String> channels, MySQL mySQL, OpenAI openAI) {
+    public BotClient(Main main) {
 
-        // Init Bot Name
-        this.botName = botName;
+        // Get Utilities
+        jsonUtility = main.getJsonUtility();
+        reader = main.getReader();
 
-        // Init MySQL
-        this.mySQL = mySQL;
+        // Get Associations
+        Credentials credentials = main.getCredentials();
+        mySQL = main.getMySQL();
+        frame = main.getFrame();
+
+        // Load Bot Config
+        JsonNode botConfig = credentials.getBotConfig();
+        botName = botConfig.get("botName").asText();
+        prefix = botConfig.get("prefix").asText();
+        admins = new ArrayList<>(Arrays.asList(botConfig.get("admins").asText().split("; ")));
 
         // Init Credential
-        OAuth2Credential credential = new OAuth2Credential("twitch", botToken);
+        OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
 
-        // Init Client and Chat
+        // Init Client
         client = TwitchClientBuilder.builder()
-                .withDefaultAuthToken(credential)
-                .withChatAccount(credential)
+                .withDefaultAuthToken(botCredential)
+                .withChatAccount(botCredential)
                 .withEnableChat(true)
                 .withEnableHelix(true)
                 .build();
 
+        // Init Modules
         chat = client.getChat();
+        helix = client.getHelix();
+        eventManager = client.getEventManager();
 
-        // Init White and Blacklist
-        JsonUtility jsonUtility = new JsonUtility();
-        JsonNode whiteList = jsonUtility.load("/config/whitelist.json");
-        JsonNode blackList = jsonUtility.load("/config/blacklist.json");
+        // Join Channels
+        ArrayList<String> channelList = new ArrayList<>();
+        if (main.getArg("dev")) channelList.addAll(credentials.getDevList());
+        else {
+            if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
+            channelList.addAll(mySQL.getActiveChannels());
+        }
+        joinChannel(channelList);
 
-        // Init API Checks
-        boolean giphy = jsonUtility.load("/api/Giphy.json") != null;
-        boolean weather = jsonUtility.load("/api/Giphy.json") != null;
-        if (!giphy) System.err.println(BOLD + "Giphy API missing" + UNBOLD);
-        if (!weather) System.err.println(BOLD + "OpenWeatherMap API missing" + UNBOLD);
+        // Event Handler
+        MessageHandler messageHandler = new MessageHandler(this, mySQL, main.getFrame());
 
-
-        // Init CommandHandler
-        commandHandler = new CommandHandler(mySQL, chat, whiteList, blackList, prefix);
-        interactionHandler = new InteractionHandler(mySQL, whiteList, blackList);
-
-        // Format admin names
-        ArrayList <String> adminList = new ArrayList<>(Arrays.stream(admins).toList());
-
-        // Init Commands
-        new Counter(mySQL, commandHandler, chat, adminList);
-        new CustomCommand(mySQL, commandHandler, chat, adminList);
-        new CustomTimer(mySQL, commandHandler, chat, adminList);
-        new Fact(mySQL, commandHandler, chat);
-        if (giphy) new Gif(mySQL, commandHandler, chat);
-        new Help(mySQL, commandHandler, chat, whiteList, blackList);
-        new Insult(mySQL, commandHandler, chat);
-        new Join(mySQL, commandHandler, chat);
-        new Joke(mySQL, commandHandler, chat);
-        // new Key(mySQL, commandHandler, chat); ToDo Make it work
-        new Lurk(mySQL, commandHandler, chat, interactionHandler);
-        new Moderate(mySQL, commandHandler, chat, adminList);
-        new Ping(mySQL, commandHandler, chat);
-        new Play(mySQL, commandHandler, chat);
-        if (openAI != null) new Prompt(mySQL, commandHandler, chat, openAI, botName);
-        // new Rank(mySQL, commandHandler, chat); ToDo Make it work
-        new Say(mySQL, commandHandler, chat, adminList);
-        new Status(mySQL, commandHandler, chat);
-        if (openAI != null) new Translate(mySQL, commandHandler, chat, openAI, botName);
-        if (openAI != null && weather) new Weather(mySQL, commandHandler, chat, openAI, botName);
-        if (openAI != null) new Wiki(mySQL, commandHandler, chat, openAI, botName);
-
-        // Init Interactions
-        new ReplyYepp(mySQL, interactionHandler, chat);
-        new StoppedLurk(mySQL, interactionHandler, chat);
-        new Yepp(mySQL, interactionHandler, chat);
-
-        // Register the Bot into all channels
-        new Thread(() -> {
-            for (String channel : channels) {
-                try {
-                    chat.joinChannel(channel);
-                    System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel, BREAK, UNBOLD);
-                    Thread.sleep(250); // Prevent rate limit
-                } catch (InterruptedException e) {
-                    System.err.println(e.getMessage());
-                }
-            }
-        }).start();
-
-        // Init the EventListener
-        EventManager eventManager = client.getEventManager();
-
-        // Message Event
-        eventManager.onEvent(ChannelMessageEvent.class, event -> {
-
-            // Log to MySQL
-            mySQL.logMessage(event);
-
-            // Console Output
-            System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, getChannel(event), getAuthor(event), getMessage(event), BREAK);
-
-            // Handle Interaction
-            interactionHandler.handleInteraction(event, botName);
-
-            // Handle Command
-            commandHandler.handleCommand(event, botName);
-
-            // Execute Custom Timers
-            commandHandler.handleCustomTimers(event, botName);
-        });
-
-        // Follow Event
-        eventManager.onEvent(ChannelFollowEvent.class, event -> System.out.printf("%s %s <%s> %s -> Followed%s", logTimestamp(), FOLLOW, event.getBroadcasterUserName(), event.getUserName(), BREAK));
-
-        // Sub Event
-        eventManager.onEvent(ChannelSubscribeEvent.class, event -> System.out.printf("%s %s <%s> %s -> Subscribed %s%s", logTimestamp(), SUBSCRIBE, event.getBroadcasterUserName(), event.getUserName(), event.getTier(), BREAK));
-    }
-
-    // Methods
-    public void sendMessage(String channel, String message) {
-        if (!chat.getChannels().contains(channel)) joinChannel(channel);
-        if (message.length() > 500) message = message.substring(0, 500);
-        if (message.isEmpty()) return;
-
-        chat.sendMessage(channel, message);
-        System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
-        mySQL.messageSent(channel, botName, message);
+        // Message Events
+        eventManager.onEvent(ChannelMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
+        eventManager.onEvent(ChannelCheerEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
+        eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
     }
 
     // Setter
-    public void joinChannel(String channel) {
-        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel, BREAK, UNBOLD);
-        chat.joinChannel(channel);
+    public void sendMessage(String channel, String message) {
+
+        // Update Frame
+        frame.log(USER, channel, botName.toLowerCase(), message);
+
+        // Log
+        // ToDo MySQL log response
+        System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName.toLowerCase(), message, BREAK);
+
+        // Send Message
+        chat.sendMessage(channel, message);
     }
 
-    @SuppressWarnings("unused")
+    public void joinChannel(String channel) {
+        chat.joinChannel(channel);
+        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+    }
+
+    public void joinChannel(ArrayList<String> channels) {
+        new Thread(() -> {
+            try {
+                for (String channel : channels) {
+                    joinChannel(channel);
+                    Thread.sleep(250); // Prevent rate limit
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
+
     public void leaveChannel(String channel) {
         chat.leaveChannel(channel);
     }
 
-    @SuppressWarnings("unused")
+    public void leaveChannel(ArrayList<String> channels) {
+        new Thread(() -> {
+            try {
+                for (String channel : channels) {
+                    leaveChannel(channel);
+                    Thread.sleep(250); // Prevent rate limit
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
+
     public void close() {
         client.close();
     }
 
-    // Getter
-    @SuppressWarnings("unused")
-    public ArrayList<String> getChannels() {
-        return new ArrayList<>(chat.getChannels());
+    // Association Getter
+    public TwitchClient getClient() {
+        return client;
     }
 
-    @SuppressWarnings("unused")
-    public boolean isChannelJoined(String channel) {
-        return chat.getChannels().contains(channel);
+    public TwitchChat getChat() {
+        return chat;
+    }
+
+    public TwitchHelix getHelix() {
+        return helix;
+    }
+
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
+    // Utility Getter
+    public JsonUtility getJsonUtility() {
+        return jsonUtility;
+    }
+
+    public Reader getReader() {
+        return reader;
     }
 }

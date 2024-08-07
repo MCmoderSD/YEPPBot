@@ -1,6 +1,5 @@
 package de.MCmoderSD.main;
 
-import com.fasterxml.jackson.databind.JsonNode;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
@@ -11,7 +10,6 @@ import de.MCmoderSD.utilities.other.OpenAI;
 import de.MCmoderSD.utilities.other.Reader;
 
 import java.awt.HeadlessException;
-import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,46 +20,59 @@ public class Main {
 
     // Constants
     public static final String VERSION = "1.21.3";
+
+    // Bot Config
     public static final String BOT_CONFIG = "/config/BotConfig.json";
     public static final String CHANNEL_LIST = "/config/Channel.list";
     public static final String MYSQL_CONFIG = "/database/mySQL.json";
+
+    // API Credentials
     public static final String OPENAI_CONFIG = "/api/ChatGPT.json";
     public static final String WEATHER_CONFIG = "/api/OpenWeatherMap.json";
     public static final String GIPHY_CONFIG = "/api/Giphy.json";
-    public static final String HELIX_CONFIG = "/api/HelixAPI.json";
+
+    // Dev Credentials
     public static final String DEV_CONFIG = "/config/BotConfig.json.dev";
     public static final String DEV_LIST = "/config/Channel.list.dev";
 
+    // Utilities
+    private final JsonUtility jsonUtility;
+    private final Reader reader;
+
     // Associations
-    private final Frame frame;
-    private final BotClient botClient;
+    private final Credentials credentials;
+
+    private BotClient botClient;
+    private Frame frame;
+    private MySQL mySQL;
+    private OpenAI openAI;
+
+    // Variables
+    private final HashMap<String, Boolean> argMap;
 
     // Constructor
     public Main(ArrayList<String> args) {
 
         // Utilities
-        JsonUtility jsonUtility = new JsonUtility();
-        Reader reader = new Reader();
-
+        jsonUtility = new JsonUtility();
+        reader = new Reader();
 
         // Check Args
-        HashMap<String, Boolean> argMap = checkArgs(args);
+        argMap = checkArgs(args);
 
         // Help
         if (argMap.get("help")) help();
         if (argMap.get("version")) System.out.println("Version: " + VERSION);
 
-
         // Config Paths
-        String botConfigPath;
-        String channelListPath;
-        String mysqlConfigPath;
+        String botConfigPath = null;
+        String channelListPath = null;
+        String mysqlConfigPath = null;
 
         // API Paths
-        String openAIConfigPath;
-        String weatherConfigPath;
-        String giphyConfigPath;
-        String helixConfigPath;
+        String openAIConfigPath = null;
+        String weatherConfigPath = null;
+        String giphyConfigPath = null;
 
         // Bot Config
         try {
@@ -129,26 +140,6 @@ public class Main {
             System.exit(0);
         }
 
-        // Helix Config
-        try {
-            if (argMap.get("helixconfig")) {
-                helixConfigPath = args.get(args.indexOf("helixconfig") + 1);
-                jsonUtility.load(helixConfigPath);
-            } else helixConfigPath = HELIX_CONFIG;
-        } catch (RuntimeException e) {
-            System.err.println(BOLD + "Helix Config missing: " + UNBOLD + e.getMessage());
-            System.exit(0);
-        }
-
-        // Dev Mode
-        if (argMap.get("dev")) {
-            botConfigPath = DEV_CONFIG;
-            channelListPath = DEV_LIST;
-        } else {
-            botConfigPath = BOT_CONFIG;
-            channelListPath = CHANNEL_LIST;
-        }
-
         // CLI Mode
         if (!argMap.get("cli")) {
             Frame tempFrame = null;
@@ -158,62 +149,66 @@ public class Main {
                 System.err.println(BOLD + "No display found: " + UNBOLD + e.getMessage());
             }
             frame = tempFrame;
-        } else frame = null;
-
-        // No Log Mode
-        MySQL mySQL = new MySQL(mysqlConfigPath, frame, !argMap.get("log"));
-
-        // Load Bot Config
-        JsonNode botConfig = jsonUtility.load(botConfigPath);
-        String botName = botConfig.get("botName").asText().toLowerCase();     // Get Bot Name
-        String botToken = botConfig.get("botToken").asText();   // Get Bot Token
-        String prefix = botConfig.get("prefix").asText();       // Get Prefix
-        String[] admins = botConfig.get("admins").asText().toLowerCase().split("; ");
-
-        // Load Channel List
-        Reader reader = new Reader();
-        ArrayList<String> channels = new ArrayList<>();
-        for (String channel : reader.lineRead(channelListPath)) if (channel.length() > 3) channels.add(channel.replace("\n", "").replace(" ", ""));
-        if (!args.contains("-dev")) {
-            ArrayList<String> temp = mySQL.getActiveChannels();
-            for (String channel : temp) if (!channels.contains(channel)) channels.add(channel);
         }
 
-        // Init Bot
-        botClient = new BotClient(botName, botToken, prefix, admins, channels, mySQL, openAI);
+        // Dev Mode
+        if (argMap.get("dev")) {
+            botConfigPath = DEV_CONFIG;
+            channelListPath = DEV_LIST;
+        } else {
+            if (botConfigPath == null) botConfigPath = BOT_CONFIG;
+            if (channelListPath == null) channelListPath = CHANNEL_LIST;
+        }
+
+        // Initialize Credentials
+        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, openAIConfigPath, weatherConfigPath, giphyConfigPath, DEV_CONFIG, DEV_LIST);
+
+        // Initialize OpenAI
+        if (credentials.validateOpenAIConfig()) openAI = new OpenAI(credentials.getOpenAIConfig());
+        else System.err.println(BOLD + "OpenAI Config missing: " + UNBOLD + "OpenAI will not be available");
+
+        // Initialize MySQL
+        if (credentials.validateMySQLConfig()) mySQL = new MySQL(this, args.contains("nolog"));
+        else {
+            System.err.println(BOLD + "MySQL Config missing: Stopping Bot" + UNBOLD);
+            System.exit(0);
+        }
+
+        // Initialize Bot Client
+        if (credentials.validateBotConfig()) botClient = new BotClient(this);
+        else {
+            System.err.println(BOLD + "Bot Config missing: Stopping Bot" + UNBOLD);
+            System.exit(0);
+        }
     }
 
     private HashMap<String, Boolean> checkArgs(ArrayList<String> args) {
 
         // Variables
+        ArrayList<String> arguments = new ArrayList<>();
         HashMap<String, Boolean> result = new HashMap<>();
 
         // Format args
-        args.stream().filter(arg -> !(arg.startsWith("-") || arg.startsWith("/"))).toList().forEach(args::remove);
-        for (String arg : args) {
-            args.remove(arg);
-            args.add(arg.replace("/", "-").replace("-", "").toLowerCase());
-        }
+        for (String arg : args) if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replace("/", "-").replace("-", "").toLowerCase());
 
         // Dev & CLI & Log
-        result.put("dev", args.contains("dev") || args.contains("development") || args.contains("debug") || args.contains("test"));
-        result.put("cli", args.contains("cli") || args.contains("nogui") || args.contains("console") || args.contains("terminal"));
-        result.put("log", args.contains("nolog") || args.contains("no-log") || args.contains("disable-log") || args.contains("disablelog"));
+        result.put("dev", arguments.contains("dev") || arguments.contains("development") || arguments.contains("debug") || arguments.contains("test"));
+        result.put("cli", arguments.contains("nogui") || arguments.contains("no-gui") || arguments.contains("console") || arguments.contains("terminal"));
+        result.put("log", arguments.contains("nolog") || arguments.contains("no-log") || arguments.contains("disable-log") || arguments.contains("disablelog"));
 
         // Info
-        result.put("help", args.contains("help") || args.contains("?"));
-        result.put("version", args.contains("version") || args.contains("ver") || args.contains("v"));
+        result.put("help", arguments.contains("help") || arguments.contains("?"));
+        result.put("version", arguments.contains("version") || arguments.contains("ver") || arguments.contains("v"));
 
         // Bot Config
-        result.put("botconfig", args.contains("botconfig") || args.contains("bot-config"));
-        result.put("channellist", args.contains("channellist") || args.contains("channel-list"));
-        result.put("mysqlconfig", args.contains("mysqlconfig") || args.contains("mysql-config"));
+        result.put("botconfig", arguments.contains("botconfig") || arguments.contains("bot-config"));
+        result.put("channellist", arguments.contains("channellist") || arguments.contains("channel-list"));
+        result.put("mysqlconfig", arguments.contains("mysqlconfig") || arguments.contains("mysql-config"));
 
         // API Config
-        result.put("openaiconfig", args.contains("openaiconfig") || args.contains("openai-config") || args.contains("chatgptconfig") || args.contains("chatgpt-config"));
-        result.put("weatherconfig", args.contains("weatherconfig") || args.contains("weather-config") || args.contains("weatherapi") || args.contains("weather-api"));
-        result.put("giphyconfig", args.contains("giphyconfig") || args.contains("giphy-config") || args.contains("gifconfig") || args.contains("gif-config"));
-        result.put("helixconfig", args.contains("helixconfig") || args.contains("helix-config") || args.contains("twitchconfig") || args.contains("twitch-config"));
+        result.put("openaiconfig", arguments.contains("openaiconfig") || arguments.contains("openai-config") || arguments.contains("chatgptconfig") || arguments.contains("chatgpt-config"));
+        result.put("weatherconfig", arguments.contains("weatherconfig") || arguments.contains("weather-config") || arguments.contains("weatherapi") || arguments.contains("weather-api"));
+        result.put("giphyconfig", arguments.contains("giphyconfig") || arguments.contains("giphy-config") || arguments.contains("gifconfig") || arguments.contains("gif-config"));
 
         // Return
         return result;
@@ -242,7 +237,6 @@ public class Main {
         System.out.println("  -openaiconfig: Path to OpenAI Config");
         System.out.println("  -weatherconfig: Path to Weather Config");
         System.out.println("  -giphyconfig: Path to Giphy Config");
-        System.out.println("  -helixconfig: Path to Helix Config");
         System.exit(0);
     }
 
@@ -254,5 +248,33 @@ public class Main {
     // Getter
     public BotClient getBotClient() {
         return botClient;
+    }
+
+    public Frame getFrame() {
+        return frame;
+    }
+
+    public MySQL getMySQL() {
+        return mySQL;
+    }
+
+    public OpenAI getOpenAI() {
+        return openAI;
+    }
+
+    public Credentials getCredentials() {
+        return credentials;
+    }
+
+    public JsonUtility getJsonUtility() {
+        return jsonUtility;
+    }
+
+    public Reader getReader() {
+        return reader;
+    }
+
+    public boolean getArg(String arg) {
+        return argMap.get(arg);
     }
 }
