@@ -6,19 +6,19 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import java.util.ArrayList;
 
-public class Join {
+public class Play {
 
     // Attributes
-    private boolean firstJoin;
+    private boolean firstPlay;
     private boolean sentMessage;
     private String channel;
 
     // Constructor
-    public Join(BotClient botClient, MessageHandler messageHandler) {
+    public Play(BotClient botClient, MessageHandler messageHandler) {
 
         // About
-        String[] name = {"join"};
-        String description = "Sendet den Befehl " + BotClient.prefix + "join in den Chat, um Events beizutreten";
+        String[] name = {"play"};
+        String description = "Sendet den Befehl " + botClient.getPrefix() + "play in den Chat, um Events beizutreten";
 
         // Initialize attributes
         sentMessage = false;
@@ -28,8 +28,8 @@ public class Join {
         messageHandler.addCommand(new Command(description, name) {
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
-                if (!firstJoin && !sentMessage) {
-                    firstJoin = true;
+                if (!firstPlay && !sentMessage) {
+                    firstPlay = true;
                     channel = event.getChannel();
                     startResetTimer(10);
                     return;
@@ -38,7 +38,7 @@ public class Join {
                 if (!sentMessage && channel != null && channel.equals(event.getChannel())) {
 
                     // Send message
-                    botClient.respond(event, getCommand(), BotClient.prefix + "join");
+                    botClient.respond(event, getCommand(), BotClient.prefix + "play");
 
                     // Reset attributes
                     sentMessage = true;
@@ -50,7 +50,7 @@ public class Join {
 
     // Reset attributes
     private void reset() {
-        firstJoin = false;
+        firstPlay = false;
         channel = null;
     }
 

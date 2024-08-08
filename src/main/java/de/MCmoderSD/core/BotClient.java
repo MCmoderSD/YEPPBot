@@ -65,7 +65,7 @@ public class BotClient {
         JsonNode botConfig = credentials.getBotConfig();
         botName = botConfig.get("botName").asText().toLowerCase();
         prefix = botConfig.get("prefix").asText();
-        admins = new ArrayList<>(Arrays.asList(botConfig.get("admins").asText().split("; ")));
+        admins = new ArrayList<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
         // Init Bot Credential
         OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
@@ -100,9 +100,27 @@ public class BotClient {
         eventManager.onEvent(ChannelCheerEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
         eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
 
+        // Validate Configs
+        boolean openAI = credentials.validateOpenAIConfig();
+        boolean weather = credentials.validateWeatherConfig();
+        boolean giphy = credentials.validateGiphyConfig();
+
         // Initialize Commands
         new Join(this, messageHandler);
         new Ping(this, messageHandler);
+        new Play(this, messageHandler);
+        if (openAI) new Prompt(this, messageHandler, main.getOpenAI());
+        new Say(this, messageHandler);
+        new Status(this, messageHandler);
+        if (openAI) new Translate(this, messageHandler, main.getOpenAI());
+        if (openAI && weather) new Weather(this, messageHandler, main.getOpenAI(), main.getCredentials());
+        if (openAI) new Wiki(this, messageHandler, main.getOpenAI());
+    }
+
+    // Methods
+    private boolean checkModerator(TwitchMessageEvent event) {
+        // ToDo Check if user is moderator
+        return false;
     }
 
     // Setter
@@ -192,6 +210,10 @@ public class BotClient {
 
     public boolean isAdmin(String user) {
         return admins.contains(user);
+    }
+
+    public boolean isModerator(TwitchMessageEvent event) {
+        return checkModerator(event);
     }
 
     // Module Getter

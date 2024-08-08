@@ -6,15 +6,14 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import java.util.ArrayList;
 
-public class Ping {
+public class Status {
 
     // Constructor
-    public Ping(BotClient botClient, MessageHandler messageHandler) {
+    public Status(BotClient botClient, MessageHandler messageHandler) {
 
         // About
-        String[] name = {"ping", "latency"};
-        String description = "Sendet eine Nachricht mit der Latenz des Bots zurück.";
-
+        String[] name = {"status", "test"};
+        String description = "Zeigt den Status des Bots an. Also ob er aktiv ist oder nicht.";
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -23,7 +22,7 @@ public class Ping {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                botClient.respond(event, getCommand(), "Pong " + botClient.getChat().getLatency() + "ms");
+                botClient.respond(event, getCommand(), "Bot ist aktiv!");
             }
         });
     }
