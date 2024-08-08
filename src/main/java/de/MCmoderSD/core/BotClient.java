@@ -85,11 +85,8 @@ public class BotClient {
 
         // Join Channels
         ArrayList<String> channelList = new ArrayList<>();
-        if (getArg("dev")) channelList.addAll(credentials.getDevList());
-        else {
-            if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
-            channelList.addAll(mySQL.getActiveChannels());
-        }
+        if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
+        if (!getArg("dev")) channelList.addAll(mySQL.getActiveChannels());
         joinChannel(channelList);
 
         // Event Handler

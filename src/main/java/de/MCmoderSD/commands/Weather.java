@@ -45,7 +45,7 @@ public class Weather {
         String description = "Zeigt das Wetter in einer Stadt an. " + syntax;
 
         // Load API key
-        JsonNode config = credentials.getWeatherConfig();
+        JsonNode config = credentials.getOpenWeatherMapConfig();
 
         // Load Config
         this.openAI = openAI;

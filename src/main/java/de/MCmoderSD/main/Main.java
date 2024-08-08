@@ -119,7 +119,7 @@ public class Main {
 
         // Weather Config
         try {
-            if (argMap.get("weatherconfig")) {
+            if (argMap.get("openweathermap")) {
                 weatherConfigPath = args.get(args.indexOf("weatherconfig") + 1);
                 jsonUtility.load(weatherConfigPath);
             } else weatherConfigPath = WEATHER_CONFIG;
@@ -162,7 +162,7 @@ public class Main {
         }
 
         // Initialize Credentials
-        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, openAIConfigPath, weatherConfigPath, giphyConfigPath, DEV_CONFIG, DEV_LIST);
+        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, openAIConfigPath, weatherConfigPath, giphyConfigPath);
 
         // Initialize OpenAI
         if (credentials.validateOpenAIConfig()) openAI = new OpenAI(credentials.getOpenAIConfig());
@@ -202,14 +202,14 @@ public class Main {
         result.put("version", listContainsEither(arguments, "version", "ver", "v"));
 
         // Bot Config
-        result.put("botconfig", listContainsEither(arguments, "botconfig", "bot-config"));
-        result.put("channellist", listContainsEither(arguments, "channellist", "channel-list"));
-        result.put("mysqlconfig", listContainsEither(arguments, "mysqlconfig", "mysql-config"));
+        result.put("botconfig", listContainsEither(arguments, "botconfig", "bot-config", "config", "bot"));
+        result.put("channellist", listContainsEither(arguments, "channellist", "channel-list", "channels", "channel"));
+        result.put("mysqlconfig", listContainsEither(arguments, "mysqlconfig", "mysql-config", "databaseconfig", "database-config", "database", "mysql"));
 
         // API Config
-        result.put("openaiconfig", listContainsEither(arguments, "openaiconfig", "openai-config", "chatgptconfig", "chatgpt-config"));
-        result.put("weatherconfig", listContainsEither(arguments, "weatherconfig", "weather-config", "weatherapi", "weather-api"));
-        result.put("giphyconfig", listContainsEither(arguments, "giphyconfig", "giphy-config", "gifconfig", "gif-config"));
+        result.put("openaiconfig", listContainsEither(arguments, "openaiconfig", "openai-config", "chatgptconfig", "chatgpt-config", "openai", "chatgpt"));
+        result.put("openweathermap", listContainsEither(arguments, "weatherconfig", "weather-config", "weatherapi", "weather-api", "openweathermap", "open-weather-map", "openweathermapconfig", "open-weather-map-config"));
+        result.put("giphyconfig", listContainsEither(arguments, "giphyconfig", "giphy-config", "gifconfig", "gif-config", "giphy", "gif"));
 
         // Return
         return result;
@@ -248,7 +248,7 @@ public class Main {
         """
         API Config:
             -openaiconfig: Path to OpenAI Config
-            -weatherconfig: Path to Weather Config
+            -openweathermap: Path to Weather Config
             -giphyconfig: Path to Giphy Config
         """);
 

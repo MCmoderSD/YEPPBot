@@ -11,106 +11,115 @@ import java.util.ArrayList;
 public class Credentials {
 
     // Bot Credentials
-    private JsonNode BotConfig;
-    private ArrayList<String> ChannelList;
-    private JsonNode MySQLConfig;
+    private JsonNode botConfig;
+    private ArrayList<String> channelList;
+    private JsonNode mySQLConfig;
 
-    // API Credentials
-    private JsonNode OpenAIConfig;
-    private JsonNode WeatherConfig;
-    private JsonNode GiphyConfig;
-
-    // Dev Credentials
-    private JsonNode DevConfig;
-    private ArrayList<String> DevList;
+    // API Cials
+    private JsonNode openAIConfig;
+    private JsonNode openWeatherMapConfig;
+    private JsonNode giphyConfig;
 
     // Constructor
-    public Credentials(Main main, String botConfig, String channelList, String mySQL, String openAI, String weather, String giphy, String devConfig, String devList) {
+    public Credentials(Main main, String botConfig, String channelList, String mySQL, String openAI, String weather, String giphy) {
 
         // Get Utilities
         JsonUtility jsonUtility = main.getJsonUtility();
         Reader reader = main.getReader();
 
-        // Load Credentials
+        // Load Bot Config
         try {
-            BotConfig = jsonUtility.load(botConfig);
-            ChannelList = reader.lineRead(channelList);
-            MySQLConfig = jsonUtility.load(mySQL);
-
-            OpenAIConfig = jsonUtility.load(openAI);
-            WeatherConfig = jsonUtility.load(weather);
-            GiphyConfig = jsonUtility.load(giphy);
-
-            DevConfig = jsonUtility.load(devConfig);
-            DevList = reader.lineRead(devList);
+            this.botConfig = jsonUtility.load(botConfig);
         } catch (Exception e) {
-            System.err.println("Error loading credentials: " + e.getMessage());
+            System.err.println("Error loading Bot Config: " + e.getMessage());
+            System.exit(1);
         }
+
+        // Load Channel List
+        try {
+            this.channelList = reader.lineRead(channelList);
+        } catch (Exception e) {
+            System.err.println("Error loading Channel List: " + e.getMessage());
+        }
+
+        // Load MySQL Config
+        try {
+            this.mySQLConfig = jsonUtility.load(mySQL);
+        } catch (Exception e) {
+            System.err.println("Error loading MySQL Config: " + e.getMessage());
+            System.exit(1);
+        }
+
+        // Load OpenAI Config
+        try {
+            this.openAIConfig = jsonUtility.load(openAI);
+        } catch (Exception e) {
+            System.err.println("Error loading OpenAI Config: " + e.getMessage());
+        }
+
+        // Load OpenWeatherMap Config
+        try {
+            this.openWeatherMapConfig = jsonUtility.load(weather);
+        } catch (Exception e) {
+            System.err.println("Error loading OpenWeatherMap Config: " + e.getMessage());
+        }
+
+        // Load Giphy Config
+        try {
+            this.giphyConfig = jsonUtility.load(giphy);
+        } catch (Exception e) {
+            System.err.println("Error loading Giphy Config: " + e.getMessage());
+        }
+
     }
 
     // Getters
     public JsonNode getBotConfig() {
-        return BotConfig;
+        return botConfig;
     }
 
     public ArrayList<String> getChannelList() {
-        return ChannelList;
+        return channelList;
     }
 
     public JsonNode getMySQLConfig() {
-        return MySQLConfig;
+        return mySQLConfig;
     }
 
     public JsonNode getOpenAIConfig() {
-        return OpenAIConfig;
+        return openAIConfig;
     }
 
-    public JsonNode getWeatherConfig() {
-        return WeatherConfig;
+    public JsonNode getOpenWeatherMapConfig() {
+        return openWeatherMapConfig;
     }
 
     public JsonNode getGiphyConfig() {
-        return GiphyConfig;
-    }
-
-    public JsonNode getDevConfig() {
-        return DevConfig;
-    }
-
-    public ArrayList<String> getDevList() {
-        return DevList;
+        return giphyConfig;
     }
 
     // Validations
     public boolean validateBotConfig() {
-        return BotConfig != null;
+        return botConfig != null;
     }
 
     public boolean validateChannelList() {
-        return ChannelList != null && !ChannelList.isEmpty();
+        return channelList != null && !channelList.isEmpty();
     }
 
     public boolean validateMySQLConfig() {
-        return MySQLConfig != null;
+        return mySQLConfig != null;
     }
 
     public boolean validateOpenAIConfig() {
-        return OpenAIConfig != null;
+        return openAIConfig != null;
     }
 
     public boolean validateWeatherConfig() {
-        return WeatherConfig != null;
+        return openWeatherMapConfig != null;
     }
 
     public boolean validateGiphyConfig() {
-        return GiphyConfig != null;
+        return giphyConfig != null;
     }
-
-    public boolean validateDevConfig() {
-        return DevConfig != null;
-    }
-
-    public boolean validateDevList() {
-        return DevList != null && !DevList.isEmpty();
-        }
 }
