@@ -2,6 +2,7 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.Command;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class Join {
 
         // About
         String[] name = {"join"};
-        String description = "Sendet den Befehl " + BotClient.prefix + "join in den Chat, um Events beizutreten";
+        String description = "Sendet den Befehl " + botClient.getPrefix() + "join in den Chat, um Events beizutreten";
 
         // Initialize attributes
         sentMessage = false;
@@ -38,7 +39,7 @@ public class Join {
                 if (!sentMessage && channel != null && channel.equals(event.getChannel())) {
 
                     // Send message
-                    botClient.respond(event, getCommand(), BotClient.prefix + "join");
+                    botClient.respond(event, getCommand(), botClient.getPrefix() + "join");
 
                     // Reset attributes
                     sentMessage = true;

@@ -8,7 +8,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
-import static java.awt.Color.WHITE;
 
 public class LogPanel extends JPanel {
 

@@ -2,7 +2,6 @@ package de.MCmoderSD.UI;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.main.Main;
-
 import de.MCmoderSD.utilities.image.ImageReader;
 
 import javax.swing.JFrame;

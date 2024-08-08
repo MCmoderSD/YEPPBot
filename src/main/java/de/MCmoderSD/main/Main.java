@@ -1,9 +1,7 @@
 package de.MCmoderSD.main;
 
-
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
-
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.OpenAI;

@@ -1,15 +1,16 @@
 package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.Command;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.other.OpenAI;
 
 import java.util.ArrayList;
 
-import static de.MCmoderSD.utilities.other.Calculate.processArgs;
-import static de.MCmoderSD.utilities.other.Calculate.trimMessage;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Prompt {
 
@@ -33,7 +34,6 @@ public class Prompt {
         maxTokens = config.get("maxTokens").asInt();
         temperature = config.get("temperature").asDouble();
         instruction = config.get("instruction").asText();
-
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {

@@ -1,7 +1,7 @@
 package de.MCmoderSD.core;
 
 import de.MCmoderSD.UI.Frame;
-import de.MCmoderSD.commands.Command;
+import de.MCmoderSD.objects.Command;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 

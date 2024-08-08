@@ -28,6 +28,7 @@ public class Calculate {
     public final static Color DARK = new Color(0x0e0e10);
     public final static Color LIGHT = new Color(0x18181b);
     public final static Color PURPLE = new Color(0x771fe2);
+    public final static Color WHITE = new Color(0xffffff);
 
 
     // Methods

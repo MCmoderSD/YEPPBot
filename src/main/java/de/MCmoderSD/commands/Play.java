@@ -2,6 +2,7 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.Command;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class Play {
                 if (!sentMessage && channel != null && channel.equals(event.getChannel())) {
 
                     // Send message
-                    botClient.respond(event, getCommand(), BotClient.prefix + "play");
+                    botClient.respond(event, getCommand(), botClient.getPrefix() + "play");
 
                     // Reset attributes
                     sentMessage = true;

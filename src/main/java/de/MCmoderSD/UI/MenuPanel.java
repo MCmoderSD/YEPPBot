@@ -1,7 +1,6 @@
 package de.MCmoderSD.UI;
 
 import de.MCmoderSD.core.BotClient;
-
 import de.MCmoderSD.utilities.frontend.RoundedButton;
 import de.MCmoderSD.utilities.frontend.RoundedTextField;
 
@@ -17,7 +16,6 @@ import java.awt.event.KeyEvent;
 import java.util.Stack;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
-import static java.awt.Color.WHITE;
 import static java.awt.event.KeyEvent.*;
 
 public class MenuPanel extends JPanel {

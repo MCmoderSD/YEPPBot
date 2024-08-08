@@ -2,6 +2,7 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.Command;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import java.util.ArrayList;
