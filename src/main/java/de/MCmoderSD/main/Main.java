@@ -192,12 +192,11 @@ public class Main {
         String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "ChatGPT.json", "OpenWeatherMap.json", "Giphy.json"};
 
         for (String fileName : fileNames) {
-            File file = new File(fileName);
             InputStream inputStream = getClass().getResourceAsStream("/example/" + fileName);
 
             assert inputStream != null;
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            BufferedWriter bufferedWriter = null;
+            BufferedWriter bufferedWriter;
 
             try {
                 bufferedWriter = new BufferedWriter(new FileWriter(fileName));
