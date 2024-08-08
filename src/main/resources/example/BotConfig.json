@@ -1,0 +1,6 @@
+{
+  "botName": "Name of the Bot",
+  "botToken": "YOUR_BOT_TOKEN",
+  "prefix": "!",
+  "admins": "ExampleAdmin1; ExampleAdmin2; ExampleAdmin3"
+}
