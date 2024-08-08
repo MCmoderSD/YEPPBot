@@ -26,7 +26,7 @@ import java.util.Collections;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-@SuppressWarnings({"unused"})
+@SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 public class BotClient {
 
     // Associations
@@ -208,6 +208,10 @@ public class BotClient {
 
     public boolean isAdmin(String user) {
         return admins.contains(user);
+    }
+
+    public boolean isBroadcaster(TwitchMessageEvent event) {
+        return event.getChannelId() == event.getUserId();
     }
 
     public boolean isModerator(TwitchMessageEvent event) {

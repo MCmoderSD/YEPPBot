@@ -11,6 +11,7 @@ import java.awt.HeadlessException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -56,6 +57,13 @@ public class Main {
         // Utilities
         jsonUtility = new JsonUtility();
         reader = new Reader();
+
+        // Format Args
+        args.replaceAll(String::toLowerCase);
+        args.removeAll(Collections.singleton(""));
+        args.removeAll(Collections.singleton(" "));
+        args.removeAll(Collections.singleton(null));
+        for (String arg : args) if (arg.startsWith("-") || arg.startsWith("/")) args.set(args.indexOf(arg), arg.replaceAll("/", "-").replaceAll("--", "-"));
 
         // Check Args
         argMap = checkArgs(args);
@@ -111,9 +119,9 @@ public class Main {
 
         // Dev Mode
         if (argMap.get("dev")) {
-            botConfigPath = DEV_CONFIG;
-            channelListPath = DEV_LIST;
-            mysqlConfigPath = DEV_MYSQL;
+            if (botConfigPath == null) botConfigPath = DEV_CONFIG;
+            if (channelListPath == null) channelListPath = DEV_LIST;
+            if (mysqlConfigPath == null) mysqlConfigPath = DEV_MYSQL;
         } else {
             if (botConfigPath == null) botConfigPath = BOT_CONFIG;
             if (channelListPath == null) channelListPath = CHANNEL_LIST;
@@ -191,7 +199,7 @@ public class Main {
         HashMap<String, Boolean> result = new HashMap<>();
 
         // Format args
-        for (String arg : args) if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replaceAll("/", "-").replaceAll("-", "").toLowerCase());
+        for (String arg : args) if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replaceAll("/", "-").replaceAll("-", ""));
 
         // Dev & CLI & Log
         result.put("dev", listContainsEither(arguments, "dev", "development", "debug", "test"));

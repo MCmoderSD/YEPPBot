@@ -184,10 +184,10 @@ After you compiled the bot into a .jar file, you can run it using the following 
 ```java -jar NAME_OF_THE_JAR_FILE.jar``` 
 
 If you use the downloaded jar file to generate example files, you can run it using the following command: <br>
-```java -jar YEPPBot.jar -generate"``` <br> <br>
+```java -jar YEPPBot.jar -generate``` <br> <br>
 
 After you edited the config files and put in the API keys, you can run the bot using the following command: <br>
-```java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -mysqlconfig "/PATH/TO/mySQL.json ..."``` <br> <br>
+```java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -mysqlconfig "/PATH/TO/mySQL.json``` <br> <br>
 and so on for the other config files. <br>
 
 You don't need a channel list file, but it's recommended to use one. <br>
