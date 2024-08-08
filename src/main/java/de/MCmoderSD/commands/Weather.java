@@ -102,7 +102,7 @@ public class Weather {
         String finalCityName = cityName.toString();
 
         // Query weather data
-        String response = query(finalCityName);
+        String response = query(convertToAscii(finalCityName));
         if (response == null || response.isEmpty() || response.isBlank()) return "Fehler beim Abrufen der Wetterdaten.";
         String formattedWeatherData = formatWeatherData(finalCityName, response);
 

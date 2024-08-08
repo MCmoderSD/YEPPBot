@@ -8,6 +8,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Color;
 import java.sql.Timestamp;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,6 +60,30 @@ public class Calculate {
     // Log timestamp
     public static String logTimestamp() {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new java.util.Date()) + "]";
+    }
+
+    // Convert to ASCII
+    public static String convertToAscii(String input) {
+
+        // Replace German Umlauts
+        input = input.replaceAll("Ä", "Ae");
+        input = input.replaceAll("ä", "ae");
+        input = input.replaceAll("Ö", "Oe");
+        input = input.replaceAll("ö", "oe");
+        input = input.replaceAll("Ü", "Ue");
+        input = input.replaceAll("ü", "ue");
+        input = input.replaceAll("ß", "ss");
+
+        // Normalize the input string to decompose accented characters
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+
+        // Remove diacritical marks (accents)
+        String ascii = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+
+        // Remove any remaining non-ASCII characters
+        ascii = ascii.replaceAll("[^\\p{ASCII}]", "");
+
+        return ascii;
     }
 
     // Trim Message

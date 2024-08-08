@@ -73,75 +73,30 @@ public class Main {
         String mysqlConfigPath = null;
 
         // API Paths
-        String openAIConfigPath = null;
-        String weatherConfigPath = null;
-        String giphyConfigPath = null;
+        String openAIConfigPath;
+        String weatherConfigPath;
+        String giphyConfigPath;
 
         // Bot Config
-        try {
-            if (argMap.get("botconfig")) {
-                botConfigPath = args.get(args.indexOf("botconfig") + 1);
-                jsonUtility.load(botConfigPath);
-            } else botConfigPath = BOT_CONFIG;
-        } catch (RuntimeException e) {
-            System.err.println(BOLD + "Bot Config missing: " + UNBOLD + e.getMessage());
-            System.exit(0);
-        }
+        if (argMap.get("botconfig")) botConfigPath = args.get(args.indexOf("-botconfig") + 1);
 
         // Channel List
-        try {
-            if (argMap.get("channellist")) {
-                channelListPath = args.get(args.indexOf("channellist") + 1);
-                reader.lineRead(channelListPath);
-            } else channelListPath = CHANNEL_LIST;
-        } catch (RuntimeException e) {
-            System.err.println(BOLD + "Channel List missing: " + UNBOLD + e.getMessage());
-            System.exit(0);
-        }
+        if (argMap.get("channellist")) channelListPath = args.get(args.indexOf("-channellist") + 1);
 
         // MySQL Config
-        try {
-            if (argMap.get("mysqlconfig")) {
-                mysqlConfigPath = args.get(args.indexOf("mysqlconfig") + 1);
-                jsonUtility.load(mysqlConfigPath);
-            } else mysqlConfigPath = MYSQL_CONFIG;
-        } catch (RuntimeException e) {
-            System.err.println(BOLD + "MySQL Config missing: " + UNBOLD + e.getMessage());
-            System.exit(0);
-        }
+        if (argMap.get("mysqlconfig")) mysqlConfigPath = args.get(args.indexOf("-mysqlconfig") + 1);
 
         // OpenAI Config
-        try {
-            if (argMap.get("openaiconfig")) {
-                openAIConfigPath = args.get(args.indexOf("openaiconfig") + 1);
-                jsonUtility.load(openAIConfigPath);
-            } else openAIConfigPath = OPENAI_CONFIG;
-        } catch (RuntimeException e) {
-            System.err.println(BOLD + "OpenAI Config missing: " + UNBOLD + e.getMessage());
-            System.exit(0);
-        }
+        if (argMap.get("openaiconfig")) openAIConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
+        else openAIConfigPath = OPENAI_CONFIG;
 
         // Weather Config
-        try {
-            if (argMap.get("openweathermap")) {
-                weatherConfigPath = args.get(args.indexOf("weatherconfig") + 1);
-                jsonUtility.load(weatherConfigPath);
-            } else weatherConfigPath = WEATHER_CONFIG;
-        } catch (RuntimeException e) {
-            System.err.println(BOLD + "Weather Config missing: " + UNBOLD + e.getMessage());
-            System.exit(0);
-        }
+        if (argMap.get("openweathermapconfig")) weatherConfigPath = args.get(args.indexOf("-openweathermapconfig") + 1);
+        else weatherConfigPath = WEATHER_CONFIG;
 
         // Giphy Config
-        try {
-            if (argMap.get("giphyconfig")) {
-                giphyConfigPath = args.get(args.indexOf("giphyconfig") + 1);
-                jsonUtility.load(giphyConfigPath);
-            } else giphyConfigPath = GIPHY_CONFIG;
-        } catch (RuntimeException e) {
-            System.err.println(BOLD + "Giphy Config missing: " + UNBOLD + e.getMessage());
-            System.exit(0);
-        }
+        if (argMap.get("giphyconfig")) giphyConfigPath = args.get(args.indexOf("-giphyconfig") + 1);
+        else giphyConfigPath = GIPHY_CONFIG;
 
         // CLI Mode
         if (!argMap.get("cli")) {
@@ -176,36 +131,46 @@ public class Main {
         if (credentials.validateMySQLConfig()) mySQL = new MySQL(this);
         else {
             System.err.println(BOLD + "MySQL Config missing: Stopping Bot" + UNBOLD);
-            System.exit(0);
+            System.exit(1);
         }
 
         // Initialize Bot Client
         if (credentials.validateBotConfig()) botClient = new BotClient(this);
         else {
             System.err.println(BOLD + "Bot Config missing: Stopping Bot" + UNBOLD);
-            System.exit(0);
+            System.exit(1);
         }
     }
 
+    // Generate Config Files
     private void generateConfigFiles() {
-        // Generate Config Files
+
+        // Files
         String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "ChatGPT.json", "OpenWeatherMap.json", "Giphy.json"};
 
         for (String fileName : fileNames) {
-            InputStream inputStream = getClass().getResourceAsStream("/example/" + fileName);
 
-            assert inputStream != null;
+            // Input Stream
+            InputStream inputStream = getClass().getResourceAsStream("/examples/" + fileName);
+
+            assert inputStream != null; // Check
+
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             BufferedWriter bufferedWriter;
 
             try {
+
+                // Create
                 bufferedWriter = new BufferedWriter(new FileWriter(fileName));
 
+                // Write
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     bufferedWriter.write(line);
                     bufferedWriter.newLine();
                 }
+
+                // Close
                 bufferedReader.close();
                 bufferedWriter.close();
 
@@ -213,6 +178,8 @@ public class Main {
                 throw new RuntimeException(e);
             }
         }
+
+        // Exit
         System.out.println("Config Files generated");
         System.exit(0);
     }
@@ -230,21 +197,21 @@ public class Main {
         result.put("dev", listContainsEither(arguments, "dev", "development", "debug", "test"));
         result.put("cli", listContainsEither(arguments, "nogui", "no-gui", "console", "terminal"));
         result.put("log", !listContainsEither(arguments, "nolog", "no-log", "disable-log", "disablelog"));
-        result.put("generate", listContainsEither(arguments, "generate", "gen"));
 
         // Info
         result.put("help", listContainsEither(arguments, "help", "?"));
         result.put("version", listContainsEither(arguments, "version", "ver", "v"));
+        result.put("generate", listContainsEither(arguments, "generate", "gen"));
 
         // Bot Config
-        result.put("botconfig", listContainsEither(arguments, "botconfig", "bot-config", "config", "bot"));
-        result.put("channellist", listContainsEither(arguments, "channellist", "channel-list", "channels", "channel"));
-        result.put("mysqlconfig", listContainsEither(arguments, "mysqlconfig", "mysql-config", "databaseconfig", "database-config", "database", "mysql"));
+        result.put("botconfig", listContainsEither(arguments, "botconfig"));
+        result.put("channellist", listContainsEither(arguments, "channellist"));
+        result.put("mysqlconfig", listContainsEither(arguments, "mysqlconfig"));
 
         // API Config
-        result.put("openaiconfig", listContainsEither(arguments, "openaiconfig", "openai-config", "chatgptconfig", "chatgpt-config", "openai", "chatgpt"));
-        result.put("openweathermap", listContainsEither(arguments, "weatherconfig", "weather-config", "weatherapi", "weather-api", "openweathermap", "open-weather-map", "openweathermapconfig", "open-weather-map-config"));
-        result.put("giphyconfig", listContainsEither(arguments, "giphyconfig", "giphy-config", "gifconfig", "gif-config", "giphy", "gif"));
+        result.put("openaiconfig", listContainsEither(arguments, "openaiconfig"));
+        result.put("openweathermapconfig", listContainsEither(arguments, "openweathermapconfig"));
+        result.put("giphyconfig", listContainsEither(arguments, "giphyconfig"));
 
         // Return
         return result;
@@ -268,6 +235,7 @@ public class Main {
             -cli: CLI Mode (No GUI)
             -nolog: Disable Logging
         """);
+
         // Generate Config Files
         System.out.println(
         """ 

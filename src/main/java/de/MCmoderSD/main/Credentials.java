@@ -29,7 +29,7 @@ public class Credentials {
 
         // Load Bot Config
         try {
-            this.botConfig = jsonUtility.load(botConfig);
+            this.botConfig = jsonUtility.load(botConfig, main.getArg("botconfig"));
         } catch (Exception e) {
             System.err.println("Error loading Bot Config: " + e.getMessage());
             System.exit(1);
@@ -37,14 +37,14 @@ public class Credentials {
 
         // Load Channel List
         try {
-            this.channelList = reader.lineRead(channelList);
+            this.channelList = reader.lineRead(channelList, main.getArg("channellist"));
         } catch (Exception e) {
             System.err.println("Error loading Channel List: " + e.getMessage());
         }
 
         // Load MySQL Config
         try {
-            this.mySQLConfig = jsonUtility.load(mySQL);
+            this.mySQLConfig = jsonUtility.load(mySQL, main.getArg("mysqlconfig"));
         } catch (Exception e) {
             System.err.println("Error loading MySQL Config: " + e.getMessage());
             System.exit(1);
@@ -52,21 +52,21 @@ public class Credentials {
 
         // Load OpenAI Config
         try {
-            this.openAIConfig = jsonUtility.load(openAI);
+            this.openAIConfig = jsonUtility.load(openAI, main.getArg("openaiconfig"));
         } catch (Exception e) {
             System.err.println("Error loading OpenAI Config: " + e.getMessage());
         }
 
         // Load OpenWeatherMap Config
         try {
-            this.openWeatherMapConfig = jsonUtility.load(weather);
+            this.openWeatherMapConfig = jsonUtility.load(weather, main.getArg("openweathermapconfig"));
         } catch (Exception e) {
             System.err.println("Error loading OpenWeatherMap Config: " + e.getMessage());
         }
 
         // Load Giphy Config
         try {
-            this.giphyConfig = jsonUtility.load(giphy);
+            this.giphyConfig = jsonUtility.load(giphy, main.getArg("giphyconfig"));
         } catch (Exception e) {
             System.err.println("Error loading Giphy Config: " + e.getMessage());
         }

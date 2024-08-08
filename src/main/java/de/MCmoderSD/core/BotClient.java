@@ -22,6 +22,7 @@ import de.MCmoderSD.utilities.other.Reader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -84,7 +85,7 @@ public class BotClient {
         eventManager = client.getEventManager();
 
         // Join Channels
-        ArrayList<String> channelList = new ArrayList<>();
+        ArrayList<String> channelList = new ArrayList<>(Collections.singleton(botName));
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
         if (!getArg("dev")) channelList.addAll(mySQL.getActiveChannels());
         joinChannel(channelList);
