@@ -67,7 +67,8 @@ But remember **DON'T POST** or **SHARE** the token anywhere!!! <br> <br>
 ### 1. Download the bot jar file
 
 You can download the latest version of the bot from the [releases](https://github.com/MCmoderSD/YEPPBot/releases/latest) page. <br>
-You need to create the config files and add the API keys, but if you don't want to compile the bot yourself, you can ignore the folder structure. <br>
+You can create the Config files yourself or use the ```-generate``` argument to create the config files. <br>
+You can skip to [Step 8](#8-compile-the-bot) if you use the downloaded jar file. <br> <br>
 
 You can also clone the repository and compile the bot yourself.
 For that need to have Git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
@@ -182,8 +183,12 @@ You can also add your own assets to the database, just pay attention to the form
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
 ```java -jar NAME_OF_THE_JAR_FILE.jar``` 
 
-If you use the downloaded jar file, you can run it using the following command: <br>
-```java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -mysql "/PATH/TO/mySQL.json"``` <br> <br>
+If you use the downloaded jar file to generate example files, you can run it using the following command: <br>
+```java -jar YEPPBot.jar -generate"``` <br> <br>
+
+After you edited the config files and put in the API keys, you can run the bot using the following command: <br>
+```java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -mysqlconfig "/PATH/TO/mySQL.json ..."``` <br> <br>
+and so on for the other config files. <br>
 
 You don't need a channel list file, but it's recommended to use one. <br>
 You can use the ```-help``` argument to get a list of all the arguments. <br>
@@ -198,8 +203,6 @@ the ```-mysqlconfig "/PATH/TO/mySQL.json"``` argument to specify the path to the
 the ```-openaiconfig "/PATH/TO/ChatGPT.json"``` argument to specify the path to the ChatGPT.json file. <br>
 the ```-openweathermapconfig "/PATH/TO/OpenWeatherMap.json"``` argument to specify the path to the OpenWeatherMap.json file. <br>
 the ```-giphyconfig "/PATH/TO/Giphy.json"``` argument to specify the path to the Giphy.json file. <br> <br>
-
-<br> <br>
 
 ## Usage and commands
 
