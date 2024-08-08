@@ -8,6 +8,7 @@ import de.MCmoderSD.utilities.other.OpenAI;
 import de.MCmoderSD.utilities.other.Reader;
 
 import java.awt.HeadlessException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,6 +63,9 @@ public class Main {
         // Help
         if (argMap.get("help")) help();
         if (argMap.get("version")) System.out.println("Version: " + VERSION);
+
+        // Generate Config Files
+        if (argMap.get("generate")) generateConfigFiles();
 
         // Config Paths
         String botConfigPath = null;
@@ -183,6 +187,36 @@ public class Main {
         }
     }
 
+    private void generateConfigFiles() {
+        // Generate Config Files
+        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "ChatGPT.json", "OpenWeatherMap.json", "Giphy.json"};
+
+        for (String fileName : fileNames) {
+            InputStream inputStream = getClass().getResourceAsStream("/example/" + fileName);
+
+            assert inputStream != null;
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedWriter bufferedWriter;
+
+            try {
+                bufferedWriter = new BufferedWriter(new FileWriter(fileName));
+
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    bufferedWriter.write(line);
+                    bufferedWriter.newLine();
+                }
+                bufferedReader.close();
+                bufferedWriter.close();
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        System.out.println("Config Files generated");
+        System.exit(0);
+    }
+
     private HashMap<String, Boolean> checkArgs(ArrayList<String> args) {
 
         // Variables
@@ -196,6 +230,7 @@ public class Main {
         result.put("dev", listContainsEither(arguments, "dev", "development", "debug", "test"));
         result.put("cli", listContainsEither(arguments, "nogui", "no-gui", "console", "terminal"));
         result.put("log", !listContainsEither(arguments, "nolog", "no-log", "disable-log", "disablelog"));
+        result.put("generate", listContainsEither(arguments, "generate", "gen"));
 
         // Info
         result.put("help", listContainsEither(arguments, "help", "?"));
@@ -232,6 +267,13 @@ public class Main {
             -dev: Development Mode
             -cli: CLI Mode (No GUI)
             -nolog: Disable Logging
+        """);
+        // Generate Config Files
+        System.out.println(
+        """ 
+        Generate:
+            -generate: Generate Config Files
+            -gen: Generate Config Files
         """);
 
         // Bot Config
