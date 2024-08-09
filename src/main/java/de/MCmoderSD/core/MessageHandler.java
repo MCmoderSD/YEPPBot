@@ -6,11 +6,15 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.NoSuchElementException;
+
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-@SuppressWarnings("unused")
 public class MessageHandler {
 
     // Associations
@@ -25,6 +29,7 @@ public class MessageHandler {
     private final HashMap<Integer, ArrayList<String>> blackList;
     private final HashMap<Integer, HashMap<String, String >> customCommands;
     private final HashMap<Integer, HashMap<String, String >> customAliases;
+    private final HashMap<Integer, HashMap<String, Integer>> counters;
 
     // Utilities
     private final Random random = new Random();
@@ -44,11 +49,13 @@ public class MessageHandler {
         blackList = new HashMap<>();
         customCommands = new HashMap<>();
         customAliases = new HashMap<>();
+        counters = new HashMap<>();
 
         // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
         updateBlackList(mySQL.getChannelManager().getBlackList());
         updateCustomCommands(mySQL.getCustomManager().getCustomCommands(), mySQL.getCustomManager().getCustomAliases());
+        updateCounters(mySQL.getCustomManager().getCustomCounters());
     }
 
     // Handle Methods
@@ -197,7 +204,22 @@ public class MessageHandler {
         }
 
         // Check for Counter
-        // TODO: Implement Counter
+        if (counters.containsKey(channelID)) {
+
+            // Check for Counter
+            if (counters.get(channelID).containsKey(trigger)) {
+
+                var currentValue = counters.get(channelID).get(trigger);
+                String response = mySQL.getCustomManager().editCounter(event, trigger, currentValue + 1);
+                parts.removeFirst();
+
+                // Log Command
+                mySQL.getLogManager().logCommand(event, trigger, processArgs(parts));
+
+                // Execute Command
+                botClient.respond(event, "Counter: " + trigger, response);
+            }
+        }
     }
 
     // Message Formatting
@@ -318,6 +340,12 @@ public class MessageHandler {
         this.customAliases.putAll(customAliases);
     }
 
+    // Update Counters
+    public void updateCounters(HashMap<Integer, HashMap<String, Integer>> counters) {
+        this.counters.clear();
+        this.counters.putAll(counters);
+    }
+
     // Getter
     public boolean isBlackListed(TwitchMessageEvent event, String command) {
         if (!blackList.containsKey(event.getChannelId())) return false;
@@ -334,10 +362,6 @@ public class MessageHandler {
 
     public boolean checkAlias(String alias) {
         return aliasList.containsKey(alias);
-    }
-
-    public HashMap<String, Command> getCommandList() {
-        return commandList;
     }
 
     public HashMap<String, String> getAliasList() {

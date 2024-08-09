@@ -293,4 +293,137 @@ public class CustomManager {
 
         return command + " command removed";
     }
+
+    // Get CustomCounters
+    public HashMap<Integer, HashMap<String, Integer>> getCustomCounters() {
+
+        // Variables
+        HashMap<Integer, HashMap<String, Integer>> customCounters = new HashMap<>();
+
+        // Get CustomCounters
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT channel_id, name, value FROM Counters";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Process results
+            while (resultSet.next()) {
+                int channelId = resultSet.getInt("channel_id");
+                String counterName = resultSet.getString("name");
+                int counterValue = resultSet.getInt("value");
+
+                // Add to customCounters
+                customCounters
+                        .computeIfAbsent(channelId, k -> new HashMap<>())
+                        .put(counterName, counterValue);
+            }
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return customCounters;
+    }
+
+    // Get Counters
+    public HashMap<String, Integer> getCounters(TwitchMessageEvent event) {
+
+        // Set Variables
+        var channelID = event.getChannelId();
+        HashMap<String, Integer> counters = new HashMap<>();
+
+        // Get Counters
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT name, value FROM " + "Counters" + " WHERE channel_id = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to List
+            while (resultSet.next()) counters.put(resultSet.getString("name"), resultSet.getInt("value"));
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return counters;
+    }
+
+    // Create Counter
+    public String createCounter(TwitchMessageEvent event, String counter) {
+
+        // Set Variables
+        var channelID = event.getChannelId();
+
+        // Create Counter
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "INSERT INTO " + "Counters" + " (channel_id, name, value) VALUES (?, ?, ?)";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setString(2, counter); // set counter
+            preparedStatement.setInt(3, 0); // set value
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+        return counter + " counter created";
+    }
+
+    // Edit Counter
+    public String editCounter(TwitchMessageEvent event, String counter, int value) {
+
+        // Set Variables
+        var channelID = event.getChannelId();
+
+        // Edit Counter
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "UPDATE " + "Counters" + " SET value = ? WHERE channel_id = ? AND name = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, value); // set value
+            preparedStatement.setInt(2, channelID); // set channel
+            preparedStatement.setString(3, counter); // set counter
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return counter + " counter: " + value;
+    }
+
+    // Delete Counter
+    public String deleteCounter(TwitchMessageEvent event, String counter) {
+
+        // Set Variables
+        var channelID = event.getChannelId();
+
+        // Delete Counter
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "DELETE FROM " + "Counters" + " WHERE channel_id = ? AND name = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setString(2, counter); // set counter
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return counter + " counter removed";
+    }
 }
