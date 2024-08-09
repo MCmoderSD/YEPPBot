@@ -1,5 +1,6 @@
-package de.MCmoderSD.objects;
+package de.MCmoderSD.commands;
 
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import org.apache.commons.lang.IncompleteArgumentException;
 
 import java.util.ArrayList;

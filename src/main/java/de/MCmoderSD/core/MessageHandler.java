@@ -1,7 +1,7 @@
 package de.MCmoderSD.core;
 
 import de.MCmoderSD.UI.Frame;
-import de.MCmoderSD.objects.Command;
+import de.MCmoderSD.commands.Command;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
@@ -55,14 +55,14 @@ public class MessageHandler {
 
     public void updateBlackList() {
         blackList.clear();
-        blackList.putAll(mySQL.getBlackList());
+        blackList.putAll(mySQL.getBlackListManager().getBlackList());
     }
 
     public void handleMessage(TwitchMessageEvent event) {
         new Thread(() -> {
 
             // Log Message
-            mySQL.logMessage(event);
+            mySQL.getLogManager().logMessage(event);
             event.logToConsole();
             if (!botClient.hasArg("cli")) frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
 
@@ -116,7 +116,7 @@ public class MessageHandler {
             parts.removeFirst();
 
             // Log Command
-            mySQL.logCommand(event, trigger, processArgs(parts));
+            mySQL.getLogManager().logCommand(event, trigger, processArgs(parts));
 
             // Execute Command
             command.execute(event, parts);

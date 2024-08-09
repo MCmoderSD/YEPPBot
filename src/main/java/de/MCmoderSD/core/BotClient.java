@@ -88,7 +88,7 @@ public class BotClient {
         // Join Channels
         ArrayList<String> channelList = new ArrayList<>(Collections.singleton(botName));
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
-        if (!hasArg("dev")) channelList.addAll(mySQL.getActiveChannels());
+        if (!hasArg("dev")) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
         joinChannel(channelList);
 
         // Event Handler
@@ -129,7 +129,7 @@ public class BotClient {
         if (!hasArg("cli")) frame.log(USER, channel, botName, message);
 
         // Log
-        mySQL.logResponse(channel, botName, message);
+        mySQL.getLogManager().logResponse(channel, botName, message);
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
@@ -145,7 +145,7 @@ public class BotClient {
         if (!hasArg("cli")) frame.log(RESPONSE, channel, botName, message);
 
         // Log
-        mySQL.logResponse(event, command, message);
+        mySQL.getLogManager().logResponse(event, command, message);
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
         System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 

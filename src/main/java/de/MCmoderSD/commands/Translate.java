@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.objects.Command;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.other.OpenAI;
 

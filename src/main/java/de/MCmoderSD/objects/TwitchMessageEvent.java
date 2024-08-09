@@ -5,6 +5,7 @@ import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
 
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.PreparedStatement;
@@ -98,15 +99,17 @@ public class TwitchMessageEvent {
     }
 
     // Methods
-    public void logToMySQL(MySQL mySQL) {
+    public void logToMySQL(LogManager logManager) {
+
+        MySQL mySQL = logManager.getMySQL();
 
         // Log message
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Check Channel and User
-            mySQL.checkCache(channelId, channel);
-            mySQL.checkCache(userId, user);
+            logManager.checkCache(channelId, channel);
+            logManager.checkCache(userId, user);
 
             // Prepare statement
             String query = "INSERT INTO " + "MessageLog" + " (timestamp, type, channel_id, user_id, message, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
