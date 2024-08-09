@@ -45,6 +45,7 @@ public class LurkManager {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+
         return getLurkList(); // get lurk time
     }
 
@@ -68,6 +69,7 @@ public class LurkManager {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+
         return lurkList;
     }
 
@@ -108,6 +110,46 @@ public class LurkManager {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+
         return lurkTime;
+    }
+
+    // Remove Lurker
+    public HashMap<Integer, Integer> removeLurker(int userID) {
+
+        // Log message
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "DELETE FROM " + "lurkList" + " WHERE user_id = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, userID); // set user
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return getLurkList(); // get lurk time
+    }
+
+    // Add Traitor
+    public void addTraitor(int userID, String traitors) {
+        new Thread(() -> {
+
+            // Log message
+            try {
+                if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+                // Prepare statement
+                String query = "UPDATE " + "lurkList" + " SET traitorChannel = ? WHERE user_id = ?";
+                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                preparedStatement.setString(1, traitors); // set traitor
+                preparedStatement.setInt(2, userID); // set user
+                preparedStatement.executeUpdate(); // execute
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
     }
 }

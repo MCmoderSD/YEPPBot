@@ -106,6 +106,7 @@ public class BotClient {
 
         // Initialize Commands
         new Join(this, messageHandler);
+        new Lurk(this, messageHandler, mySQL);
         new Ping(this, messageHandler);
         new Play(this, messageHandler);
         if (openAI) new Prompt(this, messageHandler, main.getOpenAI());
@@ -125,6 +126,9 @@ public class BotClient {
     // Setter
     public void write(String channel, String message) {
 
+        // Check Message
+        if (message.isEmpty() || message.isBlank()) return;
+
         // Update Frame
         if (!hasArg("cli")) frame.log(USER, channel, botName, message);
 
@@ -133,7 +137,6 @@ public class BotClient {
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
-        if (message.isEmpty() || message.isBlank()) return;
         chat.sendMessage(channel, message);
     }
 
@@ -143,16 +146,15 @@ public class BotClient {
         var channel = event.getChannel();
 
         // Update Frame
-        if (!hasArg("cli")) frame.log(RESPONSE, channel, botName, message);
+        if (!(message.isEmpty() || message.isBlank()) && !hasArg("cli")) frame.log(RESPONSE, channel, botName, message);
 
         // Log
         mySQL.getLogManager().logResponse(event, command, message);
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
-        System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
+        if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
         // Send Messag
-        if (message.isEmpty() || message.isBlank()) return;
-        chat.sendMessage(channel, message);
+        if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
     }
 
     public void joinChannel(String channel) {

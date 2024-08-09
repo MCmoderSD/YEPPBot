@@ -38,7 +38,7 @@ public class TwitchMessageEvent {
     private final String subTier;
     private final Integer bits;
 
-
+    // Message Event
     public TwitchMessageEvent(ChannelMessageEvent event) {
 
         // Set Timestamp
@@ -62,6 +62,7 @@ public class TwitchMessageEvent {
         bits = null;
     }
 
+    // Cheer Event
     public TwitchMessageEvent(ChannelCheerEvent event) {
 
         // Set Timestamp
@@ -85,6 +86,7 @@ public class TwitchMessageEvent {
         bits = event.getBits();
     }
 
+    // Sub Event
     public TwitchMessageEvent(ChannelSubscriptionMessageEvent event) {
 
         // Set Timestamp
@@ -106,6 +108,20 @@ public class TwitchMessageEvent {
         subStreak = event.getStreakMonths();
         subTier = event.getTier().ordinalName().toUpperCase();
         bits = null;
+    }
+
+    // Manual Event
+    public TwitchMessageEvent(Timestamp timestamp, int channelId, int userId, String channel, String user, String message, Integer subMonths, Integer subStreak, String subTier, Integer bits) {
+        this.timestamp = timestamp;
+        this.channelId = channelId;
+        this.userId = userId;
+        this.channel = channel;
+        this.user = user;
+        this.message = message;
+        this.subMonths = subMonths;
+        this.subStreak = subStreak;
+        this.subTier = subTier;
+        this.bits = bits;
     }
 
     // Methods

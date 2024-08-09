@@ -227,6 +227,10 @@ public class MySQL extends Driver {
                             """
             ).execute();
 
+
+            // Copy all channel names to the users table
+            connection.prepareStatement("INSERT INTO users (id, name) SELECT c.id, c.name FROM channels c LEFT JOIN users u ON c.id = u.id WHERE u.id IS NULL").execute();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

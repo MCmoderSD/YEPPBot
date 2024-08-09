@@ -4,6 +4,7 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.manager.LurkManager;
 
 import java.util.ArrayList;
 
@@ -22,6 +23,12 @@ public class Lurk {
 
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Variables
+                LurkManager lurkManager = mySQL.getLurkManager();
+
+                // Check if user is already in lurk
+                if (messageHandler.checkLurk(event)) messageHandler.updateLurkList(lurkManager.removeLurker(event.getUserId()));
 
                 // Save data
                 messageHandler.updateLurkList(mySQL.getLurkManager().saveLurk(event));
