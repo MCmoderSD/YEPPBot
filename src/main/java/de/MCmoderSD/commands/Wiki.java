@@ -87,5 +87,4 @@ public class Wiki {
         if (page.has("extract")) return page.getString("extract");
         else throw new IOException("Keine Zusammenfassung für dieses Thema gefunden.");
     }
-
 }

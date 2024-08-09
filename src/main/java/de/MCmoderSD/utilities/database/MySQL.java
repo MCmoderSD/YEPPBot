@@ -1,10 +1,7 @@
 package de.MCmoderSD.utilities.database;
 
 import de.MCmoderSD.main.Main;
-import de.MCmoderSD.utilities.database.manager.BlackListManager;
-import de.MCmoderSD.utilities.database.manager.ChannelManager;
-import de.MCmoderSD.utilities.database.manager.LogManager;
-import de.MCmoderSD.utilities.database.manager.LurkManager;
+import de.MCmoderSD.utilities.database.manager.*;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -13,6 +10,7 @@ import java.util.HashMap;
 public class MySQL extends Driver {
 
     // Associations
+    private final AssetManager assetManager;
     private final BlackListManager blackListManager;
     private final ChannelManager channelManager;
     private final LogManager logManager;
@@ -36,7 +34,8 @@ public class MySQL extends Driver {
         channelCache = loadCache("channels");
         userCache = loadCache("users");
 
-        // Initialize Managers
+        // Initialize Manager
+        assetManager = new AssetManager(this);
         blackListManager = new BlackListManager(this);
         channelManager = new ChannelManager(this);
         logManager = new LogManager(this, main.hasArg("log"));
@@ -69,77 +68,6 @@ public class MySQL extends Driver {
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
                             active BIT NOT NULL DEFAULT 1
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the message log table
-            connection.prepareStatement(condition +
-                            """
-                            MessageLog (
-                            timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                            type VARCHAR(5) NOT NULL,
-                            channel_id INT NOT NULL,
-                            user_id INT NOT NULL,
-                            message VARCHAR(500),
-                            bits INT NOT NULL DEFAULT 0,
-                            subMonths INT NOT NULL DEFAULT 0,
-                            subStreak INT NOT NULL DEFAULT 0,
-                            subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
-                            FOREIGN KEY (channel_id) REFERENCES channels(id),
-                            FOREIGN KEY (user_id) REFERENCES users(id)
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the command log table
-            connection.prepareStatement(condition +
-                            """
-                            CommandLog (
-                            timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                            channel_id INT NOT NULL,
-                            user_id INT NOT NULL,
-                            command TEXT NOT NULL,
-                            args VARCHAR(500),
-                            bits INT NOT NULL DEFAULT 0,
-                            subMonths INT NOT NULL DEFAULT 0,
-                            subStreak INT NOT NULL DEFAULT 0,
-                            subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
-                            FOREIGN KEY (channel_id) REFERENCES channels(id),
-                            FOREIGN KEY (user_id) REFERENCES users(id)
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the response log table
-            connection.prepareStatement(condition +
-                            """
-                            ResponseLog (
-                            timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                            channel_id INT NOT NULL,
-                            user_id INT NOT NULL,
-                            command TEXT NOT NULL,
-                            args VARCHAR(500),
-                            response VARCHAR(500),
-                            bits INT NOT NULL DEFAULT 0,
-                            subMonths INT NOT NULL DEFAULT 0,
-                            subStreak INT NOT NULL DEFAULT 0,
-                            subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
-                            FOREIGN KEY (channel_id) REFERENCES channels(id),
-                            FOREIGN KEY (user_id) REFERENCES users(id)
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the lurk list table
-            connection.prepareStatement(condition +
-                            """
-                            lurkList (
-                            user_id INT PRIMARY KEY,
-                            lurkChannel_ID INT NOT NULL,
-                            startTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                            traitorChannel TEXT,
-                            FOREIGN KEY (lurkChannel_ID) REFERENCES channels(id)
                             )
                             """
             ).execute();
@@ -180,49 +108,6 @@ public class MySQL extends Driver {
                             name TEXT NOT NULL,
                             value INT NOT NULL,
                             FOREIGN KEY (channel_id) REFERENCES channels(id)
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the fact list table
-            connection.prepareStatement(condition +
-                            """
-                            factList (
-                            fact_id INT PRIMARY KEY AUTO_INCREMENT,
-                            en_percent varchar(500),
-                            en_people varchar(500),
-                            en_verb varchar(500),
-                            en_frequency varchar(500),
-                            en_adjective varchar(500),
-                            en_object varchar(500),
-                            de_percent varchar(500),
-                            de_people varchar(500),
-                            de_verb varchar(500),
-                            de_frequency varchar(500),
-                            de_adjective varchar(500),
-                            de_object varchar(500)
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the joke list table
-            connection.prepareStatement(condition +
-                            """
-                            jokeList (
-                            joke_id INT PRIMARY KEY AUTO_INCREMENT,
-                            en varchar(500),
-                            de varchar(500)
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the insult list table
-            connection.prepareStatement(condition +
-                            """
-                            insultList (
-                            insult_id INT PRIMARY KEY AUTO_INCREMENT,
-                            en varchar(500) NOT NULL,
-                            de varchar(500) NOT NULL
                             )
                             """
             ).execute();
@@ -346,6 +231,10 @@ public class MySQL extends Driver {
     }
 
     // Get Manager
+    public AssetManager getAssetManager() {
+        return assetManager;
+    }
+
     public BlackListManager getBlackListManager() {
         return blackListManager;
     }

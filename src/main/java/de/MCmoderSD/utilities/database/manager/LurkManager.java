@@ -3,10 +3,7 @@ package de.MCmoderSD.utilities.database.manager;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
-import java.sql.Timestamp;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -17,7 +14,39 @@ public class LurkManager {
 
     // Constructor
     public LurkManager(MySQL mySQL) {
+
+        // Set associations
         this.mySQL = mySQL;
+
+        // Initialize
+        initTables();
+    }
+
+    // Initialize Tables
+    private void initTables() {
+        try {
+
+            // Variables
+            Connection connection = mySQL.getConnection();
+
+            // Condition for creating tables
+            String condition = "CREATE TABLE IF NOT EXISTS ";
+
+            // SQL statement for creating the lurk list table
+            connection.prepareStatement(condition +
+                    """
+                    lurkList (
+                    user_id INT PRIMARY KEY,
+                    lurkChannel_ID INT NOT NULL,
+                    startTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    traitorChannel TEXT,
+                    FOREIGN KEY (lurkChannel_ID) REFERENCES channels(id)
+                    )
+                    """
+            ).execute();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     // Save Lurk
