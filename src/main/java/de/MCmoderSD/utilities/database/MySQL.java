@@ -13,7 +13,6 @@ public class MySQL extends Driver {
 
     // Associations
     private final AssetManager assetManager;
-    private final BlackListManager blackListManager;
     private final ChannelManager channelManager;
     private final LogManager logManager;
     private final LurkManager lurkManager;
@@ -38,7 +37,6 @@ public class MySQL extends Driver {
 
         // Initialize Manager
         assetManager = new AssetManager(this);
-        blackListManager = new BlackListManager(this);
         channelManager = new ChannelManager(this);
         logManager = new LogManager(this, main.hasArg("log"));
         lurkManager = new LurkManager(this);
@@ -232,13 +230,14 @@ public class MySQL extends Driver {
         return null;
     }
 
+    // Get Cache
+    public HashMap<Integer, String> getChannelCache() {
+        return channelCache;
+    }
+
     // Get Manager
     public AssetManager getAssetManager() {
         return assetManager;
-    }
-
-    public BlackListManager getBlackListManager() {
-        return blackListManager;
     }
 
     public ChannelManager getChannelManager() {

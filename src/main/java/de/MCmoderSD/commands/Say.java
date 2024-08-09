@@ -26,7 +26,7 @@ public class Say {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Check if user is moderator or admin
-                if (!(botClient.isModerator(event) || botClient.isAdmin(event.getUser()))) return;
+                if (!botClient.isPermitted(event)) return;
 
                 // Send Message
                 botClient.respond(event, getCommand(), String.join(" ", args));

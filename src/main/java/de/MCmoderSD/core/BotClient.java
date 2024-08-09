@@ -112,6 +112,7 @@ public class BotClient {
         new Join(this, messageHandler);
         new Joke(this, messageHandler, mySQL);
         new Lurk(this, messageHandler, mySQL);
+        new Moderate(this, messageHandler, mySQL);
         new Ping(this, messageHandler);
         new Play(this, messageHandler);
         if (openAI) new Prompt(this, messageHandler, main.getOpenAI());
@@ -221,8 +222,12 @@ public class BotClient {
         return main.hasArg(arg);
     }
 
-    public boolean isAdmin(String user) {
-        return admins.contains(user);
+    public boolean isAdmin(TwitchMessageEvent event) {
+        return admins.contains(event.getUser());
+    }
+
+    public boolean isPermitted(TwitchMessageEvent event) {
+        return isModerator(event) || isBroadcaster(event);
     }
 
     public boolean isBroadcaster(TwitchMessageEvent event) {

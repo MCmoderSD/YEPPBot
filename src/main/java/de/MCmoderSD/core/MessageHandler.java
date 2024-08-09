@@ -14,6 +14,7 @@ import java.util.NoSuchElementException;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
+@SuppressWarnings("unused")
 public class MessageHandler {
 
     // Associations
@@ -43,7 +44,7 @@ public class MessageHandler {
 
         // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
-        updateBlackList(mySQL.getBlackListManager().getBlackList());
+        updateBlackList(mySQL.getChannelManager().getBlackList());
     }
 
     // Handle Methods
@@ -268,5 +269,21 @@ public class MessageHandler {
 
     public boolean checkLurk(TwitchMessageEvent event) {
         return lurkList.containsKey(event.getUserId());
+    }
+
+    public boolean checkCommand(String command) {
+        return commandList.containsKey(command);
+    }
+
+    public boolean checkAlias(String alias) {
+        return aliasList.containsKey(alias);
+    }
+
+    public HashMap<String, Command> getCommandList() {
+        return commandList;
+    }
+
+    public HashMap<String, String> getAliasList() {
+        return aliasList;
     }
 }

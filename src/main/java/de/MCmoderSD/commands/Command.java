@@ -30,7 +30,7 @@ public abstract class Command {
 
     // Getter
     public String getCommand() {
-        return command;
+        return command.toLowerCase();
     } // Get the command
 
     public String[] getAlias() {
