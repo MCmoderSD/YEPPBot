@@ -1,5 +1,7 @@
 package de.MCmoderSD.utilities.database.manager;
 
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
@@ -156,7 +158,6 @@ public class CustomManager {
     public ArrayList<String> getCommands(TwitchMessageEvent event, boolean all) {
 
         // Set Variables
-        var channelID = event.getChannelId();
         ArrayList<String> commands = new ArrayList<>();
 
         // Get Commands
@@ -166,7 +167,7 @@ public class CustomManager {
             // Prepare statement
             String query = "SELECT command_name, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? "" : " AND isEnabled = 1");
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) commands.add(resultSet.getString("command_name"));
 
@@ -180,7 +181,6 @@ public class CustomManager {
     public HashMap<String, String> getAliases(TwitchMessageEvent event, boolean all) {
 
         // Set Variables
-        var channelID = event.getChannelId();
         HashMap<String, String> aliases = new HashMap<>();
 
         // Get Aliases
@@ -190,7 +190,7 @@ public class CustomManager {
             // Prepare statement
             String query = "SELECT command_alias, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? "" : " AND isEnabled = 1");
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
             ResultSet resultSet = preparedStatement.executeQuery();
 
             // Add to List
@@ -213,7 +213,6 @@ public class CustomManager {
     public String createCommand(TwitchMessageEvent event, String command, ArrayList<String> aliases, String commandResponse) {
 
         // Set Variables
-        var channelID = event.getChannelId();
         String aliasesString = null;
         if (!aliases.isEmpty()) aliasesString = String.join("; ", aliases);
 
@@ -230,7 +229,7 @@ public class CustomManager {
             // Prepare statement
             String query = "INSERT INTO " + "CustomCommands" + " (channel_id, command_name, command_alias, command_response, isEnabled) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
             preparedStatement.setString(2, command); // set command
             preparedStatement.setString(3, aliasesString); // set aliases
             preparedStatement.setString(4, commandResponse); // set response
@@ -247,7 +246,6 @@ public class CustomManager {
     public String editCommand(TwitchMessageEvent event, String command, boolean enable) {
 
         // Set Variables
-        var channelID = event.getChannelId();
         if (!getCommands(event, true).contains(command)) command = getAliases(event, true).get(command);
 
         // Edit Command
@@ -258,7 +256,7 @@ public class CustomManager {
             String query = "UPDATE " + "CustomCommands" + " SET isEnabled = ? WHERE channel_id = ? AND command_name = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, enable ? 1 : 0); // set isEnabled
-            preparedStatement.setInt(2, channelID); // set channel
+            preparedStatement.setInt(2, event.getChannelId()); // set channel
             preparedStatement.setString(3, command); // set command
             preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
@@ -273,7 +271,6 @@ public class CustomManager {
     public String deleteCommand(TwitchMessageEvent event, String command) {
 
         // Set Variables
-        var channelID = event.getChannelId();
         if (!getCommands(event, true).contains(command)) command = getAliases(event, true).get(command);
 
         // Delete Command
@@ -283,7 +280,7 @@ public class CustomManager {
             // Prepare statement
             String query = "DELETE FROM " + "CustomCommands" + " WHERE channel_id = ? AND command_name = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
             preparedStatement.setString(2, command); // set command
             preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
@@ -332,7 +329,6 @@ public class CustomManager {
     public HashMap<String, Integer> getCounters(TwitchMessageEvent event) {
 
         // Set Variables
-        var channelID = event.getChannelId();
         HashMap<String, Integer> counters = new HashMap<>();
 
         // Get Counters
@@ -342,7 +338,7 @@ public class CustomManager {
             // Prepare statement
             String query = "SELECT name, value FROM " + "Counters" + " WHERE channel_id = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
             ResultSet resultSet = preparedStatement.executeQuery();
 
             // Add to List
@@ -356,18 +352,13 @@ public class CustomManager {
 
     // Create Counter
     public String createCounter(TwitchMessageEvent event, String counter) {
-
-        // Set Variables
-        var channelID = event.getChannelId();
-
-        // Create Counter
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
             String query = "INSERT INTO " + "Counters" + " (channel_id, name, value) VALUES (?, ?, ?)";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
             preparedStatement.setString(2, counter); // set counter
             preparedStatement.setInt(3, 0); // set value
             preparedStatement.executeUpdate(); // execute
@@ -380,11 +371,6 @@ public class CustomManager {
 
     // Edit Counter
     public String editCounter(TwitchMessageEvent event, String counter, int value) {
-
-        // Set Variables
-        var channelID = event.getChannelId();
-
-        // Edit Counter
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
@@ -392,7 +378,7 @@ public class CustomManager {
             String query = "UPDATE " + "Counters" + " SET value = ? WHERE channel_id = ? AND name = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, value); // set value
-            preparedStatement.setInt(2, channelID); // set channel
+            preparedStatement.setInt(2, event.getChannelId()); // set channel
             preparedStatement.setString(3, counter); // set counter
             preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
@@ -405,18 +391,13 @@ public class CustomManager {
 
     // Delete Counter
     public String deleteCounter(TwitchMessageEvent event, String counter) {
-
-        // Set Variables
-        var channelID = event.getChannelId();
-
-        // Delete Counter
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
             String query = "DELETE FROM " + "Counters" + " WHERE channel_id = ? AND name = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-            preparedStatement.setInt(1, channelID); // set channel
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
             preparedStatement.setString(2, counter); // set counter
             preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
@@ -425,5 +406,164 @@ public class CustomManager {
         }
 
         return counter + " counter removed";
+    }
+
+    // Get All Custom Timers
+    public HashMap<Integer, ArrayList<Timer>> getCustomTimers(BotClient botClient) {
+
+        // Variables
+        HashMap<Integer, ArrayList<Timer>> customTimers = new HashMap<>();
+
+        // Get CustomTimers
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT channel_id, name, time, response FROM CustomTimers WHERE isEnabled = 1";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Process results
+            while (resultSet.next()) {
+                int channelId = resultSet.getInt("channel_id");
+                String name = resultSet.getString("name");
+                String time = resultSet.getString("time");
+                String response = resultSet.getString("response");
+
+                // Create Timer object
+                Timer timer = new Timer(botClient, mySQL, mySQL.queryName("channels", channelId), name, time, response);
+
+                // Add to customTimers
+                customTimers
+                        .computeIfAbsent(channelId, k -> new ArrayList<>())
+                        .add(timer);
+            }
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return customTimers;
+    }
+
+    // Get Custom Timers
+    public HashMap<String, Timer> getCustomTimers(TwitchMessageEvent event, BotClient botClient) {
+
+        // Set Variables
+        HashMap<String, Timer> customTimers = new HashMap<>();
+
+        // Get Custom Timers
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT name, time, response FROM " + "CustomTimers" + " WHERE channel_id = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to List
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                String time = resultSet.getString("time");
+                String response = resultSet.getString("response");
+                customTimers.put(name, new Timer(botClient, mySQL, event.getChannel(), name, time, response));
+            }
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return customTimers;
+    }
+
+    // Get Active Custom Commands
+    public ArrayList<Timer> getActiveCustomTimers(TwitchMessageEvent event, BotClient botClient) {
+
+        // Variables
+        ArrayList<Timer> customTimers = new ArrayList<>();
+
+        // Get Custom Timers
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT channel_id, name, time, response FROM " + "CustomTimers WHERE isEnabled = 1";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to List
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                String time = resultSet.getString("time");
+                String response = resultSet.getString("response");
+                customTimers.add(new Timer(botClient, mySQL, event.getChannel(), name, time, response));
+            }
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return customTimers;
+    }
+
+    // Create Custom Timer
+    public String createCustomTimer(TwitchMessageEvent event, String name, String time, String response) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "INSERT INTO " + "CustomTimers" + " (channel_id, name, time, response) VALUES (?, ?, ?, ?)";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
+            preparedStatement.setString(2, name); // set name
+            preparedStatement.setString(3, time); // set time
+            preparedStatement.setString(4, response); // set response
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+        return name + " custom timer created";
+    }
+
+    // Edit Custom Timer
+    public String editCustomTimer(TwitchMessageEvent event, String name, String time, String response, boolean enable) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "UPDATE " + "CustomTimers" + " SET time = ?, response = ?, isEnabled = ? WHERE channel_id = ? AND name = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setString(1, time); // set time
+            preparedStatement.setString(2, response); // set response
+            preparedStatement.setInt(3, enable ? 1 : 0); // set isEnabled
+            preparedStatement.setInt(4, event.getChannelId()); // set channel
+            preparedStatement.setString(5, name); // set name
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return name + " custom timer " + (enable ? "enabled" : "disabled");
+    }
+
+    // Delete Custom Timer
+    public String deleteCustomTimer(TwitchMessageEvent event, String name) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "DELETE FROM " + "CustomTimers" + " WHERE channel_id = ? AND name = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, event.getChannelId()); // set channel
+            preparedStatement.setString(2, name); // set name
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return name + " custom timer removed";
     }
 }

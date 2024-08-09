@@ -2,6 +2,7 @@ package de.MCmoderSD.core;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.commands.Command;
+import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
@@ -30,6 +31,7 @@ public class MessageHandler {
     private final HashMap<Integer, HashMap<String, String >> customCommands;
     private final HashMap<Integer, HashMap<String, String >> customAliases;
     private final HashMap<Integer, HashMap<String, Integer>> counters;
+    private final HashMap<Integer, ArrayList<Timer>> customTimers;
 
     // Utilities
     private final Random random = new Random();
@@ -50,12 +52,14 @@ public class MessageHandler {
         customCommands = new HashMap<>();
         customAliases = new HashMap<>();
         counters = new HashMap<>();
+        customTimers = new HashMap<>();
 
         // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
         updateBlackList(mySQL.getChannelManager().getBlackList());
         updateCustomCommands(mySQL.getCustomManager().getCustomCommands(), mySQL.getCustomManager().getCustomAliases());
         updateCounters(mySQL.getCustomManager().getCustomCounters());
+        updateCustomTimers(mySQL.getCustomManager().getCustomTimers(botClient));
     }
 
     // Handle Methods
@@ -92,7 +96,7 @@ public class MessageHandler {
 
     private void handleTimers(TwitchMessageEvent event) {
         new Thread(() -> {
-            // TODO: Implement Timers
+            if (customTimers.containsKey(event.getChannelId())) customTimers.get(event.getChannelId()).forEach(Timer::trigger);
         }).start();
     }
 
@@ -344,6 +348,16 @@ public class MessageHandler {
     public void updateCounters(HashMap<Integer, HashMap<String, Integer>> counters) {
         this.counters.clear();
         this.counters.putAll(counters);
+    }
+
+    // Update Custom Timers
+    public void updateCustomTimers(HashMap<Integer, ArrayList<Timer>> customTimers) {
+        this.customTimers.clear();
+        this.customTimers.putAll(customTimers);
+    }
+
+    public void updateCustomTimers(int channelID, ArrayList<Timer> customTimers) {
+        this.customTimers.replace(channelID, customTimers);
     }
 
     // Getter
