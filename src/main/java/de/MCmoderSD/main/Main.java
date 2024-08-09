@@ -192,6 +192,7 @@ public class Main {
         System.exit(0);
     }
 
+    // Check Args
     private HashMap<String, Boolean> checkArgs(ArrayList<String> args) {
 
         // Variables
@@ -225,6 +226,7 @@ public class Main {
         return result;
     }
 
+    // Help
     private void help() {
         // Info
         System.out.println(

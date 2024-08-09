@@ -18,6 +18,7 @@ public class Say {
         String[] name = {"say", "repeat"};
         String description = "Nur für Moderatoren und Administratoren. Sendet eine Nachricht in den Chat. " + syntax;
 
+
         // Register command
         messageHandler.addCommand(new Command(description, name) {
 

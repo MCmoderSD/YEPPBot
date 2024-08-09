@@ -56,7 +56,6 @@ public class Weather {
         url = config.get("url").asText();
         apiKey = config.get("api_key").asText();
 
-
         // Register command
         messageHandler.addCommand(new Command(description, name) {
 

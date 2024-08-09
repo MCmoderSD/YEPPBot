@@ -15,6 +15,7 @@ public class Status {
         String[] name = {"status", "test"};
         String description = "Zeigt den Status des Bots an. Also ob er aktiv ist oder nicht.";
 
+
         // Register command
         messageHandler.addCommand(new Command(description, name) {
 

@@ -203,7 +203,6 @@ public class BotClient {
         client.close();
     }
 
-
     // Getter
     public String getBotName() {
         return botName;

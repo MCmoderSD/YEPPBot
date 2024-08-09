@@ -16,6 +16,8 @@ public class BlackListManager {
 
     // Constructor
     public BlackListManager(MySQL mySQL) {
+
+        // Get Associations
         this.mySQL = mySQL;
     }
 

@@ -227,7 +227,6 @@ public class TwitchMessageEvent {
         return message.startsWith(BotClient.prefix) || message.contains(" " + BotClient.prefix);
     }
 
-
     // Log
     public Timestamp getTimestamp() {
         return timestamp;

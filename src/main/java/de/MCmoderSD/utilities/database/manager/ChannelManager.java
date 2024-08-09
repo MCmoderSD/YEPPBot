@@ -14,6 +14,8 @@ public class ChannelManager {
 
     // Constructor
     public ChannelManager(MySQL mySQL) {
+
+        // Get Associations
         this.mySQL = mySQL;
     }
 

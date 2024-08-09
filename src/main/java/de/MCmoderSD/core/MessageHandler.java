@@ -22,12 +22,12 @@ public class MessageHandler {
     private final Frame frame;
 
     // Attributes
-    private final HashMap<Integer, ArrayList<String>> blackList;
     private final HashMap<String, Command> commandList;
     private final HashMap<String, String> aliasList;
     private final HashMap<Integer, Integer> lurkList;
+    private final HashMap<Integer, ArrayList<String>> blackList;
 
-
+    // Constructor
     public MessageHandler(BotClient botClient, MySQL mySQL, Frame frame) {
 
         // Initialize Associations
@@ -36,39 +36,24 @@ public class MessageHandler {
         this.frame = frame;
 
         // Initialize Attributes
-        blackList = new HashMap<>();
         commandList = new HashMap<>();
         aliasList = new HashMap<>();
         lurkList = new HashMap<>();
+        blackList = new HashMap<>();
 
-        // Update Black List
-        updateBlackList();
+        // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
+        updateBlackList(mySQL.getBlackListManager().getBlackList());
     }
 
-    public void addCommand(Command command) {
-
-        // Register command
-        String name = command.getCommand().toLowerCase();
-        commandList.put(name, command);
-
-        // Register aliases
-        for (String alias : command.getAlias()) aliasList.put(alias.toLowerCase(), name);
-    }
-
-    public void updateBlackList() {
-        blackList.clear();
-        blackList.putAll(mySQL.getBlackListManager().getBlackList());
-    }
-
+    // Handle Methods
     public void handleMessage(TwitchMessageEvent event) {
         new Thread(() -> {
 
             // Log Message
             mySQL.getLogManager().logMessage(event);
             event.logToConsole();
-            if (!botClient.hasArg("cli"))
-                frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
+            if (!botClient.hasArg("cli")) frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
 
             // Handle Timers;
             handleTimers(event);
@@ -90,6 +75,12 @@ public class MessageHandler {
 
             // Say YEPP
             if (event.hasYEPP()) botClient.respond(event, "YEPP", "YEPP");
+        }).start();
+    }
+
+    private void handleTimers(TwitchMessageEvent event) {
+        new Thread(() -> {
+            // TODO: Implement Timers
         }).start();
     }
 
@@ -148,12 +139,6 @@ public class MessageHandler {
         }).start();
     }
 
-    private void handleTimers(TwitchMessageEvent event) {
-        new Thread(() -> {
-            // TODO: Implement Timers
-        }).start();
-    }
-
     private void handleCommand(TwitchMessageEvent event) {
 
         // Variables
@@ -186,6 +171,7 @@ public class MessageHandler {
         // TODO: Implement Counter
     }
 
+    // Message Formatting
     private ArrayList<String> formatCommand(TwitchMessageEvent event) {
 
         // Variables
@@ -251,9 +237,27 @@ public class MessageHandler {
         return response.substring(0, response.length() - 2);
     }
 
+    // Register Command
+    public void addCommand(Command command) {
+
+        // Register command
+        String name = command.getCommand().toLowerCase();
+        commandList.put(name, command);
+
+        // Register aliases
+        for (String alias : command.getAlias()) aliasList.put(alias.toLowerCase(), name);
+    }
+
+    // Update Lurk List
     public void updateLurkList(HashMap<Integer, Integer> lurkList) {
         this.lurkList.clear();
         this.lurkList.putAll(lurkList);
+    }
+
+    // Update Black List
+    public void updateBlackList(HashMap<Integer, ArrayList<String>> blackList) {
+        this.blackList.clear();
+        this.blackList.putAll(blackList);
     }
 
     // Getter

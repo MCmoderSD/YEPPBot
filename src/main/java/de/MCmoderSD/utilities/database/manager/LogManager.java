@@ -7,8 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import static de.MCmoderSD.utilities.other.Calculate.USER;
-import static de.MCmoderSD.utilities.other.Calculate.getTimestamp;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class LogManager {
     
@@ -97,8 +96,8 @@ public class LogManager {
                     """
             ).execute();
         } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            } 
+            System.err.println(e.getMessage());
+        }
     }
 
     // Log Message

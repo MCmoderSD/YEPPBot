@@ -7,7 +7,6 @@ import de.MCmoderSD.utilities.other.Reader;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("unused")
 public class Credentials {
 
     // Bot Credentials
