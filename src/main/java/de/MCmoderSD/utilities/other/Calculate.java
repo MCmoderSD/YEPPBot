@@ -19,6 +19,8 @@ public class Calculate {
     public final static String BOLD = "\033[0;1m";
     public final static String UNBOLD = "\u001B[0m";
     public final static String BREAK = "\n";
+
+    // Tags
     public final static String SYSTEM = "[SYS]";
     public final static String USER = "[USR]";
     public final static String COMMAND = "[CMD]";
@@ -26,13 +28,12 @@ public class Calculate {
     public final static String MESSAGE = "[MSG]";
     public final static String CHEER = "[CHR]";
     public final static String SUBSCRIBE = "[SUB]";
+
+    // Colors
     public final static Color DARK = new Color(0x0e0e10);
     public final static Color LIGHT = new Color(0x18181b);
     public final static Color PURPLE = new Color(0x771fe2);
     public final static Color WHITE = new Color(0xffffff);
-
-
-    // Methods
 
     // Center JFrame
     public static Point centerJFrame(JFrame frame) {
@@ -47,14 +48,14 @@ public class Calculate {
         return new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(unixTimestamp * 1000));
     }
 
-    // Tag the author
-    public static String tagUser(TwitchMessageEvent event) {
-        return "@" + event.getUser();
-    }
-
     // Tag the channel
     public static String tagChannel(TwitchMessageEvent event) {
         return "@" + event.getChannel();
+    }
+
+    // Tag the user
+    public static String tagUser(TwitchMessageEvent event) {
+        return "@" + event.getUser();
     }
 
     // Log timestamp
