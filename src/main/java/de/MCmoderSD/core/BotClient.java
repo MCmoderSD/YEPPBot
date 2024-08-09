@@ -133,6 +133,7 @@ public class BotClient {
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
+        if (message.isEmpty() || message.isBlank()) return;
         chat.sendMessage(channel, message);
     }
 
@@ -149,7 +150,8 @@ public class BotClient {
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
         System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
-        // Send Message
+        // Send Messag
+        if (message.isEmpty() || message.isBlank()) return;
         chat.sendMessage(channel, message);
     }
 

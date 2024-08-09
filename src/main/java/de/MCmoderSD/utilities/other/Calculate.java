@@ -100,7 +100,7 @@ public class Calculate {
 
     // Get Timestamp
     public static Timestamp getTimestamp() {
-        return new Timestamp(new java.util.Date().getTime());
+        return new Timestamp(System.currentTimeMillis());
     }
 
     // List Contains either

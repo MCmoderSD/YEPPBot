@@ -7,6 +7,7 @@ import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.other.Calculate;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,7 +19,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class TwitchMessageEvent {
 
     // Constants
-    private final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    private final Timestamp timestamp;
 
     // ID
     private final int channelId;
@@ -40,6 +41,9 @@ public class TwitchMessageEvent {
 
     public TwitchMessageEvent(ChannelMessageEvent event) {
 
+        // Set Timestamp
+        timestamp = Calculate.getTimestamp();
+
         // Get ID's
         channelId = Integer.parseInt(trimMessage(event.getChannel().getId()));
         userId = Integer.parseInt(trimMessage(event.getUser().getId()));
@@ -60,6 +64,9 @@ public class TwitchMessageEvent {
 
     public TwitchMessageEvent(ChannelCheerEvent event) {
 
+        // Set Timestamp
+        timestamp = Calculate.getTimestamp();
+
         // Get ID's
         channelId = Integer.parseInt(trimMessage(event.getBroadcasterUserId()));
         userId = Integer.parseInt(trimMessage(event.getUserId()));
@@ -79,6 +86,9 @@ public class TwitchMessageEvent {
     }
 
     public TwitchMessageEvent(ChannelSubscriptionMessageEvent event) {
+
+        // Set Timestamp
+        timestamp = Calculate.getTimestamp();
 
         /// Get ID's
         channelId = Integer.parseInt(trimMessage(event.getBroadcasterUserId()));
@@ -108,8 +118,8 @@ public class TwitchMessageEvent {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Check Channel and User
-            logManager.checkCache(channelId, channel);
-            logManager.checkCache(userId, user);
+            mySQL.checkCache(channelId, channel);
+            mySQL.checkCache(userId, user);
 
             // Prepare statement
             String query = "INSERT INTO " + "MessageLog" + " (timestamp, type, channel_id, user_id, message, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";

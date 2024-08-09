@@ -7,6 +7,7 @@ import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.database.manager.LurkManager;
 
 import java.sql.*;
+import java.util.HashMap;
 
 @SuppressWarnings("unused")
 public class MySQL extends Driver {
@@ -16,6 +17,10 @@ public class MySQL extends Driver {
     private final ChannelManager channelManager;
     private final LogManager logManager;
     private final LurkManager lurkManager;
+
+    // Cache Lists
+    private final HashMap<Integer, String> channelCache;
+    private final HashMap<Integer, String> userCache;
 
     // Constructor
     public MySQL(Main main) {
@@ -27,6 +32,10 @@ public class MySQL extends Driver {
         new Thread(this::connect).start();
         initTables();
 
+        // Load Cache
+        channelCache = loadCache("channels");
+        userCache = loadCache("users");
+
         // Initialize Managers
         blackListManager = new BlackListManager(this);
         channelManager = new ChannelManager(this);
@@ -34,6 +43,7 @@ public class MySQL extends Driver {
         lurkManager = new LurkManager(this);
     }
 
+    // Initialize Tables
     private void initTables() {
         try {
             if (!isConnected()) connect();
@@ -220,6 +230,78 @@ public class MySQL extends Driver {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+    }
+
+    // Update Channels and Users
+    private void updateCache(int id, String name, String table) throws SQLException {
+        if (!isConnected()) connect(); // connect
+
+        // Check Channel
+        String selectQuery = "SELECT * FROM " + table + " WHERE id = ?";
+        PreparedStatement selectPreparedStatement = getConnection().prepareStatement(selectQuery);
+        selectPreparedStatement.setInt(1, id);
+        ResultSet resultSet = selectPreparedStatement.executeQuery();
+
+        // Add Channel
+        if (!resultSet.next()) {
+            String insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
+            PreparedStatement insertPreparedStatement = getConnection().prepareStatement(insertQuery);
+            insertPreparedStatement.setInt(1, id); // set id
+            insertPreparedStatement.setString(2, name); // set name
+            insertPreparedStatement.executeUpdate(); // execute
+            insertPreparedStatement.close(); // close the insertPreparedStatement
+        }
+
+        // Close resources
+        resultSet.close();
+        selectPreparedStatement.close(); // close the selectPreparedStatement
+    }
+
+    // Check Cache
+    public void checkCache(int id, String name) throws SQLException {
+
+        // Check Cache
+        boolean channel = channelCache.containsKey(id) && channelCache.get(id).equals(name);
+        boolean user = userCache.containsKey(id) && userCache.get(id).equals(name);
+
+        // Return if in Cache
+        if (channel && user) return;
+
+        // Update Channel Cache
+        if (!channel) {
+            updateCache(id, name, "channels");
+            channelCache.put(id, name);
+        }
+
+        // Update User Cache
+        if (!user) {
+            updateCache(id, name, "users");
+            userCache.put(id, name);
+        }
+    }
+
+    // Load Cache
+    private HashMap<Integer, String> loadCache(String table) {
+
+        // Variables
+        HashMap<Integer, String> cache = new HashMap<>();
+
+        // Load Channel Cache
+        try {
+            if (!isConnected()) connect(); // connect
+
+            String query = null;
+            if (table.equals("channels")) query = "SELECT * FROM " + "channels";
+            if (table.equals("users")) query = "SELECT * FROM " + "users";
+            if (query == null) return null;
+            PreparedStatement preparedStatement = getConnection().prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) cache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return cache;
     }
 
     // Query ID

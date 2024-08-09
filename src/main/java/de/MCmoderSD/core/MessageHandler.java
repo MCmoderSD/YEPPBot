@@ -5,6 +5,7 @@ import de.MCmoderSD.commands.Command;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -23,7 +24,7 @@ public class MessageHandler {
     private final HashMap<Integer, ArrayList<String>> blackList;
     private final HashMap<String, Command> commandList;
     private final HashMap<String, String> aliasList;
-    private final ArrayList<Integer> lurkList;
+    private final HashMap<Integer, Integer> lurkList;
 
 
     public MessageHandler(BotClient botClient, MySQL mySQL, Frame frame) {
@@ -37,7 +38,7 @@ public class MessageHandler {
         blackList = new HashMap<>();
         commandList = new HashMap<>();
         aliasList = new HashMap<>();
-        lurkList = new ArrayList<>();
+        lurkList = new HashMap<>();
 
         // Update Black List
         updateBlackList();
@@ -70,7 +71,7 @@ public class MessageHandler {
             handleTimers(event);
 
             // Check for Lurk
-            if (lurkList.contains(event.getUserId())) handleLurk(event);
+            if (lurkList.containsKey(event.getUserId())) handleLurk(event);
 
             // Check for Command
             if (event.hasCommand()) {
@@ -90,7 +91,7 @@ public class MessageHandler {
     }
 
     private void handleLurk(TwitchMessageEvent event) {
-        // TODO: Implement Lurk
+
     }
 
     private void handleTimers(TwitchMessageEvent event) {
@@ -146,5 +147,10 @@ public class MessageHandler {
     private boolean isBlackListed(TwitchMessageEvent event, String command) {
         if (!blackList.containsKey(event.getChannelId())) return false;
         else return blackList.get(event.getChannelId()).contains(command.toLowerCase());
+    }
+
+    public void updateLurkList(HashMap<Integer, Integer> lurkList) {
+        this.lurkList.clear();
+        this.lurkList.putAll(lurkList);
     }
 }
