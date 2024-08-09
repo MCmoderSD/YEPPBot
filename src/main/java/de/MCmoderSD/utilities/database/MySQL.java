@@ -3,7 +3,9 @@ package de.MCmoderSD.utilities.database;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.utilities.database.manager.*;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 
 @SuppressWarnings("unused")

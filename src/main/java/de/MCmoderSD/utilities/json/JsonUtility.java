@@ -14,13 +14,10 @@ public class JsonUtility {
     // Attributes
     private final HashMap<String, JsonNode> jsonCache;
 
-    private String url;
-    private boolean isAbsolute;
-
     // Default constructor
     public JsonUtility() {
-        url = null;
-        isAbsolute = false;
+
+        // Initialize JSON cache
         this.jsonCache = new HashMap<>();
     }
 
