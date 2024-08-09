@@ -329,9 +329,9 @@ public class MySQL extends Driver {
                 preparedStatement.setString(4, command); // set command
                 preparedStatement.setString(5, event.getMessage()); // set args
                 preparedStatement.setString(6, response); // set response
-                preparedStatement.setInt(7, event.getBits()); // set bits
-                preparedStatement.setInt(8, event.getSubMonths()); // set subMonths
-                preparedStatement.setInt(9, event.getSubStreak()); // set subStreak
+                preparedStatement.setInt(7, event.getLogBits()); // set bits
+                preparedStatement.setInt(8, event.getLogSubMonths()); // set subMonths
+                preparedStatement.setInt(9, event.getLogSubStreak()); // set subStreak
                 preparedStatement.setString(10, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
             } catch (SQLException e) {
@@ -396,9 +396,9 @@ public class MySQL extends Driver {
                 preparedStatement.setInt(3, userID); // set user
                 preparedStatement.setString(4, trigger); // set command
                 preparedStatement.setString(5, args); // set args
-                preparedStatement.setInt(6, event.getBits()); // set bits
-                preparedStatement.setInt(7, event.getSubMonths()); // set subMonths
-                preparedStatement.setInt(8, event.getSubStreak()); // set subStreak
+                preparedStatement.setInt(6, event.getLogBits()); // set bits
+                preparedStatement.setInt(7, event.getLogSubMonths()); // set subMonths
+                preparedStatement.setInt(8, event.getLogSubStreak()); // set subStreak
                 preparedStatement.setString(9, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
             } catch (SQLException e) {

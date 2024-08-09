@@ -64,7 +64,7 @@ public class MessageHandler {
             // Log Message
             mySQL.logMessage(event);
             event.logToConsole();
-            if (!botClient.getArg("cli")) frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
+            if (!botClient.hasArg("cli")) frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
 
             // Handle Timers;
             handleTimers(event);

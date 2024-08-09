@@ -203,7 +203,7 @@ public class Main {
 
         // Dev & CLI & Log
         result.put("dev", listContainsEither(arguments, "dev", "development", "debug", "test"));
-        result.put("cli", listContainsEither(arguments, "nogui", "no-gui", "console", "terminal"));
+        result.put("cli", listContainsEither(arguments, "nogui", "no-gui", "console", "terminal", "cli"));
         result.put("log", !listContainsEither(arguments, "nolog", "no-log", "disable-log", "disablelog"));
 
         // Info

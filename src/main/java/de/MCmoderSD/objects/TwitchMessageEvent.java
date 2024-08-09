@@ -116,9 +116,9 @@ public class TwitchMessageEvent {
             preparedStatement.setInt(3, channelId); // set channel
             preparedStatement.setInt(4, userId); // set user
             preparedStatement.setString(5, message); // set message
-            preparedStatement.setInt(6, bits == null ? 0 : bits); // set bits
-            preparedStatement.setInt(7, subMonths == null ? 0 : subMonths); // set subMonths
-            preparedStatement.setInt(8, subStreak == null ? 0 : subStreak); // set subStreak
+            preparedStatement.setInt(6, getLogBits()); // set bits
+            preparedStatement.setInt(7, getLogSubMonths()); // set subMonths
+            preparedStatement.setInt(8, getLogSubStreak()); // set subStreak
             preparedStatement.setString(9, getSubTier()); // set subPlan
             preparedStatement.executeUpdate(); // execute
         } catch (SQLException e) {
@@ -210,5 +210,17 @@ public class TwitchMessageEvent {
 
     public String getLog() {
         return getFormattedTimestamp() + " " + getType() + " <" + getChannel() + "> " + getUser() + ": " + getMessage();
+    }
+
+    public int getLogSubMonths() {
+        return subMonths == null ? 0 : subMonths;
+    }
+
+    public int getLogSubStreak() {
+        return subStreak == null ? 0 : subStreak;
+    }
+
+    public int getLogBits() {
+        return bits == null ? 0 : bits;
     }
 }

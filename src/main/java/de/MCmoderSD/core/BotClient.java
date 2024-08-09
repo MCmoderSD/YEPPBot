@@ -23,6 +23,7 @@ import de.MCmoderSD.utilities.other.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Set;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -87,7 +88,7 @@ public class BotClient {
         // Join Channels
         ArrayList<String> channelList = new ArrayList<>(Collections.singleton(botName));
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
-        if (!getArg("dev")) channelList.addAll(mySQL.getActiveChannels());
+        if (!hasArg("dev")) channelList.addAll(mySQL.getActiveChannels());
         joinChannel(channelList);
 
         // Event Handler
@@ -125,7 +126,7 @@ public class BotClient {
     public void write(String channel, String message) {
 
         // Update Frame
-        if (!getArg("cli")) frame.log(USER, channel, botName, message);
+        if (!hasArg("cli")) frame.log(USER, channel, botName, message);
 
         // Log
         mySQL.logResponse(channel, botName, message);
@@ -141,7 +142,7 @@ public class BotClient {
         var channel = event.getChannel();
 
         // Update Frame
-        if (!getArg("cli")) frame.log(RESPONSE, channel, botName, message);
+        if (!hasArg("cli")) frame.log(RESPONSE, channel, botName, message);
 
         // Log
         mySQL.logResponse(event, command, message);
@@ -153,6 +154,7 @@ public class BotClient {
     }
 
     public void joinChannel(String channel) {
+        if (chat.isChannelJoined(channel)) return;
         System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
         chat.joinChannel(channel);
     }
@@ -171,6 +173,7 @@ public class BotClient {
     }
 
     public void leaveChannel(String channel) {
+        if (!chat.isChannelJoined(channel)) return;
         System.out.printf("%s%s %s Leave Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
         chat.leaveChannel(channel);
     }
@@ -202,7 +205,11 @@ public class BotClient {
         return prefix;
     }
 
-    public boolean getArg(String arg) {
+    public Set<String> getChannels() {
+        return chat.getChannels();
+    }
+
+    public boolean hasArg(String arg) {
         return main.hasArg(arg);
     }
 
@@ -216,6 +223,10 @@ public class BotClient {
 
     public boolean isModerator(TwitchMessageEvent event) {
         return checkModerator(event);
+    }
+
+    public boolean isInChannel(String channel) {
+        return chat.isChannelJoined(channel);
     }
 
     // Module Getter
