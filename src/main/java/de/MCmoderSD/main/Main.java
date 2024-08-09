@@ -308,7 +308,7 @@ public class Main {
         return reader;
     }
 
-    public boolean getArg(String arg) {
+    public boolean hasArg(String arg) {
         return argMap.get(arg);
     }
 }

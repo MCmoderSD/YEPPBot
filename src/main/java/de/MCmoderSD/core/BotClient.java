@@ -203,7 +203,7 @@ public class BotClient {
     }
 
     public boolean getArg(String arg) {
-        return main.getArg(arg);
+        return main.hasArg(arg);
     }
 
     public boolean isAdmin(String user) {

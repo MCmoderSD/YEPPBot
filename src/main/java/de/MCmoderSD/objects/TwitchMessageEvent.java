@@ -93,35 +93,37 @@ public class TwitchMessageEvent {
         // Get Additional Information
         subMonths = event.getCumulativeMonths();
         subStreak = event.getStreakMonths();
-        subTier = event.getTier().ordinalName();
+        subTier = event.getTier().ordinalName().toUpperCase();
         bits = null;
     }
 
     // Methods
     public void logToMySQL(MySQL mySQL) {
-        new Thread(() -> {
+
+        // Log message
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Check Channel and User
-            mySQL.checkChannel(channelId, channel);
-            mySQL.checkUser(userId, user);
+            mySQL.checkCache(channelId, channel);
+            mySQL.checkCache(userId, user);
 
-            // Log message
-            try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
-
-                // Prepare statement
-                String query = "INSERT INTO " + "MessageLog" + " (timestamp, type, channel_id, user_id, message) VALUES (?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-                preparedStatement.setTimestamp(1, timestamp); // set timestamp
-                preparedStatement.setString(2, getType()); // set type
-                preparedStatement.setInt(3, channelId); // set channel
-                preparedStatement.setInt(4, userId); // set user
-                preparedStatement.setString(5, message); // set message
-                preparedStatement.executeUpdate(); // execute
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            }
-        }).start();
+            // Prepare statement
+            String query = "INSERT INTO " + "MessageLog" + " (timestamp, type, channel_id, user_id, message, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setTimestamp(1, timestamp); // set timestamp
+            preparedStatement.setString(2, getType()); // set type
+            preparedStatement.setInt(3, channelId); // set channel
+            preparedStatement.setInt(4, userId); // set user
+            preparedStatement.setString(5, message); // set message
+            preparedStatement.setInt(6, bits == null ? 0 : bits); // set bits
+            preparedStatement.setInt(7, subMonths == null ? 0 : subMonths); // set subMonths
+            preparedStatement.setInt(8, subStreak == null ? 0 : subStreak); // set subStreak
+            preparedStatement.setString(9, getSubTier()); // set subPlan
+            preparedStatement.executeUpdate(); // execute
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public void logToConsole() {

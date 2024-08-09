@@ -1,7 +1,5 @@
 package de.MCmoderSD.utilities.database;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
@@ -14,73 +12,52 @@ import java.util.List;
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 @SuppressWarnings("unused")
-public class MySQL {
-
-    // Attributes
-    private final String host;
-    private final Integer port;
-    private final String database;
-    private final String username;
-    private final String password;
+public class MySQL extends Driver {
 
     // Cache Lists
     private final HashMap<Integer, String> channelCache;
     private final HashMap<Integer, String> userCache;
 
     // Variables
-    private Connection connection;
     private boolean log;
 
     // Constructor
     public MySQL(Main main) {
 
-        // Set Associations
-        JsonNode databaseConfig = main.getCredentials().getMySQLConfig();
-
-        // Set Attributes
-        host = databaseConfig.get("host").asText();
-        port = databaseConfig.get("port").asInt();
-        database = databaseConfig.get("database").asText();
-        username = databaseConfig.get("username").asText();
-        password = databaseConfig.get("password").asText();
+        // Initialize Driver
+        super(main.getCredentials().getMySQLConfig());
 
         // Set Logging
-        log = main.getArg("log");
-
-        // Initialize Cache Lists
-        channelCache = new HashMap<>();
-        userCache = new HashMap<>();
+        log = main.hasArg("log");
 
         // Connect to database
         new Thread(this::connect).start();
-        init();
+        initTables();
 
         // Load Cache
-        loadChannelCache();
-        loadUserCache();
+        channelCache = loadCache("channels");
+        userCache = loadCache("users");
     }
 
-    private void init() {
+    private void initTables() {
         try {
             if (!isConnected()) connect();
-
-            // List of tables to be created
-            ArrayList<PreparedStatement> tables = new ArrayList<>();
 
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
 
             // SQL statement for creating the users table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             users (
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the channels table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             channels (
                             id INT PRIMARY KEY,
@@ -88,10 +65,11 @@ public class MySQL {
                             blacklist TEXT,
                             active BIT NOT NULL DEFAULT 1
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the message log table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             MessageLog (
                             timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -99,13 +77,18 @@ public class MySQL {
                             channel_id INT NOT NULL,
                             user_id INT NOT NULL,
                             message VARCHAR(500),
+                            bits INT NOT NULL DEFAULT 0,
+                            subMonths INT NOT NULL DEFAULT 0,
+                            subStreak INT NOT NULL DEFAULT 0,
+                            subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
                             FOREIGN KEY (channel_id) REFERENCES channels(id),
                             FOREIGN KEY (user_id) REFERENCES users(id)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the command log table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             CommandLog (
                             timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -113,13 +96,18 @@ public class MySQL {
                             user_id INT NOT NULL,
                             command TEXT NOT NULL,
                             args VARCHAR(500),
+                            bits INT NOT NULL DEFAULT 0,
+                            subMonths INT NOT NULL DEFAULT 0,
+                            subStreak INT NOT NULL DEFAULT 0,
+                            subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
                             FOREIGN KEY (channel_id) REFERENCES channels(id),
                             FOREIGN KEY (user_id) REFERENCES users(id)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the response log table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             ResponseLog (
                             timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -128,13 +116,18 @@ public class MySQL {
                             command TEXT NOT NULL,
                             args VARCHAR(500),
                             response VARCHAR(500),
+                            bits INT NOT NULL DEFAULT 0,
+                            subMonths INT NOT NULL DEFAULT 0,
+                            subStreak INT NOT NULL DEFAULT 0,
+                            subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
                             FOREIGN KEY (channel_id) REFERENCES channels(id),
                             FOREIGN KEY (user_id) REFERENCES users(id)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the lurk list table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             lurkList (
                             user_id INT PRIMARY KEY,
@@ -143,10 +136,11 @@ public class MySQL {
                             traitorChannel TEXT,
                             FOREIGN KEY (lurkChannel_ID) REFERENCES channels(id)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the custom timers table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             CustomTimers (
                             channel_id INT NOT NULL,
@@ -156,10 +150,11 @@ public class MySQL {
                             isEnabled BIT NOT NULL DEFAULT 1,
                             FOREIGN KEY (channel_id) REFERENCES channels(id)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the custom commands table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             CustomCommands (
                             channel_id INT NOT NULL,
@@ -169,10 +164,11 @@ public class MySQL {
                             isEnabled BIT NOT NULL DEFAULT 1,
                             FOREIGN KEY (channel_id) REFERENCES channels(id)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the counters table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             Counters (
                             channel_id INT NOT NULL,
@@ -180,10 +176,11 @@ public class MySQL {
                             value INT NOT NULL,
                             FOREIGN KEY (channel_id) REFERENCES channels(id)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the fact list table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             factList (
                             fact_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -200,165 +197,113 @@ public class MySQL {
                             de_adjective varchar(500),
                             de_object varchar(500)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the joke list table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             jokeList (
                             joke_id INT PRIMARY KEY AUTO_INCREMENT,
                             en varchar(500),
                             de varchar(500)
                             )
-                            """));
+                            """
+            ).execute();
 
             // SQL statement for creating the insult list table
-            tables.add(connection.prepareStatement(condition +
+            connection.prepareStatement(condition +
                             """
                             insultList (
                             insult_id INT PRIMARY KEY AUTO_INCREMENT,
                             en varchar(500) NOT NULL,
                             de varchar(500) NOT NULL
                             )
-                            """));
+                            """
+            ).execute();
 
-            // Execute each SQL statement in the list tables
-            for (PreparedStatement table : tables) table.execute();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    // Load Channel Cache
-    private void loadChannelCache() {
+    // Load Cache
+    private HashMap<Integer, String> loadCache(String table) {
 
-        // New Thread
-        new Thread(() -> {
+        // Variables
+        HashMap<Integer, String> cache = new HashMap<>();
 
-            // Load Channel Cache
-            try {
-                if (!isConnected()) connect(); // connect
+        // Load Channel Cache
+        try {
+            if (!isConnected()) connect(); // connect
 
-                String query = "SELECT * FROM " + "channels";
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) channelCache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            }
-        }).start();
+            String query = "SELECT * FROM " + table;
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) cache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return cache;
     }
 
-    // Load User Cache
-    private void loadUserCache() {
+    // Update Channels and Users
+    private void updateCache(int id, String name, String table) throws SQLException {
+        if (!isConnected()) connect(); // connect
 
-        // New Thread
-        new Thread(() -> {
+        // Check Channel
+        String selectQuery = "SELECT * FROM " + table + " WHERE id = ?";
+        PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
+        selectPreparedStatement.setInt(1, id);
+        ResultSet resultSet = selectPreparedStatement.executeQuery();
 
-            // Load User Cache
-            try {
-                if (!isConnected()) connect(); // connect
+        // Add Channel
+        if (!resultSet.next()) {
+            String insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
+            PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
+            insertPreparedStatement.setInt(1, id); // set id
+            insertPreparedStatement.setString(2, name); // set name
+            insertPreparedStatement.executeUpdate(); // execute
+            insertPreparedStatement.close(); // close the insertPreparedStatement
+        }
 
-                String query = "SELECT * FROM " + "users";
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) userCache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
-
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            }
-        }).start();
+        // Close resources
+        resultSet.close();
+        selectPreparedStatement.close(); // close the selectPreparedStatement
     }
 
-    // Checks Channels
-    public void checkChannel(int id, String name) {
-        if (channelCache.containsKey(id)) return;
+    // Check Cache
+    public void checkCache(int id, String name) throws SQLException {
 
-        // New Thread
-        new Thread(() -> {
-
-            // Check Channel
-            try {
-                if (!isConnected()) connect(); // connect
-
-                // Check Channel
-                String selectQuery = "SELECT * FROM channels WHERE id = ?";
-                PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
-                selectPreparedStatement.setInt(1, id);
-                ResultSet resultSet = selectPreparedStatement.executeQuery();
-
-                // Add Channel
-                if (!resultSet.next()) {
-                    String insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
-                    PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
-                    insertPreparedStatement.setInt(1, id); // set id
-                    insertPreparedStatement.setString(2, name); // set name
-                    insertPreparedStatement.executeUpdate(); // execute
-                    insertPreparedStatement.close(); // close the insertPreparedStatement
-                }
-
-                // Add to Cache
-                channelCache.put(id, name);
-
-                // Close resources
-                resultSet.close();
-                selectPreparedStatement.close(); // close the selectPreparedStatement
-
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            }
-        }).start();
-    }
-
-    // Checks Users
-    public void checkUser(int id, String name) {
+        // Check Cache
+        boolean channel = channelCache.containsKey(id) && channelCache.get(id).equals(name);
+        boolean user = userCache.containsKey(id) && userCache.get(id).equals(name);
 
         // Return if in Cache
-        if (userCache.containsKey(id)) return;
+        if (channel && user) return;
 
-        // New Thread
-        new Thread(() -> {
+        // Update Channel Cache
+        if (!channel) {
+            updateCache(id, name, "channels");
+            channelCache.put(id, name);
+        }
 
-            // Check User
-            try {
-                if (!isConnected()) connect(); // connect
-
-                // Check User
-                String selectQuery = "SELECT * FROM users WHERE id = ?";
-                PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
-                selectPreparedStatement.setInt(1, id);
-                ResultSet resultSet = selectPreparedStatement.executeQuery();
-
-                // Add User
-                if (!resultSet.next()) {
-                    String insertQuery = "INSERT INTO users (id, name) VALUES (?, ?)";
-                    PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
-                    insertPreparedStatement.setInt(1, id); // set id
-                    insertPreparedStatement.setString(2, name); // set name
-                    insertPreparedStatement.executeUpdate(); // execute
-                    insertPreparedStatement.close(); // close the insertPreparedStatement
-                }
-
-                // Add to Cache
-                userCache.put(id, name);
-
-                // Close resources
-                resultSet.close();
-                selectPreparedStatement.close(); // close the selectPreparedStatement
-
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            }
-        }).start();
+        // Update User Cache
+        if (!user) {
+            updateCache(id, name, "users");
+            userCache.put(id, name);
+        }
     }
 
     // Log Message
     public void logMessage(TwitchMessageEvent event) {
-        if (log) event.logToMySQL(this); // log to MySQL
+        if (log) new Thread(() -> {
+            event.logToMySQL(this); // log to MySQL
+        }).start();
     }
 
-    // Log Response
+    // Log Command Response
     public void logResponse(TwitchMessageEvent event, String command, String response) {
         if (log) new Thread(() -> {
 
@@ -368,14 +313,15 @@ public class MySQL {
             var channel = event.getChannel();
             var user = event.getUser();
 
-            checkChannel(channelID, channel); // check channel
-            checkUser(userID, user); // check user
-
             try {
                 if (!isConnected()) connect(); // connect
 
+                // Check Channel and User
+                checkCache(channelID, channel);
+                checkCache(userID, user);
+
                 // Prepare statement
-                String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
+                String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelID); // set channel
@@ -383,6 +329,10 @@ public class MySQL {
                 preparedStatement.setString(4, command); // set command
                 preparedStatement.setString(5, event.getMessage()); // set args
                 preparedStatement.setString(6, response); // set response
+                preparedStatement.setInt(7, event.getBits()); // set bits
+                preparedStatement.setInt(8, event.getSubMonths()); // set subMonths
+                preparedStatement.setInt(9, event.getSubStreak()); // set subStreak
+                preparedStatement.setString(10, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
@@ -390,18 +340,20 @@ public class MySQL {
         }).start();
     }
 
+    // Log Bot Response
     public void logResponse(String channel, String user, String message) {
         if (log) new Thread(() -> {
 
             // Variables
-            var channelID = queryChannelID(channel);
-            var userID = queryUserID(user);
-
-            checkChannel(channelID, channel); // check channel
-            checkUser(userID, user); // check user
+            var channelID = queryID("channels", channel);
+            var userID = queryID("users", user);
 
             try {
                 if (!isConnected()) connect(); // connect
+
+                // Check Channel and User
+                checkCache(channelID, channel);
+                checkCache(userID, user);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
@@ -429,20 +381,25 @@ public class MySQL {
             var channel = event.getChannel();
             var user = event.getUser();
 
-            checkChannel(channelID, channel); // check channel
-            checkUser(userID, user); // check user
-
             try {
                 if (!isConnected()) connect(); // connect
 
+                // Check Channel and User
+                checkCache(channelID, channel);
+                checkCache(userID, user);
+
                 // Prepare statement
-                String query = "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args) VALUES (?, ?, ?, ?, ?)";
+                String query = "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelID); // set channel
                 preparedStatement.setInt(3, userID); // set user
                 preparedStatement.setString(4, trigger); // set command
                 preparedStatement.setString(5, args); // set args
+                preparedStatement.setInt(6, event.getBits()); // set bits
+                preparedStatement.setInt(7, event.getSubMonths()); // set subMonths
+                preparedStatement.setInt(8, event.getSubStreak()); // set subStreak
+                preparedStatement.setString(9, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
@@ -486,20 +443,26 @@ public class MySQL {
                 String blacklist = resultSet.getString("blacklist");
                 if (blacklist != null) blackList.put(id, new ArrayList<>(List.of(blacklist.toLowerCase().split("; "))));
             }
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            }
-            return blackList;
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return blackList;
     }
 
-    // Query Channel ID
-    public int queryChannelID(String channel) {
+    // Get Lurk List
+    // ToDo Implement
+
+    // Query ID
+    public int queryID(String table, String name) {
         try {
             if (!isConnected()) connect();
-
-            String query = "SELECT id FROM " + "channels" + " WHERE name = ?";
+            String query = null;
+            if (table.equals("channels")) query = "SELECT id FROM " + "channels" + " WHERE name = ?";
+            if (table.equals("users")) query = "SELECT id FROM " + "users" + " WHERE name = ?";
+            if (query == null) return -1;
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, channel);
+            preparedStatement.setString(1, name);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) return resultSet.getInt("id");
         } catch (SQLException e) {
@@ -508,44 +471,15 @@ public class MySQL {
         return -1;
     }
 
-    // Query User ID
-    public int queryUserID(String user) {
+    // Query Name
+    public String queryName(String table, int id) {
+
         try {
             if (!isConnected()) connect();
-
-            String query = "SELECT id FROM " + "users" + " WHERE name = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, user);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) return resultSet.getInt("id");
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-        return -1;
-    }
-
-    // Query Channel
-    public String queryChannel(int id) {
-        try {
-            if (!isConnected()) connect();
-
-            String query = "SELECT name FROM " + "channels" + " WHERE id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) return resultSet.getString("name");
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-        return null;
-    }
-
-    // Query User
-    public String queryUser(int id) {
-        try {
-            if (!isConnected()) connect();
-
-            String query = "SELECT name FROM " + "users" + " WHERE id = ?";
+            String query = null;
+            if (table.equals("channels")) query = "SELECT name FROM " + "channels" + " WHERE id = ?";
+            if (table.equals("users")) query = "SELECT name FROM " + "users" + " WHERE id = ?";
+            if (query == null) return null;
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -557,41 +491,11 @@ public class MySQL {
     }
 
     // Getter
-    public boolean isConnected() {
-        try {
-            return connection != null && connection.isValid(0);
-        } catch (SQLException e) {
-            return false;
-        }
-    }
-
     public boolean isLoggingEnabled() {
         return log;
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
     // Setter
-    public void connect() {
-        try {
-            if (isConnected()) return; // already connected
-            connection = java.sql.DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password); // connect
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
-    public void disconnect() {
-        try {
-            if (!isConnected()) return; // already disconnected
-            connection.close(); // disconnect
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
     public void loggingEnabled(boolean loggingEnabled) {
         this.log = loggingEnabled;
     }
