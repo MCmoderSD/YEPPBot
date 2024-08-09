@@ -6,11 +6,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import java.util.HashMap;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -27,6 +23,11 @@ public class MessageHandler {
     private final HashMap<String, String> aliasList;
     private final HashMap<Integer, Integer> lurkList;
     private final HashMap<Integer, ArrayList<String>> blackList;
+    private final HashMap<Integer, HashMap<String, String >> customCommands;
+    private final HashMap<Integer, HashMap<String, String >> customAliases;
+
+    // Utilities
+    private final Random random = new Random();
 
     // Constructor
     public MessageHandler(BotClient botClient, MySQL mySQL, Frame frame) {
@@ -41,10 +42,13 @@ public class MessageHandler {
         aliasList = new HashMap<>();
         lurkList = new HashMap<>();
         blackList = new HashMap<>();
+        customCommands = new HashMap<>();
+        customAliases = new HashMap<>();
 
         // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
         updateBlackList(mySQL.getChannelManager().getBlackList());
+        updateCustomCommands(mySQL.getCustomManager().getCustomCommands(), mySQL.getCustomManager().getCustomAliases());
     }
 
     // Handle Methods
@@ -163,10 +167,34 @@ public class MessageHandler {
 
             // Execute Command
             command.execute(event, parts);
+            return;
         }
 
-        // Check for Custom Command
-        // TODO: Implement Custom Commands
+        // Check for Custom Command in channel
+        var channelID = event.getChannelId();
+        if (customCommands.containsKey(channelID)) {
+
+            // Check for Alias
+            if (customAliases.containsKey(channelID) && customAliases.get(channelID).containsKey(trigger)) {
+                trigger = customAliases.get(channelID).get(trigger);
+                parts.set(0, trigger);
+            }
+
+            // Check for Command
+            if (customCommands.get(channelID).containsKey(trigger)) {
+
+                // Check for Blacklist
+                if (isBlackListed(event, trigger)) return;
+                String response = formatCommand(event, parts, customCommands.get(channelID).get(trigger));
+                parts.removeFirst();
+
+                // Log Command
+                mySQL.getLogManager().logCommand(event, trigger, processArgs(parts));
+
+                // Execute Command
+                botClient.respond(event, "Custom: " + trigger, response);
+            }
+        }
 
         // Check for Counter
         // TODO: Implement Counter
@@ -185,6 +213,27 @@ public class MessageHandler {
         // Split Command
         String[] split = trimMessage(message).split(" ");
         return new ArrayList<>(Arrays.asList(split));
+    }
+
+    private String formatCommand(TwitchMessageEvent event, ArrayList<String>args, String response) {
+
+        // Replace Variables
+        if (response.contains("%random%")) response = response.replaceAll("%random%", random.nextInt(100) + "%");
+        if (response.contains("%channel%")) response = response.replaceAll("%channel%", tagChannel(event));
+
+        if (response.contains("%user%") || response.contains("%author%")) {
+            response = response.replaceAll("%user%", tagUser(event));
+            response = response.replaceAll("%author%", tagUser(event));
+        }
+
+        if (response.contains("%tagged%")) {
+            String tagged;
+            if (!args.isEmpty()) tagged = args.getFirst().startsWith("@") ? args.getFirst() : "@" + args.getFirst();
+            else tagged = tagUser(event);
+            response = response.replaceAll("%tagged%", tagged);
+        }
+
+        return response;
     }
 
     private String formatLurkTime(Timestamp startTime) {
@@ -259,6 +308,14 @@ public class MessageHandler {
     public void updateBlackList(HashMap<Integer, ArrayList<String>> blackList) {
         this.blackList.clear();
         this.blackList.putAll(blackList);
+    }
+
+    // Update Custom Commands
+    public void updateCustomCommands(HashMap<Integer, HashMap<String, String>> customCommands, HashMap<Integer, HashMap<String, String>> customAliases) {
+        this.customCommands.clear();
+        this.customCommands.putAll(customCommands);
+        this.customAliases.clear();
+        this.customAliases.putAll(customAliases);
     }
 
     // Getter

@@ -14,6 +14,7 @@ public class MySQL extends Driver {
     // Associations
     private final AssetManager assetManager;
     private final ChannelManager channelManager;
+    private final CustomManager customManager;
     private final LogManager logManager;
     private final LurkManager lurkManager;
 
@@ -38,6 +39,7 @@ public class MySQL extends Driver {
         // Initialize Manager
         assetManager = new AssetManager(this);
         channelManager = new ChannelManager(this);
+        customManager = new CustomManager(this);
         logManager = new LogManager(this, main.hasArg("log"));
         lurkManager = new LurkManager(this);
     }
@@ -68,46 +70,6 @@ public class MySQL extends Driver {
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
                             active BIT NOT NULL DEFAULT 1
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the custom timers table
-            connection.prepareStatement(condition +
-                            """
-                            CustomTimers (
-                            channel_id INT NOT NULL,
-                            name TEXT NOT NULL,
-                            time TEXT NOT NULL,
-                            response VARCHAR(500) NOT NULL,
-                            isEnabled BIT NOT NULL DEFAULT 1,
-                            FOREIGN KEY (channel_id) REFERENCES channels(id)
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the custom commands table
-            connection.prepareStatement(condition +
-                            """
-                            CustomCommands (
-                            channel_id INT NOT NULL,
-                            command_name TEXT NOT NULL,
-                            command_alias TEXT,
-                            command_response VARCHAR(500) NOT NULL,
-                            isEnabled BIT NOT NULL DEFAULT 1,
-                            FOREIGN KEY (channel_id) REFERENCES channels(id)
-                            )
-                            """
-            ).execute();
-
-            // SQL statement for creating the counters table
-            connection.prepareStatement(condition +
-                            """
-                            Counters (
-                            channel_id INT NOT NULL,
-                            name TEXT NOT NULL,
-                            value INT NOT NULL,
-                            FOREIGN KEY (channel_id) REFERENCES channels(id)
                             )
                             """
             ).execute();
@@ -242,6 +204,10 @@ public class MySQL extends Driver {
 
     public ChannelManager getChannelManager() {
         return channelManager;
+    }
+
+    public CustomManager getCustomManager() {
+        return customManager;
     }
 
     public LogManager getLogManager() {

@@ -106,6 +106,7 @@ public class BotClient {
         boolean giphy = credentials.validateGiphyConfig();
 
         // Initialize Commands
+        new CustomCommand(this, messageHandler, mySQL);
         new Fact(this, messageHandler, mySQL);
         if (giphy) new Gif(this, messageHandler, credentials);
         new Insult(this, messageHandler, mySQL);
