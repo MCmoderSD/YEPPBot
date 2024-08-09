@@ -18,8 +18,6 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [Usage and commands](#usage-and-commands)
 - [Contributing](#contributing)
 
-<br>
-
 ## Features
 
 - Commands:
@@ -48,7 +46,8 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - [x] Custom Counters
   - [x] Custom Timers (Still in development)
   - [x] Database Logging
-  - [x] User Intercae
+  - [x] Error 
+  - [x] User Interface (Cheap with JavaSwing)
 
 
 - Planned Features:
@@ -211,7 +210,7 @@ The bot has a variety of commands that you can use. <br>
 You can use the ```!help``` command to get a list of all the commands. <br>
 You can use the ```!help COMMAND_NAME``` to get more information about a specific command. <br>
 
-You can use the ```!moderate join/leave CHANNEL_NAME``` to make the bot join or leave a specific channel. <br>
+You can use the ```!moderate join/leave``` to make the bot join or leave your channel. <br>
 You can use the ```!moderate block/unblock``` to blacklist commands. <br>
 
 You can use the ```!CustomCommand``` command to create and manage custom commands. <br>

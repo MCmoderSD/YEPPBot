@@ -378,6 +378,10 @@ public class MessageHandler {
         return aliasList.containsKey(alias);
     }
 
+    public HashMap<String, Command> getCommandList() {
+        return commandList;
+    }
+
     public HashMap<String, String> getAliasList() {
         return aliasList;
     }

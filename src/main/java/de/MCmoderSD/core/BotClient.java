@@ -111,6 +111,7 @@ public class BotClient {
         new CustomTimers(this, messageHandler, mySQL);
         new Fact(this, messageHandler, mySQL);
         if (giphy) new Gif(this, messageHandler, credentials);
+        new Help(this, messageHandler, mySQL);
         new Insult(this, messageHandler, mySQL);
         new Join(this, messageHandler);
         new Joke(this, messageHandler, mySQL);
