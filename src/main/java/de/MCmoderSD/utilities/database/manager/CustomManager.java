@@ -46,7 +46,7 @@ public class CustomManager {
                     time TEXT NOT NULL,
                     response VARCHAR(500) NOT NULL,
                     isEnabled BIT NOT NULL DEFAULT 1,
-                    FOREIGN KEY (channel_id) REFERENCES channels(id)
+                    FOREIGN KEY (channel_id) REFERENCES users(id)
                     )
                     """
             ).execute();
@@ -60,7 +60,7 @@ public class CustomManager {
                     command_alias TEXT,
                     command_response VARCHAR(500) NOT NULL,
                     isEnabled BIT NOT NULL DEFAULT 1,
-                    FOREIGN KEY (channel_id) REFERENCES channels(id)
+                    FOREIGN KEY (channel_id) REFERENCES users(id)
                     )
                     """
             ).execute();
@@ -72,7 +72,7 @@ public class CustomManager {
                     channel_id INT NOT NULL,
                     name TEXT NOT NULL,
                     value INT NOT NULL,
-                    FOREIGN KEY (channel_id) REFERENCES channels(id)
+                    FOREIGN KEY (channel_id) REFERENCES users(id)
                     )
                     """
             ).execute();

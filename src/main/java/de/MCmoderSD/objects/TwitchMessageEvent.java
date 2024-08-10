@@ -134,8 +134,8 @@ public class TwitchMessageEvent {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Check Channel and User
-            mySQL.checkCache(channelId, channel, true);
             mySQL.checkCache(userId, user, false);
+            mySQL.checkCache(channelId, channel, true);
 
             // Prepare statement
             String query = "INSERT INTO " + "MessageLog" + " (timestamp, type, channel_id, user_id, message, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";

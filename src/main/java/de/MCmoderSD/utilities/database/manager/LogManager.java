@@ -56,7 +56,7 @@ public class LogManager {
                 subMonths INT NOT NULL DEFAULT 0,
                 subStreak INT NOT NULL DEFAULT 0,
                 subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
-                FOREIGN KEY (channel_id) REFERENCES channels(id),
+                FOREIGN KEY (channel_id) REFERENCES users(id),
                 FOREIGN KEY (user_id) REFERENCES users(id)
                 )
                 """
@@ -75,7 +75,7 @@ public class LogManager {
                     subMonths INT NOT NULL DEFAULT 0,
                     subStreak INT NOT NULL DEFAULT 0,
                     subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
-                    FOREIGN KEY (channel_id) REFERENCES channels(id),
+                    FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
                     """
@@ -95,7 +95,7 @@ public class LogManager {
                     subMonths INT NOT NULL DEFAULT 0,
                     subStreak INT NOT NULL DEFAULT 0,
                     subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
-                    FOREIGN KEY (channel_id) REFERENCES channels(id),
+                    FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
                     """
@@ -110,7 +110,7 @@ public class LogManager {
                     user_id INT NOT NULL,
                     role varchar(3) NOT NULL,
                     added BIT NOT NULL,
-                    FOREIGN KEY (channel_id) REFERENCES channels(id),
+                    FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
                     """
@@ -127,7 +127,7 @@ public class LogManager {
                     subPlan VARCHAR(5),
                     giftAmount INT,
                     giftTotal INT,
-                    FOREIGN KEY (channel_id) REFERENCES channels(id),
+                    FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
                     """
@@ -141,7 +141,7 @@ public class LogManager {
                     channel_id INT NOT NULL,
                     raider_id INT NOT NULL,
                     viwerAmount INT NOT NULL DEFAULT 0,
-                    FOREIGN KEY (channel_id) REFERENCES channels(id),
+                    FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (raider_id) REFERENCES users(id)
                     )
                     """
@@ -173,8 +173,8 @@ public class LogManager {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(channelID, channel, true);
                 mySQL.checkCache(userID, user, false);
+                mySQL.checkCache(channelID, channel, true);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -209,8 +209,8 @@ public class LogManager {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(channelID, channel, true);
                 mySQL.checkCache(userID, user, false);
+                mySQL.checkCache(channelID, channel, true);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -244,8 +244,8 @@ public class LogManager {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(channelID, channel, true);
                 mySQL.checkCache(userID, user, false);
+                mySQL.checkCache(channelID, channel, true);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
@@ -277,8 +277,8 @@ public class LogManager {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(channelID, event.getChannel(), true);
                 mySQL.checkCache(userID, event.getUser(), false);
+                mySQL.checkCache(channelID, event.getChannel(), true);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "RoleLog" + " (timestamp, channel_id, user_id, role, added) VALUES (?, ?, ?, ?, ?)";
@@ -311,8 +311,8 @@ public class LogManager {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(channelID, channel, true);
                 mySQL.checkCache(userID, user, false);
+                mySQL.checkCache(channelID, channel, true);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type) VALUES (?, ?, ?, ?)";
@@ -345,8 +345,8 @@ public class LogManager {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(channelID, channel, true);
                 mySQL.checkCache(userID, user, false);
+                mySQL.checkCache(channelID, channel, true);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subPlan) VALUES (?, ?, ?, ?, ?)";
@@ -390,8 +390,8 @@ public class LogManager {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(channelID, channel, true);
                 mySQL.checkCache(userID, user, false);
+                mySQL.checkCache(channelID, channel, true);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subPlan, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -427,8 +427,8 @@ public class LogManager {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(channelID, channel, true);
                 mySQL.checkCache(raiderID, raider, false);
+                mySQL.checkCache(channelID, channel, true);
 
                 // Prepare statement
                 String query = "INSERT INTO " + "RaidLog" + " (timestamp, channel_id, raider_id, viwerAmount) VALUES (?, ?, ?, ?)";

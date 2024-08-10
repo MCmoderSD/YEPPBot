@@ -44,7 +44,7 @@ public class LurkManager {
                     lurkChannel_ID INT NOT NULL,
                     startTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     traitorChannel TEXT,
-                    FOREIGN KEY (lurkChannel_ID) REFERENCES channels(id)
+                    FOREIGN KEY (lurkChannel_ID) REFERENCES users(id)
                     )
                     """
             ).execute();
@@ -65,8 +65,8 @@ public class LurkManager {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Check Channel and User
-            mySQL.checkCache(channelID, event.getChannel(), true);
             mySQL.checkCache(userID, event.getUser(), false);
+            mySQL.checkCache(channelID, event.getChannel(), true);
 
             // Prepare statement
             String query = "INSERT INTO " + "lurkList" + " (user_id, lurkChannel_ID, startTime) VALUES (?, ?, ?)";

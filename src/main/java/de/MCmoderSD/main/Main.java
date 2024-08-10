@@ -311,18 +311,18 @@ public class Main {
     public enum Argument {
 
         // Arguments
-        HELP("help", "help", "?"),
-        VERSION("version", "version", "ver", "v"),
-        GENERATE("generate", "generate", "gen"),
-        DEV("dev", "dev", "development", "debug", "test"),
-        CLI("cli", "cli", "nogui", "no-gui", "console", "terminal"),
-        LOG("log", "log", "nolog", "no-log", "disable-log", "disablelog"),
-        BOT_CONFIG("botconfig", "botconfig"),
-        CHANNEL_LIST("channellist", "channellist"),
-        MYSQL_CONFIG("mysqlconfig", "mysqlconfig"),
-        OPENAI_CONFIG("openaiconfig", "openaiconfig"),
-        OPENWEATHERMAP_CONFIG("openweathermapconfig", "openweathermapconfig"),
-        GIPHY_CONFIG("giphyconfig", "giphyconfig");
+        HELP("help", "?", "h"),
+        VERSION("version", "ver", "v"),
+        GENERATE("generate", "gen"),
+        DEV("dev", "development", "debug", "test"),
+        CLI("cli", "nogui", "console", "terminal"),
+        LOG("nolog", "disablelog"),
+        BOT_CONFIG("botconfig"),
+        CHANNEL_LIST("channellist"),
+        MYSQL_CONFIG("mysqlconfig"),
+        OPENAI_CONFIG("openaiconfig"),
+        OPENWEATHERMAP_CONFIG("openweathermapconfig"),
+        GIPHY_CONFIG("giphyconfig");
 
         // Attributes
         private final String[] aliases;

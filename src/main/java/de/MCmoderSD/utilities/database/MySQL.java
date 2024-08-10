@@ -40,7 +40,7 @@ public class MySQL extends Driver {
         assetManager = new AssetManager(this);
         channelManager = new ChannelManager(this);
         customManager = new CustomManager(this);
-        logManager = new LogManager(this, main.hasArg(Main.Argument.LOG));
+        logManager = new LogManager(this, !main.hasArg(Main.Argument.LOG));
         lurkManager = new LurkManager(this);
     }
 
@@ -66,10 +66,11 @@ public class MySQL extends Driver {
             connection.prepareStatement(condition +
                     """
                             channels (
-                            id INT PRIMARY KEY,
+                            id INT NOT NULL,
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
-                            active BIT NOT NULL DEFAULT 1
+                            active BIT NOT NULL DEFAULT 1,
+                            FOREIGN KEY (id) REFERENCES users(id)
                             )
                             """
             ).execute();
@@ -83,25 +84,57 @@ public class MySQL extends Driver {
         }
     }
 
-    // Update Channels and Users
-    private void updateCache(int id, String name, String table) throws SQLException {
+    // Checks Channels
+    private void checkChannel(int id, String name) throws SQLException {
+
         if (!isConnected()) connect(); // connect
 
         // Check Channel
-        String selectQuery = "SELECT * FROM " + table + " WHERE id = ?";
-        PreparedStatement selectPreparedStatement = getConnection().prepareStatement(selectQuery);
+        String selectQuery = "SELECT * FROM channels WHERE id = ?";
+        PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
         selectPreparedStatement.setInt(1, id);
         ResultSet resultSet = selectPreparedStatement.executeQuery();
 
         // Add Channel
         if (!resultSet.next()) {
             String insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
-            PreparedStatement insertPreparedStatement = getConnection().prepareStatement(insertQuery);
+            PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
             insertPreparedStatement.setInt(1, id); // set id
             insertPreparedStatement.setString(2, name); // set name
             insertPreparedStatement.executeUpdate(); // execute
             insertPreparedStatement.close(); // close the insertPreparedStatement
         }
+
+        // Add to Cache
+        channelCache.put(id, name);
+
+        // Close resources
+        resultSet.close();
+        selectPreparedStatement.close(); // close the selectPreparedStatement
+    }
+
+    // Checks Users
+    private void checkUser(int id, String name) throws SQLException {
+        if (!isConnected()) connect(); // connect
+
+        // Check Channel
+        String selectQuery = "SELECT * FROM users WHERE id = ?";
+        PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
+        selectPreparedStatement.setInt(1, id);
+        ResultSet resultSet = selectPreparedStatement.executeQuery();
+
+        // Add Channel
+        if (!resultSet.next()) {
+            String insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
+            PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
+            insertPreparedStatement.setInt(1, id); // set id
+            insertPreparedStatement.setString(2, name); // set name
+            insertPreparedStatement.executeUpdate(); // execute
+            insertPreparedStatement.close(); // close the insertPreparedStatement
+        }
+
+        // Add to Cache
+        channelCache.put(id, name);
 
         // Close resources
         resultSet.close();
@@ -112,22 +145,22 @@ public class MySQL extends Driver {
     public void checkCache(int id, String name, boolean isChannel) throws SQLException {
 
         // Check Cache
-        boolean channel = channelCache.containsKey(id) && channelCache.get(id).equals(name);
         boolean user = userCache.containsKey(id) && userCache.get(id).equals(name);
+        boolean channel = channelCache.containsKey(id) && channelCache.get(id).equals(name);
 
         // Return if in Cache
-        if (channel && user) return;
-
-        // Update Channel Cache
-        if (!channel && isChannel) {
-            updateCache(id, name, "channels");
-            channelCache.put(id, name);
-        }
+        if (user && channel) return;
 
         // Update User Cache
         if (!user) {
-            updateCache(id, name, "users");
+            checkUser(id, name);
             userCache.put(id, name);
+        }
+
+        // Update Channel Cache
+        if (!channel && isChannel) {
+            checkChannel(id, name);
+            channelCache.put(id, name);
         }
     }
 
