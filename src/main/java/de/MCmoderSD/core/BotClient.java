@@ -9,7 +9,14 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
-
+import com.github.twitch4j.eventsub.events.ChannelVipAddEvent;
+import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
+import com.github.twitch4j.eventsub.events.ChannelModeratorAddEvent;
+import com.github.twitch4j.eventsub.events.ChannelModeratorRemoveEvent;
+import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
+import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
+import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
+import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.UI.Frame;
@@ -17,9 +24,14 @@ import de.MCmoderSD.commands.*;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.TwitchMessageEvent;
+import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +43,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 @SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 public class BotClient {
 
+    private static final Logger log = LoggerFactory.getLogger(BotClient.class);
     // Associations
     private final Main main;
     private final MySQL mySQL;
@@ -125,6 +138,23 @@ public class BotClient {
         if (openAI) new Translate(this, messageHandler, main.getOpenAI());
         if (openAI && weather) new Weather(this, messageHandler, main.getOpenAI(), main.getCredentials());
         if (openAI) new Wiki(this, messageHandler, main.getOpenAI());
+
+        // Initialize LogManager
+        LogManager logManager = mySQL.getLogManager();
+
+        // Role Events
+        eventManager.onEvent(ChannelVipAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelVipRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelModeratorAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
+
+        // Loyalty Events
+        eventManager.onEvent(ChannelFollowEvent.class, logManager::logLoyalty);
+        eventManager.onEvent(ChannelSubscribeEvent.class, logManager::logLoyalty);
+        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, logManager::logLoyalty);
+
+        // Raid Events
+        eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid);
     }
 
     // Methods

@@ -109,7 +109,7 @@ public class MySQL extends Driver {
     }
 
     // Check Cache
-    public void checkCache(int id, String name) throws SQLException {
+    public void checkCache(int id, String name, boolean isChannel) throws SQLException {
 
         // Check Cache
         boolean channel = channelCache.containsKey(id) && channelCache.get(id).equals(name);
@@ -119,7 +119,7 @@ public class MySQL extends Driver {
         if (channel && user) return;
 
         // Update Channel Cache
-        if (!channel) {
+        if (!channel && isChannel) {
             updateCache(id, name, "channels");
             channelCache.put(id, name);
         }

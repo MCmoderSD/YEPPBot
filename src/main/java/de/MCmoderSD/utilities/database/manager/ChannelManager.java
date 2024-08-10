@@ -90,7 +90,7 @@ public class ChannelManager {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Check Channel
-            if (!mySQL.getChannelCache().containsValue(channel)) mySQL.checkCache(mySQL.queryID("channels", channel), channel);
+            if (!mySQL.getChannelCache().containsValue(channel)) mySQL.checkCache(mySQL.queryID("channels", channel), channel, true);
 
             // Variables
             Connection connection = mySQL.getConnection();

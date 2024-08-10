@@ -25,9 +25,13 @@ public class Calculate {
     public final static String USER = "[USR]";
     public final static String COMMAND = "[CMD]";
     public final static String RESPONSE = "[RSP]";
+    public final static String EVENT = "[EVT]";
     public final static String MESSAGE = "[MSG]";
     public final static String CHEER = "[CHR]";
+    public final static String FOLLOW = "[FLW]";
     public final static String SUBSCRIBE = "[SUB]";
+    public final static String GIFT = "[GFT]";
+    public final static String RAID = "[RAD]";
 
     // Colors
     public final static Color DARK = new Color(0x0e0e10);
@@ -102,6 +106,10 @@ public class Calculate {
     // Get Timestamp
     public static Timestamp getTimestamp() {
         return new Timestamp(System.currentTimeMillis());
+    }
+
+    public static String getFormattedTimestamp() {
+        return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(getTimestamp()) + "]";
     }
 
     // List Contains either
