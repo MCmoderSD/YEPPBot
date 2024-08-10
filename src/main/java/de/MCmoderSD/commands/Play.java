@@ -62,7 +62,7 @@ public class Play {
                 reset();
                 if (sentMessage) sentMessage = false;
             } catch (InterruptedException e) {
-                System.out.println("Error: " + e);
+                System.err.println("Error: " + e);
             }
         }).start();
     }

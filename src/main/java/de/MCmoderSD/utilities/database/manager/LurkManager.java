@@ -65,8 +65,8 @@ public class LurkManager {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Check Channel and User
-            mySQL.checkCache(channelID, event.getChannel());
-            mySQL.checkCache(userID, event.getUser());
+            mySQL.checkCache(channelID, event.getChannel(), true);
+            mySQL.checkCache(userID, event.getUser(), false);
 
             // Prepare statement
             String query = "INSERT INTO " + "lurkList" + " (user_id, lurkChannel_ID, startTime) VALUES (?, ?, ?)";
