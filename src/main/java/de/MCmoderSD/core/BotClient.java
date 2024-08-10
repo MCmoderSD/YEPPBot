@@ -7,179 +7,299 @@ import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
+import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
+import com.github.twitch4j.eventsub.events.ChannelVipAddEvent;
+import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
+import com.github.twitch4j.eventsub.events.ChannelModeratorAddEvent;
+import com.github.twitch4j.eventsub.events.ChannelModeratorRemoveEvent;
 import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
+import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
+import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
+import com.github.twitch4j.helix.TwitchHelix;
 
+import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.commands.*;
-import de.MCmoderSD.events.*;
-
+import de.MCmoderSD.main.Credentials;
+import de.MCmoderSD.main.Main;
+import de.MCmoderSD.objects.TwitchMessageEvent;
+import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
-import de.MCmoderSD.utilities.other.OpenAI;
+import de.MCmoderSD.utilities.other.Reader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
+import static de.MCmoderSD.main.Main.Argument.*;
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
+@SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 public class BotClient {
 
+    private static final Logger log = LoggerFactory.getLogger(BotClient.class);
     // Associations
+    private final Main main;
     private final MySQL mySQL;
+    private final Frame frame;
+
+    // Utilities
+    private final JsonUtility jsonUtility;
+    private final Reader reader;
+
+    // Constants
+    public static String botName;
+    public static String prefix;
+    public static ArrayList<String> admins;
 
     // Attributes
     private final TwitchClient client;
     private final TwitchChat chat;
-    private final CommandHandler commandHandler;
-    private final InteractionHandler interactionHandler;
-    private final String botName;
+    private final TwitchHelix helix;
+    private final EventManager eventManager;
 
     // Constructor
-    public BotClient(String botName, String botToken, String prefix, String[] admins, ArrayList<String> channels, MySQL mySQL, OpenAI openAI) {
+    public BotClient(Main main) {
 
-        // Init Bot Name
-        this.botName = botName;
+        // Get Associations
+        Credentials credentials = main.getCredentials();
+        mySQL = main.getMySQL();
+        frame = main.getFrame();
+        this.main = main;
 
-        // Init MySQL
-        this.mySQL = mySQL;
+        // Get Utilities
+        jsonUtility = main.getJsonUtility();
+        reader = main.getReader();
 
-        // Init Credential
-        OAuth2Credential credential = new OAuth2Credential("twitch", botToken);
+        // Load Bot Config
+        JsonNode botConfig = credentials.getBotConfig();
+        botName = botConfig.get("botName").asText().toLowerCase();
+        prefix = botConfig.get("prefix").asText();
+        admins = new ArrayList<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
-        // Init Client and Chat
+        // Init Bot Credential
+        OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
+
+        // Init Client
         client = TwitchClientBuilder.builder()
-                .withDefaultAuthToken(credential)
-                .withChatAccount(credential)
+                .withDefaultAuthToken(botCredential)
+                .withChatAccount(botCredential)
                 .withEnableChat(true)
                 .withEnableHelix(true)
                 .build();
 
+        // Init Modules
         chat = client.getChat();
+        helix = client.getHelix();
+        eventManager = client.getEventManager();
 
-        // Init White and Blacklist
-        JsonUtility jsonUtility = new JsonUtility();
-        JsonNode whiteList = jsonUtility.load("/config/whitelist.json");
-        JsonNode blackList = jsonUtility.load("/config/blacklist.json");
+        // Join Channels
+        ArrayList<String> channelList = new ArrayList<>(Collections.singleton(botName));
+        if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
+        if (!hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
+        joinChannel(channelList);
 
-        // Init API Checks
-        boolean giphy = jsonUtility.load("/api/Giphy.json") != null;
-        boolean weather = jsonUtility.load("/api/Giphy.json") != null;
-        if (!giphy) System.err.println(BOLD + "Giphy API missing" + UNBOLD);
-        if (!weather) System.err.println(BOLD + "OpenWeatherMap API missing" + UNBOLD);
+        // Event Handler
+        MessageHandler messageHandler = new MessageHandler(this, mySQL, main.getFrame());
 
+        // Message Events
+        eventManager.onEvent(ChannelMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
+        eventManager.onEvent(ChannelCheerEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
+        eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
 
-        // Init CommandHandler
-        commandHandler = new CommandHandler(mySQL, chat, whiteList, blackList, prefix);
-        interactionHandler = new InteractionHandler(mySQL, whiteList, blackList);
+        // Validate Configs
+        boolean openAI = credentials.validateOpenAIConfig();
+        boolean weather = credentials.validateWeatherConfig();
+        boolean giphy = credentials.validateGiphyConfig();
 
-        // Format admin names
-        ArrayList <String> adminList = new ArrayList<>(Arrays.stream(admins).toList());
+        // Initialize Commands
+        new Counter(this, messageHandler, mySQL);
+        new CustomCommand(this, messageHandler, mySQL);
+        new CustomTimers(this, messageHandler, mySQL);
+        new Fact(this, messageHandler, mySQL);
+        if (giphy) new Gif(this, messageHandler, credentials);
+        new Help(this, messageHandler, mySQL);
+        new Insult(this, messageHandler, mySQL);
+        new Join(this, messageHandler);
+        new Joke(this, messageHandler, mySQL);
+        new Lurk(this, messageHandler, mySQL);
+        new Moderate(this, messageHandler, mySQL);
+        new Ping(this, messageHandler);
+        new Play(this, messageHandler);
+        if (openAI) new Prompt(this, messageHandler, main.getOpenAI());
+        new Say(this, messageHandler);
+        new Status(this, messageHandler);
+        if (openAI) new Translate(this, messageHandler, main.getOpenAI());
+        if (openAI && weather) new Weather(this, messageHandler, main.getOpenAI(), main.getCredentials());
+        if (openAI) new Wiki(this, messageHandler, main.getOpenAI());
 
-        // Init Commands
-        new Counter(mySQL, commandHandler, chat, adminList);
-        new CustomCommand(mySQL, commandHandler, chat, adminList);
-        new CustomTimer(mySQL, commandHandler, chat, adminList);
-        new Fact(mySQL, commandHandler, chat);
-        if (giphy) new Gif(mySQL, commandHandler, chat);
-        new Help(mySQL, commandHandler, chat, whiteList, blackList);
-        new Insult(mySQL, commandHandler, chat);
-        new Join(mySQL, commandHandler, chat);
-        new Joke(mySQL, commandHandler, chat);
-        // new Key(mySQL, commandHandler, chat); ToDo Make it work
-        new Lurk(mySQL, commandHandler, chat, interactionHandler);
-        new Moderate(mySQL, commandHandler, chat, adminList);
-        new Ping(mySQL, commandHandler, chat);
-        new Play(mySQL, commandHandler, chat);
-        if (openAI != null) new Prompt(mySQL, commandHandler, chat, openAI, botName);
-        // new Rank(mySQL, commandHandler, chat); ToDo Make it work
-        new Say(mySQL, commandHandler, chat, adminList);
-        new Status(mySQL, commandHandler, chat);
-        if (openAI != null) new Translate(mySQL, commandHandler, chat, openAI, botName);
-        if (openAI != null && weather) new Weather(mySQL, commandHandler, chat, openAI, botName);
-        if (openAI != null) new Wiki(mySQL, commandHandler, chat, openAI, botName);
+        // Initialize LogManager
+        LogManager logManager = mySQL.getLogManager();
 
-        // Init Interactions
-        new ReplyYepp(mySQL, interactionHandler, chat);
-        new StoppedLurk(mySQL, interactionHandler, chat);
-        new Yepp(mySQL, interactionHandler, chat);
+        // Role Events
+        eventManager.onEvent(ChannelVipAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelVipRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelModeratorAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
 
-        // Register the Bot into all channels
-        new Thread(() -> {
-            for (String channel : channels) {
-                try {
-                    chat.joinChannel(channel);
-                    System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel, BREAK, UNBOLD);
-                    Thread.sleep(250); // Prevent rate limit
-                } catch (InterruptedException e) {
-                    System.err.println(e.getMessage());
-                }
-            }
-        }).start();
+        // Loyalty Events
+        eventManager.onEvent(ChannelFollowEvent.class, logManager::logLoyalty);
+        eventManager.onEvent(ChannelSubscribeEvent.class, logManager::logLoyalty);
+        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, logManager::logLoyalty);
 
-        // Init the EventListener
-        EventManager eventManager = client.getEventManager();
-
-        // Message Event
-        eventManager.onEvent(ChannelMessageEvent.class, event -> {
-
-            // Log to MySQL
-            mySQL.logMessage(event);
-
-            // Console Output
-            System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), MESSAGE, getChannel(event), getAuthor(event), getMessage(event), BREAK);
-
-            // Handle Interaction
-            interactionHandler.handleInteraction(event, botName);
-
-            // Handle Command
-            commandHandler.handleCommand(event, botName);
-
-            // Execute Custom Timers
-            commandHandler.handleCustomTimers(event, botName);
-        });
-
-        // Follow Event
-        eventManager.onEvent(ChannelFollowEvent.class, event -> System.out.printf("%s %s <%s> %s -> Followed%s", logTimestamp(), FOLLOW, event.getBroadcasterUserName(), event.getUserName(), BREAK));
-
-        // Sub Event
-        eventManager.onEvent(ChannelSubscribeEvent.class, event -> System.out.printf("%s %s <%s> %s -> Subscribed %s%s", logTimestamp(), SUBSCRIBE, event.getBroadcasterUserName(), event.getUserName(), event.getTier(), BREAK));
+        // Raid Events
+        eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid);
     }
 
     // Methods
-    public void sendMessage(String channel, String message) {
-        if (!chat.getChannels().contains(channel)) joinChannel(channel);
-        if (message.length() > 500) message = message.substring(0, 500);
-        if (message.isEmpty()) return;
-
-        chat.sendMessage(channel, message);
-        System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
-        mySQL.messageSent(channel, botName, message);
+    private boolean checkModerator(TwitchMessageEvent event) {
+        // ToDo Check if user is moderator
+        return false;
     }
 
     // Setter
+    public void write(String channel, String message) {
+
+        // Check Message
+        if (message.isEmpty() || message.isBlank()) return;
+
+        // Update Frame
+        if (!hasArg(CLI)) frame.log(USER, channel, botName, message);
+
+        // Log
+        mySQL.getLogManager().logResponse(channel, botName, message);
+        System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
+
+        // Send Message
+        chat.sendMessage(channel, message);
+    }
+
+    public void respond(TwitchMessageEvent event, String command, String message) {
+
+        // Variables
+        var channel = event.getChannel();
+
+        // Update Frame
+        if (!(message.isEmpty() || message.isBlank()) && !hasArg(CLI)) frame.log(RESPONSE, channel, botName, message);
+
+        // Log
+        mySQL.getLogManager().logResponse(event, command, message);
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
+        if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
+
+        // Send Messag
+        if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
+    }
+
     public void joinChannel(String channel) {
-        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel, BREAK, UNBOLD);
+        if (chat.isChannelJoined(channel)) return;
+        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
         chat.joinChannel(channel);
     }
 
-    @SuppressWarnings("unused")
+    public void joinChannel(ArrayList<String> channels) {
+        new Thread(() -> {
+            try {
+                for (String channel : channels) {
+                    joinChannel(channel);
+                    Thread.sleep(250); // Prevent rate limit
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
+
     public void leaveChannel(String channel) {
+        if (!chat.isChannelJoined(channel)) return;
+        System.out.printf("%s%s %s Leave Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
         chat.leaveChannel(channel);
     }
 
-    @SuppressWarnings("unused")
+    public void leaveChannel(ArrayList<String> channels) {
+        new Thread(() -> {
+            try {
+                for (String channel : channels) {
+                    leaveChannel(channel);
+                    Thread.sleep(250); // Prevent rate limit
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
+
     public void close() {
         client.close();
     }
 
     // Getter
-    @SuppressWarnings("unused")
-    public ArrayList<String> getChannels() {
-        return new ArrayList<>(chat.getChannels());
+    public String getBotName() {
+        return botName;
     }
 
-    @SuppressWarnings("unused")
-    public boolean isChannelJoined(String channel) {
-        return chat.getChannels().contains(channel);
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public Set<String> getChannels() {
+        return chat.getChannels();
+    }
+
+    public boolean hasArg(Main.Argument arg) {
+        return main.hasArg(arg);
+    }
+
+    public boolean isAdmin(TwitchMessageEvent event) {
+        return admins.contains(event.getUser());
+    }
+
+    public boolean isPermitted(TwitchMessageEvent event) {
+        return isModerator(event) || isBroadcaster(event);
+    }
+
+    public boolean isBroadcaster(TwitchMessageEvent event) {
+        return event.getChannelId() == event.getUserId();
+    }
+
+    public boolean isModerator(TwitchMessageEvent event) {
+        return checkModerator(event);
+    }
+
+    public boolean isInChannel(String channel) {
+        return chat.isChannelJoined(channel);
+    }
+
+    // Module Getter
+    public TwitchClient getClient() {
+        return client;
+    }
+
+    public TwitchChat getChat() {
+        return chat;
+    }
+
+    public TwitchHelix getHelix() {
+        return helix;
+    }
+
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
+    // Utility Getter
+    public JsonUtility getJsonUtility() {
+        return jsonUtility;
+    }
+
+    public Reader getReader() {
+        return reader;
     }
 }

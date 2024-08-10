@@ -1,43 +1,35 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
-import de.MCmoderSD.core.CommandHandler;
-
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import java.util.ArrayList;
-
-import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Say {
 
     // Constructor
-    public Say(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, ArrayList<String> admins) {
+    public Say(BotClient botClient, MessageHandler messageHandler) {
 
         // Syntax
-        String syntax = "Syntax: " + commandHandler.getPrefix() + "say <Nachricht>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "say <Nachricht>";
 
         // About
         String[] name = {"say", "repeat"};
-        String description = "Nur für Administratoren. Sendet eine Nachricht in den Chat. " + syntax;
+        String description = "Nur für Moderatoren und Administratoren. Sendet eine Nachricht in den Chat. " + syntax;
 
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
+
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
-                String channel = getChannel(event);
-                String author = getAuthor(event);
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
-                String response;
-                if (admins.contains(author) || author.equals(channel)) response = processArgs(args);
-                else return;
+                // Check if user is moderator or admin
+                if (!botClient.isPermitted(event)) return;
 
-                // Send Message and log
-                chat.sendMessage(channel, response);
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                // Send Message
+                botClient.respond(event, getCommand(), String.join(" ", args));
             }
         });
     }

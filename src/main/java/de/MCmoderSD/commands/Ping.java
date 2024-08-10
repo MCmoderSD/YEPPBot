@@ -1,18 +1,15 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.core.CommandHandler;
-
-import de.MCmoderSD.utilities.database.MySQL;
-
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import java.util.ArrayList;
 
 public class Ping {
 
     // Constructor
-    public Ping(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
+    public Ping(BotClient botClient, MessageHandler messageHandler) {
 
         // About
         String[] name = {"ping", "latency"};
@@ -20,18 +17,13 @@ public class Ping {
 
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
-            @Override
-            public void execute(ChannelMessageEvent event, String... args) {
+        messageHandler.addCommand(new Command(description, name) {
 
-                // Check latency
-                String response = "Pong " + chat.getLatency() + "ms";
+            @Override
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                chat.sendMessage(getChannel(event), response);
-
-                // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                botClient.respond(event, getCommand(), "Pong " + botClient.getChat().getLatency() + "ms");
             }
         });
     }

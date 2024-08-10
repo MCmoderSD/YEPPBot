@@ -1,48 +1,46 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
-import de.MCmoderSD.core.CommandHandler;
-
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
+
+import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Insult {
 
     // Constructor
-    public Insult(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
+    public Insult(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
 
         // Syntax
-        String syntax = "Syntax: " + commandHandler.getPrefix() + "insult <Nutzer> <en/de>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "insult <Nutzer> <en/de>";
 
         // About
-        String[] name = {"insult", "beleidige", "mobbe", "mobbing"};
+        String[] name = {"insult", "beleidige", "fronte", "mobbe", "mobbing"};
         String description = "Beleidigt einen Nutzer. " + syntax;
 
+
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
+
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Determine language
                 boolean isEnglish = false;
-                if (args.length > 1) isEnglish = trimMessage(args[1]).toLowerCase().startsWith("en");
-                String insult = mySQL.getInsult(isEnglish ? "en" : "de");
+                if (args.size() > 1) isEnglish = trimMessage(args.get(1)).toLowerCase().startsWith("en");
+                String insult = mySQL.getAssetManager().getInsult(isEnglish ? "en" : "de");
 
                 // Gets target, insults the author if no target is provided
-                String target = getAuthor(event);
-                if (args.length > 0 && args[0].length() > 2) target = trimMessage(args[0]);
+                String target = tagUser(event);
+                if (!args.isEmpty() && args.getFirst().length() > 2) target = trimMessage(args.getFirst());
                 if (target.startsWith("@")) target = target.substring(1);
                 String message = insult.replace("%member%", '@' + target);
 
                 // Send message
-                String response = trimMessage(message);
-                chat.sendMessage(getChannel(event), message);
-
-                // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                botClient.respond(event, getCommand(), trimMessage(message));
             }
         });
     }

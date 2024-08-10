@@ -1,13 +1,13 @@
 package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
-import de.MCmoderSD.core.CommandHandler;
-
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.other.OpenAI;
+
+import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -18,10 +18,10 @@ public class Translate {
     private final double temperature;
 
     // Constructor
-    public Translate(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
+    public Translate(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
         // Syntax
-        String syntax = "Syntax: " + commandHandler.getPrefix() + "translate <Sprache> <Text>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "translate <Sprache> <Text>";
 
         // About
         String[] name = {"translator", "translate", "übersetzer", "übersetze"};
@@ -34,28 +34,28 @@ public class Translate {
         temperature = 0;
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
+
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 String response;
-                if (args.length < 2) response = syntax;
+                if (args.size() < 2) response = syntax;
                 else {
 
                     // Check for language
-                    String language = args[0];
+                    String language = args.getFirst();
 
                     // Process text
                     String text = trimMessage(processArgs(args)).replace(language, "");
                     String instruction = trimMessage("Please translate the following text into " + language + ":");
 
                     // Translate
-                    response = openAI.prompt(botName, instruction, text, maxTokens, temperature);
+                    response = openAI.prompt(botClient.getBotName(), instruction, text, maxTokens, temperature);
                 }
 
-                // Send message and log
-                chat.sendMessage(getChannel(event), response);
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                // Send Message
+                botClient.respond(event, getCommand(), response);
             }
         });
     }

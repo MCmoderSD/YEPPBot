@@ -1,120 +1,137 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
-import de.MCmoderSD.core.CommandHandler;
-
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.manager.ChannelManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
-
 public class Moderate {
 
     // Associations
-    private final MySQL mySQL;
-    private final CommandHandler commandHandler;
-
+    private final BotClient botClient;
+    private final MessageHandler messageHandler;
+    private final ChannelManager channelManager;
 
     // Constructor
-    public Moderate(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, ArrayList<String> admins) {
+    public Moderate(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
 
         // Init Associations
-        this.mySQL = mySQL;
-        this.commandHandler = commandHandler;
+        this.botClient = botClient;
+        this.messageHandler = messageHandler;
+        this.channelManager = mySQL.getChannelManager();
 
         // Syntax
-        String syntax = "Syntax: " + commandHandler.getPrefix() + "moderate join/leave/block/unblock command/channel";
+        String syntax = "Syntax: " + botClient.getPrefix() + "moderate join/leave/block/unblock command/channel";
 
         // About
-        String[] name = {"moderate","mod"};
+        String[] name = {"moderate", "mod", "moderrate", "modderate", "modderrate"};
         String description = "Ändert die Einstellungen des Bots. " + syntax;
 
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
+
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
-                String channel = getChannel(event);
-                String author = getAuthor(event);
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Variables
+                String channel = event.getChannel();
+                String user = event.getUser();
+                String response = syntax;
 
                 // Check args
-                String response = getDescription();
-                if (args.length < 1) {
-                    sendMessage(chat, event, getCommand(), channel, response, args);
+                if (args.isEmpty()) {
+                    botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
-                String verb = args[0].toLowerCase();
+                String verb = args.getFirst().toLowerCase();
                 if (!Arrays.asList("join", "leave", "block", "unblock").contains(verb)) {
-                    sendMessage(chat, event, getCommand(), channel, response, args);
+                    botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
-                if (Arrays.asList("block", "unblock").contains(verb) && args.length < 2) {
-                    sendMessage(chat, event, getCommand(), channel, response, args);
+                if (Arrays.asList("block", "unblock").contains(verb) && args.size() < 2) {
+                    botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
                 // Response
                 switch (verb) {
                     case "join":
-                        if (args.length < 2) response = join(chat, author); // Broadcaster
-                        else if (admins.contains(author)) response = join(chat, args[1].toLowerCase()); // Admin
+                        if (args.size() < 2) response = join(user); // Broadcaster
+                        else if (botClient.isModerator(event)) response = join(channel); // Moderator
+                        else if (botClient.isAdmin(event)) response = join(args.get(1)); // Admin
                         break;
                     case "leave":
-                        if (args.length < 2) response = leave(chat, author); // Broadcaster
-                        else if (admins.contains(author)) response = leave(chat, args[1].toLowerCase()); // Admin
+                        if (args.size() < 2) response = leave(user); // Broadcaster
+                        else if (botClient.isModerator(event)) response = leave(channel); // Moderator
+                        else if (botClient.isAdmin(event)) response = leave(args.get(1)); // Admin
                         break;
                     case "block":
-                        if (args.length < 3) response = editBlacklist(author, args[1].toLowerCase(), true); // Broadcaster
-                        else if (admins.contains(author)) response = editBlacklist(args[2], args[1].toLowerCase(), true); // Admin
+                        if (botClient.isBroadcaster(event))
+                            response = editBlacklist(user, args.get(1), true); // Broadcaster
+                        else if (botClient.isModerator(event))
+                            response = editBlacklist(channel, args.get(1), true); // Moderator
+                        else if (botClient.isAdmin(event) && args.size() == 2)
+                            response = editBlacklist(channel, args.get(1), true); // Admin
+                        else if (botClient.isAdmin(event) && args.size() == 3)
+                            response = editBlacklist(args.get(2), args.get(1), true); // Admin
                         break;
                     case "unblock":
-                        if (args.length < 3) response = editBlacklist(author, args[1].toLowerCase(), false); // Broadcaster
-                        else if (admins.contains(author)) response = editBlacklist(args[2], args[1].toLowerCase(), false); // Admin
-                        break;
-                    default:
-                        sendMessage(chat, event, getCommand(), channel, response, args);
-                        return;
+                        if (botClient.isBroadcaster(event))
+                            response = editBlacklist(user, args.get(1), false); // Broadcaster
+                        else if (botClient.isModerator(event))
+                            response = editBlacklist(channel, args.get(1), false); // Moderator
+                        else if (botClient.isAdmin(event) && args.size() == 2)
+                            response = editBlacklist(channel, args.get(1), false); // Admin
+                        else if (botClient.isAdmin(event) && args.size() == 3)
+                            response = editBlacklist(args.get(2), args.get(1), false); // Admin
                 }
 
-                // Send message
-                sendMessage(chat, event, getCommand(), channel, response, args);
+                // Send Message
+                botClient.respond(event, getCommand(), response);
             }
         });
     }
 
-    // Send Message
-    private void sendMessage(TwitchChat chat, ChannelMessageEvent event, String command, String channel, String response, String... args) {
-
-        // Send Message
-        chat.sendMessage(channel, response);
-
-        // Log response
-        mySQL.logResponse(event, command, processArgs(args), response);
+    // Join chat
+    private String join(String channel) {
+        if (channel.startsWith("@")) channel = channel.substring(1);
+        channel = channel.toLowerCase();
+        botClient.joinChannel(channel);
+        return channelManager.editChannel(channel, true);
     }
 
     // Leave chat
-    private String leave(TwitchChat chat, String channel) {
-        chat.leaveChannel(channel);
-        return mySQL.editChannel(channel, false);
+    private String leave(String channel) {
+        if (channel.startsWith("@")) channel = channel.substring(1);
+        channel = channel.toLowerCase();
+        botClient.leaveChannel(channel);
+        return channelManager.editChannel(channel, false);
     }
 
-    // Join chat
-    private String join(TwitchChat chat, String channel) {
-        chat.joinChannel(channel);
-        return mySQL.editChannel(channel, true);
-    }
-
+    // Edit blacklist
     private String editBlacklist(String channel, String command, boolean block) {
-        command = commandHandler.getCommands().containsKey(command) ? command : commandHandler.getAliases().getOrDefault(command, null);
+
+        // Format
+        channel = channel.startsWith("@") ? channel.substring(1) : channel;
+        channel = channel.toLowerCase();
+        command = command.toLowerCase();
+
+        if (channel.isEmpty() || channel.isBlank()) return "Error: Channel is empty!";
+
+        // Check command
+        command = messageHandler.checkCommand(command) ? command : messageHandler.getAliasMap().getOrDefault(command, null);
         if (command == null) return "Der Befehl existiert nicht!";
-        String response = mySQL.editBlacklist(channel, command, block);
-        commandHandler.updateBlackList();
+
+        // Edit blacklist
+        String response = channelManager.editBlacklist(channel, command, block);
+        messageHandler.updateBlackList(channelManager.getBlackList());
         return response;
     }
 }

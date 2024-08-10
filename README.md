@@ -3,12 +3,10 @@
 ## Description
 
 The YEPPBot is a Twitch bot that provides a variety of features to entertain your Twitch channel. <br>
-Originally created by [FoxxHimself](https://github.com/lennartfu) in Python and now being rewritten
-in [Java 21](https://www.oracle.com/de/java/technologies/downloads/#java21) using
-the [Twitch4J](https://twitch4j.github.io/) library.
+Originally created by [FoxxHimself](https://github.com/lennartfu) in Python and now compleatly rewritten in [Java 21](https://www.oracle.com/de/java/technologies/downloads/#java21) using the [Twitch4J](https://twitch4j.github.io/) library.
 
 The bot is currently under active development and it's features can change a lot in the future. <br>
-You can use the project to create your own bot, but you have to add a MySQL database and for some features you need a config with an API key. <br>
+You can use the project to create your own bot, but you have to add a MySQL database and for certain features you need a config with an API key. <br>
 If you don't have access to the API, the bot will still work, but without those features, but the database is necessary. <br>
 If you have any ideas or suggestions, feel free to open an issue or a pull request. <br> <br>
 
@@ -19,8 +17,6 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [How to use](#how-to-use)
 - [Usage and commands](#usage-and-commands)
 - [Contributing](#contributing)
-
-<br>
 
 ## Features
 
@@ -48,9 +44,10 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - Features:
   - [x] Custom Commands
   - [x] Custom Counters
-  - [x] Custom Timers
+  - [x] Custom Timers (Still in development)
   - [x] Database Logging
-  - [x] User Intercae
+  - [x] Error 
+  - [x] User Interface (Cheap with JavaSwing)
 
 
 - Planned Features:
@@ -66,14 +63,19 @@ You need the Twitch Account Token of the Twitch Bot which you can get from [here
 Keep in mind that the token can change from to time. <br>
 But remember **DON'T POST** or **SHARE** the token anywhere!!! <br> <br>
 
-### 1. Clone the repository
+### 1. Download the bot jar file
 
-You need to have Git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
+You can download the latest version of the bot from the [releases](https://github.com/MCmoderSD/YEPPBot/releases/latest) page. <br>
+You can create the Config files yourself or use the ```-generate``` argument to create the config files. <br>
+You can skip to [Step 8](#8-compile-the-bot) if you use the downloaded jar file. <br> <br>
+
+You can also clone the repository and compile the bot yourself.
+For that need to have Git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
 Clone the repository using the following command: <br>
 ```git clone https://www.github.com/MCmoderSD/YEPPBot.git ``` <br> <br>
 
-### 2. Edit the bot config file
-[comment]: <> (TODO: implement a config generator)
+### 2. Edit the config files
+
 You currently need to create two JSON files in ```/src/main/resources/config/``` folder. <br> <br>
 The first file is ```BotConfig.json``` and it should have the following structure: <br>
 
@@ -94,7 +96,8 @@ CHANNEL_NAME
 OTHER_CHANNEL_NAME
 ```
 
-You can add as many channels as you want. <br> <br>
+You can add as many channels as you want.
+<br> <br>
 
 ### 3. Add a ChatGPT API key
 
@@ -105,7 +108,7 @@ The file should have the following structure: <br>
 {
   "apiKey": "YOUR_API_KEY",
   "model": "gpt-4o-mini",
-  "maxTokens": 120,
+  "maxTokens": 100,
   "temperature": 1,
   "instruction": "You are the best TwitchBot that ever existed!"
 }
@@ -120,7 +123,6 @@ text weirder. <br>
 The instruction is the way the bot should behave and how he should reply to the prompt. <br> <br>
 
 ### 4. Add an OpenWeatherMap API key
-[comment]: <> (TODO: implement a config generator)
 You need to create a file called ```OpenWeatherMap.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
 
@@ -135,7 +137,6 @@ You need a ChatGPT API key to use the weather command. <br>
 You can get the API key from [OpenWeatherMap](https://openweathermap.org/api). <br> <br>
 
 ### 5. Add a Giphy API key
-[comment]: <> (TODO: implement a config generator)
 You need to create a file called ```Giphy.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
 
@@ -149,26 +150,8 @@ The file should have the following structure: <br>
 
 You can get the API key from [Giphy](https://developers.giphy.com/). <br> <br>
 
-### 6. Black and White list commands
-
-You can edit the ```blacklist.json``` and ```whitelist.json```  files in the ```/src/main/resources/config/```
-folder. <br>
-
-It should have the following structure: <br>
-
-```json
-{
-  "COMMAND_NAME": "Channel1; Channel2; Channel3",
-  "OTHER_COMMAND_NAME": "Channel1; Channel2; Channel3"
-}
-```
-
-You can add as many channels or commands as you want. <br>
-Otherwise you can use the ```!moderate block/unblock``` command. <br>
-The way for black and whitelist works the same. <br> <br>
-
-
-### 7. MySQL Database
+#
+### 6. MySQL Database
 
 You need to have your own MySQL database to run and use the bot. <br>
 The Bot creates the tables and everything by itself, but you have to create a config. <br>
@@ -188,16 +171,37 @@ The file should have the following structure: <br>
 You have to give the user full permission over the whole database. <br>
 If you don't want to use a database, you have to remove certain features from the source code. <br> <br>
 
-### 8. Add assets to the database
+### 7. Add assets to the database
 
 For the fact, insult and joke command you need to add the assets to the database. <br>
 You can import the existing ones to the database from the .tsv files in the ```/storage/assets/``` folder. <br> <br>
 You can also add your own assets to the database, just pay attention to the format. <br>
 
-### 9. Compile the bot
+### 8. Compile the bot
 
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
-```java -jar NAME_OF_THE_JAR_FILE.jar``` <br> <br>
+```java -jar NAME_OF_THE_JAR_FILE.jar``` 
+
+If you use the downloaded jar file to generate example files, you can run it using the following command: <br>
+```java -jar YEPPBot.jar -generate``` <br> <br>
+
+After you edited the config files and put in the API keys, you can run the bot using the following command: <br>
+```java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -mysqlconfig "/PATH/TO/mySQL.json``` <br> <br>
+and so on for the other config files. <br>
+
+You don't need a channel list file, but it's recommended to use one. <br>
+You can use the ```-help``` argument to get a list of all the arguments. <br>
+You can use the ```-version``` argument to get the version of the bot. <br> <br>
+You can use the ```-cli``` argument to run the bot in the command line interface mode. <br>
+You can use the ```-nolog``` argument to disable the database logging. <br>
+
+For the configs you can use: <br>
+the ```-botconfig "/PATH/TO/BotConfig.json"``` argument to specify the path to the BotConfig.json file. <br>
+the ```-channellist "/PATH/TO/Channel.list"``` argument to specify the path to the Channel.list file. <br>
+the ```-mysqlconfig "/PATH/TO/mySQL.json"``` argument to specify the path to the mySQL.json file. <br>
+the ```-openaiconfig "/PATH/TO/ChatGPT.json"``` argument to specify the path to the ChatGPT.json file. <br>
+the ```-openweathermapconfig "/PATH/TO/OpenWeatherMap.json"``` argument to specify the path to the OpenWeatherMap.json file. <br>
+the ```-giphyconfig "/PATH/TO/Giphy.json"``` argument to specify the path to the Giphy.json file. <br> <br>
 
 ## Usage and commands
 
@@ -206,7 +210,7 @@ The bot has a variety of commands that you can use. <br>
 You can use the ```!help``` command to get a list of all the commands. <br>
 You can use the ```!help COMMAND_NAME``` to get more information about a specific command. <br>
 
-You can use the ```!moderate join/leave CHANNEL_NAME``` to make the bot join or leave a specific channel. <br>
+You can use the ```!moderate join/leave``` to make the bot join or leave your channel. <br>
 You can use the ```!moderate block/unblock``` to blacklist commands. <br>
 
 You can use the ```!CustomCommand``` command to create and manage custom commands. <br>
@@ -216,10 +220,7 @@ You can also use variables in the custom commands. <br>
 %tagged% - will be replaced by the first word after the command<br>
 %random% - will be replaced by a random percentage between 0 and 100<br>
 
-You can use the ```!Counter``` command to create and manage counter commands. <br>
-
-You can start the bot without the graphical user interface mode by running the bot with the ```-nogui```
-argument. <br> <br>
+You can use the ```!Counter``` command to create and manage counter commands. <br> <br>
 
 ## Contributing
 

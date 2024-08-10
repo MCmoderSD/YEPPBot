@@ -1,7 +1,9 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import org.apache.commons.lang.IncompleteArgumentException;
+
+import java.util.ArrayList;
 
 public abstract class Command {
 
@@ -24,11 +26,11 @@ public abstract class Command {
     }
 
     // Methods
-    public abstract void execute(ChannelMessageEvent event, String... args); // Execute the command
+    public abstract void execute(TwitchMessageEvent event, ArrayList<String> args); // Execute the command
 
     // Getter
     public String getCommand() {
-        return command;
+        return command.toLowerCase();
     } // Get the command
 
     public String[] getAlias() {

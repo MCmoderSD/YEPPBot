@@ -1,6 +1,6 @@
 package de.MCmoderSD.utilities.other;
 
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import javax.swing.JFrame;
 import java.awt.Dimension;
@@ -8,6 +8,8 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Color;
 import java.sql.Timestamp;
+import java.text.Normalizer;
+import java.util.ArrayList;
 
 public class Calculate {
 
@@ -15,18 +17,25 @@ public class Calculate {
     public final static String BOLD = "\033[0;1m";
     public final static String UNBOLD = "\u001B[0m";
     public final static String BREAK = "\n";
+
+    // Tags
     public final static String SYSTEM = "[SYS]";
+    public final static String USER = "[USR]";
     public final static String COMMAND = "[CMD]";
+    public final static String RESPONSE = "[RSP]";
+    public final static String EVENT = "[EVT]";
     public final static String MESSAGE = "[MSG]";
+    public final static String CHEER = "[CHR]";
     public final static String FOLLOW = "[FLW]";
     public final static String SUBSCRIBE = "[SUB]";
-    public final static String USER = "[USR]";
+    public final static String GIFT = "[GFT]";
+    public final static String RAID = "[RAD]";
+
+    // Colors
     public final static Color DARK = new Color(0x0e0e10);
     public final static Color LIGHT = new Color(0x18181b);
     public final static Color PURPLE = new Color(0x771fe2);
-
-
-    // Methods
+    public final static Color WHITE = new Color(0xffffff);
 
     // Center JFrame
     public static Point centerJFrame(JFrame frame) {
@@ -41,44 +50,43 @@ public class Calculate {
         return new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(unixTimestamp * 1000));
     }
 
-    // Get the author
-    public static String getAuthor(ChannelMessageEvent event) {
-        return event.getUser().getName();
-    }
-
-    // Tag the author
-    public static String tagAuthor(ChannelMessageEvent event) {
-        return "@" + getAuthor(event);
-    }
-
-    // Get the message
-    public static String getMessage(ChannelMessageEvent event) {
-        return event.getMessage();
-    }
-
-    // Get Channel
-    public static String getChannel(ChannelMessageEvent event) {
-        return event.getChannel().getName();
-    }
-
     // Tag the channel
-    public static String tagChannel(ChannelMessageEvent event) {
-        return "@" + getChannel(event);
+    public static String tagChannel(TwitchMessageEvent event) {
+        return "@" + event.getChannel();
     }
 
-    // Get Channel ID
-    public static int getChannelID(ChannelMessageEvent event) {
-        return Integer.parseInt(event.getChannel().getId());
-    }
-
-    // Get User ID
-    public static int getUserID(ChannelMessageEvent event) {
-        return Integer.parseInt(event.getUser().getId());
+    // Tag the user
+    public static String tagUser(TwitchMessageEvent event) {
+        return "@" + event.getUser();
     }
 
     // Log timestamp
     public static String logTimestamp() {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new java.util.Date()) + "]";
+    }
+
+    // Convert to ASCII
+    public static String convertToAscii(String input) {
+
+        // Replace German Umlauts
+        input = input.replaceAll("Ä", "Ae");
+        input = input.replaceAll("ä", "ae");
+        input = input.replaceAll("Ö", "Oe");
+        input = input.replaceAll("ö", "oe");
+        input = input.replaceAll("Ü", "Ue");
+        input = input.replaceAll("ü", "ue");
+        input = input.replaceAll("ß", "ss");
+
+        // Normalize the input string to decompose accented characters
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+
+        // Remove diacritical marks (accents)
+        String ascii = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+
+        // Remove any remaining non-ASCII characters
+        ascii = ascii.replaceAll("[^\\p{ASCII}]", "");
+
+        return ascii;
     }
 
     // Trim Message
@@ -89,12 +97,16 @@ public class Calculate {
     }
 
     // Trim Args
-    public static String processArgs(String... args) {
+    public static String processArgs(ArrayList<String> args) {
         return trimMessage(String.join(" ", args)).trim();
     }
 
     // Get Timestamp
     public static Timestamp getTimestamp() {
-        return new Timestamp(new java.util.Date().getTime());
+        return new Timestamp(System.currentTimeMillis());
+    }
+
+    public static String getFormattedTimestamp() {
+        return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(getTimestamp()) + "]";
     }
 }

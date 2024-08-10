@@ -1,132 +1,135 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
-import de.MCmoderSD.core.CommandHandler;
-
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.manager.CustomManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class CustomCommand {
 
     // Constructor
-    public CustomCommand(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, ArrayList<String> admins) {
+    public CustomCommand(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
 
-        String prefix = commandHandler.getPrefix();
+        // Variables
+        CustomManager customManager = mySQL.getCustomManager();
+        String prefix = botClient.getPrefix();
         String syntax = prefix + "CustomCommand create/enable/disable/delete/list name/alias : response";
 
         // About
         String[] name = {"customcommand", "cc"};
         String description = "Kann benutzt werden um eigene Commands zu erstellen. Syntax: " + syntax;
 
+
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
+
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
-                // Get author and channel
-                String author = getAuthor(event);
-                String channel = getChannel(event);
-
-                // Check if user is a moderator
-                if (!(channel.equals(author) || admins.contains(author))) return;
+                // Check if user is permitted
+                if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
 
                 // Check for list
-                if (args.length > 0 && args[0].equalsIgnoreCase("list")) {
-                    sendMessage(mySQL, chat, event, getCommand(), channel, getCommandNames(event, mySQL), args);
+                if (!args.isEmpty() && args.getFirst().equalsIgnoreCase("list") || args.getFirst().equalsIgnoreCase("show")) {
+                    botClient.respond(event, getCommand(), getCommandNames(event, customManager));
                     return;
                 }
 
                 // Get command syntax
                 HashMap<String, Integer> message = new HashMap<>();
-                for (var i = 1; i < args.length; i++) message.put(args[i], i);
+                for (var i = 1; i < args.size(); i++) message.put(args.get(i), i);
 
-                String response;
-                if (args.length < 2) response = "Syntax: " + syntax;
-                else if (Arrays.asList("create", "add", "enable", "disable", "delete", "del", "remove", "rm").contains(args[0].toLowerCase())){
+                String response = null;
+                if (args.size() < 2) response = "Syntax: " + syntax;
+                else if (Arrays.asList("create", "add", "enable", "disable", "delete", "del", "remove", "rm").contains(args.getFirst().toLowerCase())){
 
                     // Process command
-                    String commandName = trimMessage(args[1].toLowerCase());
+                    String commandName = trimMessage(args.get(1).toLowerCase());
                     commandName = commandName.startsWith(prefix) ? commandName.substring(prefix.length()) : commandName;
 
                     // Process message
-                    switch (args[0].toLowerCase()) {
+                    switch (args.get(0).toLowerCase()) {
 
-                            // Enable command
+                        // Enable command
                         case "enable":
-                            response = mySQL.editCommand(event, commandName, true);
+                            response = customManager.editCommand(event, commandName, true);
                             break;
 
-                            // Disable command
+                        // Disable command
                         case "disable":
-                            response = mySQL.editCommand(event, commandName, false);
+                            response = customManager.editCommand(event, commandName, false);
                             break;
 
-                            // Delete command
+                        // Delete command
                         case "delete":
                         case "del":
                         case "remove":
                         case "rm":
-                            response = mySQL.deleteCommand(event, commandName);
+                            response = customManager.deleteCommand(event, commandName);
                             break;
 
-                            // Create command
+                        // Create command
                         case "create":
                         case "add":
                             if (!message.containsKey(":")) response = "Syntax: " + syntax;
-                            else if (mySQL.getCommands(event, true).contains(commandName) || mySQL.getAliases(event, true).containsKey(commandName)) response = "Command already exists";
+                            else if (customManager.getCommands(event, true).contains(commandName) || customManager.getAliases(event, true).containsKey(commandName) || messageHandler.checkCommand(commandName) || messageHandler.checkAlias(commandName)) response = "Command or Alias already exists";
                             else {
 
                                 // Get command aliases;
-                                ArrayList<String> aliases = new ArrayList<>(Arrays.asList(args).subList(2, message.get(":")));
+                                ArrayList<String> aliases = new ArrayList<>(args.subList(2, message.get(":")));
                                 aliases.replaceAll(String::toLowerCase);
+
+                                // Check Aliases
+                                for (String alias : aliases) if (customManager.getCommands(event, true).contains(alias) || customManager.getAliases(event, true).containsKey(alias) || messageHandler.checkCommand(alias) || messageHandler.checkAlias(alias)) {
+                                    response = "Command or Alias already exists";
+                                    break;
+                                }
+
+                                if (Objects.equals(response, "Command or Alias already exists")) break;
 
                                 // Get command response
                                 StringBuilder stringBuilder = new StringBuilder();
-                                for (var i = message.get(":") + 1; i < args.length; i++) stringBuilder.append(args[i]).append(" ");
+                                for (var i = message.get(":") + 1; i < args.size(); i++) stringBuilder.append(args.get(i)).append(" ");
                                 String commandResponse = trimMessage(stringBuilder.toString());
 
                                 // Create command
-                                response = mySQL.createCommand(event, commandName, aliases, commandResponse);
+                                response = customManager.createCommand(event, commandName, aliases, commandResponse);
                             }
                             break;
 
-                            // Error
+                        // Error
                         default:
                             response = "Syntax: " + syntax;
                             break;
                     }
                 } else response = "Syntax: " + syntax;
 
+                // Update custom commands
+                messageHandler.updateCustomCommands(customManager.getCustomCommands(), customManager.getCustomAliases());
+
                 // Send message
-                sendMessage(mySQL, chat, event, getCommand(), channel, response, args);
+                botClient.respond(event, getCommand(), response);
             }
         });
     }
 
-    // Methods
-    private void sendMessage(MySQL mySQL, TwitchChat chat, ChannelMessageEvent event, String command, String channel, String response, String... args) {
-
-        // Send message
-        chat.sendMessage(channel, response);
-
-        // Log response
-        mySQL.logResponse(event, command, processArgs(args), response);
-    }
-
-    private String getCommandNames(ChannelMessageEvent event, MySQL mySQL) {
+    private String getCommandNames(TwitchMessageEvent event, CustomManager customManager) {
         StringBuilder stringBuilder = new StringBuilder("Commands: ");
-        ArrayList<String> enabledCommands = mySQL.getCommands(event, false);
-        ArrayList<String> disabledCommands = mySQL.getCommands(event, true);
+        ArrayList<String> enabledCommands = customManager.getCommands(event, false);
+        ArrayList<String> disabledCommands = customManager.getCommands(event, true);
 
         for (String command : enabledCommands) stringBuilder.append(command).append(" enabled, ");
         for (String command : disabledCommands) if (!enabledCommands.contains(command)) stringBuilder.append(command).append(" disabled, ");
+
+        if (enabledCommands.size() + disabledCommands.size() == 0) stringBuilder.append("none. ");
 
         return stringBuilder.substring(0, stringBuilder.length() - 2) + ".";
     }

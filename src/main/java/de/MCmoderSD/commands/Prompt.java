@@ -1,13 +1,13 @@
 package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
-import de.MCmoderSD.core.CommandHandler;
-
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.other.OpenAI;
+
+import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -19,10 +19,10 @@ public class Prompt {
     private final String instruction;
 
     // Constructor
-    public Prompt(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
+    public Prompt(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
         // Syntax
-        String syntax = "Syntax: " + commandHandler.getPrefix() + "prompt <Frage>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "prompt <Frage>";
 
         // About
         String[] name = {"prompt", "gpt", "chatgpt", "ai", "question", "yeppbot", "yepppbot"}; // Command name and aliases
@@ -35,14 +35,13 @@ public class Prompt {
         instruction = config.get("instruction").asText();
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
-            @Override
-            public void execute(ChannelMessageEvent event, String... args) {
+        messageHandler.addCommand(new Command(description, name) {
 
-                // Send message and log
-                String response = openAI.prompt(botName, instruction, trimMessage(processArgs(args)), maxTokens, temperature);
-                chat.sendMessage(getChannel(event), response);
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+            @Override
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Send Message
+                botClient.respond(event, getCommand(), openAI.prompt(botClient.getBotName(), instruction, trimMessage(processArgs(args)), maxTokens, temperature));
             }
         });
     }

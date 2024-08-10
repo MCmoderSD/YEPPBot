@@ -1,20 +1,21 @@
 package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
+import de.MCmoderSD.utilities.other.OpenAI;
+
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
-import de.MCmoderSD.core.CommandHandler;
-
-import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.other.OpenAI;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+
+import org.jsoup.nodes.Document;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -25,10 +26,10 @@ public class Wiki {
     private final double temperature;
 
     // Constructor
-    public Wiki(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, OpenAI openAI, String botName) {
+    public Wiki(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
         // Syntax
-        String syntax = "Syntax: " + commandHandler.getPrefix() + "wiki <Thema>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "wiki <Thema>";
 
         // About
         String[] name = {"wiki", "wikipedia", "summarize", "zusammenfassung"};
@@ -40,14 +41,16 @@ public class Wiki {
         temperature = 0;
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
+
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
-                String channel = getChannel(event);
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Attributes
                 String response;
 
                 // Check for topic
-                if (args.length < 1) response = syntax;
+                if (args.isEmpty()) response = syntax;
                 else {
 
                     // Query Wikipedia
@@ -60,18 +63,15 @@ public class Wiki {
                         // Check if summary is too long
                         if (summary.length() <= 500) response = summary;
                         else
-                            response = trimMessage(openAI.prompt(botName, "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, maxTokens, temperature));
+                            response = trimMessage(openAI.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, maxTokens, temperature));
 
                     } catch (IOException e) {
                         response = trimMessage("Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage());
                     }
                 }
 
-                // Send message and log response
-                chat.sendMessage(channel, response);
-
-                // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                // Send Message
+                botClient.respond(event, getCommand(), response);
             }
         });
     }

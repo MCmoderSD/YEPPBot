@@ -1,7 +1,6 @@
 package de.MCmoderSD.UI;
 
 import de.MCmoderSD.core.BotClient;
-
 import de.MCmoderSD.utilities.frontend.RoundedButton;
 import de.MCmoderSD.utilities.frontend.RoundedTextField;
 
@@ -17,7 +16,6 @@ import java.awt.event.KeyEvent;
 import java.util.Stack;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
-import static java.awt.Color.WHITE;
 import static java.awt.event.KeyEvent.*;
 
 public class MenuPanel extends JPanel {
@@ -36,23 +34,28 @@ public class MenuPanel extends JPanel {
 
     // Constructor
     public MenuPanel(Frame frame, Dimension size) {
+
+        // Init Panel
         super();
         setLayout(null);
-        setPreferredSize(size);
         setBackground(DARK);
         setForeground(PURPLE);
-        setVisible(true);
+
+        // Set Size
+        var height = Math.toIntExact(Math.round(size.height * 0.1));
+        Dimension panelSize = new Dimension(size.width, height);
+        setPreferredSize(panelSize);
 
         // Variables
-        int fontSize = size.width / 50;
-        int padding = size.width / 100;
+        int fontSize = panelSize.width / 50;
+        int padding = panelSize.width / 100;
 
         Font font = new Font("Roboto", Font.PLAIN, fontSize);
         messageHistory = new Stack<>();
 
         // Channel Input
         channelField = new RoundedTextField(1, "Channel");
-        channelField.setBounds(padding, padding, size.width / 5 - 2 * padding, size.height - 3 * padding);
+        channelField.setBounds(padding, padding, panelSize.width / 5 - 2 * padding, panelSize.height - 3 * padding);
         channelField.setFont(font);
         channelField.setHorizontalAlignment(JTextField.CENTER);
         channelField.setBackground(LIGHT);
@@ -61,7 +64,7 @@ public class MenuPanel extends JPanel {
 
         // Text Input
         textField = new RoundedTextField(1, "Message");
-        textField.setBounds(size.width / 5, padding, Math.toIntExact(Math.round(size.width / 1.6)) + 2 * padding, size.height - 3 * padding);
+        textField.setBounds(panelSize.width / 5, padding, Math.toIntExact(Math.round(panelSize.width / 1.6)) + 2 * padding, panelSize.height - 3 * padding);
         textField.setFont(font);
         textField.setBackground(LIGHT);
         textField.setBorder(new LineBorder(LIGHT, padding / 2));
@@ -99,7 +102,7 @@ public class MenuPanel extends JPanel {
 
         // Send Button
         RoundedButton sendButton = new RoundedButton("Send");
-        sendButton.setBounds(Math.toIntExact(Math.round(size.width - size.width / 6.25 + 2 * padding)), padding, Math.toIntExact(Math.round(size.width / 6.25 - 4 * padding)), size.height - 3 * padding);
+        sendButton.setBounds(Math.toIntExact(Math.round(panelSize.width - panelSize.width / 6.25 + 2 * padding)), padding, Math.toIntExact(Math.round(panelSize.width / 6.25 - 4 * padding)), panelSize.height - 3 * padding);
         sendButton.setFont(font);
         sendButton.setBackground(PURPLE);
         sendButton.setForeground(WHITE);
@@ -129,7 +132,7 @@ public class MenuPanel extends JPanel {
             return;
         }
 
-        botClient.sendMessage(channel, message);
+        botClient.write(channel, message);
         textField.setText("");
         messageHistory.push(message);
         messageIndex = messageHistory.size();

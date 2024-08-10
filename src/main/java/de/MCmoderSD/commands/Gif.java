@@ -1,19 +1,19 @@
 package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.main.Credentials;
+import de.MCmoderSD.objects.TwitchMessageEvent;
+
 import org.json.JSONObject;
-
-import de.MCmoderSD.core.CommandHandler;
-
-import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonUtility;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -24,45 +24,36 @@ public class Gif {
     private final String url;
     private final String apiKey;
     private final String query;
-    private final boolean isNull;
 
     // Constructor
-    public Gif(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
+    public Gif(BotClient botClient, MessageHandler messageHandler, Credentials credentials) {
 
         // Syntax
-        String syntax = "Syntax: " + commandHandler.getPrefix() + "gif <Thema>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "gif <Thema>";
 
         // About
         String[] name = {"gif", "giphy", "gify"};
         String description = "Sendet ein GIF zu einem bestimmten Thema. " + syntax;
 
         // Load API key
-        JsonUtility jsonUtility = new JsonUtility();
-        JsonNode config = jsonUtility.load("/api/Giphy.json");
+        JsonNode config = credentials.getGiphyConfig();
 
         // Init Attributes
-        isNull = config == null;
-        url = isNull ? null : config.get("url").asText();
-        apiKey = isNull ? null : config.get("api_key").asText();
-        query = isNull ? null : config.get("query").asText();
-        if (isNull) System.err.println(BOLD + "Giphy API missing" + UNBOLD);
+        url = config.get("url").asText();
+        apiKey = config.get("api_key").asText();
+        query = config.get("query").asText();
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
-            @Override
-            public void execute(ChannelMessageEvent event, String... args) {
+        messageHandler.addCommand(new Command(description, name) {
 
-                if (isNull) return;
+            @Override
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Check arguments
-                String topic = trimMessage(processArgs(args));
+                String topic = trimMessage(convertToAscii(processArgs(args)));
 
-                // Send message
-                String response = trimMessage(gif(topic));
-                chat.sendMessage(getChannel(event), response);
-
-                // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                // Send Message
+                botClient.respond(event, getCommand(), trimMessage(gif(topic)));
             }
         });
     }

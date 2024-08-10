@@ -1,12 +1,11 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
-import de.MCmoderSD.core.CommandHandler;
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Timer;
-
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.manager.CustomManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,14 +13,16 @@ import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-public class CustomTimer {
+public class CustomTimers {
 
     // Constructor
-    public CustomTimer(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, ArrayList<String> admins) {
+    public CustomTimers(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
 
         // ToDo Make it possible to create timers with hours, minutes and seconds
 
-        String prefix = commandHandler.getPrefix();
+        // Variables
+        CustomManager customManager = mySQL.getCustomManager();
+        String prefix = botClient.getPrefix();
         //String syntax = prefix + "CustomTimer create/enable/disable/delete/list name 1000M/500h/30m/10s : response";
         String syntax = prefix + "CustomTimer create/enable/disable/delete/list name 1000M : response";
 
@@ -30,102 +31,95 @@ public class CustomTimer {
         //String description = "Kann benutzt werden, um eigene Timer zu erstellen M = Messages, h = hours m = minutes, s = seconds. Syntax: " + syntax;
         String description = "Kann benutzt werden, um eigene Timer zu erstellen M = Messages. Syntax: " + syntax;
 
-        // Register command
-        commandHandler.registerCommand(new Command(description, name) {
-            @Override
-                public void execute(ChannelMessageEvent event, String... args) {
 
-                // Get author and channel
-                String author = getAuthor(event);
-                String channel = getChannel(event);
+        // Register command
+        messageHandler.addCommand(new Command(description, name) {
+
+            @Override
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Variables
                 String response = syntax;
 
                 // Check if user is a moderator
-                if (!(channel.equals(author) || admins.contains(author))) return;
+                if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
 
                 // Get Custom Timers
-                HashMap<String, Timer> customTimers = mySQL.getCustomTimers(event, chat);
+                HashMap<String, Timer> customTimers = customManager.getCustomTimers(event, botClient);
 
-                if (args.length > 0 && args[0].equalsIgnoreCase("list")) {
-                    sendMessage(mySQL, chat, event, getCommand(), channel, getCustomTimerNames(channel, customTimers, mySQL.getActiveCustomTimers(chat)), args);
+                if (!args.isEmpty() && args.getFirst().equalsIgnoreCase("list")) {
+                    botClient.respond(event, getCommand(), getCustomTimerNames(event.getChannel(), customTimers, customManager.getActiveCustomTimers(event, botClient)));
                     return;
                 }
 
                 // Get Custom Timer syntax
                 HashMap<String, Integer> message = new HashMap<>();
-                for (var i = 1; i < args.length; i++) message.put(args[i], i);
+                for (var i = 1; i < args.size(); i++) message.put(args.get(i), i);
 
-                if (args.length < 2) sendMessage(mySQL, chat, event, getCommand(), channel, response, args);
-                else if (Arrays.asList("create", "add", "enable", "disable", "delete", "del", "remove", "rm", "list").contains(args[0].toLowerCase())) {
+                if (args.size() < 2) botClient.respond(event, getCommand(), response);
+                else if (Arrays.asList("create", "add", "enable", "disable", "delete", "del", "remove", "rm", "list").contains(args.getFirst().toLowerCase())) {
 
                     // Get Custom Timer name
-                    String timerName = args[1].toLowerCase();
+                    String timerName = args.get(1).toLowerCase();
 
                     // Process message
-                    switch (args[0].toLowerCase()) {
+                    switch (args.getFirst().toLowerCase()) {
 
-                            // Enable Custom Timer
+                        // Enable Custom Timer
                         case "enable":
-                            response = customTimers.containsKey(timerName) ? mySQL.editCustomTimer(event, timerName, customTimers.get(timerName).getTime() + "M", customTimers.get(timerName).getResponse(), true) : "Custom Timer does not exist";
+                            response = customTimers.containsKey(timerName) ? customManager.editCustomTimer(event, timerName, customTimers.get(timerName).getTime() + "M", customTimers.get(timerName).getResponse(), true) : "Custom Timer does not exist";
                             break;
 
-                            // Disable Custom Timer
+                        // Disable Custom Timer
                         case "disable":
-                            response = customTimers.containsKey(timerName) ? mySQL.editCustomTimer(event, timerName, customTimers.get(timerName).getTime() + "M", customTimers.get(timerName).getResponse(), false) : "Custom Timer does not exist";
+                            response = customTimers.containsKey(timerName) ? customManager.editCustomTimer(event, timerName, customTimers.get(timerName).getTime() + "M", customTimers.get(timerName).getResponse(), false) : "Custom Timer does not exist";
                             break;
 
-                            // Delete Custom Timer
+                        // Delete Custom Timer
                         case "delete":
                         case "del":
                         case "remove":
                         case "rm":
-                            response = customTimers.containsKey(timerName) ? mySQL.deleteCustomTimer(event, timerName) : "Custom Timer does not exist";
+                            response = customTimers.containsKey(timerName) ? customManager.deleteCustomTimer(event, timerName) : "Custom Timer does not exist";
                             break;
 
-                            // Create Custom Timer
+                        // Create Custom Timer
                         case "create":
                         case "add":
-                            if (!message.containsKey(":") && args.length < 4) response = "Syntax: " + syntax;
+                            if (!message.containsKey(":") && args.size() < 4) response = "Syntax: " + syntax;
                             else if (customTimers.containsKey(timerName)) response = "Custom Timer already exists";
                             else {
 
                                 // Get Time
-                                if (inValidCustomTime(args[2])) {
-                                    sendMessage(mySQL, chat, event, getCommand(), channel, "Not valid format or to long time" , args);
+                                if (inValidCustomTime(args.get(2))) {
+                                    botClient.respond(event, getCommand(), "Not valid format or to long time");
                                     return;
                                 }
 
                                 // Get Custom Timer response
                                 StringBuilder stringBuilder = new StringBuilder();
-                                for (var i = message.get(":") + 1; i < args.length; i++) stringBuilder.append(args[i]).append(" ");
+                                for (var i = message.get(":") + 1; i < args.size(); i++) stringBuilder.append(args.get(i)).append(" ");
                                 String timerResponse = trimMessage(stringBuilder.toString());
 
                                 // Create command
-                               response = mySQL.createCustomTimer(event, timerName, args[2], timerResponse);
+                                response = customManager.createCustomTimer(event, timerName, args.get(2), timerResponse);
                             }
                             break;
 
-                            // Error
+                        // Error
                         default:
                             response = "Syntax: " + syntax;
                             break;
                     }
                 } else response = "Syntax: " + syntax;
 
-                sendMessage(mySQL, chat, event, getCommand(), channel, response, args);
-                commandHandler.updateCustomTimers();
+                // Update Custom Timers
+                messageHandler.updateCustomTimers(event.getChannelId(), customManager.getActiveCustomTimers(event, botClient));
+
+                // Send message
+                botClient.respond(event, getCommand(), response);
             }
         });
-    }
-
-    // Send Message
-    private void sendMessage(MySQL mySQL, TwitchChat chat, ChannelMessageEvent event, String command, String channel, String response, String... args) {
-
-        // Send Message
-        chat.sendMessage(channel, response);
-
-        // Log response
-        mySQL.logResponse(event, command, processArgs(args), response);
     }
 
     private String getCustomTimerNames(String channel, HashMap<String, Timer> customTimers, ArrayList<Timer> enabledTimers) {
@@ -171,6 +165,5 @@ public class CustomTimer {
             default:
                 return false;
         }
-
     }
 }

@@ -2,7 +2,6 @@ package de.MCmoderSD.UI;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.main.Main;
-
 import de.MCmoderSD.utilities.image.ImageReader;
 
 import javax.swing.JFrame;
@@ -20,13 +19,18 @@ public class Frame extends JFrame {
 
     // Constructor
     public Frame(Main main) {
-        super();
-        setTitle("YEPPBot v2.0");
+
+        // Init Frame
+        super("YEPPBot v" + Main.VERSION);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+
+        // Set Colors
         setBackground(DARK);
         setForeground(PURPLE);
+
+        // Set Layout
         setLayout(new BorderLayout());
         this.main = main;
 
@@ -35,12 +39,16 @@ public class Frame extends JFrame {
         setIconImage(imageReader.read("/images/icon.png"));
 
         // Variables
-        int width = 1000;
-        var ratio = 0.8;
+        var multiplyer = 0.75;
+        var rawHeight = getToolkit().getScreenSize().getHeight() * multiplyer;
+        var rawWidth = rawHeight * ((double) 4 / 3);
+        var height = Math.toIntExact(Math.round(rawHeight));
+        var width = Math.toIntExact(Math.round(rawWidth));
+        Dimension size = new Dimension(width, height);
 
         // Add Panel
-        menuPanel = new MenuPanel(this, new Dimension(width, Math.toIntExact(Math.round(width * ratio * 0.1))));
-        logPanel = new LogPanel(this, new Dimension(width, Math.toIntExact(Math.round(width * ratio * 0.9))));
+        logPanel = new LogPanel(this, size);
+        menuPanel = new MenuPanel(this, size);
 
         // Set Visible
         pack();

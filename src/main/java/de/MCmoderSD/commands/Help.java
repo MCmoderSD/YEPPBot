@@ -1,110 +1,97 @@
 package de.MCmoderSD.commands;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
-import de.MCmoderSD.core.CommandHandler;
-
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.manager.CustomManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
-
 public class Help {
 
-    // Attributes
-    private final CommandHandler commandHandler;
-    private final JsonNode whitelist;
-    private final JsonNode blacklist;
+    // Associations
+    private final BotClient botClient;
+    private final MessageHandler messageHandler;
+    private final CustomManager customManager;
 
     // Constructor
-    public Help(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat, JsonNode whitelist, JsonNode blacklist) {
+    public Help(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+
+        // Init Associations
+        this.botClient = botClient;
+        this.messageHandler = messageHandler;
+        this.customManager = mySQL.getCustomManager();
 
         // Syntax
-        String prefix = commandHandler.getPrefix();
+        String prefix = botClient.getPrefix();
         String syntax = prefix + "help commands oder " + prefix + "help <Befehl>";
 
         // About
         String[] name = {"help", "hilfe"};
         String description = "Um die verfügbaren Befehle zu sehen, schreibe: " + syntax;
 
-        // Init Attributes
-        this.commandHandler = commandHandler;
-        this.whitelist = whitelist;
-        this.blacklist = blacklist;
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
+
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
-                String channel = getChannel(event);
-                String arg = args.length > 0 ? args[0].toLowerCase() : "";
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Variables
+                String arg = !args.isEmpty() ? args.getFirst().toLowerCase() : "";
 
                 // Help Commands
-                String response;
-                if (Arrays.asList("commands", "command", "befehle", "befehl").contains(arg)) response = helpCommands(event, mySQL); // Help Commands
-                else if (getCommandDescription(channel, arg) != null) response = getCommandDescription(channel, arg); // Command Description
-                else response = getDescription(); // Help Description (Default)
+                String response = null;
+                if (Arrays.asList("commands", "command", "befehle", "befehl", "comand", "comands").contains(arg))
+                    response = helpCommands(event); // Help Commands
+                else if (getCommandDescription(arg) != null)
+                    response = getCommandDescription(arg); // Command Description
+                if (response == null) response = getDescription(); // Default Description
 
                 // Send message
-                chat.sendMessage(channel, response);
-
-                // Log response
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                botClient.respond(event, getCommand(), response);
             }
         });
     }
 
     // Gets all available commands
-    private String helpCommands(ChannelMessageEvent event, MySQL mySQL) {
+    private String helpCommands(TwitchMessageEvent event) {
+
+        // Variables
         StringBuilder message = new StringBuilder("Available commands: ");
-
-        // Get channel
-        String channel = getChannel(event);
-
-        // Get prefix
-        String prefix = commandHandler.getPrefix();
+        String prefix = botClient.getPrefix();
 
         // Get commands
-        HashMap<String, Command> commands = commandHandler.getCommands();
+        HashMap<String, Command> commands = messageHandler.getCommandList();
 
         // Filter available commands
-        for (String command : commands.keySet()) {
-            if (whitelist.has(command.toLowerCase())) {
-                if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
-                    message.append(prefix).append(command).append(", ");
-            } else if (blacklist.has(command.toLowerCase())) {
-                if (!Arrays.stream(blacklist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
-                    message.append(prefix).append(command).append(", ");
-            } else message.append(prefix).append(command).append(", ");
-        }
+        for (String command : commands.keySet())
+            if (!messageHandler.isBlackListed(event, command.toLowerCase()))
+                message.append(prefix).append(command).append(", ");
 
         // Add custom commands
-        for (String command : mySQL.getCommands(event, false)) message.append(prefix).append(command).append(", ");
+        for (String command : customManager.getCommands(event, false))
+            message.append(prefix).append(command).append(", ");
+
+        // Check how many commands are available
+        if (message.length() < 22) message.append("none. ");
 
         // Return message
         return message.substring(0, message.length() - 2) + '.';
     }
 
     // Gets the description of a command
-    private String getCommandDescription(String channel, String command) {
+    private String getCommandDescription(String command) {
 
         // Get command
-        if (commandHandler.getAliases().containsKey(command)) command = commandHandler.getAliases().get(command);
+        if (messageHandler.checkAlias(command)) command = messageHandler.getAliasMap().get(command);
 
         // Get description if command is available
-        //todo: eh unclean
-        if (whitelist.has(command.toLowerCase())) {
-            if (Arrays.stream(whitelist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
-                return commandHandler.getCommands().get(command).getDescription();
-        } else if (blacklist.has(command.toLowerCase())) {
-            if (!Arrays.stream(blacklist.get(command.toLowerCase()).asText().toLowerCase().split("; ")).toList().contains(channel))
-                return commandHandler.getCommands().get(command).getDescription();
-        } else if (commandHandler.getCommands().containsKey(command))
-            return commandHandler.getCommands().get(command).getDescription();
-        return null;
+        if (messageHandler.checkCommand(command.toLowerCase()))
+            return messageHandler.getCommandList().get(command).getDescription();
+        else return null;
     }
 }

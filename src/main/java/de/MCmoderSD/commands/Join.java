@@ -1,13 +1,10 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.core.CommandHandler;
-
-import de.MCmoderSD.utilities.database.MySQL;
-
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import java.util.ArrayList;
 
 public class Join {
 
@@ -17,36 +14,31 @@ public class Join {
     private String channel;
 
     // Constructor
-    public Join(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
+    public Join(BotClient botClient, MessageHandler messageHandler) {
 
         // About
         String[] name = {"join"};
-        String description = "Sendet den Befehl " + commandHandler.getPrefix() + "join in den Chat, um Events beizutreten";
-
+        String description = "Sendet den Befehl " + botClient.getPrefix() + "join in den Chat, um Events beizutreten";
 
         // Initialize attributes
         sentMessage = false;
         reset();
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
                 if (!firstJoin && !sentMessage) {
                     firstJoin = true;
-                    channel = getChannel(event);
+                    channel = event.getChannel();
                     startResetTimer(10);
                     return;
                 }
 
-                if (!sentMessage && channel != null && channel.equals(getChannel(event))) {
+                if (!sentMessage && channel != null && channel.equals(event.getChannel())) {
 
                     // Send message
-                    String response = commandHandler.getPrefix() + "join";
-                    chat.sendMessage(channel, response);
-
-                    // Log response
-                    mySQL.logResponse(event, getCommand(), processArgs(args), response);
+                    botClient.respond(event, getCommand(), botClient.getPrefix() + "join");
 
                     // Reset attributes
                     sentMessage = true;
@@ -70,7 +62,7 @@ public class Join {
                 reset();
                 if (sentMessage) sentMessage = false;
             } catch (InterruptedException e) {
-                System.out.println("Error: " + e);
+                System.err.println("Error: " + e);
             }
         }).start();
     }

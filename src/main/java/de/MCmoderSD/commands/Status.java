@@ -1,18 +1,15 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.core.CommandHandler;
-
-import de.MCmoderSD.utilities.database.MySQL;
-
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import java.util.ArrayList;
 
 public class Status {
 
     // Constructor
-    public Status(MySQL mySQL, CommandHandler commandHandler, TwitchChat chat) {
+    public Status(BotClient botClient, MessageHandler messageHandler) {
 
         // About
         String[] name = {"status", "test"};
@@ -20,13 +17,13 @@ public class Status {
 
 
         // Register command
-        commandHandler.registerCommand(new Command(description, name) {
+        messageHandler.addCommand(new Command(description, name) {
+
             @Override
-            public void execute(ChannelMessageEvent event, String... args) {
-                // Report status
-                String response = "Bot ist aktiv!";
-                chat.sendMessage(getChannel(event), response);
-                mySQL.logResponse(event, getCommand(), processArgs(args), response);
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Send Message
+                botClient.respond(event, getCommand(), "Bot ist aktiv!");
             }
         });
     }

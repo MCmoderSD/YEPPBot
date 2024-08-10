@@ -1,21 +1,22 @@
 package de.MCmoderSD.objects;
 
-import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
+import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.utilities.database.MySQL;
+
+import java.sql.Timestamp;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Timer {
 
     // Associations
-    private final TwitchChat chat;
+    private final BotClient botClient;
     private final MySQL mySQL;
 
     // Attributes
-    private final String name;
     private final String channel;
+    private final String name;
+    private final char type;
     private final long time;
     private final String response;
 
@@ -23,37 +24,68 @@ public class Timer {
     private long counter;
 
     // Constructor
-    public Timer(TwitchChat chat, MySQL mySQL, String channel, String name, String time, String response) {
-        this.chat = chat;
+    public Timer(BotClient botClient, MySQL mySQL, String channel, String name, String time, String response) {
+
+        // Set Associations
+        this.botClient = botClient;
         this.mySQL = mySQL;
+
+        // Set Attributes
         this.channel = channel;
         this.name = name;
-        var temp = time.split("M"); // Remove the M TEMPORARY
-        this.time = Long.parseLong(temp[0]);
+        this.type = time.charAt(time.length() - 1);
+        this.time = parseTime(time.trim());
         this.response = response;
 
         // Init Counter
         counter = 1;
     }
 
-    public void trigger(ChannelMessageEvent event) {
-        if (counter == time) execute(event);
-        else counter++;
+    // Methods
+    private long parseTime(String timeString) {
+
+            // Variables
+            long time = 0;
+            String number = timeString.substring(0, timeString.length() - 1);
+
+            // Parse Time
+            switch (type) {
+                case 's', 'M' -> time = Long.parseLong(number);
+                case 'm' -> time = Long.parseLong(number) * 60;
+                case 'h' -> time = Long.parseLong(number) * 60 * 60;
+            }
+
+            return time;
     }
 
-    private void execute(ChannelMessageEvent event) {
-
-        // Send Message
-        chat.sendMessage(channel, response);
+    // Execute
+    private void execute() {
 
         // Reset Counter
         counter = 1;
 
-        // Log response
-        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, name + ": " + response, BREAK, UNBOLD);
-        mySQL.logResponse(event, "Timer: " + name, ""   , response);
+        // Log
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, "Timer: " + name + ": " + response, BREAK, UNBOLD);
+
+        // Send Message
+        botClient.respond(new TwitchMessageEvent(
+                new Timestamp(System.currentTimeMillis()),
+                mySQL.queryID("channels", channel),
+                mySQL.queryID("channels", channel),
+                channel,
+                channel,
+                response,
+                null,
+                null,
+                "NONE",
+                null), "Timer: " + name, response);
     }
 
+    // Trigger
+    public void trigger() {
+        if (type == 'M' && counter >= time) execute();
+        else counter++;
+    }
 
     // Getter
     public String getChannel() {
