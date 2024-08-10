@@ -41,6 +41,7 @@ public class Timer {
         counter = 1;
     }
 
+    // Methods
     private long parseTime(String timeString) {
 
             // Variables
@@ -57,11 +58,7 @@ public class Timer {
             return time;
     }
 
-    public void trigger() {
-        if (type == 'M' && counter >= time) execute();
-        else counter++;
-    }
-
+    // Execute
     private void execute() {
 
         // Reset Counter
@@ -82,6 +79,12 @@ public class Timer {
                 null,
                 "NONE",
                 null), "Timer: " + name, response);
+    }
+
+    // Trigger
+    public void trigger() {
+        if (type == 'M' && counter >= time) execute();
+        else counter++;
     }
 
     // Getter

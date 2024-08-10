@@ -8,7 +8,11 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -30,7 +34,7 @@ public class MessageHandler {
     private final HashMap<Integer, ArrayList<Timer>> customTimers;
 
     // Utilities
-    private final Random random = new Random();
+    private final Random random;
 
     // Constructor
     public MessageHandler(BotClient botClient, MySQL mySQL, Frame frame) {
@@ -49,6 +53,7 @@ public class MessageHandler {
         customAliases = new HashMap<>();
         counters = new HashMap<>();
         customTimers = new HashMap<>();
+        random = new Random();
 
         // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
@@ -93,8 +98,7 @@ public class MessageHandler {
 
     private void handleTimers(TwitchMessageEvent event) {
         new Thread(() -> {
-            if (customTimers.containsKey(event.getChannelId()))
-                customTimers.get(event.getChannelId()).forEach(Timer::trigger);
+            if (customTimers.containsKey(event.getChannelId())) customTimers.get(event.getChannelId()).forEach(Timer::trigger);
         }).start();
     }
 

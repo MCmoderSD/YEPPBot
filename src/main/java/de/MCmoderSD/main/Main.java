@@ -7,8 +7,13 @@ import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.OpenAI;
 import de.MCmoderSD.utilities.other.Reader;
 
-import java.awt.*;
-import java.io.*;
+import java.awt.HeadlessException;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,39 +81,39 @@ public class Main {
         // Generate Config Files
         if (hasArg(Argument.GENERATE)) generateConfigFiles();
 
-// Config Paths
+        // Config Paths
         String botConfigPath = null;
         String channelListPath = null;
         String mysqlConfigPath = null;
 
-// API Paths
+        // API Paths
         String openAIConfigPath;
         String weatherConfigPath;
         String giphyConfigPath;
 
-// Bot Config
+        // Bot Config
         if (hasArg(Argument.BOT_CONFIG)) botConfigPath = args.get(args.indexOf("-botconfig") + 1);
 
-// Channel List
+        // Channel List
         if (hasArg(Argument.CHANNEL_LIST)) channelListPath = args.get(args.indexOf("-channellist") + 1);
 
-// MySQL Config
+        // MySQL Config
         if (hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = args.get(args.indexOf("-mysqlconfig") + 1);
 
-// OpenAI Config
+        // OpenAI Config
         if (hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
         else openAIConfigPath = OPENAI_CONFIG;
 
-// Weather Config
+        // Weather Config
         if (hasArg(Argument.OPENWEATHERMAP_CONFIG))
             weatherConfigPath = args.get(args.indexOf("-openweathermapconfig") + 1);
         else weatherConfigPath = WEATHER_CONFIG;
 
-// Giphy Config
+        // Giphy Config
         if (hasArg(Argument.GIPHY_CONFIG)) giphyConfigPath = args.get(args.indexOf("-giphyconfig") + 1);
         else giphyConfigPath = GIPHY_CONFIG;
 
-// CLI Mode
+        // CLI Mode
         if (!hasArg(Argument.CLI)) {
             Frame tempFrame = null;
             try {
@@ -119,7 +124,7 @@ public class Main {
             frame = tempFrame;
         }
 
-// Dev Mode
+        // Dev Mode
         if (hasArg(Argument.DEV)) {
             if (botConfigPath == null) botConfigPath = DEV_CONFIG;
             if (channelListPath == null) channelListPath = DEV_LIST;
@@ -223,7 +228,7 @@ public class Main {
     private void help() {
         // Info
         System.out.println(
-                """
+                        """
                         \n
                         Info:
                             -help: Show Help
@@ -232,7 +237,7 @@ public class Main {
 
         // Modes
         System.out.println(
-                """ 
+                        """ 
                         Modes:
                             -dev: Development Mode
                             -cli: CLI Mode (No GUI)
@@ -241,7 +246,7 @@ public class Main {
 
         // Generate Config Files
         System.out.println(
-                """ 
+                        """ 
                         Generate:
                             -generate: Generate Config Files
                             -gen: Generate Config Files
@@ -249,7 +254,7 @@ public class Main {
 
         // Bot Config
         System.out.println(
-                """
+                        """
                         Bot Config:
                             -botconfig: Path to Bot Config
                             -channellist: Path to Channel List
@@ -258,7 +263,7 @@ public class Main {
 
         // API Config
         System.out.println(
-                """
+                        """
                         API Config:
                             -openaiconfig: Path to OpenAI Config
                             -openweathermap: Path to Weather Config
@@ -302,7 +307,10 @@ public class Main {
         return args.contains(arg);
     }
 
+    // Enum
     public enum Argument {
+
+        // Arguments
         HELP("help", "help", "?"),
         VERSION("version", "version", "ver", "v"),
         GENERATE("generate", "generate", "gen"),
@@ -316,20 +324,22 @@ public class Main {
         OPENWEATHERMAP_CONFIG("openweathermapconfig", "openweathermapconfig"),
         GIPHY_CONFIG("giphyconfig", "giphyconfig");
 
+        // Attributes
         private final String[] aliases;
         private final String name;
 
+        // Constructor
         Argument(String name, String... aliases) {
             this.name = name;
             this.aliases = aliases;
         }
 
-        boolean listHasNameOrAlias(ArrayList<String> list) {
+        // Check
+        private boolean listHasNameOrAlias(ArrayList<String> list) {
             if (list == null) return false;
             if (list.isEmpty()) return false;
             if (list.contains(name)) return true;
             return Arrays.stream(aliases).anyMatch(list::contains);
         }
-
     }
 }

@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
+import static de.MCmoderSD.main.Main.Argument.*;
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 @SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
@@ -102,7 +103,7 @@ public class BotClient {
         // Join Channels
         ArrayList<String> channelList = new ArrayList<>(Collections.singleton(botName));
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
-        if (!hasArg("dev")) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
+        if (!hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
         joinChannel(channelList);
 
         // Event Handler
@@ -170,7 +171,7 @@ public class BotClient {
         if (message.isEmpty() || message.isBlank()) return;
 
         // Update Frame
-        if (!hasArg("cli")) frame.log(USER, channel, botName, message);
+        if (!hasArg(CLI)) frame.log(USER, channel, botName, message);
 
         // Log
         mySQL.getLogManager().logResponse(channel, botName, message);
@@ -186,7 +187,7 @@ public class BotClient {
         var channel = event.getChannel();
 
         // Update Frame
-        if (!(message.isEmpty() || message.isBlank()) && !hasArg("cli")) frame.log(RESPONSE, channel, botName, message);
+        if (!(message.isEmpty() || message.isBlank()) && !hasArg(CLI)) frame.log(RESPONSE, channel, botName, message);
 
         // Log
         mySQL.getLogManager().logResponse(event, command, message);
@@ -252,7 +253,7 @@ public class BotClient {
         return chat.getChannels();
     }
 
-    public boolean hasArg(String arg) {
+    public boolean hasArg(Main.Argument arg) {
         return main.hasArg(arg);
     }
 
