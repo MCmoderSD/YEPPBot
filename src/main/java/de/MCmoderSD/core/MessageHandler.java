@@ -161,7 +161,7 @@ public class MessageHandler {
 
         // Variables
         ArrayList<String> parts = formatCommand(event);
-        String trigger = parts.getFirst();
+        String trigger = parts.getFirst().toLowerCase();
 
         // Check for Alias
         if (aliasMap.containsKey(trigger)) {

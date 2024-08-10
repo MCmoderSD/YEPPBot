@@ -56,7 +56,7 @@ public class CustomCommand {
                     commandName = commandName.startsWith(prefix) ? commandName.substring(prefix.length()) : commandName;
 
                     // Process message
-                    switch (args.get(0).toLowerCase()) {
+                    switch (args.getFirst().toLowerCase()) {
 
                         // Enable command
                         case "enable":
