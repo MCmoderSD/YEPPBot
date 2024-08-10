@@ -7,19 +7,15 @@ import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.OpenAI;
 import de.MCmoderSD.utilities.other.Reader;
 
-import java.awt.HeadlessException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Calculate.BOLD;
+import static de.MCmoderSD.utilities.other.Calculate.UNBOLD;
 
 public class Main {
 
@@ -47,14 +43,12 @@ public class Main {
 
     // Associations
     private final Credentials credentials;
-
+    // Variables
+    private List<Argument> args = new ArrayList<>();
     private BotClient botClient;
     private Frame frame;
     private MySQL mySQL;
     private OpenAI openAI;
-
-    // Variables
-    private final HashMap<String, Boolean> argMap;
 
     // Constructor
     public Main(ArrayList<String> args) {
@@ -68,51 +62,54 @@ public class Main {
         args.removeAll(Collections.singleton(""));
         args.removeAll(Collections.singleton(" "));
         args.removeAll(Collections.singleton(null));
-        for (String arg : args) if (arg.startsWith("-") || arg.startsWith("/")) args.set(args.indexOf(arg), arg.replaceAll("/", "-").replaceAll("--", "-"));
+        for (String arg : args)
+            if (arg.startsWith("-") || arg.startsWith("/"))
+                args.set(args.indexOf(arg), arg.replaceAll("/", "-").replaceAll("--", "-"));
 
         // Check Args
-        argMap = checkArgs(args);
+        this.args = checkArgs(args);
 
         // Help
-        if (argMap.get("help")) help();
-        if (argMap.get("version")) System.out.println("Version: " + VERSION);
+        if (hasArg(Argument.HELP)) help();
+        if (hasArg(Argument.VERSION)) System.out.println("Version: " + VERSION);
 
         // Generate Config Files
-        if (argMap.get("generate")) generateConfigFiles();
+        if (hasArg(Argument.GENERATE)) generateConfigFiles();
 
-        // Config Paths
+// Config Paths
         String botConfigPath = null;
         String channelListPath = null;
         String mysqlConfigPath = null;
 
-        // API Paths
+// API Paths
         String openAIConfigPath;
         String weatherConfigPath;
         String giphyConfigPath;
 
-        // Bot Config
-        if (argMap.get("botconfig")) botConfigPath = args.get(args.indexOf("-botconfig") + 1);
+// Bot Config
+        if (hasArg(Argument.BOT_CONFIG)) botConfigPath = args.get(args.indexOf("-botconfig") + 1);
 
-        // Channel List
-        if (argMap.get("channellist")) channelListPath = args.get(args.indexOf("-channellist") + 1);
+// Channel List
+        if (hasArg(Argument.CHANNEL_LIST)) channelListPath = args.get(args.indexOf("-channellist") + 1);
 
-        // MySQL Config
-        if (argMap.get("mysqlconfig")) mysqlConfigPath = args.get(args.indexOf("-mysqlconfig") + 1);
+// MySQL Config
+        if (hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = args.get(args.indexOf("-mysqlconfig") + 1);
 
-        // OpenAI Config
-        if (argMap.get("openaiconfig")) openAIConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
+// OpenAI Config
+        if (hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
         else openAIConfigPath = OPENAI_CONFIG;
 
-        // Weather Config
-        if (argMap.get("openweathermapconfig")) weatherConfigPath = args.get(args.indexOf("-openweathermapconfig") + 1);
+// Weather Config
+        if (hasArg(Argument.OPENWEATHERMAP_CONFIG))
+            weatherConfigPath = args.get(args.indexOf("-openweathermapconfig") + 1);
         else weatherConfigPath = WEATHER_CONFIG;
 
-        // Giphy Config
-        if (argMap.get("giphyconfig")) giphyConfigPath = args.get(args.indexOf("-giphyconfig") + 1);
+// Giphy Config
+        if (hasArg(Argument.GIPHY_CONFIG)) giphyConfigPath = args.get(args.indexOf("-giphyconfig") + 1);
         else giphyConfigPath = GIPHY_CONFIG;
 
-        // CLI Mode
-        if (!argMap.get("cli")) {
+// CLI Mode
+        if (!hasArg(Argument.CLI)) {
             Frame tempFrame = null;
             try {
                 tempFrame = new Frame(this);
@@ -122,8 +119,8 @@ public class Main {
             frame = tempFrame;
         }
 
-        // Dev Mode
-        if (argMap.get("dev")) {
+// Dev Mode
+        if (hasArg(Argument.DEV)) {
             if (botConfigPath == null) botConfigPath = DEV_CONFIG;
             if (channelListPath == null) channelListPath = DEV_LIST;
             if (mysqlConfigPath == null) mysqlConfigPath = DEV_MYSQL;
@@ -153,6 +150,11 @@ public class Main {
             System.err.println(BOLD + "Bot Config missing: Stopping Bot" + UNBOLD);
             System.exit(1);
         }
+    }
+
+    // PSVM
+    public static void main(String[] args) {
+        new Main(new ArrayList<>(Arrays.asList(args)));
     }
 
     // Generate Config Files
@@ -198,34 +200,20 @@ public class Main {
     }
 
     // Check Args
-    private HashMap<String, Boolean> checkArgs(ArrayList<String> args) {
+    private List<Argument> checkArgs(ArrayList<String> args) {
 
         // Variables
         ArrayList<String> arguments = new ArrayList<>();
-        HashMap<String, Boolean> result = new HashMap<>();
+        List<Argument> result = new ArrayList<>();
 
         // Format args
-        for (String arg : args) if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replaceAll("/", "-").replaceAll("-", ""));
+        for (String arg : args)
+            if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replaceAll("/", "-").replaceAll("-", ""));
 
-        // Dev & CLI & Log
-        result.put("dev", listContainsEither(arguments, "dev", "development", "debug", "test"));
-        result.put("cli", listContainsEither(arguments, "nogui", "no-gui", "console", "terminal", "cli"));
-        result.put("log", !listContainsEither(arguments, "nolog", "no-log", "disable-log", "disablelog"));
-
-        // Info
-        result.put("help", listContainsEither(arguments, "help", "?"));
-        result.put("version", listContainsEither(arguments, "version", "ver", "v"));
-        result.put("generate", listContainsEither(arguments, "generate", "gen"));
-
-        // Bot Config
-        result.put("botconfig", listContainsEither(arguments, "botconfig"));
-        result.put("channellist", listContainsEither(arguments, "channellist"));
-        result.put("mysqlconfig", listContainsEither(arguments, "mysqlconfig"));
-
-        // API Config
-        result.put("openaiconfig", listContainsEither(arguments, "openaiconfig"));
-        result.put("openweathermapconfig", listContainsEither(arguments, "openweathermapconfig"));
-        result.put("giphyconfig", listContainsEither(arguments, "giphyconfig"));
+        // Check
+        Arrays.stream(Argument.values()).forEach(argument -> {
+            if (argument.listHasNameOrAlias(arguments)) result.add(argument);
+        });
 
         // Return
         return result;
@@ -235,55 +223,50 @@ public class Main {
     private void help() {
         // Info
         System.out.println(
-        """
-        \n
-        Info:
-            -help: Show Help
-            -version: Show Version
-        """);
+                """
+                        \n
+                        Info:
+                            -help: Show Help
+                            -version: Show Version
+                        """);
 
         // Modes
         System.out.println(
-        """ 
-        Modes:
-            -dev: Development Mode
-            -cli: CLI Mode (No GUI)
-            -nolog: Disable Logging
-        """);
+                """ 
+                        Modes:
+                            -dev: Development Mode
+                            -cli: CLI Mode (No GUI)
+                            -nolog: Disable Logging
+                        """);
 
         // Generate Config Files
         System.out.println(
-        """ 
-        Generate:
-            -generate: Generate Config Files
-            -gen: Generate Config Files
-        """);
+                """ 
+                        Generate:
+                            -generate: Generate Config Files
+                            -gen: Generate Config Files
+                        """);
 
         // Bot Config
         System.out.println(
-        """
-        Bot Config:
-            -botconfig: Path to Bot Config
-            -channellist: Path to Channel List
-            -mysqlconfig: Path to MySQL Config
-        """);
+                """
+                        Bot Config:
+                            -botconfig: Path to Bot Config
+                            -channellist: Path to Channel List
+                            -mysqlconfig: Path to MySQL Config
+                        """);
 
         // API Config
         System.out.println(
-        """
-        API Config:
-            -openaiconfig: Path to OpenAI Config
-            -openweathermap: Path to Weather Config
-            -giphyconfig: Path to Giphy Config
-        """);
+                """
+                        API Config:
+                            -openaiconfig: Path to OpenAI Config
+                            -openweathermap: Path to Weather Config
+                            -giphyconfig: Path to Giphy Config
+                        """);
 
         // Exit
         System.exit(0);
-    }
-
-    // PSVM
-    public static void main(String[] args) {
-        new Main(new ArrayList<>(Arrays.asList(args)));
     }
 
     // Getter
@@ -315,7 +298,38 @@ public class Main {
         return reader;
     }
 
-    public boolean hasArg(String arg) {
-        return argMap.get(arg);
+    public boolean hasArg(Argument arg) {
+        return args.contains(arg);
+    }
+
+    public enum Argument {
+        HELP("help", "help", "?"),
+        VERSION("version", "version", "ver", "v"),
+        GENERATE("generate", "generate", "gen"),
+        DEV("dev", "dev", "development", "debug", "test"),
+        CLI("cli", "cli", "nogui", "no-gui", "console", "terminal"),
+        LOG("log", "log", "nolog", "no-log", "disable-log", "disablelog"),
+        BOT_CONFIG("botconfig", "botconfig"),
+        CHANNEL_LIST("channellist", "channellist"),
+        MYSQL_CONFIG("mysqlconfig", "mysqlconfig"),
+        OPENAI_CONFIG("openaiconfig", "openaiconfig"),
+        OPENWEATHERMAP_CONFIG("openweathermapconfig", "openweathermapconfig"),
+        GIPHY_CONFIG("giphyconfig", "giphyconfig");
+
+        private final String[] aliases;
+        private final String name;
+
+        Argument(String name, String... aliases) {
+            this.name = name;
+            this.aliases = aliases;
+        }
+
+        boolean listHasNameOrAlias(ArrayList<String> list) {
+            if (list == null) return false;
+            if (list.isEmpty()) return false;
+            if (list.contains(name)) return true;
+            return Arrays.stream(aliases).anyMatch(list::contains);
+        }
+
     }
 }

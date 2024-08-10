@@ -40,7 +40,7 @@ public class MySQL extends Driver {
         assetManager = new AssetManager(this);
         channelManager = new ChannelManager(this);
         customManager = new CustomManager(this);
-        logManager = new LogManager(this, main.hasArg("log"));
+        logManager = new LogManager(this, main.hasArg(Main.Argument.LOG));
         lurkManager = new LurkManager(this);
     }
 
@@ -54,7 +54,7 @@ public class MySQL extends Driver {
 
             // SQL statement for creating the users table
             connection.prepareStatement(condition +
-                            """
+                    """
                             users (
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL
@@ -64,7 +64,7 @@ public class MySQL extends Driver {
 
             // SQL statement for creating the channels table
             connection.prepareStatement(condition +
-                            """
+                    """
                             channels (
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
