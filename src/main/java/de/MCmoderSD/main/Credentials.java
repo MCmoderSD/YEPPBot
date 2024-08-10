@@ -1,7 +1,7 @@
 package de.MCmoderSD.main;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
+import de.MCmoderSD.main.Main.Argument;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
 
@@ -28,7 +28,7 @@ public class Credentials {
 
         // Load Bot Config
         try {
-            this.botConfig = jsonUtility.load(botConfig, main.hasArg("botconfig"));
+            this.botConfig = jsonUtility.load(botConfig, main.hasArg(Argument.BOT_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading Bot Config: " + e.getMessage());
             System.exit(1);
@@ -36,14 +36,14 @@ public class Credentials {
 
         // Load Channel List
         try {
-            this.channelList = reader.lineRead(channelList, main.hasArg("channellist"));
+            this.channelList = reader.lineRead(channelList, main.hasArg(Argument.CHANNEL_LIST));
         } catch (Exception e) {
             System.err.println("Error loading Channel List: " + e.getMessage());
         }
 
         // Load MySQL Config
         try {
-            this.mySQLConfig = jsonUtility.load(mySQL, main.hasArg("mysqlconfig"));
+            this.mySQLConfig = jsonUtility.load(mySQL, main.hasArg(Argument.MYSQL_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading MySQL Config: " + e.getMessage());
             System.exit(1);
@@ -51,21 +51,21 @@ public class Credentials {
 
         // Load OpenAI Config
         try {
-            this.openAIConfig = jsonUtility.load(openAI, main.hasArg("openaiconfig"));
+            this.openAIConfig = jsonUtility.load(openAI, main.hasArg(Argument.OPENAI_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading OpenAI Config: " + e.getMessage());
         }
 
         // Load OpenWeatherMap Config
         try {
-            this.openWeatherMapConfig = jsonUtility.load(weather, main.hasArg("openweathermapconfig"));
+            this.openWeatherMapConfig = jsonUtility.load(weather, main.hasArg(Argument.OPENWEATHERMAP_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading OpenWeatherMap Config: " + e.getMessage());
         }
 
         // Load Giphy Config
         try {
-            this.giphyConfig = jsonUtility.load(giphy, main.hasArg("giphyconfig"));
+            this.giphyConfig = jsonUtility.load(giphy, main.hasArg(Argument.GIPHY_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading Giphy Config: " + e.getMessage());
         }
