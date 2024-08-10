@@ -9,7 +9,9 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
+
 import com.github.twitch4j.helix.TwitchHelix;
+
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.commands.*;
 import de.MCmoderSD.main.Credentials;
@@ -29,17 +31,20 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 @SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 public class BotClient {
 
-    // Constants
-    public static String botName;
-    public static String prefix;
-    public static ArrayList<String> admins;
     // Associations
     private final Main main;
     private final MySQL mySQL;
     private final Frame frame;
+
     // Utilities
     private final JsonUtility jsonUtility;
     private final Reader reader;
+
+    // Constants
+    public static String botName;
+    public static String prefix;
+    public static ArrayList<String> admins;
+
     // Attributes
     private final TwitchClient client;
     private final TwitchChat chat;
@@ -84,7 +89,7 @@ public class BotClient {
         // Join Channels
         ArrayList<String> channelList = new ArrayList<>(Collections.singleton(botName));
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
-        if (!hasArg(Main.Argument.DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
+        if (!hasArg("dev")) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
         joinChannel(channelList);
 
         // Event Handler
@@ -135,7 +140,7 @@ public class BotClient {
         if (message.isEmpty() || message.isBlank()) return;
 
         // Update Frame
-        if (!hasArg(Main.Argument.CLI)) frame.log(USER, channel, botName, message);
+        if (!hasArg("cli")) frame.log(USER, channel, botName, message);
 
         // Log
         mySQL.getLogManager().logResponse(channel, botName, message);
@@ -151,14 +156,12 @@ public class BotClient {
         var channel = event.getChannel();
 
         // Update Frame
-        if (!(message.isEmpty() || message.isBlank()) && !hasArg(Main.Argument.CLI))
-            frame.log(RESPONSE, channel, botName, message);
+        if (!(message.isEmpty() || message.isBlank()) && !hasArg("cli")) frame.log(RESPONSE, channel, botName, message);
 
         // Log
         mySQL.getLogManager().logResponse(event, command, message);
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
-        if (!(message.isEmpty() || message.isBlank()))
-            System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
+        if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
         // Send Messag
         if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
@@ -219,7 +222,7 @@ public class BotClient {
         return chat.getChannels();
     }
 
-    public boolean hasArg(Main.Argument arg) {
+    public boolean hasArg(String arg) {
         return main.hasArg(arg);
     }
 
