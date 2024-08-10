@@ -2,17 +2,13 @@ package de.MCmoderSD.core;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.commands.Command;
+import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.NoSuchElementException;
-
+import java.util.*;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -25,11 +21,11 @@ public class MessageHandler {
 
     // Attributes
     private final HashMap<String, Command> commandList;
-    private final HashMap<String, String> aliasList;
+    private final HashMap<String, String> aliasMap;
     private final HashMap<Integer, Integer> lurkList;
     private final HashMap<Integer, ArrayList<String>> blackList;
-    private final HashMap<Integer, HashMap<String, String >> customCommands;
-    private final HashMap<Integer, HashMap<String, String >> customAliases;
+    private final HashMap<Integer, HashMap<String, String>> customCommands;
+    private final HashMap<Integer, HashMap<String, String>> customAliases;
     private final HashMap<Integer, HashMap<String, Integer>> counters;
     private final HashMap<Integer, ArrayList<Timer>> customTimers;
 
@@ -46,7 +42,7 @@ public class MessageHandler {
 
         // Initialize Attributes
         commandList = new HashMap<>();
-        aliasList = new HashMap<>();
+        aliasMap = new HashMap<>();
         lurkList = new HashMap<>();
         blackList = new HashMap<>();
         customCommands = new HashMap<>();
@@ -69,7 +65,8 @@ public class MessageHandler {
             // Log Message
             mySQL.getLogManager().logMessage(event);
             event.logToConsole();
-            if (!botClient.hasArg("cli")) frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
+            if (!botClient.hasArg(Main.Argument.CLI))
+                frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
 
             // Handle Timers;
             handleTimers(event);
@@ -96,7 +93,8 @@ public class MessageHandler {
 
     private void handleTimers(TwitchMessageEvent event) {
         new Thread(() -> {
-            if (customTimers.containsKey(event.getChannelId())) customTimers.get(event.getChannelId()).forEach(Timer::trigger);
+            if (customTimers.containsKey(event.getChannelId()))
+                customTimers.get(event.getChannelId()).forEach(Timer::trigger);
         }).start();
     }
 
@@ -150,7 +148,7 @@ public class MessageHandler {
                         event.getSubStreak(),
                         event.getSubTier(),
                         event.getBits()
-                        ), "traitor", response);
+                ), "traitor", response);
             }
         }).start();
     }
@@ -162,8 +160,8 @@ public class MessageHandler {
         String trigger = parts.getFirst();
 
         // Check for Alias
-        if (aliasList.containsKey(trigger)) {
-            trigger = aliasList.get(trigger);
+        if (aliasMap.containsKey(trigger)) {
+            trigger = aliasMap.get(trigger);
             parts.set(0, trigger);
         }
 
@@ -241,7 +239,7 @@ public class MessageHandler {
         return new ArrayList<>(Arrays.asList(split));
     }
 
-    private String formatCommand(TwitchMessageEvent event, ArrayList<String>args, String response) {
+    private String formatCommand(TwitchMessageEvent event, ArrayList<String> args, String response) {
 
         // Replace Variables
         if (response.contains("%random%")) response = response.replaceAll("%random%", random.nextInt(100) + "%");
@@ -321,7 +319,7 @@ public class MessageHandler {
         commandList.put(name, command);
 
         // Register aliases
-        for (String alias : command.getAlias()) aliasList.put(alias.toLowerCase(), name);
+        for (String alias : command.getAlias()) aliasMap.put(alias.toLowerCase(), name);
     }
 
     // Update Lurk List
@@ -375,14 +373,14 @@ public class MessageHandler {
     }
 
     public boolean checkAlias(String alias) {
-        return aliasList.containsKey(alias);
+        return aliasMap.containsKey(alias);
     }
 
     public HashMap<String, Command> getCommandList() {
         return commandList;
     }
 
-    public HashMap<String, String> getAliasList() {
-        return aliasList;
+    public HashMap<String, String> getAliasMap() {
+        return aliasMap;
     }
 }

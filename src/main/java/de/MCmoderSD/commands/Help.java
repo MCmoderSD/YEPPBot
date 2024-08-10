@@ -45,8 +45,10 @@ public class Help {
 
                 // Help Commands
                 String response = null;
-                if (Arrays.asList("commands", "command", "befehle", "befehl", "comand", "comands").contains(arg)) response = helpCommands(event); // Help Commands
-                else if (getCommandDescription(arg) != null) response = getCommandDescription(arg); // Command Description
+                if (Arrays.asList("commands", "command", "befehle", "befehl", "comand", "comands").contains(arg))
+                    response = helpCommands(event); // Help Commands
+                else if (getCommandDescription(arg) != null)
+                    response = getCommandDescription(arg); // Command Description
                 if (response == null) response = getDescription(); // Default Description
 
                 // Send message
@@ -66,10 +68,13 @@ public class Help {
         HashMap<String, Command> commands = messageHandler.getCommandList();
 
         // Filter available commands
-        for (String command : commands.keySet()) if (!messageHandler.isBlackListed(event, command.toLowerCase())) message.append(prefix).append(command).append(", ");
+        for (String command : commands.keySet())
+            if (!messageHandler.isBlackListed(event, command.toLowerCase()))
+                message.append(prefix).append(command).append(", ");
 
         // Add custom commands
-        for (String command : customManager.getCommands(event, false)) message.append(prefix).append(command).append(", ");
+        for (String command : customManager.getCommands(event, false))
+            message.append(prefix).append(command).append(", ");
 
         // Check how many commands are available
         if (message.length() < 22) message.append("none. ");
@@ -82,10 +87,11 @@ public class Help {
     private String getCommandDescription(String command) {
 
         // Get command
-        if (messageHandler.checkAlias(command)) command = messageHandler.getAliasList().get(command);
+        if (messageHandler.checkAlias(command)) command = messageHandler.getAliasMap().get(command);
 
         // Get description if command is available
-       if (messageHandler.checkCommand(command.toLowerCase())) return messageHandler.getCommandList().get(command).getDescription();
-       else return null;
+        if (messageHandler.checkCommand(command.toLowerCase()))
+            return messageHandler.getCommandList().get(command).getDescription();
+        else return null;
     }
 }

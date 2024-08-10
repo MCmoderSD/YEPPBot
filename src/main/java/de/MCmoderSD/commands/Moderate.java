@@ -65,7 +65,7 @@ public class Moderate {
                     case "join":
                         if (args.size() < 2) response = join(user); // Broadcaster
                         else if (botClient.isModerator(event)) response = join(channel); // Moderator
-                        else if ( botClient.isAdmin(event)) response = join(args.get(1)); // Admin
+                        else if (botClient.isAdmin(event)) response = join(args.get(1)); // Admin
                         break;
                     case "leave":
                         if (args.size() < 2) response = leave(user); // Broadcaster
@@ -73,16 +73,24 @@ public class Moderate {
                         else if (botClient.isAdmin(event)) response = leave(args.get(1)); // Admin
                         break;
                     case "block":
-                        if (botClient.isBroadcaster(event)) response = editBlacklist(user, args.get(1), true); // Broadcaster
-                        else if (botClient.isModerator(event)) response = editBlacklist(channel, args.get(1), true); // Moderator
-                        else if (botClient.isAdmin(event) &&  args.size() == 2) response = editBlacklist(channel, args.get(1), true); // Admin
-                        else if (botClient.isAdmin(event) &&  args.size() == 3) response = editBlacklist(args.get(2), args.get(1), true); // Admin
+                        if (botClient.isBroadcaster(event))
+                            response = editBlacklist(user, args.get(1), true); // Broadcaster
+                        else if (botClient.isModerator(event))
+                            response = editBlacklist(channel, args.get(1), true); // Moderator
+                        else if (botClient.isAdmin(event) && args.size() == 2)
+                            response = editBlacklist(channel, args.get(1), true); // Admin
+                        else if (botClient.isAdmin(event) && args.size() == 3)
+                            response = editBlacklist(args.get(2), args.get(1), true); // Admin
                         break;
                     case "unblock":
-                        if (botClient.isBroadcaster(event)) response = editBlacklist(user, args.get(1), false); // Broadcaster
-                        else if (botClient.isModerator(event)) response = editBlacklist(channel, args.get(1), false); // Moderator
-                        else if (botClient.isAdmin(event) &&  args.size() == 2) response = editBlacklist(channel, args.get(1), false); // Admin
-                        else if (botClient.isAdmin(event) &&  args.size() == 3) response = editBlacklist(args.get(2), args.get(1), false); // Admin
+                        if (botClient.isBroadcaster(event))
+                            response = editBlacklist(user, args.get(1), false); // Broadcaster
+                        else if (botClient.isModerator(event))
+                            response = editBlacklist(channel, args.get(1), false); // Moderator
+                        else if (botClient.isAdmin(event) && args.size() == 2)
+                            response = editBlacklist(channel, args.get(1), false); // Admin
+                        else if (botClient.isAdmin(event) && args.size() == 3)
+                            response = editBlacklist(args.get(2), args.get(1), false); // Admin
                 }
 
                 // Send Message
@@ -118,7 +126,7 @@ public class Moderate {
         if (channel.isEmpty() || channel.isBlank()) return "Error: Channel is empty!";
 
         // Check command
-        command = messageHandler.checkCommand(command) ? command : messageHandler.getAliasList().getOrDefault(command, null);
+        command = messageHandler.checkCommand(command) ? command : messageHandler.getAliasMap().getOrDefault(command, null);
         if (command == null) return "Der Befehl existiert nicht!";
 
         // Edit blacklist
