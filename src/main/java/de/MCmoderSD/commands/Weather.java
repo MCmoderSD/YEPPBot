@@ -6,7 +6,7 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.other.OpenAI;
+import de.MCmoderSD.utilities.other.OpenAi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,13 +28,17 @@ public class Weather {
     // Attributes
     private final String url;
     private final String apiKey;
-    private final OpenAI openAI;
+    private final OpenAi openAi;
     private final String botName;
-    private final int maxTokens;
     private final double temperature;
+    private final int maxTokens;
+    private final double topP;
+    private final double frequencyPenalty;
+    private final double presencePenalty;
+
 
     // Constructor
-    public Weather(BotClient botClient, MessageHandler messageHandler, OpenAI openAI, Credentials credentials) {
+    public Weather(BotClient botClient, MessageHandler messageHandler, OpenAi openAi, Credentials credentials) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "weather <city>, <language>";
@@ -47,10 +51,13 @@ public class Weather {
         JsonNode config = credentials.getOpenWeatherMapConfig();
 
         // Load Config
-        this.openAI = openAI;
+        this.openAi = openAi;
         this.botName = botClient.getBotName();
-        maxTokens = openAI.getConfig().get("maxTokens").asInt();
         temperature = 0;
+        maxTokens = openAi.getConfig().get("maxTokens").asInt();
+        topP = openAi.getConfig().get("topP").asDouble();
+        frequencyPenalty = openAi.getConfig().get("frequencyPenalty").asDouble();
+        presencePenalty = openAi.getConfig().get("presencePenalty").asDouble();
 
         // Init Attributes
         url = config.get("url").asText();
@@ -104,7 +111,7 @@ public class Weather {
         if (response == null || response.isEmpty() || response.isBlank()) return "Fehler beim Abrufen der Wetterdaten.";
         String formattedWeatherData = formatWeatherData(finalCityName, response);
 
-        return openAI.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, maxTokens, temperature);
+        return openAi.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
     }
 
     private String formatWeatherData(String cityName, String response){

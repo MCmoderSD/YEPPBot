@@ -63,7 +63,7 @@ public class MessageHandler {
         updateCustomTimers(mySQL.getCustomManager().getCustomTimers(botClient));
     }
 
-    // Handle Methods
+    // Handle Twitch Message
     public void handleMessage(TwitchMessageEvent event) {
         new Thread(() -> {
 

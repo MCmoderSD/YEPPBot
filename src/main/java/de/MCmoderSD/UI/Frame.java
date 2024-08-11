@@ -53,8 +53,6 @@ public class Frame extends JFrame {
         // Set Visible
         pack();
         setLocation(centerJFrame(this));
-        setVisible(true);
-        requestFocusInWindow();
     }
 
     // Setter
