@@ -59,6 +59,10 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 
 ## How to use
 
+If you need help or have any questions, feel free to contact me on [Discord](https://www.mcmodersd.de/dc) or via [Mail](mailto:business@mcmodersd.de), you can also contact me on [Twitch](https://www.twitch.tv/mcmodersd). <br>
+I respond within 24 hours, usually a lot faster. If you want to cooperate? need a version that fit your needs? <br> 
+Just write a [Mail](mailto:business@mcmodersd.de) to [business@mcmodersd.de](mailto:business@mcmodersd.de) <br> <br>
+
 You need to have Java 21 installed on your computer a download link can be found [here](https://www.oracle.com/uk/java/technologies/downloads/#java21). <br>
 You need the Twitch Account Token of the Twitch Bot which you can get from [here](https://twitchapps.com/tmi/).<br> <br>
 Keep in mind that the token can change from to time. <br>
@@ -120,45 +124,51 @@ The file should have the following structure: <br>
 ```
 
 You can get the API key from [OpenAI](https://platform.openai.com/signup). <br>
-The **model** is the model that the bot will use to generate the text. <br>
+- The **model** is the model that the bot will use to generate the text. <br>
 The available models are: <br>
 
-| **Model**              | **1 Mio Input Tokens**                                    | 
-|------------------------|-----------------------------------------------------------|
+| **Model**              | **Pricing**                                               | 
+|:-----------------------|:----------------------------------------------------------|
 | gpt-4o                 | $5.00 / 1M input tokens <br/> \$15.00 / 1M output tokens  |
 | gpt-4o-2024-08-06      | $2.50 / 1M input tokens <br/> \$10.00 / 1M output tokens  |
 | gpt-4o-2024-05-13      | $5.00 / 1M input tokens <br/> \$15.00 / 1M output tokens  |
 | gpt-4o-mini            | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
 | gpt-4o-mini-2024-07-18 | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
 
-The **maxTokensPerConversation** is the limit for the conversation. <br>
+- The **maxTokensPerConversation** is the limit for the conversation. <br>
 After the limit is reached, the conversation will end. <br>
 You can set the limit to overall max limit of 16383 tokens. <br>
 
-The **temperature** is the randomness of the text. <br>
+
+- The **temperature** is the randomness of the text. <br>
 Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive. <br>
 Higher temperature results in more random completions. <br>
 The min value is 0 and the max value is 2. <br>
 
-The **maxTokens** is the maximum length of the response text. <br>
+
+- The **maxTokens** is the maximum length of the response text. <br>
 One token is roughly 4 characters for standard English text. <br>
 The limit is 16383 tokens, but it's recommended to use a value that is suitable for the use, on Twitch the message limit is 500 characters.
 If you divide the limit by 4, you an estimate the number of characters. <br>
 
-The **topP** is the nucleus sampling. <br>
+
+- The **topP** is the nucleus sampling. <br>
 The lower the value, the more plain the text will be. <br>
 The higher the value, the more creative the text will be. <br>
 The min value is 0 and the max value is 1. <br>
 
-The **frequencyPenalty** reduces the likelihood of repeating the same words in a response.
+
+- The **frequencyPenalty** reduces the likelihood of repeating the same words in a response.
 The higher the value, the less the bot will repeat itself. <br>
 The min value is 0 and the max value is 1. <br>
 
-The **presencePenalty** reduces the likelihood of mentioning words that have already appeared in the conversation. <br>
+
+- The **presencePenalty** reduces the likelihood of mentioning words that have already appeared in the conversation. <br>
 The higher the value, the less the bot will repeat itself. <br>
 The min value is 0 and the max value is 1. <br>
 
-The **instruction** is the way the bot should behave and how he should reply to the prompt. <br> <br>
+
+- The **instruction** is the way the bot should behave and how he should reply to the prompt. <br> <br>
 
 ### 4. Add an OpenWeatherMap API key
 You need to create a file called ```OpenWeatherMap.json``` in the ```/src/main/resources/api/``` folder. <br>
@@ -228,37 +238,36 @@ After you edited the config files and put in the API keys, you can run the bot u
 and so on for the other config files. <br>
 
 You don't need a channel list file, but it's recommended to use one. <br>
-You can use the ```-help``` argument to get a list of all the arguments. <br>
-You can use the ```-version``` argument to get the version of the bot. <br> <br>
-You can use the ```-cli``` argument to run the bot in the command line interface mode. <br>
-You can use the ```-nolog``` argument to disable the database logging. <br>
+You can use the:
+- ```-help``` argument to get a list of all the arguments. <br>
+- ```-version``` argument to get the version of the bot. <br>
+- ```-cli``` argument to run the bot in the command line interface mode. <br>
+- ```-nolog``` argument to disable the database logging. <br>
 
 For the configs you can use: <br>
-the ```-botconfig "/PATH/TO/BotConfig.json"``` argument to specify the path to the BotConfig.json file. <br>
-the ```-channellist "/PATH/TO/Channel.list"``` argument to specify the path to the Channel.list file. <br>
-the ```-mysqlconfig "/PATH/TO/mySQL.json"``` argument to specify the path to the mySQL.json file. <br>
-the ```-openaiconfig "/PATH/TO/ChatGPT.json"``` argument to specify the path to the ChatGPT.json file. <br>
-the ```-openweathermapconfig "/PATH/TO/OpenWeatherMap.json"``` argument to specify the path to the OpenWeatherMap.json file. <br>
-the ```-giphyconfig "/PATH/TO/Giphy.json"``` argument to specify the path to the Giphy.json file. <br> <br>
+- ```-botconfig "/PATH/TO/BotConfig.json"``` argument to specify the path to the BotConfig.json file. <br>
+- ```-channellist "/PATH/TO/Channel.list"``` argument to specify the path to the Channel.list file. <br>
+- ```-mysqlconfig "/PATH/TO/mySQL.json"``` argument to specify the path to the mySQL.json file. <br>
+- ```-openaiconfig "/PATH/TO/ChatGPT.json"``` argument to specify the path to the ChatGPT.json file. <br>
+- ```-openweathermapconfig "/PATH/TO/OpenWeatherMap.json"``` argument to specify the path to the OpenWeatherMap.json file. <br>
+- ```-giphyconfig "/PATH/TO/Giphy.json"``` argument to specify the path to the Giphy.json file. <br> <br>
 
 ## Usage and commands
 
 The bot has a variety of commands that you can use. <br>
-
-You can use the ```!help``` command to get a list of all the commands. <br>
-You can use the ```!help COMMAND_NAME``` to get more information about a specific command. <br>
-
-You can use the ```!moderate join/leave``` to make the bot join or leave your channel. <br>
-You can use the ```!moderate block/unblock``` to blacklist commands. <br>
+You can use the:
+- ```!help``` command to get a list of all the commands. <br>
+- ```!help COMMAND_NAME``` to get more information about a specific command. <br>
+- ```!moderate join/leave``` to make the bot join or leave your channel. <br>
+- ```!moderate block/unblock``` to blacklist commands. <br>
+- ```!Counter``` command to create and manage counter commands. <br> <br>
 
 You can use the ```!CustomCommand``` command to create and manage custom commands. <br>
 You can also use variables in the custom commands. <br>
-%author% - will be replaced with the username of the person who executes the command<br>
-%channel% - will be replaced with the channel name where the command was executed<br>
-%tagged% - will be replaced by the first word after the command<br>
-%random% - will be replaced by a random percentage between 0 and 100<br>
-
-You can use the ```!Counter``` command to create and manage counter commands. <br> <br>
+- %author% - will be replaced with the username of the person who executes the command<br>
+- %channel% - will be replaced with the channel name where the command was executed<br>
+- %tagged% - will be replaced by the first word after the command<br>
+- %random% - will be replaced by a random percentage between 0 and 100<br>
 
 ## Contributing
 
