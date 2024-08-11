@@ -27,7 +27,7 @@ public class Conversation {
     public Conversation(BotClient botClient, MessageHandler messageHandler, OpenAi openAi) {
 
         // Syntax
-        String syntax = "Syntax: " + botClient.getPrefix() + "chat <Nachricht>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "chat <message/reset>)";
 
         // About
         String[] name = {"conversation", "chat", "unterhalten", "unterhaltung", "converse"}; // Command name and aliases
@@ -50,7 +50,7 @@ public class Conversation {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Check for end of conversation
-                if (!args.isEmpty() && Arrays.asList("stop", "end", "clear", "hs").contains(args.getFirst().toLowerCase())) {
+                if (!args.isEmpty() && Arrays.asList("stop", "end", "clear", "hs", "reset").contains(args.getFirst().toLowerCase())) {
                     openAi.clearConversation(event.getUserId());
                     botClient.respond(event, getCommand(), "Die Unterhaltung wurde beendet. YEPP");
                     return;
