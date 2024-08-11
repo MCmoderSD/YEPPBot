@@ -80,20 +80,18 @@ public class MySQL extends Driver {
         }
     }
 
-    // Checks Channels
-    private void checkChannel(int id, String name) throws SQLException {
-
+    private void checkUser(int id, String name) throws SQLException {
         if (!isConnected()) connect(); // connect
 
-        // Check Channel
-        String selectQuery = "SELECT * FROM channels WHERE id = ?";
+        // Check User
+        String selectQuery = "SELECT * FROM users WHERE id = ?";
         PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
         selectPreparedStatement.setInt(1, id);
         ResultSet resultSet = selectPreparedStatement.executeQuery();
 
-        // Add Channel
+        // Add User
         if (!resultSet.next()) {
-            String insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
+            String insertQuery = "INSERT INTO users (id, name) VALUES (?, ?)";
             PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
             insertPreparedStatement.setInt(1, id); // set id
             insertPreparedStatement.setString(2, name); // set name
@@ -102,19 +100,22 @@ public class MySQL extends Driver {
         }
 
         // Add to Cache
-        channelCache.put(id, name);
+        userCache.put(id, name);
 
         // Close resources
         resultSet.close();
         selectPreparedStatement.close(); // close the selectPreparedStatement
     }
 
-    // Checks Users
-    private void checkUser(int id, String name) throws SQLException {
+    // Checks Channels
+    private void checkChannel(int id, String name) throws SQLException {
         if (!isConnected()) connect(); // connect
 
+        // Ensure the user exists in the users table
+        checkUser(id, name);
+
         // Check Channel
-        String selectQuery = "SELECT * FROM users WHERE id = ?";
+        String selectQuery = "SELECT * FROM channels WHERE id = ?";
         PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
         selectPreparedStatement.setInt(1, id);
         ResultSet resultSet = selectPreparedStatement.executeQuery();
@@ -204,7 +205,6 @@ public class MySQL extends Driver {
 
     // Query Name
     public String queryName(String table, int id) {
-
         try {
             if (!isConnected()) connect();
             String query = null;

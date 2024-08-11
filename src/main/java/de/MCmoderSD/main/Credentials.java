@@ -15,12 +15,12 @@ public class Credentials {
     private JsonNode mySQLConfig;
 
     // API Cials
-    private JsonNode openAIConfig;
+    private JsonNode openAiConfig;
     private JsonNode openWeatherMapConfig;
     private JsonNode giphyConfig;
 
     // Constructor
-    public Credentials(Main main, String botConfig, String channelList, String mySQL, String openAI, String weather, String giphy) {
+    public Credentials(Main main, String botConfig, String channelList, String mySQL, String openAi, String weather, String giphy) {
 
         // Get Utilities
         JsonUtility jsonUtility = main.getJsonUtility();
@@ -49,11 +49,11 @@ public class Credentials {
             System.exit(1);
         }
 
-        // Load OpenAI Config
+        // Load OpenAi Config
         try {
-            this.openAIConfig = jsonUtility.load(openAI, main.hasArg(Argument.OPENAI_CONFIG));
+            this.openAiConfig = jsonUtility.load(openAi, main.hasArg(Argument.OPENAi_CONFIG));
         } catch (Exception e) {
-            System.err.println("Error loading OpenAI Config: " + e.getMessage());
+            System.err.println("Error loading OpenAi Config: " + e.getMessage());
         }
 
         // Load OpenWeatherMap Config
@@ -85,8 +85,8 @@ public class Credentials {
         return mySQLConfig;
     }
 
-    public JsonNode getOpenAIConfig() {
-        return openAIConfig;
+    public JsonNode getOpenAiConfig() {
+        return openAiConfig;
     }
 
     public JsonNode getOpenWeatherMapConfig() {
@@ -110,8 +110,8 @@ public class Credentials {
         return mySQLConfig != null;
     }
 
-    public boolean validateOpenAIConfig() {
-        return openAIConfig != null;
+    public boolean validateOpenAiConfig() {
+        return openAiConfig != null;
     }
 
     public boolean validateWeatherConfig() {

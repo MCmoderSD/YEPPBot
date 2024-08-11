@@ -101,6 +101,21 @@ public class Calculate {
         return trimMessage(String.join(" ", args)).trim();
     }
 
+    // Replace Emojis
+    public static String replaceEmojis(String input, String replacement) {
+        return input.replaceAll("[\\p{So}\\p{Cn}]", replacement);
+    }
+
+    // Remove repetitions
+    public static String removeRepetitions(String input, String repetition) {
+        return input.replaceAll("\\b(" + repetition + ")\\s+\\1\\b", "$1");
+    }
+
+    // Format OpenAI Response
+    public static String formatOpenAiResponse(String response, String emote) {
+        return removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + " "), emote), emote);
+    }
+
     // Get Timestamp
     public static Timestamp getTimestamp() {
         return new Timestamp(System.currentTimeMillis());

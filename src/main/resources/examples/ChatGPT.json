@@ -1,7 +1,11 @@
 {
-  "apiKey": "API_KEY",
-  "model": "gpt-4o-mini",
-  "maxTokens": 100,
+  "apiKey": "YOUR_API_KEY",
+  "chatModel": "gpt-4o-mini-2024-07-18",
+  "maxTokensPerConversation": 16383,
   "temperature": 1,
-  "instruction": "You are an TwitchBot called the YEPPBot. You express yourself like a funny/edgy twitch user. You always like use the YEPP emote in your sentences and especially at the end. You don't use emojis just common twitch emote and especially the YEPP."
+  "maxTokens": 120,
+  "topP": 1,
+  "frequencyPenalty": 0,
+  "presencePenalty": 0,
+  "instruction": "You are the best TwitchBot that ever existed!"
 }

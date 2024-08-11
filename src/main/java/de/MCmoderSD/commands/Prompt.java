@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.other.OpenAI;
+import de.MCmoderSD.utilities.other.OpenAi;
 
 import java.util.ArrayList;
 
@@ -14,12 +14,15 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Prompt {
 
     // Attributes
-    private final int maxTokens;
-    private final double temperature;
     private final String instruction;
+    private final double temperature;
+    private final int maxTokens;
+    private final double topP;
+    private final double frequencyPenalty;
+    private final double presencePenalty;
 
     // Constructor
-    public Prompt(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
+    public Prompt(BotClient botClient, MessageHandler messageHandler, OpenAi openAi) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "prompt <Frage>";
@@ -29,10 +32,13 @@ public class Prompt {
         String description = "Benutzt ChatGPT, um eine Antwort auf eine Frage zu generieren. " + syntax;
 
         // Set Attributes
-        JsonNode config = openAI.getConfig();
-        maxTokens = config.get("maxTokens").asInt();
-        temperature = config.get("temperature").asDouble();
+        JsonNode config = openAi.getConfig();
         instruction = config.get("instruction").asText();
+        temperature = config.get("temperature").asDouble();
+        maxTokens = config.get("maxTokens").asInt();
+        topP = config.get("topP").asDouble();
+        frequencyPenalty = config.get("frequencyPenalty").asDouble();
+        presencePenalty = config.get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -41,7 +47,7 @@ public class Prompt {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                botClient.respond(event, getCommand(), openAI.prompt(botClient.getBotName(), instruction, trimMessage(processArgs(args)), maxTokens, temperature));
+                botClient.respond(event, getCommand(), formatOpenAiResponse(openAi.prompt(botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP"));
             }
         });
     }

@@ -41,7 +41,8 @@ import java.util.Set;
 import static de.MCmoderSD.main.Main.Argument.*;
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-@SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
+
+@SuppressWarnings("unused")
 public class BotClient {
 
     private static final Logger log = LoggerFactory.getLogger(BotClient.class);
@@ -115,11 +116,12 @@ public class BotClient {
         eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
 
         // Validate Configs
-        boolean openAI = credentials.validateOpenAIConfig();
+        boolean openAi = credentials.validateOpenAiConfig();
         boolean weather = credentials.validateWeatherConfig();
         boolean giphy = credentials.validateGiphyConfig();
 
         // Initialize Commands
+        if (openAi) new Conversation(this, messageHandler, main.getOpenAi());
         new Counter(this, messageHandler, mySQL);
         new CustomCommand(this, messageHandler, mySQL);
         new CustomTimers(this, messageHandler, mySQL);
@@ -133,12 +135,12 @@ public class BotClient {
         new Moderate(this, messageHandler, mySQL);
         new Ping(this, messageHandler);
         new Play(this, messageHandler);
-        if (openAI) new Prompt(this, messageHandler, main.getOpenAI());
+        if (openAi) new Prompt(this, messageHandler, main.getOpenAi());
         new Say(this, messageHandler);
         new Status(this, messageHandler);
-        if (openAI) new Translate(this, messageHandler, main.getOpenAI());
-        if (openAI && weather) new Weather(this, messageHandler, main.getOpenAI(), main.getCredentials());
-        if (openAI) new Wiki(this, messageHandler, main.getOpenAI());
+        if (openAi) new Translate(this, messageHandler, main.getOpenAi());
+        if (openAi && weather) new Weather(this, messageHandler, main.getOpenAi(), main.getCredentials());
+        if (openAi) new Wiki(this, messageHandler, main.getOpenAi());
 
         // Initialize LogManager
         LogManager logManager = mySQL.getLogManager();
@@ -156,6 +158,11 @@ public class BotClient {
 
         // Raid Events
         eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid);
+
+        // Show UI
+        if (hasArg(CLI)) return;
+        frame.setVisible(true);
+        frame.requestFocusInWindow();
     }
 
     // Methods

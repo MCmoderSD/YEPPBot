@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.other.OpenAI;
+import de.MCmoderSD.utilities.other.OpenAi;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -22,11 +22,14 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Wiki {
 
     // Attributes
-    private final int maxTokens;
     private final double temperature;
+    private final int maxTokens;
+    private final double topP;
+    private final double frequencyPenalty;
+    private final double presencePenalty;
 
     // Constructor
-    public Wiki(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
+    public Wiki(BotClient botClient, MessageHandler messageHandler, OpenAi openAi) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "wiki <Thema>";
@@ -36,9 +39,12 @@ public class Wiki {
         String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. " + syntax;
 
         // Load Config
-        JsonNode config = openAI.getConfig();
-        maxTokens = config.get("maxTokens").asInt();
+        JsonNode config = openAi.getConfig();
         temperature = 0;
+        maxTokens = config.get("maxTokens").asInt();
+        topP = openAi.getConfig().get("topP").asDouble();
+        frequencyPenalty = openAi.getConfig().get("frequencyPenalty").asDouble();
+        presencePenalty = openAi.getConfig().get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -62,8 +68,7 @@ public class Wiki {
 
                         // Check if summary is too long
                         if (summary.length() <= 500) response = summary;
-                        else
-                            response = trimMessage(openAI.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, maxTokens, temperature));
+                        else response = trimMessage(openAi.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
 
                     } catch (IOException e) {
                         response = trimMessage("Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage());
