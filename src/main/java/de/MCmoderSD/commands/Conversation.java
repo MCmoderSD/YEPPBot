@@ -15,7 +15,8 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Conversation {
 
     // Attributes
-    private final int maxTokensPerConversation;
+    private final int maxConversatitionCalls;
+    private final int maxTokenSpendingLimit;
     private final double temperature;
     private final int maxTokens;
     private final double topP;
@@ -35,7 +36,8 @@ public class Conversation {
 
         // Set Attributes
         JsonNode config = openAi.getConfig();
-        maxTokensPerConversation = config.get("maxTokensPerConversation").asInt();
+        maxConversatitionCalls = config.get("maxConversationCalls").asInt();
+        maxTokenSpendingLimit = config.get("maxTokenSpendingLimit").asInt();
         temperature = config.get("temperature").asDouble();
         maxTokens = config.get("maxTokens").asInt();
         topP = config.get("topP").asDouble();
@@ -52,12 +54,12 @@ public class Conversation {
                 // Check for end of conversation
                 if (!args.isEmpty() && Arrays.asList("stop", "end", "clear", "hs", "reset").contains(args.getFirst().toLowerCase())) {
                     openAi.clearConversation(event.getUserId());
-                    botClient.respond(event, getCommand(), "Die Unterhaltung wurde beendet. YEPP");
+                    botClient.respond(event, getCommand(), "Die Unterhaltung wurde beendet YEPP");
                     return;
                 }
 
                 // Send Message
-                botClient.respond(event, getCommand(), formatOpenAiResponse(openAi.converse(event.getUserId(), maxTokensPerConversation, botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP"));
+                botClient.respond(event, getCommand(), formatOpenAiResponse(openAi.converse(event.getUserId(), maxConversatitionCalls, maxTokenSpendingLimit, botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP"));
             }
         });
     }

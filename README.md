@@ -113,7 +113,8 @@ The file should have the following structure: <br>
 {
   "apiKey": "YOUR_API_KEY",
   "chatModel": "gpt-4o-mini-2024-07-18",
-  "maxTokensPerConversation": 16383,
+  "maxConversationCalls": 6,
+  "maxTokenSpendingLimit": 8192,
   "temperature": 1,
   "maxTokens": 120,
   "topP": 1,
@@ -135,9 +136,12 @@ The available models are: <br>
 | gpt-4o-mini            | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
 | gpt-4o-mini-2024-07-18 | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
 
-- The **maxTokensPerConversation** is the limit for the conversation. <br>
-After the limit is reached, the conversation will end. <br>
-You can set the limit to overall max limit of 16383 tokens. <br>
+- The **maxConversationCalls** is the limit of calls per conversation. <br>
+  After the limit is reached, the conversation will end. <br>
+
+
+- The **maxTokenSpendingLimit** is the limit of tokens spent per conversatition. <br>
+  After the limit is reached, the conversation will end. <br>
 
 
 - The **temperature** is the randomness of the text. <br>

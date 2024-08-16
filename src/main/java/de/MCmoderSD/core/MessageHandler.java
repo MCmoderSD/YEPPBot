@@ -140,8 +140,7 @@ public class MessageHandler {
                 mySQL.getLurkManager().addTraitor(userID, traitors.toString());
 
                 // Send message
-                response = tagUser(event) + " ist ein verräter, hab den kek gerade im chat von " + tagChannel(event) + " gesehen!";
-                botClient.respond(new TwitchMessageEvent(
+                if (lurkChannel.size() < 3) botClient.respond(new TwitchMessageEvent(
                         event.getTimestamp(),
                         lurkChannel.getFirst(),
                         event.getUserId(),
@@ -152,7 +151,7 @@ public class MessageHandler {
                         event.getSubStreak(),
                         event.getSubTier(),
                         event.getBits()
-                ), "traitor", response);
+                ), "traitor", tagUser(event) + " ist ein verräter, hab den kek gerade im chat von " + tagChannel(event) + " gesehen!");
             }
         }).start();
     }
