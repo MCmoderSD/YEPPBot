@@ -220,7 +220,7 @@ public class TwitchMessageEvent {
     }
 
     public boolean hasBotName() {
-        return message.contains(BotClient.botName);
+        return message.toLowerCase().contains(BotClient.botName);
     }
 
     public boolean hasCommand() {

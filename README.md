@@ -59,7 +59,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 
 ## How to use
 
-If you need help or have any questions, feel free to contact me on [Discord](https://www.mcmodersd.de/dc) or via [Mail](mailto:business@mcmodersd.de) or check out my [Twitch](https://www.twitch.tv/mcmodersd). <br>
+If you need help or have any questions, feel free to contact me on [Discord](https://www.mcmodersd.de/dc) or via [Mail](mailto:business@mcmodersd.de), you can also contact me on [Twitch](https://www.twitch.tv/mcmodersd). <br>
 I respond within 24 hours, usually a lot faster. If you want to cooperate? need a version that fit your needs? <br> 
 Just write a [Mail](mailto:business@mcmodersd.de) to [business@mcmodersd.de](mailto:business@mcmodersd.de) <br> <br>
 
