@@ -30,9 +30,6 @@ import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,7 +42,6 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 @SuppressWarnings("unused")
 public class BotClient {
 
-    private static final Logger log = LoggerFactory.getLogger(BotClient.class);
     // Associations
     private final Main main;
     private final MySQL mySQL;

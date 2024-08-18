@@ -39,8 +39,8 @@ public class Frame extends JFrame {
         setIconImage(imageReader.read("/images/icon.png"));
 
         // Variables
-        var multiplyer = 0.75;
-        var rawHeight = getToolkit().getScreenSize().getHeight() * multiplyer;
+        var multiplier = 0.75;
+        var rawHeight = getToolkit().getScreenSize().getHeight() * multiplier;
         var rawWidth = rawHeight * ((double) 4 / 3);
         var height = Math.toIntExact(Math.round(rawHeight));
         var width = Math.toIntExact(Math.round(rawWidth));
@@ -56,8 +56,8 @@ public class Frame extends JFrame {
     }
 
     // Setter
-    public void log(String type, String channel, String author, String message) {
-        logPanel.appendText(type, channel, author, message);
+    public void log(String type, String channel, String user, String message) {
+        logPanel.appendText(type, channel, user, message);
     }
 
     // Getter
