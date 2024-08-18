@@ -28,6 +28,7 @@ import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
+import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.other.Reader;
 
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public class BotClient {
 
     // Utilities
     private final JsonUtility jsonUtility;
+    private final Encryption encryption;
     private final Reader reader;
 
     // Constants
@@ -80,6 +82,9 @@ public class BotClient {
         botName = botConfig.get("botName").asText().toLowerCase();
         prefix = botConfig.get("prefix").asText();
         admins = new ArrayList<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
+
+        // Init Encryption
+        encryption = new Encryption(botConfig);
 
         // Init Bot Credential
         OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
