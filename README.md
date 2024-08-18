@@ -75,7 +75,7 @@ You can create the Config files yourself or use the ```-generate``` argument to 
 You can skip to [Step 8](#8-compile-the-bot) if you use the downloaded jar file. <br> <br>
 
 You can also clone the repository and compile the bot yourself.
-For that need to have Git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
+For that need to have git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
 Clone the repository using the following command: <br>
 ```git clone https://www.github.com/MCmoderSD/YEPPBot.git ``` <br> <br>
 
