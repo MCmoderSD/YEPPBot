@@ -1,0 +1,156 @@
+package de.MCmoderSD.utilities.database.manager;
+
+import de.MCmoderSD.objects.TwitchMessageEvent;
+import de.MCmoderSD.utilities.database.MySQL;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static de.MCmoderSD.utilities.other.Calculate.*;
+
+public class YEPPConnect {
+
+    // Assosiations
+    private final MySQL mySQL;
+
+    // Constructor
+    public YEPPConnect(MySQL mySQL) {
+
+        // Set associations
+        this.mySQL = mySQL;
+
+        // Initialize
+        initTables();
+    }
+
+    // Initialize Tables
+    private void initTables() {
+        try {
+
+            // Variables
+            Connection connection = mySQL.getConnection();
+
+            // Condition for creating tables
+            String condition = "CREATE TABLE IF NOT EXISTS ";
+
+            // SQL statement for creating the lurk list table
+            connection.prepareStatement(condition +
+                    """
+                    MinecraftWhitelist (
+                    channel_id INT PRIMARY KEY NOT NULL,
+                    whitelist TEXT,
+                    user_pair TEXT,
+                    last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (channel_id) REFERENCES users(id)
+                    )
+                    """
+            ).execute();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public String editWhitelist(TwitchMessageEvent event, String mcUsername, boolean add) {
+
+        // Variables
+        var channelID = event.getChannelId();
+        var userID = event.getUserId();
+
+        // Check if Channel exists
+        if (!add && !channelExists(channelID)) return "No whitelist found for this channel.";
+        if (add && !channelExists(channelID)) createChannel(channelID);
+
+        // Get Whitelist
+        Set<String> whitelist = getList(channelID, "whitelist");
+        ArrayList<String> userPair = new ArrayList<>(Objects.requireNonNull(getList(channelID, "user_pair")));
+        if (whitelist == null) return "Error while getting whitelist.";
+        ArrayList<String> users = new ArrayList<>();
+        for (String id : userPair) users.add(id.split(" ")[0]);
+
+        if (add) {
+            if (whitelist.contains(mcUsername)) return "User is already whitelisted.";
+            if (!users.contains(String.valueOf(userID))) {
+                whitelist.add(mcUsername);
+                userPair.add(userID + " " + mcUsername);
+                return "User added to whitelist.";
+            } else {
+                var index = users.indexOf(String.valueOf(userID));
+                String oldName = userPair.get(index).split(" ")[1];
+                whitelist.remove(oldName);
+                whitelist.add(mcUsername);
+                userPair.set(index, userID + " " + mcUsername);
+                updateWhitelist(channelID, whitelist, userPair);
+                return "User updated in whitelist.";
+            }
+        } else {
+            if (!whitelist.contains(mcUsername)) return "User is not whitelisted.";
+            whitelist.remove(mcUsername);
+            userPair.removeIf(pair -> pair.split(" ")[1].equals(mcUsername));
+            return "User removed from whitelist.";
+        }
+    }
+
+    // Get List
+    private Set<String> getList(int id, String type) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect();
+            PreparedStatement statement = mySQL.getConnection().prepareStatement("SELECT * FROM MinecraftWhitelist WHERE channel_id = ?");
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) return Arrays.stream(resultSet.getString(type).split(" ")).collect(Collectors.toSet());
+        } catch (SQLException e) {
+            System.err.printf("Error while getting whitelist: %s\n", e.getMessage());
+        }
+        return null;
+    }
+
+    // Check if Channel exists in table
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean channelExists(int id) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect();
+            PreparedStatement statement = mySQL.getConnection().prepareStatement("SELECT 1 FROM MinecraftWhitelist WHERE channel_id = ?");
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            System.err.printf("Error while checking if channel exists: %s\n", e.getMessage());
+        }
+        return false;
+    }
+
+    // Create Channel
+    private void createChannel(int id) {
+        new Thread(() -> {
+            try {
+                if (!mySQL.isConnected()) mySQL.connect();
+                PreparedStatement statement = mySQL.getConnection().prepareStatement("INSERT INTO MinecraftWhitelist (channel_id) VALUES (?)");
+                statement.setInt(1, id);
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                System.err.printf("Error while creating channel: %s\n", e.getMessage());
+            }
+        }).start();
+    }
+
+    // Update Whitelist
+    private void updateWhitelist(int id, Set<String> whitelist, ArrayList<String> userPair) {
+        new Thread(() -> {
+            try {
+                if (!mySQL.isConnected()) mySQL.connect();
+                PreparedStatement statement = mySQL.getConnection().prepareStatement("UPDATE MinecraftWhitelist SET whitelist = ?, user_pair = ?, last_updated = ? WHERE channel_id = ?");
+                statement.setString(1, String.join(" ", whitelist));
+                statement.setString(2, String.join(" ", userPair));
+                statement.setTimestamp(3, getTimestamp());
+                statement.setInt(4, id);
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                System.err.printf("Error while updating whitelist: %s\n", e.getMessage());
+            }
+        }).start();
+    }
+}

@@ -141,6 +141,7 @@ public class BotClient {
         new Status(this, messageHandler);
         if (openAi) new Translate(this, messageHandler, main.getOpenAi());
         if (openAi && weather) new Weather(this, messageHandler, main.getOpenAi(), main.getCredentials());
+        new Whitelist(this, messageHandler, mySQL);
         if (openAi) new Wiki(this, messageHandler, main.getOpenAi());
 
         // Initialize LogManager

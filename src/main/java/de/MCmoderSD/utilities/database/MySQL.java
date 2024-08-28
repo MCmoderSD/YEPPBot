@@ -17,6 +17,7 @@ public class MySQL extends Driver {
     private final CustomManager customManager;
     private final LogManager logManager;
     private final LurkManager lurkManager;
+    private final YEPPConnect yeppConnect;
 
     // Cache Lists
     private final HashMap<Integer, String> channelCache;
@@ -42,6 +43,7 @@ public class MySQL extends Driver {
         customManager = new CustomManager(this);
         logManager = new LogManager(this, !main.hasArg(Main.Argument.LOG));
         lurkManager = new LurkManager(this);
+        yeppConnect = new YEPPConnect(this);
     }
 
     // Initialize Tables
@@ -245,5 +247,9 @@ public class MySQL extends Driver {
 
     public LurkManager getLurkManager() {
         return lurkManager;
+    }
+
+    public YEPPConnect getYEPPConnect() {
+        return yeppConnect;
     }
 }
