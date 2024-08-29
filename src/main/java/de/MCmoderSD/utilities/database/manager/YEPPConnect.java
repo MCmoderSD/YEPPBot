@@ -68,10 +68,9 @@ public class YEPPConnect {
         if (add && !channelExists(channelID)) createChannel(channelID);
 
         // Get Whitelist
-        Set<String> whitelist = getData(channelID, "whitelist") != null ? new HashSet<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "whitelist")).split(" "))) : null;
+        ArrayList<String> whitelist = getData(channelID, "whitelist") != null ? new ArrayList<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "whitelist")).split(" "))) : new ArrayList<>();
         Set<String> temp = getData(channelID, "user_pair") != null ? new HashSet<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "user_pair")).split(" - "))) : null;
         ArrayList<String> userPair = new ArrayList<>(temp != null ? temp : new ArrayList<>());
-        if (whitelist == null) whitelist = new HashSet<>();
         ArrayList<String> users = new ArrayList<>();
         for (String id : userPair) users.add(id.split(" ")[0]);
 
@@ -93,8 +92,20 @@ public class YEPPConnect {
             }
         } else {
             if (!whitelist.contains(mcUsername)) return "User is not whitelisted.";
+
+            // Remove user from whitelist
             whitelist.remove(mcUsername);
-            userPair.removeIf(pair -> pair.split(" ")[1].equals(mcUsername));
+
+            // Remove user from userPair
+            var index = 0;
+            for (String id : userPair) {
+                if (id.split(" ")[1].contains(mcUsername)) {
+                    userPair.remove(index);
+                    break;
+                }
+                index++;
+            }
+
             updateWhitelist(channelID, whitelist, userPair);
             return "User removed from whitelist.";
         }
@@ -144,13 +155,24 @@ public class YEPPConnect {
     }
 
     // Update Whitelist
-    private void updateWhitelist(int id, Set<String> whitelist, ArrayList<String> userPair) {
+    private void updateWhitelist(int id, ArrayList<String> whitelist, ArrayList<String> userPair) {
         new Thread(() -> {
+
+            // Format whitelist
+            StringBuilder whitelistString = new StringBuilder();
+            for (String name : whitelist) if (!(name.isEmpty() && name.isBlank())) whitelistString.append(name).append(" ");
+            if (!whitelistString.isEmpty()) whitelistString.deleteCharAt(whitelistString.length() - 1);
+
+            // Format userPair
+            StringBuilder userPairString = new StringBuilder();
+            for (String pair : userPair) if (!(pair.isEmpty() && pair.isBlank())) userPairString.append(pair).append(" - ");
+            if (!userPairString.isEmpty()) userPairString.delete(userPairString.length() - 3, userPairString.length());
+
             try {
                 if (!mySQL.isConnected()) mySQL.connect();
                 PreparedStatement statement = mySQL.getConnection().prepareStatement("UPDATE MinecraftWhitelist SET whitelist = ?, user_pair = ?, last_updated = ? WHERE channel_id = ?");
-                statement.setString(1, String.join(" ", whitelist));
-                statement.setString(2, String.join(" - ", userPair));
+                statement.setString(1, whitelistString.toString());
+                statement.setString(2, userPairString.toString());
                 statement.setTimestamp(3, getTimestamp());
                 statement.setInt(4, id);
                 statement.executeUpdate();

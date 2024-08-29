@@ -15,6 +15,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - [Description](#description)
 - [Features](#features)
 - [How to use](#how-to-use)
+- [YEPPConnect](#yeppconnect)
 - [Usage and commands](#usage-and-commands)
 - [Contributing](#contributing)
 
@@ -30,6 +31,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - [x] Prompt (ChatGPT)
   - [x] Translate
   - [x] Weather
+  - [x] Whitelist (YEPPConnect)
   - [x] Wiki
 
 
@@ -202,7 +204,7 @@ The file should have the following structure: <br>
 
 You can get the API key from [Giphy](https://developers.giphy.com/). <br> <br>
 
-#
+
 ### 6. MySQL Database
 
 You need to have your own MySQL database to run and use the bot. <br>
@@ -271,7 +273,18 @@ You can also use variables in the custom commands. <br>
 - %author% - will be replaced with the username of the person who executes the command<br>
 - %channel% - will be replaced with the channel name where the command was executed<br>
 - %tagged% - will be replaced by the first word after the command<br>
-- %random% - will be replaced by a random percentage between 0 and 100<br>
+- %random% - will be replaced by a random percentage between 0 and 100<br> <br>
+
+## YEPPConnect
+
+The YEPPConnect is a feature that allows your viewers to whitelist their Minecraft username. <br>
+You can use the ```!whitelist add/remove McName``` command to whitelist yourself or remove a user from the whitelist. <br>
+
+On the Minecraft Server you need to install the [YEPPConnect](https://github.com/MCmoderSD/YEPPConnect) plugin. <br>
+It's a simple Spigot plugin that connects to the bot and allows the bot to whitelist users. <br>
+You can also use the plugin to get the online status of the bot. <br>
+The plugin works with Minecraft 1.13 and above, but requires YEPPConnect v1.21.0 to work. <br>
+You can find the documentation for the plugin [here](https://github.com/MCmoderSD/YEPPConnect?tab=readme-ov-file#commands-and-permissions). <br> <br>
 
 ## Contributing
 
