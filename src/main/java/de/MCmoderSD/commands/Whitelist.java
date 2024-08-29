@@ -5,10 +5,8 @@ import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class Whitelist {
 
@@ -34,19 +32,26 @@ public class Whitelist {
                     return;
                 }
 
+                ArrayList<String> addVerbs = new ArrayList<>(Arrays.asList("join", "add"));
+                ArrayList<String> removeVerbs = new ArrayList<>(Arrays.asList("kick", "remove", "delete"));
+                ArrayList<String> allVerbs = new ArrayList<>();
+                allVerbs.addAll(addVerbs);
+                allVerbs.addAll(removeVerbs);
+
                 String verb = args.getFirst().toLowerCase();
-                if (!Arrays.asList("join", "kick").contains(verb) && args.size() < 2) {
+                if (allVerbs.contains(verb) && args.size() < 2) {
                     botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
-                if (Objects.equals("kick", verb) && !(botClient.isPermitted(event) || botClient.isAdmin(event))) {
+                if (removeVerbs.contains(verb) && !(botClient.isPermitted(event) || botClient.isAdmin(event))) {
                     botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
-                if (Objects.equals("kick", verb)) botClient.respond(event, getCommand(), mySQL.getYEPPConnect().editWhitelist(event, args.get(1).toLowerCase(), false));
-                else botClient.respond(event, getCommand(), mySQL.getYEPPConnect().editWhitelist(event, args.get(1).toLowerCase(), true));
+                if (addVerbs.contains(verb)) botClient.respond(event, getCommand(), mySQL.getYEPPConnect().editWhitelist(event, args.get(1).toLowerCase(), true));
+                else if (removeVerbs.contains(verb))botClient.respond(event, getCommand(), mySQL.getYEPPConnect().editWhitelist(event, args.get(1).toLowerCase(), false));
+                else botClient.respond(event, getCommand(), syntax);
             }
         });
     }

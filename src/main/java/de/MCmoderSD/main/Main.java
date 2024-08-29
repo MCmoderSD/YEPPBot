@@ -19,13 +19,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static de.MCmoderSD.utilities.other.Calculate.BOLD;
-import static de.MCmoderSD.utilities.other.Calculate.UNBOLD;
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Main {
 
     // Constants
-    public static final String VERSION = "1.21.3";
+    public static final String VERSION = "1.21.4";
 
     // Bot Config
     public static final String BOT_CONFIG = "/config/BotConfig.json";
@@ -48,6 +47,7 @@ public class Main {
 
     // Associations
     private final Credentials credentials;
+
     // Variables
     private List<Argument> args = new ArrayList<>();
     private BotClient botClient;
