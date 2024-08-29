@@ -7,8 +7,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -65,9 +68,10 @@ public class YEPPConnect {
         if (add && !channelExists(channelID)) createChannel(channelID);
 
         // Get Whitelist
-        Set<String> whitelist = getList(channelID, "whitelist");
-        ArrayList<String> userPair = new ArrayList<>(Objects.requireNonNull(getList(channelID, "user_pair")));
-        if (whitelist == null) return "Error while getting whitelist.";
+        Set<String> whitelist = getData(channelID, "whitelist") != null ? new HashSet<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "whitelist")).split(" "))) : null;
+        Set<String> temp = getData(channelID, "user_pair") != null ? new HashSet<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "user_pair")).split(" - "))) : null;
+        ArrayList<String> userPair = new ArrayList<>(temp != null ? temp : new ArrayList<>());
+        if (whitelist == null) whitelist = new HashSet<>();
         ArrayList<String> users = new ArrayList<>();
         for (String id : userPair) users.add(id.split(" ")[0]);
 
@@ -76,6 +80,7 @@ public class YEPPConnect {
             if (!users.contains(String.valueOf(userID))) {
                 whitelist.add(mcUsername);
                 userPair.add(userID + " " + mcUsername);
+                updateWhitelist(channelID, whitelist, userPair);
                 return "User added to whitelist.";
             } else {
                 var index = users.indexOf(String.valueOf(userID));
@@ -90,18 +95,19 @@ public class YEPPConnect {
             if (!whitelist.contains(mcUsername)) return "User is not whitelisted.";
             whitelist.remove(mcUsername);
             userPair.removeIf(pair -> pair.split(" ")[1].equals(mcUsername));
+            updateWhitelist(channelID, whitelist, userPair);
             return "User removed from whitelist.";
         }
     }
 
     // Get List
-    private Set<String> getList(int id, String type) {
+    private String getData(int id, String type) {
         try {
             if (!mySQL.isConnected()) mySQL.connect();
             PreparedStatement statement = mySQL.getConnection().prepareStatement("SELECT * FROM MinecraftWhitelist WHERE channel_id = ?");
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) return Arrays.stream(resultSet.getString(type).split(" ")).collect(Collectors.toSet());
+            if (resultSet.next()) return resultSet.getString(type);
         } catch (SQLException e) {
             System.err.printf("Error while getting whitelist: %s\n", e.getMessage());
         }
@@ -144,7 +150,7 @@ public class YEPPConnect {
                 if (!mySQL.isConnected()) mySQL.connect();
                 PreparedStatement statement = mySQL.getConnection().prepareStatement("UPDATE MinecraftWhitelist SET whitelist = ?, user_pair = ?, last_updated = ? WHERE channel_id = ?");
                 statement.setString(1, String.join(" ", whitelist));
-                statement.setString(2, String.join(" ", userPair));
+                statement.setString(2, String.join(" - ", userPair));
                 statement.setTimestamp(3, getTimestamp());
                 statement.setInt(4, id);
                 statement.executeUpdate();
