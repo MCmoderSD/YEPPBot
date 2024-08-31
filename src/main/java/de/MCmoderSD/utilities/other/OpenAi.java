@@ -2,6 +2,7 @@ package de.MCmoderSD.utilities.other;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import com.theokanning.openai.audio.CreateSpeechRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionChunk;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
@@ -9,34 +10,96 @@ import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
 
+import de.MCmoderSD.objects.AudioFile;
 import io.reactivex.Flowable;
 import io.reactivex.flowables.ConnectableFlowable;
+import okhttp3.ResponseBody;
 
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class OpenAi {
 
     // Constants
-    private static final int CHAR_PER_TOKEN = 4;
+    public static final int CHAR_PER_TOKEN = 4;
 
     // Config
     private final JsonNode config;
-    private final String chatModel;
 
     // Attributes
     private final HashMap<Integer, ArrayList<ChatMessage>> conversations;
     private final OpenAiService service;
+
+    // Enums
+    private ChatModel chatModel;
+    private TTSModel ttsModel;
 
     // Constructor
     public OpenAi(JsonNode config) {
 
         // Set Config
         this.config = config;
-        chatModel = config.get("chatModel").asText();
+        String chat = config.get("chatModel").asText();
+        String tts = config.get("ttsModel").asText();
+
+        // Initialize Enums
+        new Thread(() -> {
+
+            // Wait for active
+            try {
+                while (!isActive()) //noinspection BusyWait
+                    Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                System.out.println("Error initializing OpenAI: " + e.getMessage());
+            }
+
+            // Set Chat Model
+            if (chat == null) throw new IllegalArgumentException("Chat model is null");
+            if (chat.isEmpty() || chat.isBlank()) throw new IllegalArgumentException("Chat model is empty");
+
+            switch (chat) {
+                case "gpt-4o":
+                    chatModel = ChatModel.GPT_4O;
+                    break;
+                case "gpt-4o-2024-08-06":
+                    chatModel = ChatModel.GPT_4O_2024_08_06;
+                    break;
+                case "gpt-4o-2024-05-13":
+                    chatModel = ChatModel.GPT_4O_2024_05_13;
+                    break;
+                case "gpt-4o-mini":
+                    chatModel = ChatModel.GPT_4O_MINI;
+                    break;
+                case "gpt-4o-mini-2024-07-18":
+                    chatModel = ChatModel.GPT_4O_MINI_2024_07_18;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid chat model");
+            }
+
+            // Set TTS Model
+            if (tts == null) throw new IllegalArgumentException("TTS model is null");
+            if (tts.isEmpty() || tts.isBlank()) throw new IllegalArgumentException("TTS model is empty");
+
+            switch (tts) {
+                case "tts-1":
+                    ttsModel = TTSModel.TTS;
+                    break;
+                case "tts-1-hd":
+                    ttsModel = TTSModel.TTS_HD;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid TTS model");
+            }
+        }).start();
 
         // Initialize Attributes
         service = new OpenAiService(config.get("apiKey").asText());
@@ -90,27 +153,6 @@ public class OpenAi {
         return totalTokensUsed + totalTokens;
     }
 
-    public static boolean disprove(String user, String instruction, String prompt, double temperature, int maxTokens, double topP, double frequencyPenalty, double presencePenalty) {
-
-        // Approve parameters
-        if (user == null) throw new IllegalArgumentException("User name is null");
-        if (instruction == null) throw new IllegalArgumentException("Instruction is null");
-        if (prompt == null) throw new IllegalArgumentException("Prompt is null");
-        if (temperature < 0) throw new IllegalArgumentException("Temperature is less than 0");
-        if (temperature > 2) throw new IllegalArgumentException("Temperature is greater than 2");
-        if (maxTokens < 1) throw new IllegalArgumentException("Max tokens is less than 1");
-        if (maxTokens > 16383) throw new IllegalArgumentException("Max tokens is greater than 16383");
-        if (topP < 0) throw new IllegalArgumentException("Top P is less than 0");
-        if (topP > 1) throw new IllegalArgumentException("Top P is greater than 1");
-        if (frequencyPenalty < 0) throw new IllegalArgumentException("Frequency penalty is less than 0");
-        if (frequencyPenalty > 2) throw new IllegalArgumentException("Frequency penalty is greater than 2");
-        if (presencePenalty < 0) throw new IllegalArgumentException("Presence penalty is less than 0");
-        if (presencePenalty > 2) throw new IllegalArgumentException("Presence penalty is greater than 2");
-
-        // Disapprove parameters
-        return false;
-    }
-
     public static ArrayList<ChatMessage> filterMessages(ArrayList<ChatMessage> messages, boolean system) {
         ArrayList<ChatMessage> filtered = new ArrayList<>();
         for (ChatMessage message : messages) {
@@ -141,7 +183,7 @@ public class OpenAi {
         // Request
         ChatCompletionRequest request = ChatCompletionRequest
                 .builder()                              // Builder
-                .model(chatModel)                       // Model
+                .model(chatModel.model)                 // Model
                 .user(user)                             // User name
                 .messages(messages)                     // Chat history
                 .temperature(temperature)               // Temperature
@@ -185,13 +227,77 @@ public class OpenAi {
         return response.getContent();
     }
 
+    private ResponseBody createSpeech(String input, String voice, String format, double speed) {
+
+        // Request
+        CreateSpeechRequest request = CreateSpeechRequest
+                .builder()                  // Builder
+                .model(ttsModel.model)      // Model
+                .input(input)               // Input
+                .voice(voice)               // Voice
+                .responseFormat(format)     // Format
+                .speed(speed)               // Speed
+                .build();                   // Build
+
+        // Result
+        return service.createSpeech(request);
+    }
+
+    public boolean disprove(String user, String instruction, String prompt, double temperature, int maxTokens, double topP, double frequencyPenalty, double presencePenalty) {
+
+        // Check Username
+        if (user == null) throw new IllegalArgumentException("User name is null");
+        if (user.isEmpty() || user.isBlank()) throw new IllegalArgumentException("User name is empty");
+
+        // Check Instruction
+        if (instruction == null) throw new IllegalArgumentException("Instruction is null");
+        if (instruction.isEmpty() || instruction.isBlank()) throw new IllegalArgumentException("Instruction is empty");
+
+        // Check Prompt
+        if (prompt == null) throw new IllegalArgumentException("Prompt is null");
+        if (prompt.isEmpty() || prompt.isBlank()) throw new IllegalArgumentException("Prompt is empty");
+
+        // Check Variables
+        if (!chatModel.checkTemperature(temperature)) throw new IllegalArgumentException("Invalid temperature");
+        if (!chatModel.checkTokens(maxTokens)) throw new IllegalArgumentException("Invalid max tokens");
+        if (!chatModel.checkTopP((int) topP)) throw new IllegalArgumentException("Invalid top P");
+        if (!chatModel.checkFrequencyPenalty((int) frequencyPenalty))
+            throw new IllegalArgumentException("Invalid frequency penalty");
+        if (!chatModel.checkPresencePenalty((int) presencePenalty))
+            throw new IllegalArgumentException("Invalid presence penalty");
+
+        // Disapprove parameters
+        return false;
+    }
+
+    public boolean disprove(String input, String voice, String format, double speed) {
+
+        // Check Input
+        if (input == null) throw new IllegalArgumentException("Input is null");
+        if (!ttsModel.checkInput(input)) throw new IllegalArgumentException("Invalid input");
+
+        // Check Voice
+        if (voice == null) throw new IllegalArgumentException("Voice is null");
+        if (!ttsModel.checkVoice(voice)) throw new IllegalArgumentException("Invalid voice");
+
+        // Check Format
+        if (format == null) throw new IllegalArgumentException("Format is null");
+        if (!ttsModel.checkFormat(format)) throw new IllegalArgumentException("Invalid format");
+
+        // Check Speed
+        if (!ttsModel.checkSpeed(speed)) throw new IllegalArgumentException("Invalid speed");
+
+        // Disapprove parameters
+        return false;
+    }
+
     // Stream
     private ConnectableFlowable<ChatCompletionChunk> chatCompleationRequestStream(String user, ArrayList<ChatMessage> messages, double temperature, int maxTokens, double topP, double frequencyPenalty, double presencePenalty) {
 
         // Request
         ChatCompletionRequest request = ChatCompletionRequest
                 .builder()                              // Builder
-                .model(chatModel)                       // Model
+                .model(chatModel.model)                 // Model
                 .user(user)                             // User name
                 .messages(messages)                     // Chat history
                 .temperature(temperature)               // Temperature
@@ -200,7 +306,7 @@ public class OpenAi {
                 .frequencyPenalty(frequencyPenalty)     // Frequency penalty
                 .presencePenalty(presencePenalty)       // Presence penalty
                 .n(1)                                // Amount of completions
-                .stream(true)                          // Stream
+                .stream(true)                           // Stream
                 .build();                               // Build
 
         return service.streamChatCompletion(request).publish();
@@ -322,6 +428,21 @@ public class OpenAi {
         return null;
     }
 
+    // TTS
+    public AudioFile tts(String input, String voice, String format, double speed) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+
+        // Approve parameters
+        if (disprove(input, voice, format, speed))
+            throw new IllegalArgumentException("Invalid parameters");
+
+        // Get response
+        ResponseBody response = createSpeech(input, voice, format, speed);
+        if (response == null) throw new IllegalArgumentException("Invalid response");
+
+        // Return audio
+        return new AudioFile(response);
+    }
+
     // Clear conversation
     public void clearConversations() {
         conversations.clear();
@@ -346,6 +467,35 @@ public class OpenAi {
         addMessage(id, message.toString(), true);
     }
 
+    // Calculate
+    public BigDecimal calculatePromptCost(String inputText, String outputText) {
+        return chatModel.calculateCost(calculateTokens(inputText), calculateTokens(outputText));
+    }
+
+    public BigDecimal calculatePromptCost(String text) {
+        return chatModel.calculateCost(calculateTokens(text));
+    }
+
+    public BigDecimal calculatePromptCost(int inputTokens, int outputTokens) {
+        return chatModel.calculateCost(inputTokens, outputTokens);
+    }
+
+    public BigDecimal calculatePromptCost(int tokens) {
+        return chatModel.calculateCost(tokens);
+    }
+
+    public BigDecimal calculateConverationCost(int id) {
+        return chatModel.calculateCost(getConversationTokens(id));
+    }
+
+    public BigDecimal calculateTtsCost(String text) {
+        return ttsModel.calculateCost(text.length());
+    }
+
+    public BigDecimal calculateTtsCost(int characters) {
+        return ttsModel.calculateCost(characters);
+    }
+
     // Getter
     public JsonNode getConfig() {
         return config;
@@ -367,23 +517,56 @@ public class OpenAi {
         return conversations.containsKey(id);
     }
 
+    // Models
     public enum ChatModel {
 
         // Models
-        GPT_4O(0.00500, 0.01500),
-        GPT_4O_2024_08_06(0.0025, 0.01),
-        GPT_4O_2024_05_13(0.005, 0.015),
-        GPT_4O_MINI(0.00015, 0.0006),
-        GPT_4O_MINI_2024_07_18(0.00015, 0.0006);
+        GPT_4O("gpt-4o", 0.00500, 0.01500),
+        GPT_4O_2024_08_06("gpt-4o-2024-08-06", 0.0025, 0.01),
+        GPT_4O_2024_05_13("gpt-4o-2024-05-13", 0.005, 0.015),
+        GPT_4O_MINI("gpt-4o-mini", 0.00015, 0.0006),
+        GPT_4O_MINI_2024_07_18("gpt-4o-mini-2024-07-18", 0.00015, 0.0006);
 
         // Attributes
+        private final Set<String> models;
+        private final double minTemperature;
+        private final double maxTemperature;
+        private final double minTopP;
+        private final double maxTopP;
+        private final double minFrequencyPenalty;
+        private final double maxFrequencyPenalty;
+        private final double minPresencePenalty;
+        private final double maxPresencePenalty;
+        private final String model;
         private final BigDecimal inputPrice;
         private final BigDecimal outputPrice;
 
         // Constructor
-        ChatModel(double input, double output) {
-            this.inputPrice = new BigDecimal(input).movePointLeft(4);
-            this.outputPrice = new BigDecimal(output).movePointLeft(4);
+        ChatModel(String model, double input, double output) {
+
+            // Initialize attributes
+            models = new HashSet<>();
+            minTemperature = 0.0;
+            maxTemperature = 2.0;
+            minTopP = 0;
+            maxTopP = 1;
+            minFrequencyPenalty = 0;
+            maxFrequencyPenalty = 2;
+            minPresencePenalty = 0;
+            maxPresencePenalty = 2;
+
+            // Set models
+            models.add("gpt-4o");
+            models.add("gpt-4o-2024-08-06");
+            models.add("gpt-4o-2024-05-13");
+            models.add("gpt-4o-mini");
+            models.add("gpt-4o-mini-2024-07-18");
+
+            // Set Attributes
+            if (models.contains(model)) this.model = model;
+            else throw new IllegalArgumentException("Invalid model");
+            inputPrice = new BigDecimal(input).movePointLeft(4);
+            outputPrice = new BigDecimal(output).movePointLeft(4);
         }
 
         // Methods
@@ -396,12 +579,267 @@ public class OpenAi {
         }
 
         // Getter
+        public Set<String> getModels() {
+            return models;
+        }
+
+        public double getMinTemperature() {
+            return minTemperature;
+        }
+
+        public double getMaxTemperature() {
+            return maxTemperature;
+        }
+
+        public double getMinTopP() {
+            return minTopP;
+        }
+
+        public double getMaxTopP() {
+            return maxTopP;
+        }
+
+        public double getMinFrequencyPenalty() {
+            return minFrequencyPenalty;
+        }
+
+        public double getMaxFrequencyPenalty() {
+            return maxFrequencyPenalty;
+        }
+
+        public double getMinPresencePenalty() {
+            return minPresencePenalty;
+        }
+
+        public double getMaxPresencePenalty() {
+            return maxPresencePenalty;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
         public BigDecimal getInputPrice() {
             return inputPrice;
         }
 
         public BigDecimal getOutputPrice() {
             return outputPrice;
+        }
+
+        // Check
+        public boolean checkModel(String model) {
+            return models.contains(model);
+        }
+
+        public boolean checkInput(String input) {
+            return !input.isEmpty() || !input.isBlank();
+        }
+
+        public boolean checkTemperature(double temperature) {
+            return temperature >= minTemperature && temperature <= maxTemperature;
+        }
+
+        public boolean checkTopP(int topP) {
+            return topP >= minTopP && topP <= maxTopP;
+        }
+
+        public boolean checkFrequencyPenalty(double frequencyPenalty) {
+            return frequencyPenalty >= minFrequencyPenalty && frequencyPenalty <= maxFrequencyPenalty;
+        }
+
+        public boolean checkPresencePenalty(double presencePenalty) {
+            return presencePenalty >= minPresencePenalty && presencePenalty <= maxPresencePenalty;
+        }
+
+        public boolean checkTokens(int tokens) {
+            if (model.equals("gpt-4o") || model.equals("gpt-4o-2024-08-06") || model.equals("gpt-4o-2024-05-13"))
+                return tokens > 0 && tokens < 4096;
+            if (model.equals("gpt-4o-mini") || model.equals("gpt-4o-mini-2024-07-18"))
+                return tokens > 0 && tokens < 16384;
+            return false;
+        }
+    }
+
+    public enum TTSModel {
+
+        // Models
+        TTS("tts-1", 0.015),
+        TTS_HD("tts-1-hd", 0.03);
+
+        // Attributes
+        private final Set<String> models;
+        private final int maxCharacters;
+        private final Set<String> voices;
+        private final Set<String> formats;
+        private final double minSpeed;
+        private final double maxSpeed;
+        private final Set<String> languages;
+        private final String model;
+        private final BigDecimal price;
+
+        // Constructor
+        TTSModel(String model, double price) {
+
+            // Initialize attributes
+            models = new HashSet<>();
+            maxCharacters = 4096;
+            voices = new HashSet<>();
+            formats = new HashSet<>();
+            minSpeed = 0.25;
+            maxSpeed = 4.0;
+            languages = new HashSet<>();
+
+            // Set models
+            models.add("tts-1");
+            models.add("tts-1-hd");
+
+            // Set voices
+            voices.add("alloy");
+            voices.add("echo");
+            voices.add("fable");
+            voices.add("onyx");
+            voices.add("nova");
+            voices.add("shimmer");
+
+            // Set formats
+            formats.add("mp3");
+            formats.add("opus");
+            formats.add("aac");
+            formats.add("flac");
+            formats.add("wav");
+            formats.add("pcm");
+
+            // Set languages
+            languages.add("Afrikaans");
+            languages.add("Arabic");
+            languages.add("Armenian");
+            languages.add("Azerbaijani");
+            languages.add("Belarusian");
+            languages.add("Bosnian");
+            languages.add("Bulgarian");
+            languages.add("Catalan");
+            languages.add("Chinese");
+            languages.add("Croatian");
+            languages.add("Czech");
+            languages.add("Danish");
+            languages.add("Dutch");
+            languages.add("English");
+            languages.add("Estonian");
+            languages.add("Finnish");
+            languages.add("French");
+            languages.add("Galician");
+            languages.add("German");
+            languages.add("Greek");
+            languages.add("Hebrew");
+            languages.add("Hindi");
+            languages.add("Hungarian");
+            languages.add("Icelandic");
+            languages.add("Indonesian");
+            languages.add("Italian");
+            languages.add("Japanese");
+            languages.add("Kannada");
+            languages.add("Kazakh");
+            languages.add("Korean");
+            languages.add("Latvian");
+            languages.add("Lithuanian");
+            languages.add("Macedonian");
+            languages.add("Malay");
+            languages.add("Marathi");
+            languages.add("Maori");
+            languages.add("Nepali");
+            languages.add("Norwegian");
+            languages.add("Persian");
+            languages.add("Polish");
+            languages.add("Portuguese");
+            languages.add("Romanian");
+            languages.add("Russian");
+            languages.add("Serbian");
+            languages.add("Slovak");
+            languages.add("Slovenian");
+            languages.add("Spanish");
+            languages.add("Swahili");
+            languages.add("Swedish");
+            languages.add("Tagalog");
+            languages.add("Tamil");
+            languages.add("Thai");
+            languages.add("Turkish");
+            languages.add("Ukrainian");
+            languages.add("Urdu");
+            languages.add("Vietnamese");
+            languages.add("Welsh");
+
+            // Set Attributes
+            if (models.contains(model)) this.model = model;
+            else throw new IllegalArgumentException("Invalid model");
+            this.price = new BigDecimal(price).movePointLeft(4);
+        }
+
+        // Methods
+        public BigDecimal calculateCost(int characters) {
+            return price.multiply(new BigDecimal(characters));
+        }
+
+        // Getter
+        public Set<String> getModels() {
+            return models;
+        }
+
+        public int getMaxCharacters() {
+            return maxCharacters;
+        }
+
+        public Set<String> getVoices() {
+            return voices;
+        }
+
+        public Set<String> getFormats() {
+            return formats;
+        }
+
+        public double getMinSpeed() {
+            return minSpeed;
+        }
+
+        public double getMaxSpeed() {
+            return maxSpeed;
+        }
+
+        public Set<String> getLanguages() {
+            return languages;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
+        public BigDecimal getPrice() {
+            return price;
+        }
+
+        // Check
+        public boolean checkModel(String model) {
+            return models.contains(model);
+        }
+
+        public boolean checkInput(String input) {
+            return !input.isEmpty() && !input.isBlank() && input.length() <= maxCharacters;
+        }
+
+        public boolean checkVoice(String voice) {
+            return voices.contains(voice);
+        }
+
+        public boolean checkFormat(String format) {
+            return formats.contains(format);
+        }
+
+        public boolean checkSpeed(double speed) {
+            return speed >= minSpeed && speed <= maxSpeed;
+        }
+
+        public boolean checkLanguage(String language) {
+            return languages.contains(language);
         }
     }
 }

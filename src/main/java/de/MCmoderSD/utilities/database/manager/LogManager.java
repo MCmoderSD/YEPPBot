@@ -4,6 +4,7 @@ import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
+import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.MySQL;
@@ -143,6 +144,25 @@ public class LogManager {
                     viwerAmount INT NOT NULL DEFAULT 0,
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (raider_id) REFERENCES users(id)
+                    )
+                    """
+            ).execute();
+
+            // SQL statement for creating the tts log table
+            connection.prepareStatement(condition +
+                    """
+                    TTSLog (
+                    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    channel_id INT NOT NULL,
+                    user_id INT NOT NULL,
+                    message VARCHAR(500),
+                    audioData LONGBLOB NOT NULL,
+                    bits INT NOT NULL DEFAULT 0,
+                    subMonths INT NOT NULL DEFAULT 0,
+                    subStreak INT NOT NULL DEFAULT 0,
+                    subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                    FOREIGN KEY (channel_id) REFERENCES users(id),
+                    FOREIGN KEY (user_id) REFERENCES users(id)
                     )
                     """
             ).execute();
@@ -437,6 +457,41 @@ public class LogManager {
                 preparedStatement.setInt(2, channelID); // set channel
                 preparedStatement.setInt(3, raiderID); // set raider
                 preparedStatement.setInt(4, viewer); // set viewerAmount
+                preparedStatement.executeUpdate(); // execute
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }).start();
+    }
+
+    public void logTTS(TwitchMessageEvent event, AudioFile audioFile) {
+        if (log) new Thread(() -> {
+
+            // Variables
+            var channelID = event.getChannelId();
+            var userID = event.getUserId();
+            var channel = event.getChannel();
+            var user = event.getUser();
+
+            try {
+                if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+                // Check Channel and User
+                mySQL.checkCache(userID, user, false);
+                mySQL.checkCache(channelID, channel, true);
+
+                // Prepare statement
+                String query = "INSERT INTO " + "TTSLog" + " (timestamp, channel_id, user_id, message, audioData, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
+                preparedStatement.setInt(2, channelID); // set channel
+                preparedStatement.setInt(3, userID); // set user
+                preparedStatement.setString(4, event.getMessage()); // set message
+                preparedStatement.setBytes(5, audioFile.getAudioData()); // set audioData
+                preparedStatement.setInt(6, event.getLogBits()); // set bits
+                preparedStatement.setInt(7, event.getLogSubMonths()); // set subMonths
+                preparedStatement.setInt(8, event.getLogSubStreak()); // set subStreak
+                preparedStatement.setString(9, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
             } catch (SQLException e) {
                 System.err.println(e.getMessage());

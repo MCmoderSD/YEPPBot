@@ -1,6 +1,10 @@
 {
   "apiKey": "YOUR_API_KEY",
   "chatModel": "gpt-4o-mini-2024-07-18",
+  "ttsModel": "tts-1",
+  "voice": "onyx",
+  "speed": 1,
+  "format": "wav",
   "maxConversationCalls": 6,
   "maxTokenSpendingLimit": 8192,
   "temperature": 1,

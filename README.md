@@ -115,6 +115,10 @@ The file should have the following structure: <br>
 {
   "apiKey": "YOUR_API_KEY",
   "chatModel": "gpt-4o-mini-2024-07-18",
+  "ttsModel": "tts-1",
+  "voice": "onyx",
+  "speed": 1,
+  "format": "wav",
   "maxConversationCalls": 6,
   "maxTokenSpendingLimit": 8192,
   "temperature": 1,
@@ -127,6 +131,7 @@ The file should have the following structure: <br>
 ```
 
 You can get the API key from [OpenAI](https://platform.openai.com/signup). <br>
+
 - The **model** is the model that the bot will use to generate the text. <br>
 The available models are: <br>
 
@@ -137,6 +142,28 @@ The available models are: <br>
 | gpt-4o-2024-05-13      | $5.00 / 1M input tokens <br/> \$15.00 / 1M output tokens  |
 | gpt-4o-mini            | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
 | gpt-4o-mini-2024-07-18 | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
+
+
+- The **ttsModel** is the model that the bot will use to generate the speech. <br>
+  The available models are: <br>
+
+| **Model** | **Pricing**            | 
+|:----------|:-----------------------|
+| tts-1     | $15.00 / 1M characters |
+| tts-1-hd  | $30.00 / 1M characters |
+
+
+- The **voice** is the voice that the bot will use to generate the speech. <br>
+  The available voices are alloy, echo, fable, onyx, nova, and shimmer. <br>
+
+
+- The **format** is the format of the audio file. <br>
+  The available formats are mp3, opus, aac, flac, wav, and pcm. <br>
+
+
+- The **speed** is the speed of the speech. <br>
+  The min value is 0.25 and the max value is 4, the default value is 1. <br>
+
 
 - The **maxConversationCalls** is the limit of calls per conversation. <br>
   After the limit is reached, the conversation will end. <br>
