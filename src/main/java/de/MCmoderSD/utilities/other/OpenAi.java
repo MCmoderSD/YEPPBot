@@ -15,9 +15,6 @@ import io.reactivex.Flowable;
 import io.reactivex.flowables.ConnectableFlowable;
 import okhttp3.ResponseBody;
 
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -429,7 +426,7 @@ public class OpenAi {
     }
 
     // TTS
-    public AudioFile tts(String input, String voice, String format, double speed) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+    public AudioFile tts(String input, String voice, String format, double speed) {
 
         // Approve parameters
         if (disprove(input, voice, format, speed))

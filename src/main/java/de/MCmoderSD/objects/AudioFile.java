@@ -25,40 +25,53 @@ public class AudioFile {
     private final SourceDataLine audioLine;
 
     // Byte array constructor
-    public AudioFile(byte[] audioData) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        this.audioData = audioData;
-        byteArrayInputStream = new ByteArrayInputStream(audioData);
-        audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
-        audioFormat = audioInputStream.getFormat();
-        info = new DataLine.Info(SourceDataLine.class, audioFormat);
-        audioLine = (SourceDataLine) AudioSystem.getLine(info);
-        audioLine.open(audioFormat);
+    public AudioFile(byte[] audioData) {
+        try {
+            this.audioData = audioData;
+            byteArrayInputStream = new ByteArrayInputStream(audioData);
+            audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+            audioFormat = audioInputStream.getFormat();
+            info = new DataLine.Info(SourceDataLine.class, audioFormat);
+            audioLine = (SourceDataLine) AudioSystem.getLine(info);
+            audioLine.open(audioFormat);
+        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            System.err.println("Error creating audio file: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     // ResponseBody constructor
-    public AudioFile(ResponseBody responseBody) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.writeBytes(responseBody.bytes());
-        audioData = byteArrayOutputStream.toByteArray();
-        byteArrayInputStream = new ByteArrayInputStream(audioData);
-        audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
-        audioFormat = audioInputStream.getFormat();
-        info = new DataLine.Info(SourceDataLine.class, audioFormat);
-        audioLine = (SourceDataLine) AudioSystem.getLine(info);
-        audioLine.open(audioFormat);
+    public AudioFile(ResponseBody responseBody) {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byteArrayOutputStream.writeBytes(responseBody.bytes());
+            audioData = byteArrayOutputStream.toByteArray();
+            byteArrayInputStream = new ByteArrayInputStream(audioData);
+            audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+            audioFormat = audioInputStream.getFormat();
+            info = new DataLine.Info(SourceDataLine.class, audioFormat);
+            audioLine = (SourceDataLine) AudioSystem.getLine(info);
+            audioLine.open(audioFormat);
+        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            System.err.println("Error creating audio file: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     // Play audio
     public void play() {
         new Thread(() -> {
             try {
-                // Reset audio stream
-                audioInputStream.reset();
+
+                // Start audio line
                 audioLine.start();
 
                 // Play audio
                 byte[] allData = audioInputStream.readAllBytes();
                 audioLine.write(allData, 0, allData.length);
+
+                // Reset audio stream
+                audioInputStream.reset();
 
                 // Stop audio
                 audioLine.drain();
