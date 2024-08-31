@@ -13,14 +13,6 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Prompt {
 
-    // Attributes
-    private final String instruction;
-    private final double temperature;
-    private final int maxTokens;
-    private final double topP;
-    private final double frequencyPenalty;
-    private final double presencePenalty;
-
     // Constructor
     public Prompt(BotClient botClient, MessageHandler messageHandler, OpenAi openAi) {
 
@@ -33,12 +25,15 @@ public class Prompt {
 
         // Set Attributes
         JsonNode config = openAi.getConfig();
-        instruction = config.get("instruction").asText();
-        temperature = config.get("temperature").asDouble();
-        maxTokens = config.get("maxTokens").asInt();
-        topP = config.get("topP").asDouble();
-        frequencyPenalty = config.get("frequencyPenalty").asDouble();
-        presencePenalty = config.get("presencePenalty").asDouble();
+        String instruction = config.get("instruction").asText();
+        double temperature = config.get("temperature").asDouble();
+        int maxTokens = config.get("maxTokens").asInt();
+        double topP = config.get("topP").asDouble();
+        double frequencyPenalty = config.get("frequencyPenalty").asDouble();
+        double presencePenalty = config.get("presencePenalty").asDouble();
+        String voice = config.get("voice").asText();
+        String format = config.get("format").asText();
+        double speed = config.get("speed").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -47,7 +42,9 @@ public class Prompt {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                botClient.respond(event, getCommand(), formatOpenAiResponse(openAi.prompt(botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP"));
+                String response = formatOpenAiResponse(openAi.prompt(botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP");
+                botClient.respond(event, getCommand(), response);
+                if (event.getChannel().equals("mcmodersd")) botClient.sendAudio(event, openAi.tts(response, voice, format, speed));
             }
         });
     }

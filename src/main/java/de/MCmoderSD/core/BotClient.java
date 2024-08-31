@@ -23,11 +23,13 @@ import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.commands.*;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
+import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
+import de.MCmoderSD.utilities.other.AudioBroadcast;
 import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.other.Reader;
 
@@ -47,6 +49,7 @@ public class BotClient {
     private final Main main;
     private final MySQL mySQL;
     private final Frame frame;
+    private final AudioBroadcast audioBroadcast;
 
     // Utilities
     private final JsonUtility jsonUtility;
@@ -101,6 +104,9 @@ public class BotClient {
         chat = client.getChat();
         helix = client.getHelix();
         eventManager = client.getEventManager();
+
+        // Init Audio Broadcast
+        audioBroadcast = new AudioBroadcast("localhost", 420);
 
         // Join Channels
         ArrayList<String> channelList = new ArrayList<>(Collections.singleton(botName));
@@ -207,6 +213,15 @@ public class BotClient {
         if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
     }
 
+    public void sendAudio(TwitchMessageEvent event, AudioFile audioFile) {
+
+        // Log
+        mySQL.getLogManager().logTTS(event, audioFile);
+
+        // Play Audio
+        audioBroadcast.play(event.getChannel(), audioFile);
+    }
+
     public void joinChannel(String channel) {
         if (chat.isChannelJoined(channel)) return;
         System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
@@ -218,6 +233,7 @@ public class BotClient {
             try {
                 for (String channel : channels) {
                     joinChannel(channel);
+                    audioBroadcast.registerBrodcast(channel);
                     Thread.sleep(250); // Prevent rate limit
                 }
             } catch (InterruptedException e) {
