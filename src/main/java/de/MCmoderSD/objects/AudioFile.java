@@ -37,8 +37,7 @@ public class AudioFile {
             audioLine = (SourceDataLine) AudioSystem.getLine(info);
             audioLine.open(audioFormat);
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            System.out.printf("%s%sTry installing %ssudo apt-get install alsa-utils pulseaudio libasound2t64%ssudo usermod -aG audio $USER%s%s%s", BREAK, BREAK, BOLD, BREAK, UNBOLD, BREAK, BREAK);
-            System.err.println("Error creating audio file: " + e.getMessage());
+            handleAudioException(e);
             throw new RuntimeException(e);
         }
     }
@@ -56,9 +55,26 @@ public class AudioFile {
             audioLine = (SourceDataLine) AudioSystem.getLine(info);
             audioLine.open(audioFormat);
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            System.out.printf("%s%sTry installing %ssudo apt-get install alsa-utils pulseaudio libasound2t64%ssudo usermod -aG audio $USER%s%s%s", BREAK, BREAK, BOLD, BREAK, UNBOLD, BREAK, BREAK);
-            System.err.println("Error creating audio file: " + e.getMessage());
+            handleAudioException(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    // Method to handle audio exceptions and provide advice
+    private void handleAudioException(Exception e) {
+        System.err.println("Error creating audio file: " + e.getMessage());
+        if (e instanceof LineUnavailableException) {
+            System.err.printf("""
+                    
+                    
+                    Try installing:
+                        %ssudo apt install alsa-utils pulseaudio libasound2t64%s
+                    
+                    And add your user to the audio group:
+                        %ssudo usermod -aG audio $USER%s
+                    
+                    
+                    """, BOLD, UNBOLD, BOLD, UNBOLD);
         }
     }
 
