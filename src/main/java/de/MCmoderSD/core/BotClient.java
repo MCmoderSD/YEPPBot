@@ -33,10 +33,7 @@ import de.MCmoderSD.utilities.other.AudioBroadcast;
 import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.other.Reader;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import static de.MCmoderSD.main.Main.Argument.*;
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -53,7 +50,7 @@ public class BotClient {
 
     // Utilities
     private final JsonUtility jsonUtility;
-    private final Encryption encryption;
+    private final Encryption  encryption;
     private final Reader reader;
 
     // Constants
@@ -107,9 +104,10 @@ public class BotClient {
 
         // Init Audio Broadcast
         audioBroadcast = new AudioBroadcast("localhost", 420);
+        audioBroadcast.registerBrodcast(botName);
 
         // Join Channels
-        ArrayList<String> channelList = new ArrayList<>(Collections.singleton(botName));
+        Set<String> channelList = new HashSet<>();
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
         if (!hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
         joinChannel(channelList);
@@ -146,6 +144,7 @@ public class BotClient {
         new Say(this, messageHandler);
         new Status(this, messageHandler);
         if (openAi) new Translate(this, messageHandler, main.getOpenAi());
+        if (openAi) new TTS(this, messageHandler, main.getOpenAi());
         if (openAi && weather) new Weather(this, messageHandler, main.getOpenAi(), main.getCredentials());
         new Whitelist(this, messageHandler, mySQL);
         if (openAi) new Wiki(this, messageHandler, main.getOpenAi());
@@ -223,12 +222,12 @@ public class BotClient {
     }
 
     public void joinChannel(String channel) {
-        if (chat.isChannelJoined(channel)) return;
+        if (chat.isChannelJoined(channel) || botName.equals(channel)) return;
         System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
         chat.joinChannel(channel);
     }
 
-    public void joinChannel(ArrayList<String> channels) {
+    public void joinChannel(Set<String> channels) {
         new Thread(() -> {
             try {
                 for (String channel : channels) {
@@ -248,7 +247,7 @@ public class BotClient {
         chat.leaveChannel(channel);
     }
 
-    public void leaveChannel(ArrayList<String> channels) {
+    public void leaveChannel(Set<String> channels) {
         new Thread(() -> {
             try {
                 for (String channel : channels) {

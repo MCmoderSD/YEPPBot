@@ -13,6 +13,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static de.MCmoderSD.utilities.other.Calculate.*;
+
 @SuppressWarnings("unused")
 public class AudioFile {
 
@@ -35,6 +37,7 @@ public class AudioFile {
             audioLine = (SourceDataLine) AudioSystem.getLine(info);
             audioLine.open(audioFormat);
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            System.out.printf("%s%sTry installing %ssudo apt-get install alsa-utils pulseaudio libasound2t64%ssudo usermod -aG audio $USER%s%s%s", BREAK, BREAK, BOLD, BREAK, UNBOLD, BREAK, BREAK);
             System.err.println("Error creating audio file: " + e.getMessage());
             throw new RuntimeException(e);
         }
@@ -53,6 +56,7 @@ public class AudioFile {
             audioLine = (SourceDataLine) AudioSystem.getLine(info);
             audioLine.open(audioFormat);
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            System.out.printf("%s%sTry installing %ssudo apt-get install alsa-utils pulseaudio libasound2t64%ssudo usermod -aG audio $USER%s%s%s", BREAK, BREAK, BOLD, BREAK, UNBOLD, BREAK, BREAK);
             System.err.println("Error creating audio file: " + e.getMessage());
             throw new RuntimeException(e);
         }

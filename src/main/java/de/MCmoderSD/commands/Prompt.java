@@ -44,7 +44,6 @@ public class Prompt {
                 // Send Message
                 String response = formatOpenAiResponse(openAi.prompt(botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP");
                 botClient.respond(event, getCommand(), response);
-                if (event.getChannel().equals("mcmodersd")) botClient.sendAudio(event, openAi.tts(response, voice, format, speed));
             }
         });
     }

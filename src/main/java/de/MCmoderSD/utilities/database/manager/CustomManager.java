@@ -41,7 +41,7 @@ public class CustomManager {
             connection.prepareStatement(condition +
                     """
                     CustomTimers (
-                    channel_id INT NOT NULL,
+                    channel_id INT PRIMARY KEY NOT NULL,
                     name TEXT NOT NULL,
                     time TEXT NOT NULL,
                     response VARCHAR(500) NOT NULL,
@@ -55,7 +55,7 @@ public class CustomManager {
             connection.prepareStatement(condition +
                     """
                     CustomCommands (
-                    channel_id INT NOT NULL,
+                    channel_id INT PRIMARY KEY NOT NULL,
                     command_name TEXT NOT NULL,
                     command_alias TEXT,
                     command_response VARCHAR(500) NOT NULL,
@@ -69,7 +69,7 @@ public class CustomManager {
             connection.prepareStatement(condition +
                     """
                     Counters (
-                    channel_id INT NOT NULL,
+                    channel_id INT PRIMARY KEY NOT NULL,
                     name TEXT NOT NULL,
                     value INT NOT NULL,
                     FOREIGN KEY (channel_id) REFERENCES users(id)

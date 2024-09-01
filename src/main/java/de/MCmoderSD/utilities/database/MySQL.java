@@ -58,7 +58,7 @@ public class MySQL extends Driver {
             connection.prepareStatement(condition +
                     """
                             users (
-                            id INT PRIMARY KEY,
+                            id INT PRIMARY KEY NOT NULL,
                             name VARCHAR(25) NOT NULL
                             )
                             """
@@ -68,7 +68,7 @@ public class MySQL extends Driver {
             connection.prepareStatement(condition +
                     """
                             channels (
-                            id INT NOT NULL,
+                            id INT PRIMARY KEY NOT NULL,
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
                             active BIT NOT NULL DEFAULT 1,

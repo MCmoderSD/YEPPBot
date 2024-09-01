@@ -40,7 +40,7 @@ public class LurkManager {
             connection.prepareStatement(condition +
                     """
                     lurkList (
-                    user_id INT PRIMARY KEY,
+                    user_id INT PRIMARY KEY NOT NULL,
                     lurkChannel_ID INT NOT NULL,
                     startTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     traitorChannel TEXT,
