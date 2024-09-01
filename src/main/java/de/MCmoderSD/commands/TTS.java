@@ -9,8 +9,6 @@ import de.MCmoderSD.utilities.other.OpenAi;
 
 import java.util.ArrayList;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
-
 public class TTS {
 
     // Constructor
@@ -25,6 +23,7 @@ public class TTS {
 
         // Set Attributes
         JsonNode config = openAi.getConfig();
+        OpenAi.TTSModel model = openAi.getTtsModel();
         String voice = config.get("voice").asText();
         String format = config.get("format").asText();
         double speed = config.get("speed").asDouble();
@@ -35,8 +34,15 @@ public class TTS {
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
+                // Check Admin
+                if (!botClient.isAdmin(event)) return;
+
+                // Get Voice if available
+                String currentVoice = voice;
+                for (String arg : args) if (model.checkVoice(arg.toLowerCase())) currentVoice = arg;
+
                 // Send Message
-                if (botClient.isAdmin(event)) botClient.sendAudio(event, openAi.tts(event.getMessage(), voice, format, speed));
+                botClient.sendAudio(event, openAi.tts(event.getMessage(), currentVoice, format, speed));
             }
         });
     }

@@ -49,10 +49,11 @@ public class AudioBroadcast {
     }
 
     // Register Broadcast
-    public void registerBrodcast(String broadcastId) {
+    public String registerBrodcast(String broadcastId) {
         server.createContext("/" + broadcastId, new FrontendHandler(broadcastId));
         server.createContext("/version/" + broadcastId, new VersionHandler(broadcastId));
         server.createContext("/audio/" + broadcastId, new AudioHandler(broadcastId));
+        return String.format("Broadcast started on http://%s:%d/%s", hostname, port, broadcastId);
     }
 
     // Play

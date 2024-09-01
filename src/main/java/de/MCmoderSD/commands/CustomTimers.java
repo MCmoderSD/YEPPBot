@@ -7,9 +7,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.CustomManager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -122,11 +120,11 @@ public class CustomTimers {
         });
     }
 
-    private String getCustomTimerNames(String channel, HashMap<String, Timer> customTimers, ArrayList<Timer> enabledTimers) {
+    private String getCustomTimerNames(String channel, HashMap<String, Timer> customTimers, Set<Timer> enabledTimers) {
         if (customTimers.isEmpty()) return "No Custom Timers available";
 
         StringBuilder stringBuilder = new StringBuilder("Custom Timers: ");
-        ArrayList<String> enabledTimersNames = new ArrayList<>();
+        Set<String> enabledTimersNames = new HashSet<>();
 
         for (var timer : enabledTimers) {
             if (timer.getChannel().equals(channel)) stringBuilder.append(timer.getName()).append(" enabled, ");

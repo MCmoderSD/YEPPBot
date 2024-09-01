@@ -14,10 +14,7 @@ import java.io.InputStreamReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -48,8 +45,10 @@ public class Main {
     // Associations
     private final Credentials credentials;
 
+    // Arguments
+    private final Set<Argument> args;
+
     // Variables
-    private List<Argument> args = new ArrayList<>();
     private BotClient botClient;
     private Frame frame;
     private MySQL mySQL;
@@ -205,11 +204,11 @@ public class Main {
     }
 
     // Check Args
-    private List<Argument> checkArgs(ArrayList<String> args) {
+    private Set<Argument> checkArgs(ArrayList<String> args) {
 
         // Variables
-        ArrayList<String> arguments = new ArrayList<>();
-        List<Argument> result = new ArrayList<>();
+        Set<String> arguments = new HashSet<>();
+        Set<Argument> result = new HashSet<>();
 
         // Format args
         for (String arg : args)
@@ -217,7 +216,7 @@ public class Main {
 
         // Check
         Arrays.stream(Argument.values()).forEach(argument -> {
-            if (argument.listHasNameOrAlias(arguments)) result.add(argument);
+            if (argument.setHasNameOrAlias(arguments)) result.add(argument);
         });
 
         // Return
@@ -335,11 +334,11 @@ public class Main {
         }
 
         // Check
-        private boolean listHasNameOrAlias(ArrayList<String> list) {
-            if (list == null) return false;
-            if (list.isEmpty()) return false;
-            if (list.contains(name)) return true;
-            return Arrays.stream(aliases).anyMatch(list::contains);
+        private boolean setHasNameOrAlias(Set<String> set) {
+            if (set == null) return false;
+            if (set.isEmpty()) return false;
+            if (set.contains(name)) return true;
+            return Arrays.stream(aliases).anyMatch(set::contains);
         }
     }
 }

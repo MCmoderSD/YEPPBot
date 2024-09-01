@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CustomManager {
 
@@ -409,10 +411,10 @@ public class CustomManager {
     }
 
     // Get All Custom Timers
-    public HashMap<Integer, ArrayList<Timer>> getCustomTimers(BotClient botClient) {
+    public HashMap<Integer, Set<Timer>> getCustomTimers(BotClient botClient) {
 
         // Variables
-        HashMap<Integer, ArrayList<Timer>> customTimers = new HashMap<>();
+        HashMap<Integer, Set<Timer>> customTimers = new HashMap<>();
 
         // Get CustomTimers
         try {
@@ -434,9 +436,7 @@ public class CustomManager {
                 Timer timer = new Timer(botClient, mySQL, mySQL.queryName("channels", channelId), name, time, response);
 
                 // Add to customTimers
-                customTimers
-                        .computeIfAbsent(channelId, k -> new ArrayList<>())
-                        .add(timer);
+                customTimers.computeIfAbsent(channelId, k -> new HashSet<>(Set.of(timer)));
             }
 
         } catch (SQLException e) {
@@ -477,10 +477,10 @@ public class CustomManager {
     }
 
     // Get Active Custom Commands
-    public ArrayList<Timer> getActiveCustomTimers(TwitchMessageEvent event, BotClient botClient) {
+    public Set<Timer> getActiveCustomTimers(TwitchMessageEvent event, BotClient botClient) {
 
         // Variables
-        ArrayList<Timer> customTimers = new ArrayList<>();
+        Set<Timer> customTimers = new HashSet<>();
 
         // Get Custom Timers
         try {

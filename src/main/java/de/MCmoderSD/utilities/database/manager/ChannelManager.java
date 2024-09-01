@@ -6,9 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class ChannelManager {
 
@@ -61,10 +59,10 @@ public class ChannelManager {
     }
 
     // Get Black List
-    public HashMap<Integer, ArrayList<String>> getBlackList() {
+    public HashMap<Integer, Set<String>> getBlackList() {
 
         // Variables
-        HashMap<Integer, ArrayList<String>> blackList = new HashMap<>();
+        HashMap<Integer, Set<String>> blackList = new HashMap<>();
 
         try {
             if (!mySQL.isConnected()) mySQL.connect();
@@ -75,7 +73,7 @@ public class ChannelManager {
             while (resultSet.next()) {
                 var id = resultSet.getInt("id");
                 String blacklist = resultSet.getString("blacklist");
-                if (blacklist != null) blackList.put(id, new ArrayList<>(List.of(blacklist.toLowerCase().split("; "))));
+                if (blacklist != null) blackList.put(id, new HashSet<>(List.of(blacklist.toLowerCase().split("; "))));
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());

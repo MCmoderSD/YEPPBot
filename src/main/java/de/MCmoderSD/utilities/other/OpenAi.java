@@ -514,6 +514,15 @@ public class OpenAi {
         return conversations.containsKey(id);
     }
 
+    // Enums
+    public ChatModel getChatModel() {
+        return chatModel;
+    }
+
+    public TTSModel getTtsModel() {
+        return ttsModel;
+    }
+
     // Models
     public enum ChatModel {
 

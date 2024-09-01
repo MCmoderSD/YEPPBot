@@ -6,12 +6,14 @@ import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Credentials {
 
     // Bot Credentials
     private JsonNode botConfig;
-    private ArrayList<String> channelList;
+    private Set<String> channelList;
     private JsonNode mySQLConfig;
 
     // API Cials
@@ -36,7 +38,7 @@ public class Credentials {
 
         // Load Channel List
         try {
-            this.channelList = reader.lineRead(channelList, main.hasArg(Argument.CHANNEL_LIST));
+            this.channelList = new HashSet<>(reader.lineRead(channelList, main.hasArg(Argument.CHANNEL_LIST)));
         } catch (Exception e) {
             System.err.println("Error loading Channel List: " + e.getMessage());
         }
@@ -77,7 +79,7 @@ public class Credentials {
         return botConfig;
     }
 
-    public ArrayList<String> getChannelList() {
+    public Set<String> getChannelList() {
         return channelList;
     }
 

@@ -8,11 +8,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.*;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -27,11 +23,11 @@ public class MessageHandler {
     private final HashMap<String, Command> commandList;
     private final HashMap<String, String> aliasMap;
     private final HashMap<Integer, Integer> lurkList;
-    private final HashMap<Integer, ArrayList<String>> blackList;
+    private final HashMap<Integer, Set<String>> blackList;
     private final HashMap<Integer, HashMap<String, String>> customCommands;
     private final HashMap<Integer, HashMap<String, String>> customAliases;
     private final HashMap<Integer, HashMap<String, Integer>> counters;
-    private final HashMap<Integer, ArrayList<Timer>> customTimers;
+    private final HashMap<Integer, Set<Timer>> customTimers;
 
     // Utilities
     private final Random random;
@@ -332,7 +328,7 @@ public class MessageHandler {
     }
 
     // Update Black List
-    public void updateBlackList(HashMap<Integer, ArrayList<String>> blackList) {
+    public void updateBlackList(HashMap<Integer, Set<String>> blackList) {
         this.blackList.clear();
         this.blackList.putAll(blackList);
     }
@@ -352,12 +348,12 @@ public class MessageHandler {
     }
 
     // Update Custom Timers
-    public void updateCustomTimers(HashMap<Integer, ArrayList<Timer>> customTimers) {
+    public void updateCustomTimers(HashMap<Integer, Set<Timer>> customTimers) {
         this.customTimers.clear();
         this.customTimers.putAll(customTimers);
     }
 
-    public void updateCustomTimers(int channelID, ArrayList<Timer> customTimers) {
+    public void updateCustomTimers(int channelID, Set<Timer> customTimers) {
         this.customTimers.replace(channelID, customTimers);
     }
 

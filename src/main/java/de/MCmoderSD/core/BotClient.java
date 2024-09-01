@@ -56,7 +56,7 @@ public class BotClient {
     // Constants
     public static String botName;
     public static String prefix;
-    public static ArrayList<String> admins;
+    public static Set<String> admins;
 
     // Attributes
     private final TwitchClient client;
@@ -81,7 +81,7 @@ public class BotClient {
         JsonNode botConfig = credentials.getBotConfig();
         botName = botConfig.get("botName").asText().toLowerCase();
         prefix = botConfig.get("prefix").asText();
-        admins = new ArrayList<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
+        admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
         // Init Encryption
         encryption = new Encryption(botConfig);
@@ -104,7 +104,7 @@ public class BotClient {
 
         // Init Audio Broadcast
         audioBroadcast = new AudioBroadcast("localhost", 420);
-        audioBroadcast.registerBrodcast(botName);
+        System.out.println(audioBroadcast.registerBrodcast(botName));
 
         // Join Channels
         Set<String> channelList = new HashSet<>();
@@ -232,7 +232,7 @@ public class BotClient {
             try {
                 for (String channel : channels) {
                     joinChannel(channel);
-                    audioBroadcast.registerBrodcast(channel);
+                    System.out.println(audioBroadcast.registerBrodcast(channel));
                     Thread.sleep(250); // Prevent rate limit
                 }
             } catch (InterruptedException e) {
