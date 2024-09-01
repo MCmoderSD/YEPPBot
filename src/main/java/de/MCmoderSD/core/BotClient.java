@@ -103,7 +103,7 @@ public class BotClient {
         eventManager = client.getEventManager();
 
         // Init Audio Broadcast
-        audioBroadcast = new AudioBroadcast("localhost", 420);
+        audioBroadcast = new AudioBroadcast("MCmoderSD.de", 420);
         System.out.println(audioBroadcast.registerBrodcast(botName));
 
         // Join Channels
