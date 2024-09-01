@@ -27,6 +27,7 @@ public class Main {
     public static final String BOT_CONFIG = "/config/BotConfig.json";
     public static final String CHANNEL_LIST = "/config/Channel.list";
     public static final String MYSQL_CONFIG = "/database/mySQL.json";
+    public static final String HTTP_SERVER = "/config/HttpServer.json";
 
     // API Credentials
     public static final String OPENAi_CONFIG = "/api/ChatGPT.json";
@@ -37,6 +38,7 @@ public class Main {
     public static final String DEV_CONFIG = "/config/BotConfig.json.dev";
     public static final String DEV_LIST = "/config/Channel.list.dev";
     public static final String DEV_MYSQL = "/database/dev.json";
+    public static final String DEV_HTTP_SERVER = "/examples/HttpServer.json";
 
     // Utilities
     private final JsonUtility jsonUtility;
@@ -46,7 +48,8 @@ public class Main {
     private final Credentials credentials;
 
     // Arguments
-    private final Set<Argument> args;
+    public static String[] arguments;
+    private final HashSet<Argument> args;
 
     // Variables
     private BotClient botClient;
@@ -84,6 +87,7 @@ public class Main {
         String botConfigPath = null;
         String channelListPath = null;
         String mysqlConfigPath = null;
+        String httpServerPath = null;
 
         // API Paths
         String openAiConfigPath;
@@ -98,6 +102,9 @@ public class Main {
 
         // MySQL Config
         if (hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = args.get(args.indexOf("-mysqlconfig") + 1);
+
+        // Http Server
+        if (hasArg(Argument.HTTP_SERVER)) httpServerPath = args.get(args.indexOf("-httpserver") + 1);
 
         // OpenAi Config
         if (hasArg(Argument.OPENAi_CONFIG)) openAiConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
@@ -128,14 +135,19 @@ public class Main {
             if (botConfigPath == null) botConfigPath = DEV_CONFIG;
             if (channelListPath == null) channelListPath = DEV_LIST;
             if (mysqlConfigPath == null) mysqlConfigPath = DEV_MYSQL;
+            if (httpServerPath == null) httpServerPath = DEV_HTTP_SERVER;
         } else {
             if (botConfigPath == null) botConfigPath = BOT_CONFIG;
             if (channelListPath == null) channelListPath = CHANNEL_LIST;
             if (mysqlConfigPath == null) mysqlConfigPath = MYSQL_CONFIG;
+            if (httpServerPath == null) httpServerPath = HTTP_SERVER;
         }
 
+        // Custom Host and Port
+        if (hasArg(Argument.HOST) && hasArg(Argument.PORT)) arguments = new String[]{args.get(args.indexOf("-host") + 1), args.get(args.indexOf("-port") + 1)};
+
         // Initialize Credentials
-        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, openAiConfigPath, weatherConfigPath, giphyConfigPath);
+        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, httpServerPath, openAiConfigPath, weatherConfigPath, giphyConfigPath);
 
         // Initialize OpenAi
         if (credentials.validateOpenAiConfig()) openAi = new OpenAi(credentials.getOpenAiConfig());
@@ -158,6 +170,7 @@ public class Main {
 
     // PSVM
     public static void main(String[] args) {
+        arguments = args;
         new Main(new ArrayList<>(Arrays.asList(args)));
     }
 
@@ -165,7 +178,7 @@ public class Main {
     private void generateConfigFiles() {
 
         // Files
-        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "ChatGPT.json", "OpenWeatherMap.json", "Giphy.json"};
+        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "HttpServer.json", "ChatGPT.json", "OpenWeatherMap.json", "Giphy.json"};
 
         for (String fileName : fileNames) {
 
@@ -204,11 +217,11 @@ public class Main {
     }
 
     // Check Args
-    private Set<Argument> checkArgs(ArrayList<String> args) {
+    private HashSet<Argument> checkArgs(ArrayList<String> args) {
 
         // Variables
-        Set<String> arguments = new HashSet<>();
-        Set<Argument> result = new HashSet<>();
+        HashSet<String> arguments = new HashSet<>();
+        HashSet<Argument> result = new HashSet<>();
 
         // Format args
         for (String arg : args)
@@ -258,6 +271,7 @@ public class Main {
                             -botconfig: Path to Bot Config
                             -channellist: Path to Channel List
                             -mysqlconfig: Path to MySQL Config
+                            -httpserver: Path to Http Server Config
                         """);
 
         // API Config
@@ -316,9 +330,12 @@ public class Main {
         DEV("dev", "development", "debug", "test"),
         CLI("cli", "nogui", "console", "terminal"),
         LOG("nolog", "disablelog"),
+        HOST("host"),
+        PORT("port"),
         BOT_CONFIG("botconfig"),
         CHANNEL_LIST("channellist"),
         MYSQL_CONFIG("mysqlconfig"),
+        HTTP_SERVER("httpserver"),
         OPENAi_CONFIG("openaiconfig"),
         OPENWEATHERMAP_CONFIG("openweathermapconfig"),
         GIPHY_CONFIG("giphyconfig");

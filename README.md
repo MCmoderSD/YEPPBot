@@ -74,7 +74,7 @@ But remember **DON'T POST** or **SHARE** the token anywhere!!! <br> <br>
 
 You can download the latest version of the bot from the [releases](https://github.com/MCmoderSD/YEPPBot/releases/latest) page. <br>
 You can create the Config files yourself or use the ```-generate``` argument to create the config files. <br>
-You can skip to [Step 8](#8-compile-the-bot) if you use the downloaded jar file. <br> <br>
+You can skip to [Step 9](#9-compile-the-bot) if you use the downloaded jar file. <br> <br>
 
 You can also clone the repository and compile the bot yourself.
 For that need to have git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
@@ -252,13 +252,31 @@ The file should have the following structure: <br>
 You have to give the user full permission over the whole database. <br>
 If you don't want to use a database, you have to remove certain features from the source code. <br> <br>
 
-### 7. Add assets to the database
+
+### 7. HTTP Server
+
+The YEPPBot creates a simple HTTP server to broadcast sound over a browser page. <br>
+You need to create a file called ```httpserver.json``` in the ```/src/main/resources/config/``` folder. <br>
+The file should have the following structure: <br>
+
+```json
+{
+  "host": "localhost",
+  "port": "80"
+}
+```
+
+The host is the IP address of the server, the default host is localhost. <br>
+You can change the port to any port you want, but the default port is 80. <br> <br>
+
+
+### 8. Add assets to the database
 
 For the fact, insult and joke command you need to add the assets to the database. <br>
 You can import the existing ones to the database from the .tsv files in the ```/storage/assets/``` folder. <br> <br>
 You can also add your own assets to the database, just pay attention to the format. <br>
 
-### 8. Compile the bot
+### 9. Compile the bot
 
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
 ```java -jar NAME_OF_THE_JAR_FILE.jar``` 
@@ -281,6 +299,7 @@ For the configs you can use: <br>
 - ```-botconfig "/PATH/TO/BotConfig.json"``` argument to specify the path to the BotConfig.json file. <br>
 - ```-channellist "/PATH/TO/Channel.list"``` argument to specify the path to the Channel.list file. <br>
 - ```-mysqlconfig "/PATH/TO/mySQL.json"``` argument to specify the path to the mySQL.json file. <br>
+- ```-httpserver "/PATH/TO/httpserver.json"``` argument to specify the path to the httpserver.json file. <br>
 - ```-openaiconfig "/PATH/TO/ChatGPT.json"``` argument to specify the path to the ChatGPT.json file. <br>
 - ```-openweathermapconfig "/PATH/TO/OpenWeatherMap.json"``` argument to specify the path to the OpenWeatherMap.json file. <br>
 - ```-giphyconfig "/PATH/TO/Giphy.json"``` argument to specify the path to the Giphy.json file. <br> <br>

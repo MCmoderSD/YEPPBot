@@ -29,11 +29,14 @@ import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
-import de.MCmoderSD.utilities.other.AudioBroadcast;
+import de.MCmoderSD.utilities.HTTP.AudioBroadcast;
 import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.other.Reader;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.MCmoderSD.main.Main.Argument.*;
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -56,7 +59,7 @@ public class BotClient {
     // Constants
     public static String botName;
     public static String prefix;
-    public static Set<String> admins;
+    public static HashSet<String> admins;
 
     // Attributes
     private final TwitchClient client;
@@ -103,13 +106,18 @@ public class BotClient {
         eventManager = client.getEventManager();
 
         // Init Audio Broadcast
-        audioBroadcast = new AudioBroadcast("MCmoderSD.de", 420);
+        JsonNode httpServerConfig = credentials.getHttpServerConfig();
+        String hostname = hasArg(HOST) ? Main.arguments[0] : httpServerConfig.get("hostname").asText();
+        int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpServerConfig.get("port").asInt();
+        audioBroadcast = new AudioBroadcast(hostname, port);
         System.out.println(audioBroadcast.registerBrodcast(botName));
 
         // Join Channels
         Set<String> channelList = new HashSet<>();
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
         if (!hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
+        channelList = channelList.stream().map(String::toLowerCase).collect(Collectors.toSet());
+        channelList.remove(botName);
         joinChannel(channelList);
 
         // Event Handler
@@ -178,7 +186,7 @@ public class BotClient {
         return false;
     }
 
-    // Setter
+    // Write
     public void write(String channel, String message) {
 
         // Check Message
@@ -195,6 +203,7 @@ public class BotClient {
         chat.sendMessage(channel, message);
     }
 
+    // Respond
     public void respond(TwitchMessageEvent event, String command, String message) {
 
         // Variables
@@ -212,6 +221,7 @@ public class BotClient {
         if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
     }
 
+    // Send Audio
     public void sendAudio(TwitchMessageEvent event, AudioFile audioFile) {
 
         // Log
@@ -219,20 +229,38 @@ public class BotClient {
 
         // Play Audio
         audioBroadcast.play(event.getChannel(), audioFile);
+
+        // Update Frame
+        if (!hasArg(CLI)) audioFile.play();
     }
 
+    // Join Channel
     public void joinChannel(String channel) {
-        if (chat.isChannelJoined(channel) || botName.equals(channel)) return;
+
+        // Format Channel
+        channel = channel.toLowerCase();
+
+        // Check Channel
+        if (channel.isEmpty() || channel.isBlank()) return;
+        if (channel.length() < 3 || channel.length() > 25) return;
+        if (channel.contains(" ") || chat.isChannelJoined(channel) || botName.equals(channel)) return;
+
+        // Log
         System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+
+        // Join Channel
         chat.joinChannel(channel);
+
+        // Register Broadcast
+        audioBroadcast.registerBrodcast(channel);
     }
 
+    // Bulk Join
     public void joinChannel(Set<String> channels) {
         new Thread(() -> {
             try {
                 for (String channel : channels) {
                     joinChannel(channel);
-                    System.out.println(audioBroadcast.registerBrodcast(channel));
                     Thread.sleep(250); // Prevent rate limit
                 }
             } catch (InterruptedException e) {
@@ -241,12 +269,27 @@ public class BotClient {
         }).start();
     }
 
+    // Leave Channel
     public void leaveChannel(String channel) {
-        if (!chat.isChannelJoined(channel)) return;
-        System.out.printf("%s%s %s Leave Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
-        chat.leaveChannel(channel);
+
+        // Format Channel
+        channel = channel.toLowerCase();
+
+        // Check Channel
+        if (channel.isEmpty() || channel.isBlank()) return;
+        if (channel.length() < 3 || channel.length() > 25) return;
+        if (channel.contains(" ") || !chat.isChannelJoined(channel) || botName.equals(channel)) return;
+
+        // Leave Channel
+        if (chat.leaveChannel(channel)) System.out.printf("%s%s %s Left Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        else System.out.printf("%s%s %s Failed to Leave Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+
+        // Unregister Broadcast
+        if (audioBroadcast.unregisterBroadcast(channel)) System.out.printf("%s%s %s Unregistered Broadcast: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        else System.out.printf("%s%s %s Failed to Unregister Broadcast: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
     }
 
+    // Bulk Leave
     public void leaveChannel(Set<String> channels) {
         new Thread(() -> {
             try {

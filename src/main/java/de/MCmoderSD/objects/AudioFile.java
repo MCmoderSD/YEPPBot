@@ -2,84 +2,88 @@ package de.MCmoderSD.objects;
 
 import okhttp3.ResponseBody;
 
-import javax.sound.sampled.DataLine;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
-
 @SuppressWarnings("unused")
 public class AudioFile {
 
-    // Attributes
+    // Audio Data
     private final byte[] audioData;
     private final ByteArrayInputStream byteArrayInputStream;
-    private final AudioInputStream audioInputStream;
-    private final AudioFormat audioFormat;
-    private final DataLine.Info info;
-    private final SourceDataLine audioLine;
+
+    // Audio Components
+    private AudioInputStream audioInputStream;
+    private AudioFormat audioFormat;
+    private DataLine.Info info;
+    private SourceDataLine audioLine;
 
     // Byte array constructor
     public AudioFile(byte[] audioData) {
-        try {
-            this.audioData = audioData;
-            byteArrayInputStream = new ByteArrayInputStream(audioData);
-            audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
-            audioFormat = audioInputStream.getFormat();
-            info = new DataLine.Info(SourceDataLine.class, audioFormat);
-            audioLine = (SourceDataLine) AudioSystem.getLine(info);
-            audioLine.open(audioFormat);
-        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            handleAudioException(e);
-            throw new RuntimeException(e);
-        }
+
+        // Set audio data
+        this.audioData = audioData;
+        byteArrayInputStream = new ByteArrayInputStream(audioData);
+
+        // Initialize audio
+        initializeAudio();
     }
 
     // ResponseBody constructor
     public AudioFile(ResponseBody responseBody) {
         try {
+
+            // Get audio data
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byteArrayOutputStream.writeBytes(responseBody.bytes());
+
+            // Set audio data
             audioData = byteArrayOutputStream.toByteArray();
             byteArrayInputStream = new ByteArrayInputStream(audioData);
-            audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
-            audioFormat = audioInputStream.getFormat();
-            info = new DataLine.Info(SourceDataLine.class, audioFormat);
-            audioLine = (SourceDataLine) AudioSystem.getLine(info);
-            audioLine.open(audioFormat);
-        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            handleAudioException(e);
+
+            // Initialize audio
+            initializeAudio();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    // Method to handle audio exceptions and provide advice
-    private void handleAudioException(Exception e) {
-        System.err.println("Error creating audio file: " + e.getMessage());
-        if (e instanceof LineUnavailableException) {
-            System.err.printf("""
-                    
-                    
-                    Try installing:
-                        %ssudo apt install alsa-utils pulseaudio libasound2t64%s
-                    
-                    And add your user to the audio group:
-                        %ssudo usermod -aG audio $USER%s
-                    
-                    
-                    """, BOLD, UNBOLD, BOLD, UNBOLD);
+    // Initialize audio components
+    private void initializeAudio() {
+        try {
+
+            // Check if the system has an audio line
+            audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+            audioFormat = audioInputStream.getFormat();
+            info = new DataLine.Info(SourceDataLine.class, audioFormat);
+            if (AudioSystem.isLineSupported(info)) {
+                audioLine = (SourceDataLine) AudioSystem.getLine(info);
+                audioLine.open(audioFormat);
+            } else {
+                audioLine = null;
+                audioInputStream = null;
+                audioFormat = null;
+                info = null;
+            }
+        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            audioLine = null;
+            audioInputStream = null;
+            audioFormat = null;
+            info = null;
         }
     }
 
     // Play audio
     public void play() {
+        if (audioLine == null) return;
         new Thread(() -> {
             try {
 
@@ -96,6 +100,7 @@ public class AudioFile {
                 // Stop audio
                 audioLine.drain();
                 audioLine.stop();
+
             } catch (IOException e) {
                 System.err.println("Error playing audio: " + e.getMessage());
             }
@@ -103,20 +108,20 @@ public class AudioFile {
     }
 
     public void pause() {
-        audioLine.stop();
+        if (audioLine != null) audioLine.stop();
     }
 
     public void resume() {
-        audioLine.start();
+        if (audioLine != null) audioLine.start();
     }
 
     public void close() {
-        audioLine.close();
+        if (audioLine != null) audioLine.close();
     }
 
     public void reset() {
         try {
-            audioInputStream.reset();
+            if (audioInputStream != null) audioInputStream.reset();
         } catch (IOException e) {
             System.err.println("Error resetting audio: " + e.getMessage());
         }

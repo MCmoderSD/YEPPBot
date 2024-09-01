@@ -1,5 +1,6 @@
 package de.MCmoderSD.utilities.other;
 
+import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import javax.swing.JFrame;
@@ -10,6 +11,8 @@ import java.awt.Color;
 import java.sql.Timestamp;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 public class Calculate {
 
@@ -36,6 +39,9 @@ public class Calculate {
     public final static Color LIGHT = new Color(0x18181b);
     public final static Color PURPLE = new Color(0x771fe2);
     public final static Color WHITE = new Color(0xffffff);
+
+    // Utilities
+    public final static Random RANDOM = new Random();
 
     // Center JFrame
     public static Point centerJFrame(JFrame frame) {
@@ -114,6 +120,92 @@ public class Calculate {
     // Format OpenAI Response
     public static String formatOpenAiResponse(String response, String emote) {
         return removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + " "), emote), emote);
+    }
+
+    public static ArrayList<String> formatCommand(TwitchMessageEvent event) {
+
+        // Variables
+        String message = event.getMessage();
+
+        // Find Start
+        if (message.indexOf(BotClient.prefix) == 0) message = message.substring(1);
+        else message = message.substring(message.indexOf(" " + BotClient.prefix) + 2);
+
+        // Split Command
+        String[] split = trimMessage(message).split(" ");
+        return new ArrayList<>(Arrays.asList(split));
+    }
+
+    public static String formatCommand(TwitchMessageEvent event, ArrayList<String> args, String response) {
+
+        // Replace Variables
+        if (response.contains("%random%")) response = response.replaceAll("%random%", RANDOM.nextInt(100) + "%");
+        if (response.contains("%channel%")) response = response.replaceAll("%channel%", tagChannel(event));
+
+        if (response.contains("%user%") || response.contains("%author%")) {
+            response = response.replaceAll("%user%", tagUser(event));
+            response = response.replaceAll("%author%", tagUser(event));
+        }
+
+        if (response.contains("%tagged%")) {
+            String tagged;
+            if (!args.isEmpty()) tagged = args.getFirst().startsWith("@") ? args.getFirst() : "@" + args.getFirst();
+            else tagged = tagUser(event);
+            response = response.replaceAll("%tagged%", tagged);
+        }
+
+        return response;
+    }
+
+    public static String formatLurkTime(Timestamp startTime) {
+
+        // Variables
+        StringBuilder response = new StringBuilder();
+        long time = getTimestamp().getTime() - startTime.getTime();
+
+        // Years
+        long years = time / 31536000000L;
+        time %= 31536000000L;
+        if (years > 1) response.append(years).append(" Jahre, ");
+        else if (years > 0) response.append(years).append(" Jahr, ");
+
+        // Months
+        long months = time / 2592000000L;
+        time %= 2592000000L;
+        if (months > 1) response.append(months).append(" Monate, ");
+        else if (months > 0) response.append(months).append(" Monat, ");
+
+        // Weeks
+        long weeks = time / 604800000L;
+        time %= 604800000L;
+        if (weeks > 1) response.append(weeks).append(" Wochen, ");
+        else if (weeks > 0) response.append(weeks).append(" Woche, ");
+
+        // Days
+        long days = time / 86400000L;
+        time %= 86400000L;
+        if (days > 1) response.append(days).append(" Tage, ");
+        else if (days > 0) response.append(days).append(" Tag, ");
+
+        // Hours
+        long hours = time / 3600000L;
+        time %= 3600000L;
+        if (hours > 1) response.append(hours).append(" Stunden, ");
+        else if (hours > 0) response.append(hours).append(" Stunde, ");
+
+        // Minutes
+        long minutes = time / 60000L;
+        time %= 60000L;
+        if (minutes > 1) response.append(minutes).append(" Minuten, ");
+        else if (minutes > 0) response.append(minutes).append(" Minute, ");
+
+        // Seconds
+        long seconds = time / 1000L;
+        if (seconds > 1) response.append(seconds).append(" Sekunden, ");
+        else if (seconds > 0) response.append(seconds).append(" Sekunde, ");
+
+        // Return
+        return response.substring(0, response.length() - 2);
     }
 
     // Get Timestamp

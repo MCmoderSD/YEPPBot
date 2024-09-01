@@ -8,7 +8,10 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
+import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -23,14 +26,11 @@ public class MessageHandler {
     private final HashMap<String, Command> commandList;
     private final HashMap<String, String> aliasMap;
     private final HashMap<Integer, Integer> lurkList;
-    private final HashMap<Integer, Set<String>> blackList;
+    private final HashMap<Integer, HashSet<String>> blackList;
     private final HashMap<Integer, HashMap<String, String>> customCommands;
     private final HashMap<Integer, HashMap<String, String>> customAliases;
     private final HashMap<Integer, HashMap<String, Integer>> counters;
-    private final HashMap<Integer, Set<Timer>> customTimers;
-
-    // Utilities
-    private final Random random;
+    private final HashMap<Integer, HashSet<Timer>> customTimers;
 
     // Constructor
     public MessageHandler(BotClient botClient, MySQL mySQL, Frame frame) {
@@ -49,7 +49,6 @@ public class MessageHandler {
         customAliases = new HashMap<>();
         counters = new HashMap<>();
         customTimers = new HashMap<>();
-        random = new Random();
 
         // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
@@ -223,93 +222,6 @@ public class MessageHandler {
         }
     }
 
-    // Message Formatting
-    private ArrayList<String> formatCommand(TwitchMessageEvent event) {
-
-        // Variables
-        String message = event.getMessage();
-
-        // Find Start
-        if (message.indexOf(botClient.getPrefix()) == 0) message = message.substring(1);
-        else message = message.substring(message.indexOf(" " + botClient.getPrefix()) + 2);
-
-        // Split Command
-        String[] split = trimMessage(message).split(" ");
-        return new ArrayList<>(Arrays.asList(split));
-    }
-
-    private String formatCommand(TwitchMessageEvent event, ArrayList<String> args, String response) {
-
-        // Replace Variables
-        if (response.contains("%random%")) response = response.replaceAll("%random%", random.nextInt(100) + "%");
-        if (response.contains("%channel%")) response = response.replaceAll("%channel%", tagChannel(event));
-
-        if (response.contains("%user%") || response.contains("%author%")) {
-            response = response.replaceAll("%user%", tagUser(event));
-            response = response.replaceAll("%author%", tagUser(event));
-        }
-
-        if (response.contains("%tagged%")) {
-            String tagged;
-            if (!args.isEmpty()) tagged = args.getFirst().startsWith("@") ? args.getFirst() : "@" + args.getFirst();
-            else tagged = tagUser(event);
-            response = response.replaceAll("%tagged%", tagged);
-        }
-
-        return response;
-    }
-
-    private String formatLurkTime(Timestamp startTime) {
-
-        // Variables
-        StringBuilder response = new StringBuilder();
-        long time = getTimestamp().getTime() - startTime.getTime();
-
-        // Years
-        long years = time / 31536000000L;
-        time %= 31536000000L;
-        if (years > 1) response.append(years).append(" Jahre, ");
-        else if (years > 0) response.append(years).append(" Jahr, ");
-
-        // Months
-        long months = time / 2592000000L;
-        time %= 2592000000L;
-        if (months > 1) response.append(months).append(" Monate, ");
-        else if (months > 0) response.append(months).append(" Monat, ");
-
-        // Weeks
-        long weeks = time / 604800000L;
-        time %= 604800000L;
-        if (weeks > 1) response.append(weeks).append(" Wochen, ");
-        else if (weeks > 0) response.append(weeks).append(" Woche, ");
-
-        // Days
-        long days = time / 86400000L;
-        time %= 86400000L;
-        if (days > 1) response.append(days).append(" Tage, ");
-        else if (days > 0) response.append(days).append(" Tag, ");
-
-        // Hours
-        long hours = time / 3600000L;
-        time %= 3600000L;
-        if (hours > 1) response.append(hours).append(" Stunden, ");
-        else if (hours > 0) response.append(hours).append(" Stunde, ");
-
-        // Minutes
-        long minutes = time / 60000L;
-        time %= 60000L;
-        if (minutes > 1) response.append(minutes).append(" Minuten, ");
-        else if (minutes > 0) response.append(minutes).append(" Minute, ");
-
-        // Seconds
-        long seconds = time / 1000L;
-        if (seconds > 1) response.append(seconds).append(" Sekunden, ");
-        else if (seconds > 0) response.append(seconds).append(" Sekunde, ");
-
-        // Return
-        return response.substring(0, response.length() - 2);
-    }
-
     // Register Command
     public void addCommand(Command command) {
 
@@ -328,7 +240,7 @@ public class MessageHandler {
     }
 
     // Update Black List
-    public void updateBlackList(HashMap<Integer, Set<String>> blackList) {
+    public void updateBlackList(HashMap<Integer, HashSet<String>> blackList) {
         this.blackList.clear();
         this.blackList.putAll(blackList);
     }
@@ -348,12 +260,12 @@ public class MessageHandler {
     }
 
     // Update Custom Timers
-    public void updateCustomTimers(HashMap<Integer, Set<Timer>> customTimers) {
+    public void updateCustomTimers(HashMap<Integer, HashSet<Timer>> customTimers) {
         this.customTimers.clear();
         this.customTimers.putAll(customTimers);
     }
 
-    public void updateCustomTimers(int channelID, Set<Timer> customTimers) {
+    public void updateCustomTimers(int channelID, HashSet<Timer> customTimers) {
         this.customTimers.replace(channelID, customTimers);
     }
 

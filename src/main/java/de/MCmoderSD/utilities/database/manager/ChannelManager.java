@@ -59,10 +59,10 @@ public class ChannelManager {
     }
 
     // Get Black List
-    public HashMap<Integer, Set<String>> getBlackList() {
+    public HashMap<Integer, HashSet<String>> getBlackList() {
 
         // Variables
-        HashMap<Integer, Set<String>> blackList = new HashMap<>();
+        HashMap<Integer, HashSet<String>> blackList = new HashMap<>();
 
         try {
             if (!mySQL.isConnected()) mySQL.connect();

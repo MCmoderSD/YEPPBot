@@ -5,16 +5,17 @@ import de.MCmoderSD.main.Main.Argument;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+@SuppressWarnings("unused")
 public class Credentials {
 
     // Bot Credentials
     private JsonNode botConfig;
     private Set<String> channelList;
     private JsonNode mySQLConfig;
+    private JsonNode httpServerConfig;
 
     // API Cials
     private JsonNode openAiConfig;
@@ -22,7 +23,7 @@ public class Credentials {
     private JsonNode giphyConfig;
 
     // Constructor
-    public Credentials(Main main, String botConfig, String channelList, String mySQL, String openAi, String weather, String giphy) {
+    public Credentials(Main main, String botConfig, String channelList, String mySQL, String httpServer, String openAi, String weather, String giphy) {
 
         // Get Utilities
         JsonUtility jsonUtility = main.getJsonUtility();
@@ -49,6 +50,13 @@ public class Credentials {
         } catch (Exception e) {
             System.err.println("Error loading MySQL Config: " + e.getMessage());
             System.exit(1);
+        }
+
+        // Load Http Server Config
+        try {
+            if (!(main.hasArg(Argument.HOST) && main.hasArg(Argument.PORT))) this.httpServerConfig = jsonUtility.load(httpServer, main.hasArg(Argument.HTTP_SERVER));
+        } catch (Exception e) {
+            System.err.println("Error loading Http Server Config: " + e.getMessage());
         }
 
         // Load OpenAi Config
@@ -87,6 +95,10 @@ public class Credentials {
         return mySQLConfig;
     }
 
+    public JsonNode getHttpServerConfig() {
+        return httpServerConfig;
+    }
+
     public JsonNode getOpenAiConfig() {
         return openAiConfig;
     }
@@ -110,6 +122,10 @@ public class Credentials {
 
     public boolean validateMySQLConfig() {
         return mySQLConfig != null;
+    }
+
+    public boolean validateHttpServerConfig() {
+        return httpServerConfig != null;
     }
 
     public boolean validateOpenAiConfig() {

@@ -411,10 +411,10 @@ public class CustomManager {
     }
 
     // Get All Custom Timers
-    public HashMap<Integer, Set<Timer>> getCustomTimers(BotClient botClient) {
+    public HashMap<Integer, HashSet<Timer>> getCustomTimers(BotClient botClient) {
 
         // Variables
-        HashMap<Integer, Set<Timer>> customTimers = new HashMap<>();
+        HashMap<Integer, HashSet<Timer>> customTimers = new HashMap<>();
 
         // Get CustomTimers
         try {
@@ -477,10 +477,10 @@ public class CustomManager {
     }
 
     // Get Active Custom Commands
-    public Set<Timer> getActiveCustomTimers(TwitchMessageEvent event, BotClient botClient) {
+    public HashSet<Timer> getActiveCustomTimers(TwitchMessageEvent event, BotClient botClient) {
 
         // Variables
-        Set<Timer> customTimers = new HashSet<>();
+        HashSet<Timer> customTimers = new HashSet<>();
 
         // Get Custom Timers
         try {

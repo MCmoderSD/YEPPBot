@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 @SuppressWarnings("unused")
 public class OpenAi {
@@ -534,7 +533,7 @@ public class OpenAi {
         GPT_4O_MINI_2024_07_18("gpt-4o-mini-2024-07-18", 0.00015, 0.0006);
 
         // Attributes
-        private final Set<String> models;
+        private final HashSet<String> models;
         private final double minTemperature;
         private final double maxTemperature;
         private final double minTopP;
@@ -585,7 +584,7 @@ public class OpenAi {
         }
 
         // Getter
-        public Set<String> getModels() {
+        public HashSet<String> getModels() {
             return models;
         }
 
@@ -674,13 +673,13 @@ public class OpenAi {
         TTS_HD("tts-1-hd", 0.03);
 
         // Attributes
-        private final Set<String> models;
+        private final HashSet<String> models;
         private final int maxCharacters;
-        private final Set<String> voices;
-        private final Set<String> formats;
+        private final HashSet<String> voices;
+        private final HashSet<String> formats;
         private final double minSpeed;
         private final double maxSpeed;
-        private final Set<String> languages;
+        private final HashSet<String> languages;
         private final String model;
         private final BigDecimal price;
 
@@ -787,7 +786,7 @@ public class OpenAi {
         }
 
         // Getter
-        public Set<String> getModels() {
+        public HashSet<String> getModels() {
             return models;
         }
 
@@ -795,11 +794,11 @@ public class OpenAi {
             return maxCharacters;
         }
 
-        public Set<String> getVoices() {
+        public HashSet<String> getVoices() {
             return voices;
         }
 
-        public Set<String> getFormats() {
+        public HashSet<String> getFormats() {
             return formats;
         }
 
@@ -811,7 +810,7 @@ public class OpenAi {
             return maxSpeed;
         }
 
-        public Set<String> getLanguages() {
+        public HashSet<String> getLanguages() {
             return languages;
         }
 
