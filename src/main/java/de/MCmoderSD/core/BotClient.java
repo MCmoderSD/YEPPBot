@@ -156,7 +156,7 @@ public class BotClient {
         new Status(this, messageHandler);
         if (openAIChat) new Translate(this, messageHandler, main.getOpenAI());
         if (openAITTS) new TTS(this, messageHandler, main.getOpenAI());
-        if (openAIChat && weather) new Weather(this, messageHandler, main.getOpenAI(), main.getCredentials());
+        if (openAIChat && weather) new Weather(this, messageHandler, main.getOpenAI(), credentials);
         new Whitelist(this, messageHandler, mySQL);
         if (openAIChat) new Wiki(this, messageHandler, main.getOpenAI());
 

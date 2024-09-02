@@ -67,7 +67,7 @@ public class Credentials {
             openAIConfig = jsonUtility.load(openAI, main.hasArg(Argument.OPENAI_CONFIG));
             if (openAIConfig.has("chat")) openAIChatConfig = openAIConfig.get("chat");
             if (openAIConfig.has("image")) openAIImageConfig = openAIConfig.get("image");
-            if (openAIConfig.has("tts")) openAITTSConfig = openAIConfig.get("tts");
+            if (openAIConfig.has("speech")) openAITTSConfig = openAIConfig.get("speech");
         } catch (Exception e) {
             System.err.println("Error loading OpenAI Config: " + e.getMessage());
         }
