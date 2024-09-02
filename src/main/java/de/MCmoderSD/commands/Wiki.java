@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.other.OpenAi;
+
+import de.MCmoderSD.utilities.OpenAI.OpenAI;
+import de.MCmoderSD.utilities.OpenAI.modules.Chat;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -29,7 +31,7 @@ public class Wiki {
     private final double presencePenalty;
 
     // Constructor
-    public Wiki(BotClient botClient, MessageHandler messageHandler, OpenAi openAi) {
+    public Wiki(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "wiki <Thema>";
@@ -38,13 +40,16 @@ public class Wiki {
         String[] name = {"wiki", "wikipedia", "summarize", "zusammenfassung"};
         String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. " + syntax;
 
-        // Load Config
-        JsonNode config = openAi.getConfig();
+        // Get Chat Module and Config
+        Chat chat = openAI.getChat();
+        JsonNode config = chat.getConfig();
+
+        // Get Parameters
         temperature = 0;
         maxTokens = config.get("maxTokens").asInt();
-        topP = openAi.getConfig().get("topP").asDouble();
-        frequencyPenalty = openAi.getConfig().get("frequencyPenalty").asDouble();
-        presencePenalty = openAi.getConfig().get("presencePenalty").asDouble();
+        topP = config.get("topP").asDouble();
+        frequencyPenalty = config.get("frequencyPenalty").asDouble();
+        presencePenalty = config.get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -68,7 +73,7 @@ public class Wiki {
 
                         // Check if summary is too long
                         if (summary.length() <= 500) response = summary;
-                        else response = trimMessage(openAi.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
+                        else response = trimMessage(chat.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
 
                     } catch (IOException e) {
                         response = trimMessage("Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage());

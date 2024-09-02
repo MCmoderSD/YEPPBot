@@ -118,7 +118,7 @@ public class Calculate {
     }
 
     // Format OpenAI Response
-    public static String formatOpenAiResponse(String response, String emote) {
+    public static String formatOpenAIResponse(String response, String emote) {
         return removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + " "), emote), emote);
     }
 

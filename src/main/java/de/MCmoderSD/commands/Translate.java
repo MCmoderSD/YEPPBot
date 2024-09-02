@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.other.OpenAi;
+import de.MCmoderSD.utilities.OpenAI.OpenAI;
+import de.MCmoderSD.utilities.OpenAI.modules.Chat;
 
 import java.util.ArrayList;
 
@@ -21,7 +22,7 @@ public class Translate {
     private final double presencePenalty;
 
     // Constructor
-    public Translate(BotClient botClient, MessageHandler messageHandler, OpenAi openAi) {
+    public Translate(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "translate <Sprache> <Text>";
@@ -31,7 +32,10 @@ public class Translate {
         String description = "Kann deine Sätze in jede erdenkliche Sprache übersetzen. " + syntax;
 
         // Load Config
-        JsonNode config = openAi.getConfig();
+        Chat chat = openAI.getChat();
+        JsonNode config = chat.getConfig();
+
+        // Get Parameters
         temperature = 0;
         maxTokens = config.get("maxTokens").asInt();
         topP = config.get("topP").asDouble();
@@ -56,7 +60,7 @@ public class Translate {
                     String instruction = trimMessage("Please translate the following text into " + language + ":");
 
                     // Translate
-                    response = openAi.prompt(botClient.getBotName(), instruction, text, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
+                    response = chat.prompt(botClient.getBotName(), instruction, text, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
                 }
 
                 // Send Message

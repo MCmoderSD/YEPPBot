@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@SuppressWarnings("HttpUrlsUsage")
 public class FrontendHandler implements HttpHandler {
 
     // Constants

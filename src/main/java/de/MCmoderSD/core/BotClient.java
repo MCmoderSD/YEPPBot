@@ -129,12 +129,15 @@ public class BotClient {
         eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
 
         // Validate Configs
-        boolean openAi = credentials.validateOpenAiConfig();
+        boolean openAI = credentials.validateOpenAIConfig();
+        boolean openAIChat = credentials.validateOpenAIChatConfig();
+        boolean openAIImage = credentials.validateOpenAIImageConfig();
+        boolean openAITTS = credentials.validateOpenAITTSConfig();
         boolean weather = credentials.validateWeatherConfig();
         boolean giphy = credentials.validateGiphyConfig();
 
         // Initialize Commands
-        if (openAi) new Conversation(this, messageHandler, main.getOpenAi());
+        if (openAIChat) new Conversation(this, messageHandler, main.getOpenAI());
         new Counter(this, messageHandler, mySQL);
         new CustomCommand(this, messageHandler, mySQL);
         new CustomTimers(this, messageHandler, mySQL);
@@ -148,14 +151,14 @@ public class BotClient {
         new Moderate(this, messageHandler, mySQL);
         new Ping(this, messageHandler);
         new Play(this, messageHandler);
-        if (openAi) new Prompt(this, messageHandler, main.getOpenAi());
+        if (openAIChat) new Prompt(this, messageHandler, main.getOpenAI());
         new Say(this, messageHandler);
         new Status(this, messageHandler);
-        if (openAi) new Translate(this, messageHandler, main.getOpenAi());
-        if (openAi) new TTS(this, messageHandler, main.getOpenAi());
-        if (openAi && weather) new Weather(this, messageHandler, main.getOpenAi(), main.getCredentials());
+        if (openAIChat) new Translate(this, messageHandler, main.getOpenAI());
+        if (openAITTS) new TTS(this, messageHandler, main.getOpenAI());
+        if (openAIChat && weather) new Weather(this, messageHandler, main.getOpenAI(), main.getCredentials());
         new Whitelist(this, messageHandler, mySQL);
-        if (openAi) new Wiki(this, messageHandler, main.getOpenAi());
+        if (openAIChat) new Wiki(this, messageHandler, main.getOpenAI());
 
         // Initialize LogManager
         LogManager logManager = mySQL.getLogManager();

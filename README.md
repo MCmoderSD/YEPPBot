@@ -108,32 +108,48 @@ You can add as many channels as you want.
 
 ### 3. Add a ChatGPT API key
 
+You only need to configure the module if you want to use, if you for example doesn't want to use the image module, you can just delete the image part of the config. <br>
 You need to create a file called ```ChatGPT.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
 
 ```json
 {
   "apiKey": "YOUR_API_KEY",
-  "chatModel": "gpt-4o-mini-2024-07-18",
-  "ttsModel": "tts-1",
-  "voice": "onyx",
-  "speed": 1,
-  "format": "wav",
-  "maxConversationCalls": 6,
-  "maxTokenSpendingLimit": 8192,
-  "temperature": 1,
-  "maxTokens": 120,
-  "topP": 1,
-  "frequencyPenalty": 0,
-  "presencePenalty": 0,
-  "instruction": "You are the best TwitchBot that ever existed!"
+
+  "chat": {
+    "chatModel": "gpt-4o-mini-2024-07-18",
+    "maxConversationCalls": 10,
+    "maxTokenSpendingLimit": 8192,
+    "temperature": 1,
+    "maxTokens": 120,
+    "topP": 1,
+    "frequencyPenalty": 0,
+    "presencePenalty": 0,
+    "instruction": "You are the best TwitchBot that ever existed!"
+  },
+
+  "image": {
+    "imageModel": "dall-e-2",
+    "quality": "standart",
+    "resolution": "1024x1024",
+    "style": "vivid"
+  },
+
+  "speech": {
+    "ttsModel": "tts-1",
+    "voice": "alloy",
+    "speed": 1,
+    "format": "wav"
+  }
 }
 ```
 
 You can get the API key from [OpenAI](https://platform.openai.com/signup). <br>
 
-- The **model** is the model that the bot will use to generate the text. <br>
-The available models are: <br>
+
+### Chat Configuration
+- The **chatModel** is the model that the bot will use to generate the text. <br>
+  The available models are: <br>
 
 | **Model**              | **Pricing**                                               | 
 |:-----------------------|:----------------------------------------------------------|
@@ -142,27 +158,6 @@ The available models are: <br>
 | gpt-4o-2024-05-13      | $5.00 / 1M input tokens <br/> \$15.00 / 1M output tokens  |
 | gpt-4o-mini            | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
 | gpt-4o-mini-2024-07-18 | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
-
-
-- The **ttsModel** is the model that the bot will use to generate the speech. <br>
-  The available models are: <br>
-
-| **Model** | **Pricing**            | 
-|:----------|:-----------------------|
-| tts-1     | $15.00 / 1M characters |
-| tts-1-hd  | $30.00 / 1M characters |
-
-
-- The **voice** is the voice that the bot will use to generate the speech. <br>
-  The available voices are alloy, echo, fable, onyx, nova, and shimmer. <br>
-
-
-- The **format** is the format of the audio file. <br>
-  The available formats are mp3, opus, aac, flac, wav, and pcm. <br>
-
-
-- The **speed** is the speed of the speech. <br>
-  The min value is 0.25 and the max value is 4, the default value is 1. <br>
 
 
 - The **maxConversationCalls** is the limit of calls per conversation. <br>
@@ -174,34 +169,89 @@ The available models are: <br>
 
 
 - The **temperature** is the randomness of the text. <br>
-Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive. <br>
-Higher temperature results in more random completions. <br>
-The min value is 0 and the max value is 2. <br>
+  Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic
+  and repetitive. <br>
+  Higher temperature results in more random completions. <br>
+  The min value is 0 and the max value is 2. <br>
 
 
 - The **maxTokens** is the maximum length of the response text. <br>
-One token is roughly 4 characters for standard English text. <br>
-The limit is 16383 tokens, but it's recommended to use a value that is suitable for the use, on Twitch the message limit is 500 characters.
-If you divide the limit by 4, you an estimate the number of characters. <br>
+  One token is roughly 4 characters for standard English text. <br>
+  The limit is 16383 tokens, but it's recommended to use a value that is suitable for the use, on Twitch the message
+  limit is 500 characters.
+  If you divide the limit by 4, you an estimate the number of characters. <br>
 
 
 - The **topP** is the nucleus sampling. <br>
-The lower the value, the more plain the text will be. <br>
-The higher the value, the more creative the text will be. <br>
-The min value is 0 and the max value is 1. <br>
+  The lower the value, the more plain the text will be. <br>
+  The higher the value, the more creative the text will be. <br>
+  The min value is 0 and the max value is 1. <br>
 
 
 - The **frequencyPenalty** reduces the likelihood of repeating the same words in a response.
-The higher the value, the less the bot will repeat itself. <br>
-The min value is 0 and the max value is 1. <br>
+  The higher the value, the less the bot will repeat itself. <br>
+  The min value is 0 and the max value is 1. <br>
 
 
-- The **presencePenalty** reduces the likelihood of mentioning words that have already appeared in the conversation. <br>
-The higher the value, the less the bot will repeat itself. <br>
-The min value is 0 and the max value is 1. <br>
+- The **presencePenalty** reduces the likelihood of mentioning words that have already appeared in the
+  conversation. <br>
+  The higher the value, the less the bot will repeat itself. <br>
+  The min value is 0 and the max value is 1. <br>
 
 
-- The **instruction** is the way the bot should behave and how he should reply to the prompt. <br> <br>
+- The **instruction** is the way the bot should behave and how he should reply to the prompt.
+
+
+### Image Configuration
+
+- The **imageModel** is the model that the bot will use to generate the image. <br>
+  The available models are: <br>
+
+| **Model** | **Quality** | **Resolution**                     | **Pricing**                                             |
+|:----------|:-----------:|:-----------------------------------|:--------------------------------------------------------|
+| dall-e-2  |             | 256x256<br/>512x512<br/>1024x1024  | \$0.016 / Image<br/>\$0.018 / Image<br/> $0.020 / Image |
+| dall-e-3  |  standart   | 1024x1024<br/>1024x1792, 1792×1024 | \$0.040 / Image<br/>\$0.080 / Image                     |
+| dall-e-3  |     hd      | 1024x1024<br/>1024x1792, 1792×1024 | \$0.080 / Image<br/>\$0.120 / Image                     |
+
+
+- The **quality** is the quality of the image. <br>
+  The available qualities are standart and hd. <br>
+  The quality is only available for dall-e-3. <br>
+
+
+- The **resolution** is the resolution of the image. <br>
+  The available resolutions are 256x256, 512x512, 1024x1024, 1024x1792, and 1792x1024. <br>
+  The resolution 1024x1024 is available for all models. <br>
+  The resolution 256x256 and 512x512 are only available for dall-e-2. <br>
+  The resolution 1024x1792 and 1792x1024 are only available for dall-e-3. <br>
+
+
+- The **style** is the style of the image. <br>
+  The available styles are vivid and natural. <br>
+  The style is only available for dall-e-3. <br>
+  The default style is vivid. <br>
+
+
+### Speech Configuration
+
+- The **ttsModel** is the model that the bot will use to generate the speech. <br>
+  The available models are: <br>
+
+| **Model** | **Pricing**            | 
+|:----------|:-----------------------|
+| tts-1     | $15.00 / 1M characters |
+| tts-1-hd  | $30.00 / 1M characters |
+
+- The **voice** is the voice that the bot will use to generate the speech. <br>
+  The available voices are alloy, echo, fable, onyx, nova, and shimmer. <br>
+
+
+- The **format** is the format of the audio file. <br>
+  The available formats are mp3, opus, aac, flac, wav, and pcm. <br>
+
+
+- The **speed** is the speed of the speech. <br>
+  The min value is 0.25 and the max value is 4, the default value is 1. <br> <br>
 
 ### 4. Add an OpenWeatherMap API key
 You need to create a file called ```OpenWeatherMap.json``` in the ```/src/main/resources/api/``` folder. <br>

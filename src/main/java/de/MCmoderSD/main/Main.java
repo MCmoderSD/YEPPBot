@@ -2,9 +2,9 @@ package de.MCmoderSD.main;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.utilities.OpenAI.OpenAI;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonUtility;
-import de.MCmoderSD.utilities.other.OpenAi;
 import de.MCmoderSD.utilities.other.Reader;
 
 import java.awt.HeadlessException;
@@ -30,7 +30,7 @@ public class Main {
     public static final String HTTP_SERVER = "/config/HttpServer.json";
 
     // API Credentials
-    public static final String OPENAi_CONFIG = "/api/ChatGPT.json";
+    public static final String OPENAI_CONFIG = "/api/ChatGPT.json";
     public static final String WEATHER_CONFIG = "/api/OpenWeatherMap.json";
     public static final String GIPHY_CONFIG = "/api/Giphy.json";
 
@@ -55,7 +55,7 @@ public class Main {
     private BotClient botClient;
     private Frame frame;
     private MySQL mySQL;
-    private OpenAi openAi;
+    private OpenAI openAI;
 
     // Constructor
     public Main(ArrayList<String> args) {
@@ -90,7 +90,7 @@ public class Main {
         String httpServerPath = null;
 
         // API Paths
-        String openAiConfigPath;
+        String openAIConfigPath;
         String weatherConfigPath;
         String giphyConfigPath;
 
@@ -106,9 +106,9 @@ public class Main {
         // Http Server
         if (hasArg(Argument.HTTP_SERVER)) httpServerPath = args.get(args.indexOf("-httpserver") + 1);
 
-        // OpenAi Config
-        if (hasArg(Argument.OPENAi_CONFIG)) openAiConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
-        else openAiConfigPath = OPENAi_CONFIG;
+        // OpenAI Config
+        if (hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
+        else openAIConfigPath = OPENAI_CONFIG;
 
         // Weather Config
         if (hasArg(Argument.OPENWEATHERMAP_CONFIG))
@@ -147,11 +147,11 @@ public class Main {
         if (hasArg(Argument.HOST) && hasArg(Argument.PORT)) arguments = new String[]{args.get(args.indexOf("-host") + 1), args.get(args.indexOf("-port") + 1)};
 
         // Initialize Credentials
-        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, httpServerPath, openAiConfigPath, weatherConfigPath, giphyConfigPath);
+        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, httpServerPath, openAIConfigPath, weatherConfigPath, giphyConfigPath);
 
-        // Initialize OpenAi
-        if (credentials.validateOpenAiConfig()) openAi = new OpenAi(credentials.getOpenAiConfig());
-        else System.err.println(BOLD + "OpenAi Config missing: " + UNBOLD + "OpenAi will not be available");
+        // Initialize OpenAI
+        if (credentials.validateOpenAIConfig()) openAI = new OpenAI(credentials.getOpenAIConfig());
+        else System.err.println(BOLD + "OpenAI Config missing: " + UNBOLD + "OpenAI will not be available");
 
         // Initialize MySQL
         if (credentials.validateMySQLConfig()) mySQL = new MySQL(this);
@@ -278,7 +278,7 @@ public class Main {
         System.out.println(
                         """
                         API Config:
-                            -openaiconfig: Path to OpenAi Config
+                            -openaiconfig: Path to OpenAI Config
                             -openweathermap: Path to Weather Config
                             -giphyconfig: Path to Giphy Config
                         """);
@@ -300,8 +300,8 @@ public class Main {
         return mySQL;
     }
 
-    public OpenAi getOpenAi() {
-        return openAi;
+    public OpenAI getOpenAI() {
+        return openAI;
     }
 
     public Credentials getCredentials() {
@@ -336,7 +336,7 @@ public class Main {
         CHANNEL_LIST("channellist"),
         MYSQL_CONFIG("mysqlconfig"),
         HTTP_SERVER("httpserver"),
-        OPENAi_CONFIG("openaiconfig"),
+        OPENAI_CONFIG("openaiconfig"),
         OPENWEATHERMAP_CONFIG("openweathermapconfig"),
         GIPHY_CONFIG("giphyconfig");
 
