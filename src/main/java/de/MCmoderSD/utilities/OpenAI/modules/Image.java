@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.theokanning.openai.image.CreateImageRequest;
 import com.theokanning.openai.image.ImageResult;
 import com.theokanning.openai.service.OpenAiService;
-
 import de.MCmoderSD.utilities.OpenAI.enums.ImageModel;
 
 import java.math.BigDecimal;
@@ -44,7 +43,6 @@ public class Image {
                 .style(style)               // Style
                 .build();                   // Build
 
-
         // Result
         return service.createImage(request);
     }
@@ -60,7 +58,6 @@ public class Image {
                 .n(amount)                  // Amount
                 .size(resolution)           // Resolution
                 .build();                   // Build
-
 
         // Result
         return service.createImage(request);

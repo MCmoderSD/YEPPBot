@@ -4,16 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.OpenAI.OpenAI;
 import de.MCmoderSD.utilities.OpenAI.modules.Speech;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.ArrayList;
 
 public class TTS {
 
     // Constructor
-    public TTS(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
+    public TTS(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, OpenAI openAI) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "prompt <Frage>";
@@ -44,8 +46,13 @@ public class TTS {
                 String currentVoice = voice;
                 for (String arg : args) if (speech.getModel().checkVoice(arg.toLowerCase())) currentVoice = arg;
 
-                // Send Message
-                botClient.sendAudio(event, speech.tts(event.getMessage(), currentVoice, format, speed));
+                String message = event.getMessage();
+
+                AudioFile audioFile = mySQL.getAssetManager().getTTSAudio(message);
+                if (audioFile == null) speech.tts(event.getMessage(), currentVoice, format, speed);
+
+                // Send Audio
+                botClient.sendAudio(event, audioFile);
             }
         });
     }

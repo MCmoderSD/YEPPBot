@@ -2,7 +2,6 @@ package de.MCmoderSD.utilities.OpenAI;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.theokanning.openai.service.OpenAiService;
-
 import de.MCmoderSD.utilities.OpenAI.enums.ChatModel;
 import de.MCmoderSD.utilities.OpenAI.enums.ImageModel;
 import de.MCmoderSD.utilities.OpenAI.enums.TTSModel;

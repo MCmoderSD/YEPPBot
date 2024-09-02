@@ -26,10 +26,10 @@ import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
+import de.MCmoderSD.utilities.HTTP.AudioBroadcast;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
-import de.MCmoderSD.utilities.HTTP.AudioBroadcast;
 import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.other.Reader;
 
@@ -89,6 +89,12 @@ public class BotClient {
         // Init Encryption
         encryption = new Encryption(botConfig);
 
+        // Init Server
+        JsonNode httpServerConfig = credentials.getHttpServerConfig();
+        String hostname = hasArg(HOST) ? Main.arguments[0] : httpServerConfig.get("hostname").asText();
+        int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpServerConfig.get("port").asInt();
+
+
         // Init Bot Credential
         OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
 
@@ -106,9 +112,6 @@ public class BotClient {
         eventManager = client.getEventManager();
 
         // Init Audio Broadcast
-        JsonNode httpServerConfig = credentials.getHttpServerConfig();
-        String hostname = hasArg(HOST) ? Main.arguments[0] : httpServerConfig.get("hostname").asText();
-        int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpServerConfig.get("port").asInt();
         audioBroadcast = new AudioBroadcast(hostname, port);
         System.out.println(audioBroadcast.registerBrodcast(botName));
 
@@ -155,7 +158,7 @@ public class BotClient {
         new Say(this, messageHandler);
         new Status(this, messageHandler);
         if (openAIChat) new Translate(this, messageHandler, main.getOpenAI());
-        if (openAITTS) new TTS(this, messageHandler, main.getOpenAI());
+        if (openAITTS) new TTS(this, messageHandler, mySQL, main.getOpenAI());
         if (openAIChat && weather) new Weather(this, messageHandler, main.getOpenAI(), credentials);
         new Whitelist(this, messageHandler, mySQL);
         if (openAIChat) new Wiki(this, messageHandler, main.getOpenAI());
@@ -311,6 +314,10 @@ public class BotClient {
     }
 
     // Getter
+    public JsonNode getConfig() {
+        return main.getCredentials().getBotConfig();
+    }
+
     public String getBotName() {
         return botName;
     }

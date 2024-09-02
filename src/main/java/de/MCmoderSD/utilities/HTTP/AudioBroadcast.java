@@ -59,7 +59,7 @@ public class AudioBroadcast {
         HashSet<HttpContext> contexts = new HashSet<>();
 
         // Add Contexts
-        contexts.add(server.createContext("/" + broadcastId, new FrontendHandler(broadcastId, hostname, port)));
+        contexts.add(server.createContext("/" + broadcastId, new FrontendHandler(broadcastId)));
         contexts.add(server.createContext("/audio/" + broadcastId, new AudioHandler(broadcastId)));
         contexts.add(server.createContext("/version/" + broadcastId, new VersionHandler(broadcastId)));
 
@@ -86,6 +86,52 @@ public class AudioBroadcast {
         audioFiles.put(broadcastId, audioFile.getAudioData());
         versions.get(broadcastId).incrementAndGet();
         return true;
+    }
+
+    // Frontend Handler
+    private class FrontendHandler implements HttpHandler {
+
+        // Attributes
+        private final String broadcastId;
+
+        // Constructor
+        public FrontendHandler(String broadcastId) {
+            this.broadcastId = broadcastId;
+        }
+
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String html = String.format("""
+                    <html>
+                        <body style='margin:0; padding:0; overflow:hidden;'>
+                           <audio id="audi" autoplay="true" src="http://%s:%d/audio/%s" type="audio/wav">
+                            <script>
+                                function checkForUpdate() {
+                                    fetch('/version/%s')
+                                        .then(response => response.text())
+                                        .then(version => {
+                                            if (localStorage.getItem('audioVersion') !== version) {
+                                                localStorage.setItem('audioVersion', version);
+                                                window.location.reload();
+                                            }
+                                        });
+                                }
+                                function updateLoop() {
+                                    setInterval(checkForUpdate, 1000);
+                                }
+                    
+                                window.onload = updateLoop;
+                            </script>
+                        </body>
+                    </html>
+                    """, hostname, port, broadcastId, broadcastId);
+
+            exchange.getResponseHeaders().set("Content-Type", "text/html");
+            exchange.sendResponseHeaders(200, html.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(html.getBytes());
+            os.close();
+        }
     }
 
     // Audio Handler

@@ -1,5 +1,6 @@
 package de.MCmoderSD.utilities.database.manager;
 
+import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.other.Reader;
 
@@ -490,5 +491,23 @@ public class AssetManager {
             System.err.println(e.getMessage());
         }
         return "Error: Database error";
+    }
+
+    public AudioFile getTTSAudio(String input) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect();
+
+            Connection connection = mySQL.getConnection();
+
+            String query = "SELECT audioData FROM TTSLog WHERE message = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, input);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) return new AudioFile(resultSet.getBytes("audioData"));
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return null;
     }
 }
