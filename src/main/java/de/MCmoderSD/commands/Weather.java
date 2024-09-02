@@ -8,6 +8,7 @@ import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import de.MCmoderSD.utilities.OpenAI.OpenAI;
+import de.MCmoderSD.utilities.OpenAI.modules.Chat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,9 +27,15 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Weather {
 
     // Attributes
+
+    // OpenWeatherMap API
     private final String url;
     private final String apiKey;
-    private final OpenAI openAI;
+
+    // OpenAI API
+    private final Chat chat;
+
+    // OpenAI Config
     private final String botName;
     private final double temperature;
     private final int maxTokens;
@@ -50,18 +57,21 @@ public class Weather {
         // Load API key
         JsonNode config = credentials.getOpenWeatherMapConfig();
 
-        // Load Config
-        this.openAI = openAI;
-        this.botName = botClient.getBotName();
-        temperature = 0;
-        maxTokens = openAI.getConfig().get("maxTokens").asInt();
-        topP = openAI.getConfig().get("topP").asDouble();
-        frequencyPenalty = openAI.getConfig().get("frequencyPenalty").asDouble();
-        presencePenalty = openAI.getConfig().get("presencePenalty").asDouble();
-
         // Init Attributes
         url = config.get("url").asText();
         apiKey = config.get("api_key").asText();
+
+        // Get Chat Module and Config
+        chat = openAI.getChat();
+        JsonNode openAIConfig = chat.getConfig();
+
+        // Get Parameters
+        botName = botClient.getBotName();
+        temperature = 0;
+        maxTokens = openAIConfig.get("maxTokens").asInt();
+        topP = openAIConfig.get("topP").asDouble();
+        frequencyPenalty = openAIConfig.get("frequencyPenalty").asDouble();
+        presencePenalty = openAIConfig.get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -111,7 +121,7 @@ public class Weather {
         if (response == null || response.isEmpty() || response.isBlank()) return "Fehler beim Abrufen der Wetterdaten.";
         String formattedWeatherData = formatWeatherData(finalCityName, response);
 
-        return openAI.getChat().prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
+        return chat.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
     }
 
     private String formatWeatherData(String cityName, String response){
