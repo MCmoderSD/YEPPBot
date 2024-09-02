@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-@SuppressWarnings({"HttpUrlsUsage", "unused"})
+@SuppressWarnings({"HttpUrlsUsage", "unused", "UnusedReturnValue"})
 public class AudioBroadcast {
 
     // Constants
@@ -24,6 +24,7 @@ public class AudioBroadcast {
 
     // Attributes
     private final HttpServer server;
+    private final InetSocketAddress address;
     private final HashMap<String, HashSet<HttpContext>> serverContexts;
     private final HashMap<String, byte[]> audioFiles;
     private final HashMap<String, AtomicLong> versions;
@@ -42,7 +43,8 @@ public class AudioBroadcast {
 
         // Start Server
         try {
-            server = HttpServer.create(new InetSocketAddress(hostname, port), 0);
+            address = new InetSocketAddress(hostname, port);
+            server = HttpServer.create(address, 0);
             server.setExecutor(null);
             server.start();
         } catch (IOException e) {
@@ -143,6 +145,10 @@ public class AudioBroadcast {
 
     public int getPort() {
         return port;
+    }
+
+    public InetSocketAddress getAddress() {
+        return address;
     }
 
     public HttpServer getServer() {
