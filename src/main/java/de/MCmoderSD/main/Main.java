@@ -14,7 +14,11 @@ import java.io.InputStreamReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -27,7 +31,7 @@ public class Main {
     public static final String BOT_CONFIG = "/config/BotConfig.json";
     public static final String CHANNEL_LIST = "/config/Channel.list";
     public static final String MYSQL_CONFIG = "/database/mySQL.json";
-    public static final String HTTP_SERVER = "/config/HttpServer.json";
+    public static final String HTTPS_SERVER = "/config/httpsServer.json";
 
     // API Credentials
     public static final String OPENAI_CONFIG = "/api/ChatGPT.json";
@@ -38,7 +42,7 @@ public class Main {
     public static final String DEV_CONFIG = "/config/BotConfig.json.dev";
     public static final String DEV_LIST = "/config/Channel.list.dev";
     public static final String DEV_MYSQL = "/database/dev.json";
-    public static final String DEV_HTTP_SERVER = "/examples/HttpServer.json";
+    public static final String DEV_HTTPS_SERVER = "/config/httpsServer.json.dev";
 
     // Utilities
     private final JsonUtility jsonUtility;
@@ -87,7 +91,7 @@ public class Main {
         String botConfigPath = null;
         String channelListPath = null;
         String mysqlConfigPath = null;
-        String httpServerPath = null;
+        String httpsServerPath = null;
 
         // API Paths
         String openAIConfigPath;
@@ -104,7 +108,7 @@ public class Main {
         if (hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = args.get(args.indexOf("-mysqlconfig") + 1);
 
         // Http Server
-        if (hasArg(Argument.HTTP_SERVER)) httpServerPath = args.get(args.indexOf("-httpserver") + 1);
+        if (hasArg(Argument.HTTPS_SERVER)) httpsServerPath = args.get(args.indexOf("-httpserver") + 1);
 
         // OpenAI Config
         if (hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
@@ -135,19 +139,19 @@ public class Main {
             if (botConfigPath == null) botConfigPath = DEV_CONFIG;
             if (channelListPath == null) channelListPath = DEV_LIST;
             if (mysqlConfigPath == null) mysqlConfigPath = DEV_MYSQL;
-            if (httpServerPath == null) httpServerPath = DEV_HTTP_SERVER;
+            if (httpsServerPath == null) httpsServerPath = DEV_HTTPS_SERVER;
         } else {
             if (botConfigPath == null) botConfigPath = BOT_CONFIG;
             if (channelListPath == null) channelListPath = CHANNEL_LIST;
             if (mysqlConfigPath == null) mysqlConfigPath = MYSQL_CONFIG;
-            if (httpServerPath == null) httpServerPath = HTTP_SERVER;
+            if (httpsServerPath == null) httpsServerPath = HTTPS_SERVER;
         }
 
         // Custom Host and Port
         if (hasArg(Argument.HOST) && hasArg(Argument.PORT)) arguments = new String[]{args.get(args.indexOf("-host") + 1), args.get(args.indexOf("-port") + 1)};
 
         // Initialize Credentials
-        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, httpServerPath, openAIConfigPath, weatherConfigPath, giphyConfigPath);
+        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, httpsServerPath, openAIConfigPath, weatherConfigPath, giphyConfigPath);
 
         // Initialize OpenAI
         if (credentials.validateOpenAIConfig()) openAI = new OpenAI(credentials.getOpenAIConfig());
@@ -178,7 +182,7 @@ public class Main {
     private void generateConfigFiles() {
 
         // Files
-        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "HttpServer.json", "ChatGPT.json", "OpenWeatherMap.json", "Giphy.json"};
+        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "httpsServer.json", "ChatGPT.json", "OpenWeatherMap.json", "Giphy.json"};
 
         for (String fileName : fileNames) {
 
@@ -335,7 +339,7 @@ public class Main {
         BOT_CONFIG("botconfig"),
         CHANNEL_LIST("channellist"),
         MYSQL_CONFIG("mysqlconfig"),
-        HTTP_SERVER("httpserver"),
+        HTTPS_SERVER("httpsserver"),
         OPENAI_CONFIG("openaiconfig"),
         OPENWEATHERMAP_CONFIG("openweathermapconfig"),
         GIPHY_CONFIG("giphyconfig");

@@ -40,7 +40,7 @@ public class TTS {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Check Admin
-                if (!botClient.isAdmin(event)) return;
+                if (!botClient.isPermitted(event)) return;
 
                 // Get Voice if available
                 String currentVoice = voice;
@@ -49,7 +49,7 @@ public class TTS {
                 String message = event.getMessage();
 
                 AudioFile audioFile = mySQL.getAssetManager().getTTSAudio(message);
-                if (audioFile == null) speech.tts(event.getMessage(), currentVoice, format, speed);
+                if (audioFile == null) audioFile = speech.tts(event.getMessage(), currentVoice, format, speed);
 
                 // Send Audio
                 botClient.sendAudio(event, audioFile);

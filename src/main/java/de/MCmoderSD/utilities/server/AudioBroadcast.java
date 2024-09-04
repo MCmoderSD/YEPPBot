@@ -1,21 +1,17 @@
-package de.MCmoderSD.utilities.HTTP;
+package de.MCmoderSD.utilities.server;
 
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 import de.MCmoderSD.objects.AudioFile;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
-
-@SuppressWarnings({"HttpUrlsUsage", "unused", "UnusedReturnValue"})
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public class AudioBroadcast {
 
     // Constants
@@ -23,57 +19,52 @@ public class AudioBroadcast {
     private final int port;
 
     // Attributes
-    private final HttpServer server;
+    private final Server server;
     private final HashMap<String, HashSet<HttpContext>> serverContexts;
     private final HashMap<String, byte[]> audioFiles;
     private final HashMap<String, AtomicLong> versions;
 
     // Constructor
-    public AudioBroadcast(String hostname, int port) {
+    public AudioBroadcast(Server server) {
 
         // Set Constants
-        this.hostname = hostname;
-        this.port = port;
+        this.server = server;
+
+        // Set Attributes
+        hostname = server.getHostname();
+        port = server.getPort();
 
         // Init Attributes
         serverContexts = new HashMap<>();
         audioFiles = new HashMap<>();
         versions = new HashMap<>();
 
-        // Start Server
-        try {
-            server = HttpServer.create(new InetSocketAddress(hostname, port), 0);
-            server.setExecutor(null);
-            server.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        System.out.printf("Server started on http://%s:%d%s", hostname, port, BREAK);
+        // Print
+        System.out.printf("AudioBroadcast initialized on https://%s:%d%s", hostname, port, "\n");
     }
 
     // Register Broadcast
-    public String registerBrodcast(String broadcastId) {
+    public String registerBroadcast(String broadcastId) {
 
         // Create Contexts
         HashSet<HttpContext> contexts = new HashSet<>();
 
         // Add Contexts
-        contexts.add(server.createContext("/" + broadcastId, new FrontendHandler(broadcastId)));
-        contexts.add(server.createContext("/audio/" + broadcastId, new AudioHandler(broadcastId)));
-        contexts.add(server.createContext("/version/" + broadcastId, new VersionHandler(broadcastId)));
+        contexts.add(server.getHttpServer().createContext("/" + broadcastId, new FrontendHandler(broadcastId)));
+        contexts.add(server.getHttpServer().createContext("/audio/" + broadcastId, new AudioHandler(broadcastId)));
+        contexts.add(server.getHttpServer().createContext("/version/" + broadcastId, new VersionHandler(broadcastId)));
 
         // Add Contexts to Server
         serverContexts.put(broadcastId, contexts);
 
         // Return
-        return String.format("Broadcast started on http://%s:%d/%s", hostname, port, broadcastId);
+        return String.format("Broadcast started on https://%s:%d/%s", hostname, port, broadcastId);
     }
 
     // Unregister Broadcast
     public boolean unregisterBroadcast(String broadcastId) {
         if (!serverContexts.containsKey(broadcastId)) return false;
-        serverContexts.get(broadcastId).forEach(server::removeContext);
+        serverContexts.get(broadcastId).forEach(server.getHttpServer()::removeContext);
         serverContexts.remove(broadcastId);
         audioFiles.remove(broadcastId);
         versions.remove(broadcastId);
@@ -104,7 +95,7 @@ public class AudioBroadcast {
             String html = String.format("""
                     <html>
                         <body style='margin:0; padding:0; overflow:hidden;'>
-                           <audio id="audi" autoplay="true" src="http://%s:%d/audio/%s" type="audio/wav">
+                           <audio id="audi" autoplay="true" src="https://%s:%d/audio/%s" type="audio/wav">
                             <script>
                                 function checkForUpdate() {
                                     fetch('/version/%s')
@@ -119,7 +110,7 @@ public class AudioBroadcast {
                                 function updateLoop() {
                                     setInterval(checkForUpdate, 1000);
                                 }
-                    
+
                                 window.onload = updateLoop;
                             </script>
                         </body>
@@ -148,7 +139,6 @@ public class AudioBroadcast {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             exchange.getResponseHeaders().set("Content-Type", "audio/wav");
-
             if (audioFiles.containsKey(broadcastId) && audioFiles.get(broadcastId) != null) {
                 byte[] audioData = audioFiles.get(broadcastId);
                 exchange.sendResponseHeaders(200, audioData.length);
@@ -191,7 +181,7 @@ public class AudioBroadcast {
         return port;
     }
 
-    public HttpServer getServer() {
+    public Server getServer() {
         return server;
     }
 

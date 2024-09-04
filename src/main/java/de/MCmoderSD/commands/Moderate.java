@@ -1,6 +1,7 @@
 package de.MCmoderSD.commands;
 
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
@@ -17,7 +18,7 @@ public class Moderate {
     private final ChannelManager channelManager;
 
     // Constructor
-    public Moderate(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Moderate(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler) {
 
         // Init Associations
         this.botClient = botClient;
@@ -25,7 +26,7 @@ public class Moderate {
         this.channelManager = mySQL.getChannelManager();
 
         // Syntax
-        String syntax = "Syntax: " + botClient.getPrefix() + "moderate join/leave/block/unblock command/channel";
+        String syntax = "Syntax: " + botClient.getPrefix() + "moderate join/leave/block/unblock/authenticate command/channel";
 
         // About
         String[] name = {"moderate", "mod", "moderrate", "modderate", "modderrate"};
@@ -50,8 +51,13 @@ public class Moderate {
                 }
 
                 String verb = args.getFirst().toLowerCase();
-                if (!Arrays.asList("join", "leave", "block", "unblock").contains(verb)) {
+                if (!Arrays.asList("join", "leave", "block", "unblock", "authenticate").contains(verb)) {
                     botClient.respond(event, getCommand(), syntax);
+                    return;
+                }
+
+                if (Arrays.asList("authenticate", "auth", "oauth").contains(verb) && (botClient.isBroadcaster(event) || botClient.isAdmin(event))) {
+                    botClient.respond(event, getCommand(), helixHandler.getAuthorizationUrl(HelixHandler.Scope.BITS_READ, HelixHandler.Scope.MODERATION_READ));
                     return;
                 }
 

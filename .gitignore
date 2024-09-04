@@ -61,6 +61,8 @@ build/
 /src/main/resources/config/BotConfig.json.dev
 /src/main/resources/config/Channel.list
 /src/main/resources/config/Channel.list.dev
+/src/main/resources/config/httpsServer.json
+/src/main/resources/config/httpsServer.json.dev
 
 ### meta-inf ###
 /src/main/resources/META-INF/

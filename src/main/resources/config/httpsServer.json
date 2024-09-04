@@ -1,0 +1,7 @@
+{
+  "hostname": "MCmoderSD.de",
+  "port": 420,
+  "keystore": "/keys/keystore.jks",
+  "fullchain": "/etc/letsencrypt/live/mcmodersd.de/fullchain.pem",
+  "privkey": "/etc/letsencrypt/live/mcmodersd.de/privkey.pem"
+}

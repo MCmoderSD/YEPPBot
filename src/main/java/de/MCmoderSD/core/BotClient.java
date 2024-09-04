@@ -26,12 +26,13 @@ import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
-import de.MCmoderSD.utilities.HTTP.AudioBroadcast;
+import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
-import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.other.Reader;
+import de.MCmoderSD.utilities.server.AudioBroadcast;
+import de.MCmoderSD.utilities.server.Server;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -42,18 +43,19 @@ import static de.MCmoderSD.main.Main.Argument.*;
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class BotClient {
 
     // Associations
     private final Main main;
     private final MySQL mySQL;
     private final Frame frame;
+    private final Server server;
+    private final HelixHandler helixHandler;
     private final AudioBroadcast audioBroadcast;
 
     // Utilities
     private final JsonUtility jsonUtility;
-    private final Encryption  encryption;
     private final Reader reader;
 
     // Constants
@@ -86,14 +88,15 @@ public class BotClient {
         prefix = botConfig.get("prefix").asText();
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
-        // Init Encryption
-        encryption = new Encryption(botConfig);
-
         // Init Server
-        JsonNode httpServerConfig = credentials.getHttpServerConfig();
+        JsonNode httpServerConfig = credentials.getHttpsServerConfig();
         String hostname = hasArg(HOST) ? Main.arguments[0] : httpServerConfig.get("hostname").asText();
         int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpServerConfig.get("port").asInt();
+        server = new Server(hostname, port, httpServerConfig.get("keystore").asText(), botConfig);
 
+        // Init Helix Handler
+        helixHandler = new HelixHandler(this, mySQL, server);
+        System.out.println(helixHandler.getAuthorizationUrl(HelixHandler.Scope.MODERATION_READ, HelixHandler.Scope.BITS_READ));
 
         // Init Bot Credential
         OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
@@ -112,8 +115,8 @@ public class BotClient {
         eventManager = client.getEventManager();
 
         // Init Audio Broadcast
-        audioBroadcast = new AudioBroadcast(hostname, port);
-        System.out.println(audioBroadcast.registerBrodcast(botName));
+        audioBroadcast = new AudioBroadcast(server);
+        System.out.println(audioBroadcast.registerBroadcast(botName));
 
         // Join Channels
         Set<String> channelList = new HashSet<>();
@@ -151,7 +154,7 @@ public class BotClient {
         new Join(this, messageHandler);
         new Joke(this, messageHandler, mySQL);
         new Lurk(this, messageHandler, mySQL);
-        new Moderate(this, messageHandler, mySQL);
+        new Moderate(this, messageHandler, mySQL, helixHandler);
         new Ping(this, messageHandler);
         new Play(this, messageHandler);
         if (openAIChat) new Prompt(this, messageHandler, main.getOpenAI());
@@ -184,12 +187,6 @@ public class BotClient {
         if (hasArg(CLI)) return;
         frame.setVisible(true);
         frame.requestFocusInWindow();
-    }
-
-    // Methods
-    private boolean checkModerator(TwitchMessageEvent event) {
-        // ToDo Check if user is moderator
-        return false;
     }
 
     // Write
@@ -258,7 +255,7 @@ public class BotClient {
         chat.joinChannel(channel);
 
         // Register Broadcast
-        audioBroadcast.registerBrodcast(channel);
+        audioBroadcast.registerBroadcast(channel);
     }
 
     // Bulk Join
@@ -347,7 +344,7 @@ public class BotClient {
     }
 
     public boolean isModerator(TwitchMessageEvent event) {
-        return checkModerator(event);
+        return helixHandler.getModerators(event.getChannelId()).contains(new TwitchUser(event));
     }
 
     public boolean isInChannel(String channel) {

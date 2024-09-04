@@ -15,7 +15,7 @@ public class Credentials {
     private JsonNode botConfig;
     private Set<String> channelList;
     private JsonNode mySQLConfig;
-    private JsonNode httpServerConfig;
+    private JsonNode httpsServerConfig;
 
     // API Cials
     private JsonNode openAIConfig;
@@ -26,7 +26,7 @@ public class Credentials {
     private JsonNode giphyConfig;
 
     // Constructor
-    public Credentials(Main main, String botConfig, String channelList, String mySQL, String httpServer, String openAI, String weather, String giphy) {
+    public Credentials(Main main, String botConfig, String channelList, String mySQL, String httpsServer, String openAI, String weather, String giphy) {
 
         // Get Utilities
         JsonUtility jsonUtility = main.getJsonUtility();
@@ -57,7 +57,7 @@ public class Credentials {
 
         // Load Http Server Config
         try {
-            if (!(main.hasArg(Argument.HOST) && main.hasArg(Argument.PORT))) this.httpServerConfig = jsonUtility.load(httpServer, main.hasArg(Argument.HTTP_SERVER));
+            if (!(main.hasArg(Argument.HOST) && main.hasArg(Argument.PORT))) this.httpsServerConfig = jsonUtility.load(httpsServer, main.hasArg(Argument.HTTPS_SERVER));
         } catch (Exception e) {
             System.err.println("Error loading Http Server Config: " + e.getMessage());
         }
@@ -101,8 +101,8 @@ public class Credentials {
         return mySQLConfig;
     }
 
-    public JsonNode getHttpServerConfig() {
-        return httpServerConfig;
+    public JsonNode getHttpsServerConfig() {
+        return httpsServerConfig;
     }
 
     public JsonNode getOpenAIConfig() {
@@ -143,7 +143,7 @@ public class Credentials {
     }
 
     public boolean validateHttpServerConfig() {
-        return httpServerConfig != null;
+        return httpsServerConfig != null;
     }
 
     public boolean validateOpenAIConfig() {

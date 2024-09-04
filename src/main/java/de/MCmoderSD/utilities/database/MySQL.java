@@ -17,6 +17,7 @@ public class MySQL extends Driver {
     private final CustomManager customManager;
     private final LogManager logManager;
     private final LurkManager lurkManager;
+    private final TokenManager tokenManager;
     private final YEPPConnect yeppConnect;
 
     // Cache Lists
@@ -43,6 +44,7 @@ public class MySQL extends Driver {
         customManager = new CustomManager(this);
         logManager = new LogManager(this, !main.hasArg(Main.Argument.LOG));
         lurkManager = new LurkManager(this);
+        tokenManager = new TokenManager(this);
         yeppConnect = new YEPPConnect(this);
     }
 
@@ -247,6 +249,10 @@ public class MySQL extends Driver {
 
     public LurkManager getLurkManager() {
         return lurkManager;
+    }
+
+    public TokenManager getTokenManager() {
+        return tokenManager;
     }
 
     public YEPPConnect getYEPPConnect() {
