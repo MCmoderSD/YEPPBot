@@ -40,7 +40,7 @@ public class TTS {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Check Admin
-                if (!botClient.isPermitted(event)) return;
+                if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
 
                 // Get Voice if available
                 String currentVoice = voice;
@@ -53,6 +53,7 @@ public class TTS {
 
                 // Send Audio
                 botClient.sendAudio(event, audioFile);
+                botClient.respond(event, getCommand(), "TTS wurde gesendet YEPP");
             }
         });
     }

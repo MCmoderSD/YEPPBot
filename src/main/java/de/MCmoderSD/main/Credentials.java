@@ -6,14 +6,13 @@ import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
 
 import java.util.HashSet;
-import java.util.Set;
 
 @SuppressWarnings("unused")
 public class Credentials {
 
     // Bot Credentials
     private JsonNode botConfig;
-    private Set<String> channelList;
+    private HashSet<String> channelList;
     private JsonNode mySQLConfig;
     private JsonNode httpsServerConfig;
 
@@ -93,7 +92,7 @@ public class Credentials {
         return botConfig;
     }
 
-    public Set<String> getChannelList() {
+    public HashSet<String> getChannelList() {
         return channelList;
     }
 

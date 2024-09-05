@@ -1,7 +1,10 @@
 package de.MCmoderSD.objects;
 
+import com.github.twitch4j.helix.domain.ChannelEditor;
+import com.github.twitch4j.helix.domain.ChannelVip;
 import com.github.twitch4j.helix.domain.Moderator;
 import com.github.twitch4j.helix.domain.User;
+import com.github.twitch4j.helix.domain.InboundFollow;
 
 @SuppressWarnings("unused")
 public class TwitchUser {
@@ -13,24 +16,43 @@ public class TwitchUser {
     // Constructor
     public TwitchUser(int id, String name) {
         this.id = id;
-        this.name = name;
+        this.name = name.toLowerCase();
     }
 
+    // Message Event
     public TwitchUser(TwitchMessageEvent event) {
         this.id = event.getUserId();
-        this.name = event.getUser();
+        this.name = event.getUser().toLowerCase();
     }
 
     // User
     public TwitchUser(User user) {
         this.id = Integer.parseInt(user.getId());
-        this.name = user.getLogin();
+        this.name = user.getDisplayName().toLowerCase();
     }
 
     // Moderator
     public TwitchUser(Moderator moderator) {
         this.id = Integer.parseInt(moderator.getUserId());
-        this.name = moderator.getUserName();
+        this.name = moderator.getUserName().toLowerCase();
+    }
+
+    // Editor
+    public TwitchUser(ChannelEditor editor) {
+        this.id = Integer.parseInt(editor.getUserId());
+        this.name = editor.getUserName().toLowerCase();
+    }
+
+    // VIP
+    public TwitchUser(ChannelVip vip) {
+        this.id = Integer.parseInt(vip.getUserId());
+        this.name = vip.getUserName().toLowerCase();
+    }
+
+    // Follow
+    public TwitchUser(InboundFollow follow) {
+        this.id = Integer.parseInt(follow.getUserId());
+        this.name = follow.getUserName().toLowerCase();
     }
 
     // Getter

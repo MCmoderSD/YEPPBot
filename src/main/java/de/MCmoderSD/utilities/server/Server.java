@@ -15,17 +15,19 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.KeyStoreException;
-import java.security.UnrecoverableKeyException;
-import java.security.KeyManagementException;
+import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.MessageDigest;
+import java.security.KeyStoreException;
+import java.security.KeyManagementException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.MessageDigest;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
 @SuppressWarnings("unused")
@@ -53,7 +55,7 @@ public class Server {
         try {
 
             // Set hostname and port
-            this.hostname = hostname;
+            this.hostname = hostname.toLowerCase();
             this.port = port;
 
             // Create HTTPS server
@@ -113,57 +115,55 @@ public class Server {
         System.out.println("Server started on https://" + hostname + ":" + port);
     }
 
-    // Constructor with SSL
     public Server(String hostname, int port, String privKeyPath, String fullChainPath) {
         try {
-
-            // Set hostname and port
             this.hostname = hostname;
             this.port = port;
 
-            // Create HTTPS server
             server = HttpsServer.create(new InetSocketAddress(hostname, port), 0);
 
-            // Create SSL context
             SSLContext sslContext = SSLContext.getInstance("TLS");
             KeyStore ks = KeyStore.getInstance("JKS");
 
-            // Load private key and certificate
-            @SuppressWarnings("DataFlowIssue") PrivateKey privKey = (PrivateKey) new FileInputStream(privKeyPath);
+            // Load private key
+            @SuppressWarnings("resource") byte[] keyBytes = new FileInputStream(privKeyPath).readAllBytes();
+            String privateKeyPEM = new String(keyBytes, StandardCharsets.UTF_8)
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s", "");
+            byte[] decodedKey = Base64.getDecoder().decode(privateKeyPEM);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PrivateKey privKey = keyFactory.generatePrivate(keySpec);
+
+            // Load certificate
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             FileInputStream certInputStream = new FileInputStream(fullChainPath);
             X509Certificate cert = (X509Certificate) certFactory.generateCertificate(certInputStream);
             certInputStream.close();
 
-            // Add key pair and certificate to key store
             ks.load(null, null);
             ks.setKeyEntry("alias", privKey, "password".toCharArray(), new Certificate[]{cert});
 
-            // Create key manager factory
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
             kmf.init(ks, "password".toCharArray());
 
-            // Initialize SSL context
             sslContext.init(kmf.getKeyManagers(), null, null);
 
-            // Set HTTPS configurator
             server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                 @Override
                 public void configure(HttpsParameters params) {
                     try {
-
-                        // Get default SSL context
                         SSLContext c = SSLContext.getDefault();
                         SSLEngine engine = c.createSSLEngine();
                         params.setNeedClientAuth(false);
                         params.setCipherSuites(engine.getEnabledCipherSuites());
                         params.setProtocols(engine.getEnabledProtocols());
 
-                        // Set SSL parameters
                         SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
                         params.setSSLParameters(defaultSSLParameters);
-                    } catch (Exception ex) {
-                        System.err.println("Failed to create HTTPS port");
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             });
@@ -171,10 +171,7 @@ public class Server {
             throw new RuntimeException(e);
         }
 
-        // Start server
         start();
-
-        // Print server info
         System.out.println("Server started on https://" + hostname + ":" + port);
     }
 

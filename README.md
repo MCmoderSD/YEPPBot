@@ -130,7 +130,7 @@ The file should have the following structure: <br>
 
   "image": {
     "imageModel": "dall-e-2",
-    "quality": "standart",
+    "quality": "standard",
     "resolution": "1024x1024",
     "style": "vivid"
   },
@@ -210,12 +210,12 @@ You can get the API key from [OpenAI](https://platform.openai.com/signup). <br>
 | **Model** | **Quality** | **Resolution**                     | **Pricing**                                             |
 |:----------|:-----------:|:-----------------------------------|:--------------------------------------------------------|
 | dall-e-2  |             | 256x256<br/>512x512<br/>1024x1024  | \$0.016 / Image<br/>\$0.018 / Image<br/> $0.020 / Image |
-| dall-e-3  |  standart   | 1024x1024<br/>1024x1792, 1792×1024 | \$0.040 / Image<br/>\$0.080 / Image                     |
+| dall-e-3  |  standard   | 1024x1024<br/>1024x1792, 1792×1024 | \$0.040 / Image<br/>\$0.080 / Image                     |
 | dall-e-3  |     hd      | 1024x1024<br/>1024x1792, 1792×1024 | \$0.080 / Image<br/>\$0.120 / Image                     |
 
 
 - The **quality** is the quality of the image. <br>
-  The available qualities are standart and hd. <br>
+  The available qualities are standard and hd. <br>
   The quality is only available for dall-e-3. <br>
 
 

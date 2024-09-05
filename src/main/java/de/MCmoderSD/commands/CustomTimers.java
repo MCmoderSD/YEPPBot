@@ -120,11 +120,11 @@ public class CustomTimers {
         });
     }
 
-    private String getCustomTimerNames(String channel, HashMap<String, Timer> customTimers, Set<Timer> enabledTimers) {
+    private String getCustomTimerNames(String channel, HashMap<String, Timer> customTimers, HashSet<Timer> enabledTimers) {
         if (customTimers.isEmpty()) return "No Custom Timers available";
 
         StringBuilder stringBuilder = new StringBuilder("Custom Timers: ");
-        Set<String> enabledTimersNames = new HashSet<>();
+        HashSet<String> enabledTimersNames = new HashSet<>();
 
         for (var timer : enabledTimers) {
             if (timer.getChannel().equals(channel)) stringBuilder.append(timer.getName()).append(" enabled, ");

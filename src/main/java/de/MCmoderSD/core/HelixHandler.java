@@ -6,9 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
-import com.github.twitch4j.helix.domain.BitsLeaderboard;
-import com.github.twitch4j.helix.domain.Moderator;
 import com.github.twitch4j.helix.domain.User;
+import com.github.twitch4j.helix.domain.BitsLeaderboard;
+import com.github.twitch4j.helix.domain.ChannelEditor;
+import com.github.twitch4j.helix.domain.ChannelEditorList;
+import com.github.twitch4j.helix.domain.ChannelVip;
+import com.github.twitch4j.helix.domain.ChannelVipList;
+import com.github.twitch4j.helix.domain.InboundFollow;
+import com.github.twitch4j.helix.domain.InboundFollowers;
+import com.github.twitch4j.helix.domain.Moderator;
 import com.github.twitch4j.helix.domain.ModeratorList;
 import com.github.twitch4j.helix.domain.UserList;
 
@@ -23,13 +29,14 @@ import java.util.Set;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
 import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.server.Server;
 
-@SuppressWarnings({"unused", "FieldCanBeLocal"})
+@SuppressWarnings({"unused", "FieldCanBeLocal", "deprecation"})
 public class HelixHandler {
 
     // Constants
@@ -126,7 +133,6 @@ public class HelixHandler {
     }
 
     // Get bits leader board
-    @SuppressWarnings("deprecation")
     public BitsLeaderboard getBitsLeaderboard(Integer channelId) {
 
         // Get access token
@@ -148,8 +154,66 @@ public class HelixHandler {
         return client.getHelix().getBitsLeaderboard(accessToken, channelId.toString(), null, null, null).execute();
     }
 
+    // Get editors
+    public HashSet<TwitchUser> getEditors(Integer channelId) {
+
+        // Get access token
+        boolean validScope = tokenManager.hasScope(channelId, Scope.CHANNEL_READ_EDITORS);
+        String accessToken = tokenManager.getAccessToken(channelId);
+
+        // Decrypt access token
+        if (validScope || accessToken == null) return null;
+        else accessToken = encryption.decrypt(accessToken);
+
+        // Create credential
+        OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
+        TwitchClient client = TwitchClientBuilder.builder()
+                .withEnableHelix(true)
+                .withDefaultAuthToken(credential)
+                .build();
+
+        // Get editors
+        ChannelEditorList editorList = client.getHelix().getChannelEditors(accessToken, channelId.toString()).execute();
+
+        // Variables
+        HashSet<TwitchUser> twitchUsers = new HashSet<>();
+
+        // Add editors
+        for (ChannelEditor editor : editorList.getEditors()) twitchUsers.add(new TwitchUser(editor));
+        return twitchUsers;
+    }
+
+    // Get followers
+    public HashSet<TwitchUser> getFollowers(Integer channelId) {
+
+        // Get access token
+        boolean validScope = tokenManager.hasScope(channelId, Scope.USER_READ_FOLLOWS, Scope.MODERATOR_READ_FOLLOWERS);
+        String accessToken = tokenManager.getAccessToken(channelId);
+
+        // Decrypt access token
+        if (validScope || accessToken == null) return null;
+        else accessToken = encryption.decrypt(accessToken);
+
+        // Create credential
+        OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
+        TwitchClient client = TwitchClientBuilder.builder()
+                .withEnableHelix(true)
+                .withDefaultAuthToken(credential)
+                .build();
+
+        // Get followers
+        InboundFollowers inboundFollowers = client.getHelix().getChannelFollowers(accessToken, channelId.toString(), null, null, null).execute();
+
+        // Variables
+        HashSet<TwitchUser> twitchUsers = new HashSet<>();
+
+        // Add followers
+        for (InboundFollow follow : Objects.requireNonNull(inboundFollowers.getFollows())) twitchUsers.add(new TwitchUser(follow));
+        return twitchUsers;
+    }
+
     // Get moderators
-    public Set<TwitchUser> getModerators(Integer channelId) {
+    public HashSet<TwitchUser> getModerators(Integer channelId) {
 
         // Get access token
         boolean validScope = tokenManager.hasScope(channelId, Scope.MODERATION_READ);
@@ -170,10 +234,39 @@ public class HelixHandler {
         ModeratorList moderatorList = client.getHelix().getModerators(accessToken, channelId.toString(), null, null, null).execute();
 
         // Variables
-        Set<TwitchUser> twitchUsers = new HashSet<>();
+        HashSet<TwitchUser> twitchUsers = new HashSet<>();
 
         // Add moderators
         for (Moderator moderator : moderatorList.getModerators()) twitchUsers.add(new TwitchUser(moderator));
+        return twitchUsers;
+    }
+
+    // Get VIPs
+    public HashSet<TwitchUser> getVIPs(Integer channelId) {
+
+        // Get access token
+        boolean validScope = tokenManager.hasScope(channelId, Scope.CHANNEL_READ_VIPS);
+        String accessToken = tokenManager.getAccessToken(channelId);
+
+        // Decrypt access token
+        if (validScope || accessToken == null) return null;
+        else accessToken = encryption.decrypt(accessToken);
+
+        // Create credential
+        OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
+        TwitchClient client = TwitchClientBuilder.builder()
+                .withEnableHelix(true)
+                .withDefaultAuthToken(credential)
+                .build();
+
+        // Get VIPs
+        ChannelVipList vipList = client.getHelix().getChannelVips(accessToken, channelId.toString(), null, null, null).execute();
+
+        // Variables
+        HashSet<TwitchUser> twitchUsers = new HashSet<>();
+
+        // Add VIPs
+        for (ChannelVip vip : vipList.getData()) twitchUsers.add(new TwitchUser(vip));
         return twitchUsers;
     }
 
@@ -188,7 +281,6 @@ public class HelixHandler {
             if (query != null && query.contains("code=")) {
 
                 // Extract code and scopes
-                String code = query.split("code=")[1].split("&")[0];
                 String scopes = query.split("scope=")[1].split("&")[0];
 
                 // Create body
@@ -196,7 +288,7 @@ public class HelixHandler {
                         "client_id=%s&client_secret=%s&code=%s&grant_type=authorization_code&redirect_uri=https://%s:%d/callback",
                         clientId,
                         clientSecret,
-                        code,
+                        query.split("code=")[1].split("&")[0],
                         hostname,
                         port
                 );

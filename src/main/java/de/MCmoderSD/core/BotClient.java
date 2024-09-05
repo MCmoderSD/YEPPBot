@@ -26,7 +26,6 @@ import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
-import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
@@ -62,6 +61,16 @@ public class BotClient {
     public static String botName;
     public static String prefix;
     public static HashSet<String> admins;
+    public static HelixHandler.Scope[] requiredScopes = {
+            HelixHandler.Scope.BITS_READ,
+            HelixHandler.Scope.CHANNEL_READ_EDITORS,
+            HelixHandler.Scope.USER_READ_FOLLOWS,
+            HelixHandler.Scope.MODERATOR_READ_FOLLOWERS,
+            HelixHandler.Scope.MODERATION_READ,
+            HelixHandler.Scope.CHANNEL_READ_VIPS,
+            HelixHandler.Scope.CHANNEL_READ_SUBSCRIPTIONS,
+            HelixHandler.Scope.CHANNEL_MANAGE_RAIDS,
+    };
 
     // Attributes
     private final TwitchClient client;
@@ -92,11 +101,12 @@ public class BotClient {
         JsonNode httpServerConfig = credentials.getHttpsServerConfig();
         String hostname = hasArg(HOST) ? Main.arguments[0] : httpServerConfig.get("hostname").asText();
         int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpServerConfig.get("port").asInt();
-        server = new Server(hostname, port, httpServerConfig.get("keystore").asText(), botConfig);
+        if (hasArg(DEV)) server = new Server(hostname, port, httpServerConfig.get("keystore").asText(), botConfig);
+        else server = new Server(httpServerConfig);
 
         // Init Helix Handler
         helixHandler = new HelixHandler(this, mySQL, server);
-        System.out.println(helixHandler.getAuthorizationUrl(HelixHandler.Scope.MODERATION_READ, HelixHandler.Scope.BITS_READ));
+        System.out.println(helixHandler.getAuthorizationUrl(requiredScopes));
 
         // Init Bot Credential
         OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
@@ -130,9 +140,9 @@ public class BotClient {
         MessageHandler messageHandler = new MessageHandler(this, mySQL, main.getFrame());
 
         // Message Events
-        eventManager.onEvent(ChannelMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
-        eventManager.onEvent(ChannelCheerEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
-        eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));
+        eventManager.onEvent(ChannelMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));              // chat:read
+        eventManager.onEvent(ChannelCheerEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));                // bits:read
+        eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));  // channel_subscriptions:read
 
         // Validate Configs
         boolean openAI = credentials.validateOpenAIConfig();
@@ -170,18 +180,18 @@ public class BotClient {
         LogManager logManager = mySQL.getLogManager();
 
         // Role Events
-        eventManager.onEvent(ChannelVipAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
-        eventManager.onEvent(ChannelVipRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
-        eventManager.onEvent(ChannelModeratorAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
-        eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelVipAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));            // channel_vips:read
+        eventManager.onEvent(ChannelVipRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));         // channel_vips:read
+        eventManager.onEvent(ChannelModeratorAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));      // moderation:read
+        eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));   // moderation:read
 
         // Loyalty Events
-        eventManager.onEvent(ChannelFollowEvent.class, logManager::logLoyalty);
-        eventManager.onEvent(ChannelSubscribeEvent.class, logManager::logLoyalty);
-        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, logManager::logLoyalty);
+        eventManager.onEvent(ChannelFollowEvent.class, logManager::logLoyalty);             // user:read:follows
+        eventManager.onEvent(ChannelSubscribeEvent.class, logManager::logLoyalty);          // channel_subscriptions:read
+        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, logManager::logLoyalty);   // channel_subscriptions:read
 
         // Raid Events
-        eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid);
+        eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid); // channel:mange:raids
 
         // Show UI
         if (hasArg(CLI)) return;
@@ -306,6 +316,10 @@ public class BotClient {
         }).start();
     }
 
+    public void updateAccessToken(String token) {
+
+    }
+
     public void close() {
         client.close();
     }
@@ -344,7 +358,15 @@ public class BotClient {
     }
 
     public boolean isModerator(TwitchMessageEvent event) {
-        return helixHandler.getModerators(event.getChannelId()).contains(new TwitchUser(event));
+        HashSet<Integer> ids = new HashSet<>();
+        helixHandler.getModerators(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
+        return ids.contains(event.getUserId());
+    }
+
+    public boolean isFollowing(TwitchMessageEvent event) {
+        HashSet<Integer> ids = new HashSet<>();
+        helixHandler.getFollowers(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
+        return ids.contains(event.getUserId());
     }
 
     public boolean isInChannel(String channel) {
