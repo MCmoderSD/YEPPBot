@@ -98,11 +98,11 @@ public class BotClient {
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
         // Init Server
-        JsonNode httpServerConfig = credentials.getHttpsServerConfig();
-        String hostname = hasArg(HOST) ? Main.arguments[0] : httpServerConfig.get("hostname").asText();
-        int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpServerConfig.get("port").asInt();
-        if (hasArg(DEV)) server = new Server(hostname, port, httpServerConfig.get("keystore").asText(), botConfig);
-        else server = new Server(httpServerConfig);
+        JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
+        String hostname = hasArg(HOST) ? Main.arguments[0] : httpsServerConfig.get("hostname").asText();
+        int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpsServerConfig.get("port").asInt();
+        if (hasArg(DEV)) server = new Server(hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
+        else server = new Server(httpsServerConfig);
 
         // Init Helix Handler
         helixHandler = new HelixHandler(this, mySQL, server);
@@ -115,8 +115,8 @@ public class BotClient {
         client = TwitchClientBuilder.builder()
                 .withDefaultAuthToken(botCredential)
                 .withChatAccount(botCredential)
-                .withEnableChat(true)
                 .withEnableHelix(true)
+                .withEnableChat(true)
                 .build();
 
         // Init Modules
@@ -186,12 +186,12 @@ public class BotClient {
         eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));   // moderation:read
 
         // Loyalty Events
-        eventManager.onEvent(ChannelFollowEvent.class, logManager::logLoyalty);             // user:read:follows
-        eventManager.onEvent(ChannelSubscribeEvent.class, logManager::logLoyalty);          // channel_subscriptions:read
-        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, logManager::logLoyalty);   // channel_subscriptions:read
+        eventManager.onEvent(ChannelFollowEvent.class, logManager::logLoyalty);                                             // user:read:follows
+        eventManager.onEvent(ChannelSubscribeEvent.class, logManager::logLoyalty);                                          // channel_subscriptions:read
+        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, logManager::logLoyalty);                                   // channel_subscriptions:read
 
         // Raid Events
-        eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid); // channel:mange:raids
+        eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid);                                                  // channel:mange:raids
 
         // Show UI
         if (hasArg(CLI)) return;

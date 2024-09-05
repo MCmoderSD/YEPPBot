@@ -43,10 +43,6 @@ public class HelixHandler {
     private static final String AUTH_URL = "https://id.twitch.tv/oauth2/authorize";
     private static final String TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 
-    // Attributes
-    private final String hostname;
-    private final int port;
-
     // Credentials
     private final String clientId;
     private final String clientSecret;
@@ -54,6 +50,7 @@ public class HelixHandler {
     // Associations
     private final BotClient botClient;
     private final TokenManager tokenManager;
+    private final Server server;
 
     // Utilites
     private final Encryption encryption;
@@ -63,7 +60,8 @@ public class HelixHandler {
 
         // Set Associations
         this.botClient = botClient;
-        tokenManager = mySQL.getTokenManager();
+        this.tokenManager = mySQL.getTokenManager();
+        this.server = server;
 
         // Set Credentials
         JsonNode botConfig = botClient.getConfig();
@@ -72,10 +70,6 @@ public class HelixHandler {
 
         // Set Utilities
         encryption = new Encryption(botConfig);
-
-        // Set Constants
-        hostname = server.getHostname();
-        port = server.getPort();
 
         // Init Server Context
         server.getHttpServer().createContext("/callback", new CallbackHandler());
@@ -97,7 +91,9 @@ public class HelixHandler {
         // Create body
         String body = String.format(
                 "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token",
-                clientId, clientSecret, refreshToken
+                clientId,
+                clientSecret,
+                refreshToken
         );
 
         // Create request
@@ -126,8 +122,8 @@ public class HelixHandler {
                 "%s?client_id=%s&redirect_uri=https://%s:%d/callback&response_type=code&scope=%s",
                 AUTH_URL,
                 clientId,
-                hostname,
-                port,
+                server.getPort(),
+                server.getPort(),
                 scopeBuilder.substring(0, scopeBuilder.length() - 1)
         );
     }
@@ -289,8 +285,8 @@ public class HelixHandler {
                         clientId,
                         clientSecret,
                         query.split("code=")[1].split("&")[0],
-                        hostname,
-                        port
+                        server.getHostname(),
+                        server.getPort()
                 );
 
                 // Create request
