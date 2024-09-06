@@ -3,9 +3,11 @@ package de.MCmoderSD.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
+import com.github.philippheuer.events4j.core.EventManager;
 import com.github.twitch4j.TwitchClient;
-import com.github.twitch4j.TwitchClientBuilder;
+import com.github.twitch4j.chat.TwitchChat;
+import com.github.twitch4j.common.exception.UnauthorizedException;
+import com.github.twitch4j.helix.TwitchHelix;
 import com.github.twitch4j.helix.domain.User;
 import com.github.twitch4j.helix.domain.BitsLeaderboard;
 import com.github.twitch4j.helix.domain.ChannelEditor;
@@ -23,18 +25,25 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import de.MCmoderSD.objects.AuthToken;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
 import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.server.Server;
+
+import static de.MCmoderSD.utilities.other.Calculate.*;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal", "deprecation"})
 public class HelixHandler {
@@ -49,30 +58,51 @@ public class HelixHandler {
 
     // Associations
     private final BotClient botClient;
-    private final TokenManager tokenManager;
     private final Server server;
+    private final TokenManager tokenManager;
+
+    // Client
+    private final TwitchClient client;
+    private final TwitchChat chat;
+    private final TwitchHelix helix;
+    private final EventManager eventManager;
 
     // Utilites
     private final Encryption encryption;
+
+    // Attributes
+    private final HashMap<Integer, AuthToken> authTokens;
 
     // Constructor
     public HelixHandler(BotClient botClient, MySQL mySQL, Server server) {
 
         // Set Associations
         this.botClient = botClient;
-        this.tokenManager = mySQL.getTokenManager();
+        tokenManager = mySQL.getTokenManager();
         this.server = server;
 
         // Set Credentials
-        JsonNode botConfig = botClient.getConfig();
-        clientId = botConfig.get("clientId").asText();
-        clientSecret = botConfig.get("clientSecret").asText();
+        clientId = botClient.getClientId();
+        clientSecret = botClient.getClientSecret();
+
+        // Initialize Client
+        client = botClient.getClient();
+        chat = botClient.getChat();
+        helix = botClient.getHelix();
+        eventManager = botClient.getEventManager();
 
         // Set Utilities
-        encryption = new Encryption(botConfig);
+        encryption = new Encryption(botClient.getConfig());
+
+        // Initialize Attributes
+        authTokens = tokenManager.getAuthTokens(encryption);
 
         // Init Server Context
         server.getHttpServer().createContext("/callback", new CallbackHandler());
+
+        // Update Loop
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(this::updateTokens, 2, 1, TimeUnit.MINUTES);
     }
 
     // Send request
@@ -85,33 +115,87 @@ public class HelixHandler {
         }
     }
 
+    // Update tokens
+    private void updateTokens() {
+
+        // Variables
+        HashSet<Integer> ids = new HashSet<>();
+
+        // Add tokens to refresh
+        authTokens.forEach((id, token) -> {
+            if (token.needsRefresh()) ids.add(id);
+        });
+
+        // Refresh tokens
+        ids.forEach(id -> authTokens.replace(id, refreshToken(authTokens.get(id))));
+    }
+
     // Refresh token
-    public void refreshToken(String refreshToken) throws JsonProcessingException {
+    private AuthToken refreshToken(AuthToken token) {
+        try {
 
-        // Create body
-        String body = String.format(
-                "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token",
-                clientId,
-                clientSecret,
-                refreshToken
-        );
+            // Create body
+            String body = String.format(
+                    "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token",
+                    clientId,
+                    clientSecret,
+                    token.getRefreshToken()
+            );
 
-        // Create request
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(TOKEN_URL))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
+            // Create request
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(TOKEN_URL))
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
 
-        // Send request
-        HttpResponse<String> response = sendRequest(request);
-        JsonNode jsonNode = new ObjectMapper().readTree(Objects.requireNonNull(response).body());
-        String newAccessToken = encryption.encrypt(jsonNode.get("access_token").asText());
-        String newRefreshToken = encryption.encrypt(jsonNode.get("refresh_token").asText());
-        int expiresIn = jsonNode.get("expires_in").asInt();
+            // Send request
+            HttpResponse<String> response = sendRequest(request);
+            JsonNode jsonNode = new ObjectMapper().readTree(Objects.requireNonNull(response).body());
+            String accessToken = jsonNode.get("access_token").asText();
+            String refreshToken = jsonNode.get("refresh_token").asText();
+            int expiresIn = jsonNode.get("expires_in").asInt();
 
-        // Update tokens in the database
-        tokenManager.refreshTokens(encryption.encrypt(refreshToken), newAccessToken, newRefreshToken, expiresIn);
+            // Add Credentials
+            botClient.addCredential(accessToken);
+
+            // Update tokens in the database
+            tokenManager.refreshTokens(encryption.encrypt(token.getRefreshToken()), encryption.encrypt(accessToken), encryption.encrypt(refreshToken), expiresIn);
+
+            // Return new token
+            return new AuthToken(token.getId(), accessToken, refreshToken, token.getScopesAsString(), expiresIn, getTimestamp());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to refresh token");
+        }
+    }
+
+    // Get access token
+    private String getAccessToken(int channelId, Scope... scopes) {
+
+        // Variables
+        boolean inCache = authTokens.containsKey(channelId);
+
+        // Get access token
+        AuthToken token = inCache ? authTokens.get(channelId) : tokenManager.getAuthToken(channelId);
+        if (!inCache) {
+            if (token == null) return null;
+            token = new AuthToken(
+                    token.getId(),
+                    encryption.decrypt(token.getAccessToken()),
+                    encryption.decrypt(token.getRefreshToken()),
+                    token.getScopesAsString(),
+                    token.getExpiresIn(),
+                    token.getTimestamp()
+            );
+            authTokens.put(channelId, token);
+        }
+
+        // Check if token is valid
+        boolean isValid = token.hasScope(scopes);
+
+        // Decrypt access token
+        if (isValid) return token.getAccessToken();
+        else return null;
     }
 
     // Get authorization URL
@@ -122,7 +206,7 @@ public class HelixHandler {
                 "%s?client_id=%s&redirect_uri=https://%s:%d/callback&response_type=code&scope=%s",
                 AUTH_URL,
                 clientId,
-                server.getPort(),
+                server.getHostname(),
                 server.getPort(),
                 scopeBuilder.substring(0, scopeBuilder.length() - 1)
         );
@@ -132,44 +216,20 @@ public class HelixHandler {
     public BitsLeaderboard getBitsLeaderboard(Integer channelId) {
 
         // Get access token
-        boolean validScope = tokenManager.hasScope(channelId, Scope.BITS_READ);
-        String accessToken = tokenManager.getAccessToken(channelId);
-
-        // Decrypt access token
-        if (validScope || accessToken == null) return null;
-        else accessToken = encryption.decrypt(accessToken);
-
-        // Create credential
-        OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
-        TwitchClient client = TwitchClientBuilder.builder()
-                .withEnableHelix(true)
-                .withDefaultAuthToken(credential)
-                .build();
+        String accessToken = getAccessToken(channelId, Scope.BITS_READ);
 
         // Get bits leaderboard
-        return client.getHelix().getBitsLeaderboard(accessToken, channelId.toString(), null, null, null).execute();
+        return helix.getBitsLeaderboard(accessToken, channelId.toString(), null, null, null).execute();
     }
 
     // Get editors
     public HashSet<TwitchUser> getEditors(Integer channelId) {
 
         // Get access token
-        boolean validScope = tokenManager.hasScope(channelId, Scope.CHANNEL_READ_EDITORS);
-        String accessToken = tokenManager.getAccessToken(channelId);
-
-        // Decrypt access token
-        if (validScope || accessToken == null) return null;
-        else accessToken = encryption.decrypt(accessToken);
-
-        // Create credential
-        OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
-        TwitchClient client = TwitchClientBuilder.builder()
-                .withEnableHelix(true)
-                .withDefaultAuthToken(credential)
-                .build();
+        String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_EDITORS);
 
         // Get editors
-        ChannelEditorList editorList = client.getHelix().getChannelEditors(accessToken, channelId.toString()).execute();
+        ChannelEditorList editorList = helix.getChannelEditors(accessToken, channelId.toString()).execute();
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
@@ -183,22 +243,10 @@ public class HelixHandler {
     public HashSet<TwitchUser> getFollowers(Integer channelId) {
 
         // Get access token
-        boolean validScope = tokenManager.hasScope(channelId, Scope.USER_READ_FOLLOWS, Scope.MODERATOR_READ_FOLLOWERS);
-        String accessToken = tokenManager.getAccessToken(channelId);
-
-        // Decrypt access token
-        if (validScope || accessToken == null) return null;
-        else accessToken = encryption.decrypt(accessToken);
-
-        // Create credential
-        OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
-        TwitchClient client = TwitchClientBuilder.builder()
-                .withEnableHelix(true)
-                .withDefaultAuthToken(credential)
-                .build();
+        String accessToken = getAccessToken(channelId, Scope.USER_READ_FOLLOWS, Scope.MODERATOR_READ_FOLLOWERS);
 
         // Get followers
-        InboundFollowers inboundFollowers = client.getHelix().getChannelFollowers(accessToken, channelId.toString(), null, null, null).execute();
+        InboundFollowers inboundFollowers = helix.getChannelFollowers(accessToken, channelId.toString(), null, null, null).execute();
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
@@ -212,22 +260,10 @@ public class HelixHandler {
     public HashSet<TwitchUser> getModerators(Integer channelId) {
 
         // Get access token
-        boolean validScope = tokenManager.hasScope(channelId, Scope.MODERATION_READ);
-        String accessToken = tokenManager.getAccessToken(channelId);
-
-        // Decrypt access token
-        if (validScope || accessToken == null) return null;
-        else accessToken = encryption.decrypt(accessToken);
-
-        // Create credential
-        OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
-        TwitchClient client = TwitchClientBuilder.builder()
-                .withEnableHelix(true)
-                .withDefaultAuthToken(credential)
-                .build();
+        String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
 
         // Get moderators
-        ModeratorList moderatorList = client.getHelix().getModerators(accessToken, channelId.toString(), null, null, null).execute();
+        ModeratorList moderatorList = helix.getModerators(accessToken, channelId.toString(), null, null, null).execute();
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
@@ -241,22 +277,10 @@ public class HelixHandler {
     public HashSet<TwitchUser> getVIPs(Integer channelId) {
 
         // Get access token
-        boolean validScope = tokenManager.hasScope(channelId, Scope.CHANNEL_READ_VIPS);
-        String accessToken = tokenManager.getAccessToken(channelId);
-
-        // Decrypt access token
-        if (validScope || accessToken == null) return null;
-        else accessToken = encryption.decrypt(accessToken);
-
-        // Create credential
-        OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
-        TwitchClient client = TwitchClientBuilder.builder()
-                .withEnableHelix(true)
-                .withDefaultAuthToken(credential)
-                .build();
+        String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
 
         // Get VIPs
-        ChannelVipList vipList = client.getHelix().getChannelVips(accessToken, channelId.toString(), null, null, null).execute();
+        ChannelVipList vipList = helix.getChannelVips(accessToken, channelId.toString(), null, null, null).execute();
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
@@ -307,14 +331,12 @@ public class HelixHandler {
 
                 // Use the access token to determine the user
                 if (accessToken != null) {
-                    OAuth2Credential credential = new OAuth2Credential("twitch", accessToken);
-                    TwitchClient client = TwitchClientBuilder.builder()
-                            .withEnableHelix(true)
-                            .withDefaultAuthToken(credential)
-                            .build();
+
+                    // Add Credentials
+                    botClient.addCredential(accessToken);
 
                     // Get user
-                    UserList userList = client.getHelix().getUsers(null, null, null).execute();
+                    UserList userList = helix.getUsers(null, null, null).execute();
                     if (!userList.getUsers().isEmpty()) {
 
                         // Extract user data
@@ -322,12 +344,11 @@ public class HelixHandler {
                         int id = Integer.parseInt(user.getId());
                         String name = user.getDisplayName();
 
-                        // Encrypt tokens
-                        String encryptedAccessToken = encryption.encrypt(accessToken);
-                        String encryptedRefreshToken = encryption.encrypt(refreshToken);
-
                         // Save token
-                        tokenManager.addToken(id, name, encryptedAccessToken, encryptedRefreshToken, scopes, expiresIn);
+                        tokenManager.addToken(id, name, encryption.encrypt(accessToken), encryption.encrypt(refreshToken), scopes, expiresIn);
+
+                        // Add to cache
+                        authTokens.put(id, new AuthToken(id, accessToken, refreshToken, scopes, expiresIn, getTimestamp()));
                     }
                 }
             }

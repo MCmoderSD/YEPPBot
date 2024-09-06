@@ -1,6 +1,8 @@
 package de.MCmoderSD.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.philippheuer.credentialmanager.CredentialManager;
+import com.github.philippheuer.credentialmanager.CredentialManagerBuilder;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.core.EventManager;
 import com.github.twitch4j.TwitchClient;
@@ -45,12 +47,13 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class BotClient {
 
+    public static final String PROVIDER = "twitch";
+
     // Associations
     private final Main main;
     private final MySQL mySQL;
     private final Frame frame;
     private final Server server;
-    private final HelixHandler helixHandler;
     private final AudioBroadcast audioBroadcast;
 
     // Utilities
@@ -72,11 +75,24 @@ public class BotClient {
             HelixHandler.Scope.CHANNEL_MANAGE_RAIDS,
     };
 
-    // Attributes
+    // Credentials
+    private final JsonNode botConfig;
+    private final Integer botId;
+    private final String botToken;
+    private final String clientId;
+    private final String clientSecret;
+    private final OAuth2Credential defaultAuthToken;
+    private final CredentialManager credentialManager;
+
+    // Client
     private final TwitchClient client;
     private final TwitchChat chat;
     private final TwitchHelix helix;
     private final EventManager eventManager;
+
+    // Handler
+    private final HelixHandler helixHandler;
+    private final MessageHandler messageHandler;
 
     // Constructor
     public BotClient(Main main) {
@@ -91,30 +107,40 @@ public class BotClient {
         jsonUtility = main.getJsonUtility();
         reader = main.getReader();
 
-        // Load Bot Config
-        JsonNode botConfig = credentials.getBotConfig();
+        // Init Credentials
+        botConfig = credentials.getBotConfig();
+        botId = botConfig.get("botId").asInt();
+        botToken = botConfig.get("botToken").asText();
+        clientId = botConfig.get("clientId").asText();
+        clientSecret = botConfig.get("clientSecret").asText();
+
+        // Init Credential Manager
+        defaultAuthToken = new OAuth2Credential(PROVIDER, botToken);
+        credentialManager = CredentialManagerBuilder.builder().build();
+
+        // Init Bot
         botName = botConfig.get("botName").asText().toLowerCase();
         prefix = botConfig.get("prefix").asText();
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
         // Init Server
         JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
-        String hostname = hasArg(HOST) ? Main.arguments[0] : httpsServerConfig.get("hostname").asText();
-        int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpsServerConfig.get("port").asInt();
-        if (hasArg(DEV)) server = new Server(hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
-        else server = new Server(httpsServerConfig);
-
-        // Init Helix Handler
-        helixHandler = new HelixHandler(this, mySQL, server);
-        System.out.println(helixHandler.getAuthorizationUrl(requiredScopes));
-
-        // Init Bot Credential
-        OAuth2Credential botCredential = new OAuth2Credential("twitch", botConfig.get("botToken").asText());
+        if (!hasArg(DEV)) server = new Server(httpsServerConfig);
+        else {
+            String hostname = hasArg(HOST) ? Main.arguments[0] : httpsServerConfig.get("hostname").asText();
+            int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpsServerConfig.get("port").asInt();
+            server = new Server(hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
+        }
 
         // Init Client
         client = TwitchClientBuilder.builder()
-                .withDefaultAuthToken(botCredential)
-                .withChatAccount(botCredential)
+                .withBotOwnerId(botId.toString())
+                .withClientId(clientId)
+                .withClientSecret(clientSecret)
+                .withCredentialManager(credentialManager)
+                .withDefaultAuthToken(defaultAuthToken)
+                .withChatAccount(defaultAuthToken)
+                .withChatCommandsViaHelix(true)
                 .withEnableHelix(true)
                 .withEnableChat(true)
                 .build();
@@ -124,9 +150,11 @@ public class BotClient {
         helix = client.getHelix();
         eventManager = client.getEventManager();
 
+        // Init Helix Handler
+        helixHandler = new HelixHandler(this, mySQL, server);
+
         // Init Audio Broadcast
         audioBroadcast = new AudioBroadcast(server);
-        System.out.println(audioBroadcast.registerBroadcast(botName));
 
         // Join Channels
         Set<String> channelList = new HashSet<>();
@@ -137,44 +165,12 @@ public class BotClient {
         joinChannel(channelList);
 
         // Event Handler
-        MessageHandler messageHandler = new MessageHandler(this, mySQL, main.getFrame());
+        messageHandler = new MessageHandler(this, mySQL, main.getFrame());
 
         // Message Events
         eventManager.onEvent(ChannelMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));              // chat:read
         eventManager.onEvent(ChannelCheerEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));                // bits:read
         eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));  // channel_subscriptions:read
-
-        // Validate Configs
-        boolean openAI = credentials.validateOpenAIConfig();
-        boolean openAIChat = credentials.validateOpenAIChatConfig();
-        boolean openAIImage = credentials.validateOpenAIImageConfig();
-        boolean openAITTS = credentials.validateOpenAITTSConfig();
-        boolean weather = credentials.validateWeatherConfig();
-        boolean giphy = credentials.validateGiphyConfig();
-
-        // Initialize Commands
-        if (openAIChat) new Conversation(this, messageHandler, main.getOpenAI());
-        new Counter(this, messageHandler, mySQL);
-        new CustomCommand(this, messageHandler, mySQL);
-        new CustomTimers(this, messageHandler, mySQL);
-        new Fact(this, messageHandler, mySQL);
-        if (giphy) new Gif(this, messageHandler, credentials);
-        new Help(this, messageHandler, mySQL);
-        new Insult(this, messageHandler, mySQL);
-        new Join(this, messageHandler);
-        new Joke(this, messageHandler, mySQL);
-        new Lurk(this, messageHandler, mySQL);
-        new Moderate(this, messageHandler, mySQL, helixHandler);
-        new Ping(this, messageHandler);
-        new Play(this, messageHandler);
-        if (openAIChat) new Prompt(this, messageHandler, main.getOpenAI());
-        new Say(this, messageHandler);
-        new Status(this, messageHandler);
-        if (openAIChat) new Translate(this, messageHandler, main.getOpenAI());
-        if (openAITTS) new TTS(this, messageHandler, mySQL, main.getOpenAI());
-        if (openAIChat && weather) new Weather(this, messageHandler, main.getOpenAI(), credentials);
-        new Whitelist(this, messageHandler, mySQL);
-        if (openAIChat) new Wiki(this, messageHandler, main.getOpenAI());
 
         // Initialize LogManager
         LogManager logManager = mySQL.getLogManager();
@@ -193,10 +189,51 @@ public class BotClient {
         // Raid Events
         eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid);                                                  // channel:mange:raids
 
+        // Validate Configs
+        boolean openAI = credentials.validateOpenAIConfig();
+        boolean openAIChat = credentials.validateOpenAIChatConfig();
+        boolean openAIImage = credentials.validateOpenAIImageConfig();
+        boolean openAITTS = credentials.validateOpenAITTSConfig();
+        boolean weather = credentials.validateWeatherConfig();
+        boolean giphy = credentials.validateGiphyConfig();
+
+        // Initialize Commands
+        if (openAIChat) new Conversation(this, messageHandler, main.getOpenAI());
+        new Counter(this, messageHandler, mySQL);
+        new CustomCommand(this, messageHandler, mySQL);
+        new CustomTimers(this, messageHandler, mySQL);
+        new Fact(this, messageHandler, mySQL);
+        if (giphy) new Gif(this, messageHandler, credentials);
+        new Help(this, messageHandler, mySQL);
+        new Info(this, messageHandler, helixHandler);
+        new Insult(this, messageHandler, mySQL);
+        new Join(this, messageHandler);
+        new Joke(this, messageHandler, mySQL);
+        new Lurk(this, messageHandler, mySQL);
+        new Moderate(this, messageHandler, mySQL, helixHandler);
+        new Ping(this, messageHandler);
+        new Play(this, messageHandler);
+        if (openAIChat) new Prompt(this, messageHandler, main.getOpenAI());
+        new Say(this, messageHandler);
+        new Status(this, messageHandler);
+        if (openAIChat) new Translate(this, messageHandler, main.getOpenAI());
+        if (openAITTS) new TTS(this, messageHandler, mySQL, main.getOpenAI());
+        if (openAIChat && weather) new Weather(this, messageHandler, main.getOpenAI(), credentials);
+        new Whitelist(this, messageHandler, mySQL);
+        if (openAIChat) new Wiki(this, messageHandler, main.getOpenAI());
+
         // Show UI
         if (hasArg(CLI)) return;
         frame.setVisible(true);
         frame.requestFocusInWindow();
+    }
+
+
+    // Bot Controls
+
+    // Credential
+    public void addCredential(String accessToken) {
+        credentialManager.addCredential(PROVIDER, new OAuth2Credential(PROVIDER, accessToken));
     }
 
     // Write
@@ -316,31 +353,14 @@ public class BotClient {
         }).start();
     }
 
-    public void updateAccessToken(String token) {
-
-    }
-
     public void close() {
         client.close();
     }
 
+
     // Getter
-    public JsonNode getConfig() {
-        return main.getCredentials().getBotConfig();
-    }
 
-    public String getBotName() {
-        return botName;
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public Set<String> getChannels() {
-        return chat.getChannels();
-    }
-
+    // Checker
     public boolean hasArg(Main.Argument arg) {
         return main.hasArg(arg);
     }
@@ -357,9 +377,21 @@ public class BotClient {
         return event.getChannelId() == event.getUserId();
     }
 
+    public boolean isEditor(TwitchMessageEvent event) {
+        HashSet<Integer> ids = new HashSet<>();
+        helixHandler.getEditors(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
+        return ids.contains(event.getUserId());
+    }
+
     public boolean isModerator(TwitchMessageEvent event) {
         HashSet<Integer> ids = new HashSet<>();
         helixHandler.getModerators(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
+        return ids.contains(event.getUserId());
+    }
+
+    public boolean isVIP(TwitchMessageEvent event) {
+        HashSet<Integer> ids = new HashSet<>();
+        helixHandler.getVIPs(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
         return ids.contains(event.getUserId());
     }
 
@@ -371,6 +403,55 @@ public class BotClient {
 
     public boolean isInChannel(String channel) {
         return chat.isChannelJoined(channel);
+    }
+
+    // Attribute Getter
+    public String getProvider() {
+        return PROVIDER;
+    }
+
+    public String getBotName() {
+        return botName;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public HashSet<String> getAdmins() {
+        return admins;
+    }
+
+    public HelixHandler.Scope[] getRequiredScopes() {
+        return requiredScopes;
+    }
+
+    public JsonNode getConfig() {
+        return botConfig;
+    }
+
+    public Integer getBotId() {
+        return botId;
+    }
+
+    public String getBotToken() {
+        return botToken;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public OAuth2Credential getDefaultAuthToken() {
+        return defaultAuthToken;
+    }
+
+    public CredentialManager getCredentialManager() {
+        return credentialManager;
     }
 
     // Module Getter
@@ -388,6 +469,14 @@ public class BotClient {
 
     public EventManager getEventManager() {
         return eventManager;
+    }
+
+    public HelixHandler getHelixHandler() {
+        return helixHandler;
+    }
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
     }
 
     // Utility Getter

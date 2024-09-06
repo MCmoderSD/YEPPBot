@@ -1,14 +1,14 @@
 package de.MCmoderSD.utilities.database.manager;
 
-import de.MCmoderSD.core.HelixHandler;
+import de.MCmoderSD.objects.AuthToken;
 import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.other.Encryption;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -109,49 +109,61 @@ public class TokenManager {
         }
     }
 
-    // Check if the token has the required scopes
-    public boolean hasScope(int id, HelixHandler.Scope... requiredScopes) {
+    // Get access token
+    public AuthToken getAuthToken(int id) {
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT scopes FROM AuthTokens WHERE id = ?";
+            String query = "SELECT * FROM AuthTokens WHERE id = ?";
             PreparedStatement selectPreparedStatement = mySQL.getConnection().prepareStatement(query);
             selectPreparedStatement.setInt(1, id); // set id
             ResultSet resultSet = selectPreparedStatement.executeQuery();
 
-            // Check if the user has the required scopes
+            // Get AuthToken
             if (resultSet.next()) {
-                String scopes = resultSet.getString("scopes"); // get scopes
-                String[] scopeArray = scopes.split("\\+"); // split scopes by '+'
-
-                // Convert scopeArray to a HashSet for easy lookup
-                HashSet<String> scopeSet = new HashSet<>(Arrays.asList(scopeArray));
-
-                // Check if all required scopes are present
-                for (HelixHandler.Scope requiredScope : requiredScopes) if (!scopeSet.contains(requiredScope.toString())) return false;
-                return true;
-            }
-            return false;
+                return new AuthToken(
+                        resultSet.getInt("id"), // get id
+                        resultSet.getString("accessToken"), // get access token
+                        resultSet.getString("refreshToken"), // get refresh token
+                        resultSet.getString("scopes"), // get scopes
+                        resultSet.getInt("expires_in"), // get expires in
+                        resultSet.getTimestamp("timestamp") // get timestamp
+                );
+            } else return null;
         } catch (SQLException e) {
             System.err.println(e.getMessage());
-            return false;
+            return null;
         }
     }
 
-    // Get access token
-    public String getAccessToken(int id) {
+    // Get all AuthTokens
+    public HashMap<Integer, AuthToken> getAuthTokens(Encryption encryption) {
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT accessToken FROM AuthTokens WHERE id = ?";
+            String query = "SELECT * FROM AuthTokens";
             PreparedStatement selectPreparedStatement = mySQL.getConnection().prepareStatement(query);
-            selectPreparedStatement.setInt(1, id); // set id
             ResultSet resultSet = selectPreparedStatement.executeQuery();
 
-            // Return access token
-            return resultSet.next() ? resultSet.getString("accessToken") : null;
+            // Get AuthTokens
+            HashMap<Integer, AuthToken> authTokens = new HashMap<>();
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                authTokens.put(
+                        id,
+                        new AuthToken(
+                                id, // get id
+                                encryption.decrypt(resultSet.getString("accessToken")), // get access token
+                                encryption.decrypt(resultSet.getString("refreshToken")), // get refresh token
+                                resultSet.getString("scopes"), // get scopes
+                                resultSet.getInt("expires_in"), // get expires in
+                                resultSet.getTimestamp("timestamp") // get timestamp
+                        )
+                );
+            }
+            return authTokens;
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return null;
