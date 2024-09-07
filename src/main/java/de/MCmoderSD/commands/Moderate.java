@@ -15,6 +15,7 @@ public class Moderate {
     // Associations
     private final BotClient botClient;
     private final MessageHandler messageHandler;
+    private final HelixHandler helixHandler;
     private final ChannelManager channelManager;
 
     // Constructor
@@ -23,6 +24,7 @@ public class Moderate {
         // Init Associations
         this.botClient = botClient;
         this.messageHandler = messageHandler;
+        this.helixHandler = helixHandler;
         this.channelManager = mySQL.getChannelManager();
 
         // Syntax
@@ -51,7 +53,7 @@ public class Moderate {
                 }
 
                 String verb = args.getFirst().toLowerCase();
-                if (!Arrays.asList("join", "leave", "block", "unblock", "authenticate").contains(verb)) {
+                if (!Arrays.asList("join", "leave", "block", "unblock", "authenticate", "auth", "oauth").contains(verb)) {
                     botClient.respond(event, getCommand(), syntax);
                     return;
                 }
@@ -136,7 +138,7 @@ public class Moderate {
         if (command == null) return "Der Befehl existiert nicht!";
 
         // Edit blacklist
-        String response = channelManager.editBlacklist(channel, command, block);
+        String response = channelManager.editBlacklist(channel, command, block, helixHandler);
         messageHandler.updateBlackList(channelManager.getBlackList());
         return response;
     }

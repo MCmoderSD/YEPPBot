@@ -433,7 +433,7 @@ public class CustomManager {
                 String response = resultSet.getString("response");
 
                 // Create Timer object
-                Timer timer = new Timer(botClient, mySQL, mySQL.queryName("channels", channelId), name, time, response);
+                Timer timer = new Timer(botClient, botClient.getHelixHandler().getUser(channelId).getName(), name, time, response);
 
                 // Add to customTimers
                 customTimers.computeIfAbsent(channelId, k -> new HashSet<>(Set.of(timer)));
@@ -467,7 +467,7 @@ public class CustomManager {
                 String name = resultSet.getString("name");
                 String time = resultSet.getString("time");
                 String response = resultSet.getString("response");
-                customTimers.put(name, new Timer(botClient, mySQL, event.getChannel(), name, time, response));
+                customTimers.put(name, new Timer(botClient, event.getChannel(), name, time, response));
             }
 
         } catch (SQLException e) {
@@ -496,7 +496,7 @@ public class CustomManager {
                 String name = resultSet.getString("name");
                 String time = resultSet.getString("time");
                 String response = resultSet.getString("response");
-                customTimers.add(new Timer(botClient, mySQL, event.getChannel(), name, time, response));
+                customTimers.add(new Timer(botClient, event.getChannel(), name, time, response));
             }
 
         } catch (SQLException e) {

@@ -1,7 +1,13 @@
 package de.MCmoderSD.utilities.database;
 
 import de.MCmoderSD.main.Main;
-import de.MCmoderSD.utilities.database.manager.*;
+import de.MCmoderSD.utilities.database.manager.AssetManager;
+import de.MCmoderSD.utilities.database.manager.ChannelManager;
+import de.MCmoderSD.utilities.database.manager.CustomManager;
+import de.MCmoderSD.utilities.database.manager.LogManager;
+import de.MCmoderSD.utilities.database.manager.LurkManager;
+import de.MCmoderSD.utilities.database.manager.TokenManager;
+import de.MCmoderSD.utilities.database.manager.YEPPConnect;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,7 +17,7 @@ import java.util.HashMap;
 @SuppressWarnings("unused")
 public class MySQL extends Driver {
 
-    // Associations
+    // Managers
     private final AssetManager assetManager;
     private final ChannelManager channelManager;
     private final CustomManager customManager;
@@ -21,8 +27,8 @@ public class MySQL extends Driver {
     private final YEPPConnect yeppConnect;
 
     // Cache Lists
-    private final HashMap<Integer, String> channelCache;
     private final HashMap<Integer, String> userCache;
+    private final HashMap<Integer, String> channelCache;
 
     // Constructor
     public MySQL(Main main) {
@@ -35,8 +41,8 @@ public class MySQL extends Driver {
         initTables();
 
         // Load Cache
-        channelCache = loadCache("channels");
-        userCache = loadCache("users");
+        userCache = loadCache(false);
+        channelCache = loadCache(true);
 
         // Initialize Manager
         assetManager = new AssetManager(this);
@@ -58,7 +64,7 @@ public class MySQL extends Driver {
 
             // SQL statement for creating the users table
             connection.prepareStatement(condition +
-                    """
+                            """
                             users (
                             id INT PRIMARY KEY NOT NULL,
                             name VARCHAR(25) NOT NULL
@@ -68,7 +74,7 @@ public class MySQL extends Driver {
 
             // SQL statement for creating the channels table
             connection.prepareStatement(condition +
-                    """
+                            """
                             channels (
                             id INT PRIMARY KEY NOT NULL,
                             name VARCHAR(25) NOT NULL,
@@ -78,55 +84,58 @@ public class MySQL extends Driver {
                             )
                             """
             ).execute();
-
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private void checkUser(int id, String name) throws SQLException {
-        if (!isConnected()) connect(); // connect
+    // Load Cache
+    private HashMap<Integer, String> loadCache(boolean isChannel) {
 
-        // Check User
-        String selectQuery = "SELECT * FROM users WHERE id = ?";
-        PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
-        selectPreparedStatement.setInt(1, id);
-        ResultSet resultSet = selectPreparedStatement.executeQuery();
+        // Variables
+        HashMap<Integer, String> cache = new HashMap<>();
 
-        // Add User
-        if (!resultSet.next()) {
-            String insertQuery = "INSERT INTO users (id, name) VALUES (?, ?)";
-            PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
-            insertPreparedStatement.setInt(1, id); // set id
-            insertPreparedStatement.setString(2, name); // set name
-            insertPreparedStatement.executeUpdate(); // execute
-            insertPreparedStatement.close(); // close the insertPreparedStatement
+        // Load Channel Cache
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Query
+            String query;
+            if (isChannel) query = "SELECT * FROM " + "channels";
+            else query = "SELECT * FROM " + "users";
+
+            // Execute Query
+            PreparedStatement preparedStatement = getConnection().prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) cache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
         }
 
-        // Add to Cache
-        userCache.put(id, name);
-
-        // Close resources
-        resultSet.close();
-        selectPreparedStatement.close(); // close the selectPreparedStatement
+        return cache;
     }
 
     // Checks Channels
-    private void checkChannel(int id, String name) throws SQLException {
+    private void checkUser(int id, String name, boolean isChannel) throws SQLException {
         if (!isConnected()) connect(); // connect
 
         // Ensure the user exists in the users table
-        checkUser(id, name);
+        if (!isChannel) checkUser(id, name, false);
 
         // Check Channel
-        String selectQuery = "SELECT * FROM channels WHERE id = ?";
+        String selectQuery;
+        if (isChannel) selectQuery = "SELECT * FROM channels WHERE id = ?";
+        else selectQuery = "SELECT * FROM users WHERE id = ?";
+
         PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
         selectPreparedStatement.setInt(1, id);
         ResultSet resultSet = selectPreparedStatement.executeQuery();
 
         // Add Channel
         if (!resultSet.next()) {
-            String insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
+            String insertQuery;
+            if (isChannel) insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
+            else insertQuery = "INSERT INTO users (id, name) VALUES (?, ?)";
             PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
             insertPreparedStatement.setInt(1, id); // set id
             insertPreparedStatement.setString(2, name); // set name
@@ -135,7 +144,8 @@ public class MySQL extends Driver {
         }
 
         // Add to Cache
-        channelCache.put(id, name);
+        if (isChannel) channelCache.put(id, name);
+        else userCache.put(id, name);
 
         // Close resources
         resultSet.close();
@@ -154,80 +164,24 @@ public class MySQL extends Driver {
 
         // Update User Cache
         if (!user) {
-            checkUser(id, name);
+            checkUser(id, name, false);
             userCache.put(id, name);
         }
 
         // Update Channel Cache
         if (!channel && isChannel) {
-            checkChannel(id, name);
+            checkUser(id, name, true);
             channelCache.put(id, name);
         }
-    }
-
-    // Load Cache
-    private HashMap<Integer, String> loadCache(String table) {
-
-        // Variables
-        HashMap<Integer, String> cache = new HashMap<>();
-
-        // Load Channel Cache
-        try {
-            if (!isConnected()) connect(); // connect
-
-            String query = null;
-            if (table.equals("channels")) query = "SELECT * FROM " + "channels";
-            if (table.equals("users")) query = "SELECT * FROM " + "users";
-            if (query == null) return null;
-            PreparedStatement preparedStatement = getConnection().prepareStatement(query);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) cache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-
-        return cache;
-    }
-
-    // Query ID
-    public int queryID(String table, String name) {
-        try {
-            if (!isConnected()) connect();
-            String query = null;
-            if (table.equals("channels")) query = "SELECT id FROM " + "channels" + " WHERE name = ?";
-            if (table.equals("users")) query = "SELECT id FROM " + "users" + " WHERE name = ?";
-            if (query == null) return -1;
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) return resultSet.getInt("id");
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-        return -1;
-    }
-
-    // Query Name
-    public String queryName(String table, int id) {
-        try {
-            if (!isConnected()) connect();
-            String query = null;
-            if (table.equals("channels")) query = "SELECT name FROM " + "channels" + " WHERE id = ?";
-            if (table.equals("users")) query = "SELECT name FROM " + "users" + " WHERE id = ?";
-            if (query == null) return null;
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) return resultSet.getString("name");
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-        return null;
     }
 
     // Get Cache
     public HashMap<Integer, String> getChannelCache() {
         return channelCache;
+    }
+
+    public HashMap<Integer, String> getUserCache() {
+        return userCache;
     }
 
     // Get Manager

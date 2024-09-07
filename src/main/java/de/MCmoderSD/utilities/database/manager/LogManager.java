@@ -4,6 +4,7 @@ import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
+import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
@@ -253,12 +254,12 @@ public class LogManager {
     }
 
     // Log Bot Response
-    public void logResponse(String channel, String user, String message) {
+    public void logResponse(String channel, String user, String message, HelixHandler helixHandler) {
         if (log) new Thread(() -> {
 
             // Variables
-            var channelID = mySQL.queryID("channels", channel);
-            var userID = mySQL.queryID("users", user);
+            var channelID = helixHandler.getUser(channel).getId();
+            var userID = helixHandler.getUser(user).getId();
 
             try {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect

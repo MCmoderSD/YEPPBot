@@ -22,7 +22,29 @@ import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.UI.Frame;
-import de.MCmoderSD.commands.*;
+import de.MCmoderSD.commands.Conversation;
+import de.MCmoderSD.commands.Counter;
+import de.MCmoderSD.commands.CustomCommand;
+import de.MCmoderSD.commands.CustomTimers;
+import de.MCmoderSD.commands.Fact;
+import de.MCmoderSD.commands.Gif;
+import de.MCmoderSD.commands.Help;
+import de.MCmoderSD.commands.Info;
+import de.MCmoderSD.commands.Insult;
+import de.MCmoderSD.commands.Join;
+import de.MCmoderSD.commands.Joke;
+import de.MCmoderSD.commands.Lurk;
+import de.MCmoderSD.commands.Moderate;
+import de.MCmoderSD.commands.Ping;
+import de.MCmoderSD.commands.Play;
+import de.MCmoderSD.commands.Prompt;
+import de.MCmoderSD.commands.Say;
+import de.MCmoderSD.commands.Status;
+import de.MCmoderSD.commands.Translate;
+import de.MCmoderSD.commands.TTS;
+import de.MCmoderSD.commands.Weather;
+import de.MCmoderSD.commands.Whitelist;
+import de.MCmoderSD.commands.Wiki;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.AudioFile;
@@ -65,6 +87,8 @@ public class BotClient {
     public static String prefix;
     public static HashSet<String> admins;
     public static HelixHandler.Scope[] requiredScopes = {
+            HelixHandler.Scope.USER_READ_EMAIL,
+            HelixHandler.Scope.CHAT_READ,
             HelixHandler.Scope.BITS_READ,
             HelixHandler.Scope.CHANNEL_READ_EDITORS,
             HelixHandler.Scope.USER_READ_FOLLOWS,
@@ -246,7 +270,7 @@ public class BotClient {
         if (!hasArg(CLI)) frame.log(USER, channel, botName, message);
 
         // Log
-        mySQL.getLogManager().logResponse(channel, botName, message);
+        mySQL.getLogManager().logResponse(channel, botName, message, helixHandler);
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
@@ -353,10 +377,20 @@ public class BotClient {
         }).start();
     }
 
+    // Disconnect
+    public void disconnectChat() {
+        chat.disconnect();
+    }
+
+    // Close Chat
+    public void closeChat() {
+        chat.close();
+    }
+
+    // Close
     public void close() {
         client.close();
     }
-
 
     // Getter
 

@@ -1,7 +1,6 @@
 package de.MCmoderSD.objects;
 
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
 
@@ -11,7 +10,6 @@ public class Timer {
 
     // Associations
     private final BotClient botClient;
-    private final MySQL mySQL;
 
     // Attributes
     private final String channel;
@@ -24,11 +22,10 @@ public class Timer {
     private long counter;
 
     // Constructor
-    public Timer(BotClient botClient, MySQL mySQL, String channel, String name, String time, String response) {
+    public Timer(BotClient botClient, String channel, String name, String time, String response) {
 
         // Set Associations
         this.botClient = botClient;
-        this.mySQL = mySQL;
 
         // Set Attributes
         this.channel = channel;
@@ -70,8 +67,8 @@ public class Timer {
         // Send Message
         botClient.respond(new TwitchMessageEvent(
                 new Timestamp(System.currentTimeMillis()),
-                mySQL.queryID("channels", channel),
-                mySQL.queryID("channels", channel),
+                botClient.getHelixHandler().getUser(channel).getId(),
+                botClient.getHelixHandler().getUser(channel).getId(),
                 channel,
                 channel,
                 response,

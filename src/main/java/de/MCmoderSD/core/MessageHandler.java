@@ -139,7 +139,7 @@ public class MessageHandler {
                         event.getTimestamp(),
                         lurkChannel.getFirst(),
                         event.getUserId(),
-                        mySQL.queryName("channels", lurkChannel.getFirst()),
+                        botClient.getHelixHandler().getUser(lurkChannel.getFirst()).getName(),
                         event.getUser(),
                         event.getMessage(),
                         event.getSubMonths(),

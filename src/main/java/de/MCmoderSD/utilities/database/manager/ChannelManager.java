@@ -1,5 +1,6 @@
 package de.MCmoderSD.utilities.database.manager;
 
+import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Connection;
@@ -83,12 +84,12 @@ public class ChannelManager {
     }
 
     // Edit Blacklist
-    public String editBlacklist(String channel, String command, boolean isBlocked) {
+    public String editBlacklist(String channel, String command, boolean isBlocked, HelixHandler helixHandler) {
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Check Channel
-            if (!mySQL.getChannelCache().containsValue(channel)) mySQL.checkCache(mySQL.queryID("channels", channel), channel, true);
+            if (!mySQL.getChannelCache().containsValue(channel)) mySQL.checkCache(helixHandler.getUser(channel).getId(), channel, true);
 
             // Variables
             Connection connection = mySQL.getConnection();

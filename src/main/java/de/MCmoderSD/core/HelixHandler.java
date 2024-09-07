@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.philippheuer.events4j.core.EventManager;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.common.exception.UnauthorizedException;
 import com.github.twitch4j.helix.TwitchHelix;
 import com.github.twitch4j.helix.domain.User;
 import com.github.twitch4j.helix.domain.BitsLeaderboard;
@@ -25,6 +24,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
@@ -210,6 +210,30 @@ public class HelixHandler {
                 server.getPort(),
                 scopeBuilder.substring(0, scopeBuilder.length() - 1)
         );
+    }
+
+    // Get user with name
+    public TwitchUser getUser(String username) {
+
+        // Get access token
+        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL);
+
+        // Get user ID
+        UserList userList = helix.getUsers(accessToken, null, Collections.singletonList(username)).execute();
+        if (userList.getUsers().isEmpty()) return null;
+        return new TwitchUser(userList.getUsers().getFirst());
+    }
+
+    // Get user with ID
+    public TwitchUser getUser(int id) {
+
+        // Get access token
+        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL);
+
+        // Get user ID
+        UserList userList = helix.getUsers(accessToken, Collections.singletonList(String.valueOf(id)), null).execute();
+        if (userList.getUsers().isEmpty()) return null;
+        return new TwitchUser(userList.getUsers().getFirst());
     }
 
     // Get bits leader board

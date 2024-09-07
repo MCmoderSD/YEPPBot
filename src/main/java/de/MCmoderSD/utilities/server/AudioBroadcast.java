@@ -38,9 +38,6 @@ public class AudioBroadcast {
         serverContexts = new HashMap<>();
         audioFiles = new HashMap<>();
         versions = new HashMap<>();
-
-        // Print
-        System.out.printf("AudioBroadcast initialized on https://%s:%d%s", hostname, port, "\n");
     }
 
     // Register Broadcast
