@@ -1,13 +1,13 @@
-package de.MCmoderSD.utilities.OpenAI;
+package de.MCmoderSD.utilities.openAI;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.theokanning.openai.service.OpenAiService;
-import de.MCmoderSD.utilities.OpenAI.enums.ChatModel;
-import de.MCmoderSD.utilities.OpenAI.enums.ImageModel;
-import de.MCmoderSD.utilities.OpenAI.enums.TTSModel;
-import de.MCmoderSD.utilities.OpenAI.modules.Chat;
-import de.MCmoderSD.utilities.OpenAI.modules.Image;
-import de.MCmoderSD.utilities.OpenAI.modules.Speech;
+import de.MCmoderSD.utilities.openAI.enums.ChatModel;
+import de.MCmoderSD.utilities.openAI.enums.ImageModel;
+import de.MCmoderSD.utilities.openAI.enums.TTSModel;
+import de.MCmoderSD.utilities.openAI.modules.Chat;
+import de.MCmoderSD.utilities.openAI.modules.Image;
+import de.MCmoderSD.utilities.openAI.modules.Speech;
 
 @SuppressWarnings("unused")
 public class OpenAI {

@@ -1,9 +1,9 @@
-package de.MCmoderSD.utilities.OpenAI.modules;
+package de.MCmoderSD.utilities.openAI.modules;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.theokanning.openai.audio.CreateSpeechRequest;
 import com.theokanning.openai.service.OpenAiService;
-import de.MCmoderSD.utilities.OpenAI.enums.TTSModel;
+import de.MCmoderSD.utilities.openAI.enums.TTSModel;
 import de.MCmoderSD.objects.AudioFile;
 import okhttp3.ResponseBody;
 

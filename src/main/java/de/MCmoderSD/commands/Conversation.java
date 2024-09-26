@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.OpenAI.OpenAI;
-import de.MCmoderSD.utilities.OpenAI.modules.Chat;
+import de.MCmoderSD.utilities.openAI.OpenAI;
+import de.MCmoderSD.utilities.openAI.modules.Chat;
 
 import java.util.ArrayList;
 import java.util.Arrays;

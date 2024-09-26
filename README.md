@@ -5,16 +5,21 @@
 The YEPPBot is a Twitch bot that provides a variety of features to entertain your Twitch channel. <br>
 Originally created by [FoxxHimself](https://github.com/lennartfu) in Python and now compleatly rewritten in [Java 21](https://www.oracle.com/de/java/technologies/downloads/#java21) using the [Twitch4J](https://twitch4j.github.io/) library.
 
-The bot is currently under active development and it's features can change a lot in the future. <br>
-You can use the project to create your own bot, but you have to add a MySQL database and for certain features you need a config with an API key. <br>
-If you don't have access to the API, the bot will still work, but without those features, but the database is necessary. <br>
+The bot is currently under active development and features can change a lot in the future. <br>
+So keep in mind setting up the bot can change from time to time. <br> <br>
+
+You can use the project to create your own bot, either by modifying the source code or by using the [jar](https://github.com/MCmoderSD/YEPPBot/releases/latest). <br>
+The setup is a bit complicated and requires a lot of configuration and troubleshooting. <br>
+
+You don't need all API keys to run the bot, just for certain features. <br>
+What you definitely need is a Twitch Account and a MySQL Database. <br>
 If you have any ideas or suggestions, feel free to open an issue or a pull request. <br> <br>
 
 ## Table of Contents
 
 - [Description](#description)
 - [Features](#features)
-- [How to use](#how-to-use)
+- [Installation](#installation-and-usage)
 - [YEPPConnect](#yeppconnect)
 - [Usage and commands](#usage-and-commands)
 - [Contributing](#contributing)
@@ -30,6 +35,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - [x] Lurk (with timer)
   - [x] Prompt (ChatGPT)
   - [x] Translate
+  - [x] TTS (Text to Speech)
   - [x] Weather
   - [x] Whitelist (YEPPConnect)
   - [x] Wiki
@@ -38,6 +44,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - Admin Commands:
   - [x] Block/Unblock
   - [x] Help
+  - [x] Info
   - [x] Join/Leave
   - [x] Ping
   - [x] Say
@@ -48,26 +55,30 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - [x] Custom Commands
   - [x] Custom Counters
   - [x] Custom Timers (Still in development)
+  - [x] Helix API (Twitch API)
+  - [x] HTTPS Server
   - [x] Database Logging
-  - [x] Error 
   - [x] User Interface (Cheap with JavaSwing)
 
 
 - Planned Features:
   - [ ] Web UI
-  - [ ] Rank
-  - [ ] Key
+  - [ ] Rank Command
+  - [ ] Key Command
+  - [ ] Discord Integration
   
 
-## How to use
+## Installation and Usage
 
 If you need help or have any questions, feel free to contact me on [Discord](https://www.mcmodersd.de/dc) or via [Mail](mailto:business@mcmodersd.de), you can also contact me on [Twitch](https://www.twitch.tv/mcmodersd). <br>
 I respond within 24 hours, usually a lot faster. If you want to cooperate? need a version that fit your needs? <br> 
 Just write a [Mail](mailto:business@mcmodersd.de) to [business@mcmodersd.de](mailto:business@mcmodersd.de) <br> <br>
 
 You need to have Java 21 installed on your computer a download link can be found [here](https://www.oracle.com/uk/java/technologies/downloads/#java21). <br>
-You need the Twitch Account Token of the Twitch Bot which you can get from [here](https://twitchapps.com/tmi/).<br> <br>
-Keep in mind that the token can change from to time. <br>
+You need the Twitch account token of the Twitch bot which you can get from [here](https://twitchapps.com/tmi/).<br>
+Then you need to register the bot on the [Twitch Developer Console](https://dev.twitch.tv/console/apps). <br>
+
+Keep in mind that the account token can change from to time. <br>
 But remember **DON'T POST** or **SHARE** the token anywhere!!! <br> <br>
 
 ### 1. Download the bot jar file
@@ -88,13 +99,17 @@ The first file is ```BotConfig.json``` and it should have the following structur
 
 ```json
 {
+  "botId": "YOUR_BOT_ID",
   "botName": "YOUR_BOT_NAME",
   "botToken": "YOUR_BOT_TOKEN",
+  "clientId": "YOUR_CLIENT_ID",
+  "clientSecret": "YOUR_CLIENT_SECRET",
   "prefix": "!",
   "admins": "ADMIN_NAME; OTHER_ADMIN_NAME"
 }
 ```
 
+The botId can be obtained with this tool [here](https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/). <br>
 The prefix is the character that the bot will use to recognize commands. <br> <br>
 The second file is ```Channel.list``` and it should have the following structure: <br>
 
@@ -106,7 +121,60 @@ OTHER_CHANNEL_NAME
 You can add as many channels as you want.
 <br> <br>
 
-### 3. Add a ChatGPT API key
+### 3. MySQL Database
+
+You need to have your own MySQL database to run and use the bot. <br>
+The Bot creates the tables and everything by itself, but you have to create a config. <br>
+You need to create a file called ```mySQL.json``` in the ```/src/main/resources/database/``` folder. <br>
+The file should have the following structure: <br>
+
+```json
+{
+  "host": "localhost",
+  "port": "3306",
+  "database": "DATABASE_NAME",
+  "username": "USER_NAME",
+  "password": "USER_PASSWORD"
+}
+```
+
+You have to give the user full permission over the whole database. <br>
+If you don't want to use the database logging, you can use the ```-nolog``` argument to disable it. <br> <br>
+You can use the ```-generate``` argument to generate an example config file. <br> <br>
+
+
+### 4. HTTPS Server
+
+The YEPPBot creates a simple HTTPS server to manage the Helix API authentication. <br>
+It can also be used to broadcast sound over a browser page. <br>
+You need to create a file called ```httpsServer.json``` in the ```/src/main/resources/config/``` folder. <br>
+The file should have the following structure: <br>
+
+```json
+{
+  "hostname": "YOUR_HOSTNAME",
+  "port": 420,
+  "keystore": "/keys/keystore.jks",
+  "fullchain": "/path/to/fullchain.pem",
+  "privkey": "/path/to/privkey.pem"
+}
+```
+
+You can also use localhost with a self-signed jks file. <br>
+Then the Twitch API will work, but OBS won't work with the browser source as it doesn't accept self-signed jks files certificate. <br>
+You can use the ```-generate``` argument to generate an example config file. <br> <br>
+
+You can generate a self-signed certificate using the following command: <br>
+```keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks -storepass password -validity 360 -keysize 2048``` <br>
+
+As password, you have set the bot token, but as SHA-256 hash, encoded in base64.<br>
+You can use this [SHA-256 hash tool](https://emn178.github.io/online-tools/sha256.html) to convert the bot token into a SHA-256 Base64 encoded hash. <br>
+Just make sure to set **UTF-8** as input and **Base64** as output format. <br>
+
+If you have a domain, you **NEED** to use a valid certificate, if you use a self-signed jks file you need to use localhost. <br>
+You can get a free valid certificate from [Let's Encrypt](https://letsencrypt.org/). <br> <br>
+
+### 5. Add a ChatGPT API key
 
 You only need to configure the module if you want to use, if you for example doesn't want to use the image module, you can just delete the image part of the config. <br>
 You need to create a file called ```ChatGPT.json``` in the ```/src/main/resources/api/``` folder. <br>
@@ -145,6 +213,8 @@ The file should have the following structure: <br>
 ```
 
 You can get the API key from [OpenAI](https://platform.openai.com/signup). <br>
+You can use the ```-generate``` argument to generate an example config file. <br>
+But if you don't want to use the ChatGPT module, you can just delete the chat part of the config. <br> <br>
 
 
 ### Chat Configuration
@@ -253,7 +323,7 @@ You can get the API key from [OpenAI](https://platform.openai.com/signup). <br>
 - The **speed** is the speed of the speech. <br>
   The min value is 0.25 and the max value is 4, the default value is 1. <br> <br>
 
-### 4. Add an OpenWeatherMap API key
+### 6. Add an OpenWeatherMap API key
 You need to create a file called ```OpenWeatherMap.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
 
@@ -267,7 +337,7 @@ The file should have the following structure: <br>
 You need a ChatGPT API key to use the weather command. <br>
 You can get the API key from [OpenWeatherMap](https://openweathermap.org/api). <br> <br>
 
-### 5. Add a Giphy API key
+### 7. Add a Giphy API key
 You need to create a file called ```Giphy.json``` in the ```/src/main/resources/api/``` folder. <br>
 The file should have the following structure: <br>
 
@@ -280,44 +350,6 @@ The file should have the following structure: <br>
 ```
 
 You can get the API key from [Giphy](https://developers.giphy.com/). <br> <br>
-
-
-### 6. MySQL Database
-
-You need to have your own MySQL database to run and use the bot. <br>
-The Bot creates the tables and everything by itself, but you have to create a config. <br>
-You need to create a file called ```mySQL.json``` in the ```/src/main/resources/database/``` folder. <br>
-The file should have the following structure: <br>
-
-```json
-{
-  "host": "localhost",
-  "port": "3306",
-  "database": "DATABASE_NAME",
-  "username": "USER_NAME",
-  "password": "USER_PASSWORD"
-}
-```
-
-You have to give the user full permission over the whole database. <br>
-If you don't want to use a database, you have to remove certain features from the source code. <br> <br>
-
-
-### 7. HTTP Server
-
-The YEPPBot creates a simple HTTP server to broadcast sound over a browser page. <br>
-You need to create a file called ```httpserver.json``` in the ```/src/main/resources/config/``` folder. <br>
-The file should have the following structure: <br>
-
-```json
-{
-  "host": "localhost",
-  "port": "80"
-}
-```
-
-The host is the IP address of the server, the default host is localhost. <br>
-You can change the port to any port you want, but the default port is 80. <br> <br>
 
 
 ### 8. Add assets to the database
@@ -349,7 +381,7 @@ For the configs you can use: <br>
 - ```-botconfig "/PATH/TO/BotConfig.json"``` argument to specify the path to the BotConfig.json file. <br>
 - ```-channellist "/PATH/TO/Channel.list"``` argument to specify the path to the Channel.list file. <br>
 - ```-mysqlconfig "/PATH/TO/mySQL.json"``` argument to specify the path to the mySQL.json file. <br>
-- ```-httpserver "/PATH/TO/httpserver.json"``` argument to specify the path to the httpserver.json file. <br>
+- ```-httpsserver "/PATH/TO/httpsserver.json"``` argument to specify the path to the httpserver.json file. <br>
 - ```-openaiconfig "/PATH/TO/ChatGPT.json"``` argument to specify the path to the ChatGPT.json file. <br>
 - ```-openweathermapconfig "/PATH/TO/OpenWeatherMap.json"``` argument to specify the path to the OpenWeatherMap.json file. <br>
 - ```-giphyconfig "/PATH/TO/Giphy.json"``` argument to specify the path to the Giphy.json file. <br> <br>
@@ -362,14 +394,14 @@ You can use the:
 - ```!help COMMAND_NAME``` to get more information about a specific command. <br>
 - ```!moderate join/leave``` to make the bot join or leave your channel. <br>
 - ```!moderate block/unblock``` to blacklist commands. <br>
-- ```!Counter``` command to create and manage counter commands. <br> <br>
+- ```!counter``` command to create and manage counter commands. <br> <br>
 
 You can use the ```!CustomCommand``` command to create and manage custom commands. <br>
-You can also use variables in the custom commands. <br>
-- %author% - will be replaced with the username of the person who executes the command<br>
-- %channel% - will be replaced with the channel name where the command was executed<br>
-- %tagged% - will be replaced by the first word after the command<br>
-- %random% - will be replaced by a random percentage between 0 and 100<br> <br>
+You can also use variables in the custom commands. <br> 
+- %author% - will be replaced with the username of the person who executes the command <br>
+- %channel% - will be replaced with the channel name where the command was executed <br>
+- %tagged% - will be replaced by the first word after the command <br>
+- %random% - will be replaced by a random percentage between 0 and 100 <br> <br>
 
 ## YEPPConnect
 
@@ -392,5 +424,4 @@ to [OpenAI](https://platform.openai.com/signup) for the ChatGPT API. <br>
 Also thanks to [OpenWeatherMap](https://openweathermap.org/api) for the weather API. <br>
 
 Especially thanks to [FoxxHimself](https://github.com/lennartfu) for the original bot and the idea to rewrite it in Java. <br>
-Lot of thanks to [RedSmileTV](https://github.com/redsmiletv) and [Rebix](https://github.com/reebix) for the help with
-the bot and api's and libraries. <br>
+Lot of thanks to [RedSmileTV](https://github.com/redsmiletv) and [Rebix](https://github.com/reebix) for the help with the bot and api's and libraries. <br>

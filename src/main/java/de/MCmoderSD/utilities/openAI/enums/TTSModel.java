@@ -1,4 +1,4 @@
-package de.MCmoderSD.utilities.OpenAI.enums;
+package de.MCmoderSD.utilities.openAI.enums;
 
 import java.math.BigDecimal;
 import java.util.HashSet;

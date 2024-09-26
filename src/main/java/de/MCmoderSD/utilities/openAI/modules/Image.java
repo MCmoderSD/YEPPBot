@@ -1,10 +1,10 @@
-package de.MCmoderSD.utilities.OpenAI.modules;
+package de.MCmoderSD.utilities.openAI.modules;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.theokanning.openai.image.CreateImageRequest;
 import com.theokanning.openai.image.ImageResult;
 import com.theokanning.openai.service.OpenAiService;
-import de.MCmoderSD.utilities.OpenAI.enums.ImageModel;
+import de.MCmoderSD.utilities.openAI.enums.ImageModel;
 
 import java.math.BigDecimal;
 import java.util.HashSet;

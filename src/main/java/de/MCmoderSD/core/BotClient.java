@@ -149,11 +149,11 @@ public class BotClient {
 
         // Init Server
         JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
-        if (!hasArg(DEV)) server = new Server(httpsServerConfig);
+        if (!hasArg(DEV) && httpsServerConfig.get("hostname").asText().contains(".")) server = new Server(this, httpsServerConfig);
         else {
             String hostname = hasArg(HOST) ? Main.arguments[0] : httpsServerConfig.get("hostname").asText();
             int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpsServerConfig.get("port").asInt();
-            server = new Server(hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
+            server = new Server(this, hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
         }
 
         // Init Client

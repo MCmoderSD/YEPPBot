@@ -2,7 +2,7 @@ package de.MCmoderSD.main;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.utilities.OpenAI.OpenAI;
+import de.MCmoderSD.utilities.openAI.OpenAI;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
@@ -69,7 +69,6 @@ public class Main {
         reader = new Reader();
 
         // Format Args
-        args.replaceAll(String::toLowerCase);
         args.removeAll(Collections.singleton(""));
         args.removeAll(Collections.singleton(" "));
         args.removeAll(Collections.singleton(null));
@@ -107,8 +106,8 @@ public class Main {
         // MySQL Config
         if (hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = args.get(args.indexOf("-mysqlconfig") + 1);
 
-        // Http Server
-        if (hasArg(Argument.HTTPS_SERVER)) httpsServerPath = args.get(args.indexOf("-httpserver") + 1);
+        // Https Server
+        if (hasArg(Argument.HTTPS_SERVER)) httpsServerPath = args.get(args.indexOf("-httpsserver") + 1);
 
         // OpenAI Config
         if (hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
@@ -229,7 +228,7 @@ public class Main {
 
         // Format args
         for (String arg : args)
-            if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replaceAll("/", "-").replaceAll("-", ""));
+            if (arg.startsWith("-") || arg.startsWith("/")) arguments.add(arg.replaceAll("/", "-").replaceAll("-", "").toLowerCase());
 
         // Check
         Arrays.stream(Argument.values()).forEach(argument -> {

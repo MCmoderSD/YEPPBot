@@ -1,7 +1,5 @@
 package de.MCmoderSD.utilities.other;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.BadPaddingException;
@@ -13,6 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Base64;
 import java.util.HashMap;
 
@@ -28,15 +29,12 @@ public class Encryption {
     private final HashMap<String, String> cache;
 
     // Constructor
-    public Encryption(JsonNode botConfig) {
-
-        // Get the bot token from the configuration
-        String botToken = botConfig.get("botToken").asText();
+    public Encryption(String token) {
 
         // Generate secret key using SHA-256 hash of the bot token
         try {
             MessageDigest sha = MessageDigest.getInstance(ALGORITHM);
-            byte[] key = sha.digest(botToken.getBytes(CHARSET));
+            byte[] key = sha.digest(token.getBytes(CHARSET));
             secretKey = new SecretKeySpec(key, "AES"); // Key for AES encryption
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -89,6 +87,56 @@ public class Encryption {
             return token; // Return the decrypted token
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    // Change Encryption Token
+    public static void main(String[] args) throws SQLException {
+
+        // Old and new token
+        String oldToken = "oauth:"; // Old token
+        String newToken = "oauth:"; // New token
+
+        // Create encryptors
+        Encryption oldEncryptor = new Encryption(oldToken); // Old token
+        Encryption newEncryptor = new Encryption(newToken); // New token
+
+        // Database connection
+        String host = "localhost";
+        int port = 3306; // MySQL Default Port
+        String database = "your_database";
+        String username = "your_username";
+        String password = "your_password";
+
+        // Connect to database
+        Connection connection = java.sql.DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password); // connect
+
+        // Replace old token with new token
+        ResultSet resultSet = connection.prepareStatement("SELECT * FROM AuthTokens").executeQuery();
+        while (resultSet.next()) {
+            try {
+
+                // Get the token
+                String accessToken = resultSet.getString("accessToken");
+                String refreshToken = resultSet.getString("refreshToken");
+
+                // Decrypt the token
+                String oldAccessToken = oldEncryptor.decrypt(accessToken);
+                String oldRefreshToken = oldEncryptor.decrypt(refreshToken);
+
+                // Encrypt the token
+                String newAccessToken = newEncryptor.encrypt(oldAccessToken);
+                String newRefreshToken = newEncryptor.encrypt(oldRefreshToken);
+
+                //noinspection SqlSourceToSinkFlow
+                connection.prepareStatement("UPDATE AuthTokens SET accessToken = '" + newAccessToken + "', refreshToken = '" + newRefreshToken + "' WHERE accessToken = '" + accessToken + "' AND refreshToken = '" + refreshToken + "'").execute();
+
+                // Log the change
+                System.out.println("Updated token from Client ID: " + resultSet.getInt("id"));
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

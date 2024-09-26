@@ -1,4 +1,4 @@
-package de.MCmoderSD.utilities.OpenAI.modules;
+package de.MCmoderSD.utilities.openAI.modules;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.theokanning.openai.completion.chat.ChatCompletionChunk;
@@ -10,7 +10,7 @@ import com.theokanning.openai.service.OpenAiService;
 import io.reactivex.Flowable;
 import io.reactivex.flowables.ConnectableFlowable;
 
-import de.MCmoderSD.utilities.OpenAI.enums.ChatModel;
+import de.MCmoderSD.utilities.openAI.enums.ChatModel;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

@@ -1,6 +1,9 @@
 {
+  "botId": 1234567890,
   "botName": "Name of the Bot",
   "botToken": "YOUR_BOT_TOKEN",
+  "clientId": "YOUR_CLIENT_ID",
+  "clientSecret": "YOUR_CLIENT_SECRET",
   "prefix": "!",
   "admins": "ExampleAdmin1; ExampleAdmin2; ExampleAdmin3"
 }

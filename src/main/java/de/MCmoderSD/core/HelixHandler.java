@@ -92,7 +92,7 @@ public class HelixHandler {
         eventManager = botClient.getEventManager();
 
         // Set Utilities
-        encryption = new Encryption(botClient.getConfig());
+        encryption = new Encryption(botClient.getBotToken());
 
         // Initialize Attributes
         authTokens = tokenManager.getAuthTokens(encryption);

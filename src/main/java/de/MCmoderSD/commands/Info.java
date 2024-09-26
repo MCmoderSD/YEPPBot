@@ -19,7 +19,7 @@ public class Info {
         String syntax = "Syntax: " + botClient.getPrefix() + "info <editor/mod/vip>";
 
         // About
-        String[] name = {"info", "inforamtion"};
+        String[] name = {"info", "information"};
         String description = "Zeigt dir infos über einen Channel. " + syntax;
 
 

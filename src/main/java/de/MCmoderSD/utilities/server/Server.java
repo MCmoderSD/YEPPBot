@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
+import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.main.Main;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -41,7 +43,7 @@ public class Server {
     private final HttpsServer server;
 
     // Constructor with SSL from JSON
-    public Server(JsonNode httpsServerConfig) {
+    public Server(BotClient botClient, JsonNode httpsServerConfig) {
         this(
                 httpsServerConfig.get("hostname").asText(),
                 httpsServerConfig.get("port").asInt(),
@@ -51,7 +53,7 @@ public class Server {
     }
 
     // Constructor with KeyStore
-    public Server(String hostname, int port, String jksPath, JsonNode botConfig) {
+    public Server(BotClient botClient, String hostname, int port, String jksPath, JsonNode botConfig) {
         try {
 
             // Set hostname and port
@@ -66,7 +68,9 @@ public class Server {
             KeyStore ks = KeyStore.getInstance("JKS");
 
             // Get the keystore file
-            InputStream keystore = getClass().getResourceAsStream(jksPath);
+            InputStream keystore;
+            if (botClient.hasArg(Main.Argument.HTTPS_SERVER)) keystore = new FileInputStream(jksPath);
+            else keystore = getClass().getResourceAsStream(jksPath);
 
             // Hash the bot token with SHA-256
             char[] password = Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(botConfig.get("botToken").asText().getBytes(StandardCharsets.UTF_8))).toCharArray();
