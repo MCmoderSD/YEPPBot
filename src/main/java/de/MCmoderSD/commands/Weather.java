@@ -29,7 +29,6 @@ public class Weather {
     // Attributes
 
     // OpenWeatherMap API
-    private final String url;
     private final String apiKey;
 
     // OpenAI API
@@ -55,11 +54,7 @@ public class Weather {
         String description = "Zeigt das Wetter in einer Stadt an. " + syntax;
 
         // Load API key
-        JsonNode config = credentials.getOpenWeatherMapConfig();
-
-        // Init Attributes
-        url = config.get("url").asText();
-        apiKey = config.get("api_key").asText();
+        apiKey = credentials.getAPIConfig().get("openWeatherMap").asText();
 
         // Get Chat Module and Config
         chat = openAI.getChat();
@@ -172,12 +167,15 @@ public class Weather {
 
     // Query weather data
     private String query(String cityName) {
+
+        // Variables
         StringBuilder response = new StringBuilder();
+
+        // Query
         try {
             String encodedCityName = cityName.replace(" ", "+");
-            while (encodedCityName.charAt(encodedCityName.length() - 1) == '+')
-                encodedCityName = encodedCityName.trim();
-            URI uri = new URI(this.url + encodedCityName + this.apiKey);
+            while (encodedCityName.charAt(encodedCityName.length() - 1) == '+') encodedCityName = encodedCityName.trim();
+            URI uri = new URI(String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", encodedCityName, apiKey));
             HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));

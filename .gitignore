@@ -51,10 +51,8 @@ build/
 /src/main/resources/database/dev.json
 
 ### api keys ###
+/src/main/resources/api/apiKeys.json
 /src/main/resources/api/ChatGPT.json
-/src/main/resources/api/Giphy.json
-/src/main/resources/api/HelixAPI.json
-/src/main/resources/api/OpenWeatherMap.json
 
 ### config ###
 /src/main/resources/config/BotConfig.json

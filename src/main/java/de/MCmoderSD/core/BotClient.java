@@ -22,29 +22,7 @@ import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.UI.Frame;
-import de.MCmoderSD.commands.Conversation;
-import de.MCmoderSD.commands.Counter;
-import de.MCmoderSD.commands.CustomCommand;
-import de.MCmoderSD.commands.CustomTimers;
-import de.MCmoderSD.commands.Fact;
-import de.MCmoderSD.commands.Gif;
-import de.MCmoderSD.commands.Help;
-import de.MCmoderSD.commands.Info;
-import de.MCmoderSD.commands.Insult;
-import de.MCmoderSD.commands.Join;
-import de.MCmoderSD.commands.Joke;
-import de.MCmoderSD.commands.Lurk;
-import de.MCmoderSD.commands.Moderate;
-import de.MCmoderSD.commands.Ping;
-import de.MCmoderSD.commands.Play;
-import de.MCmoderSD.commands.Prompt;
-import de.MCmoderSD.commands.Say;
-import de.MCmoderSD.commands.Status;
-import de.MCmoderSD.commands.Translate;
-import de.MCmoderSD.commands.TTS;
-import de.MCmoderSD.commands.Weather;
-import de.MCmoderSD.commands.Whitelist;
-import de.MCmoderSD.commands.Wiki;
+import de.MCmoderSD.commands.*;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.AudioFile;
@@ -216,14 +194,16 @@ public class BotClient {
         eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid);                                                  // channel:mange:raids
 
         // Validate Configs
+        boolean astrology = credentials.hasAstrology();
+        boolean weather = credentials.hasOpenWeatherMap();
+        boolean giphy = credentials.hasGiphy();
         boolean openAI = credentials.validateOpenAIConfig();
         boolean openAIChat = credentials.validateOpenAIChatConfig();
         boolean openAIImage = credentials.validateOpenAIImageConfig();
         boolean openAITTS = credentials.validateOpenAITTSConfig();
-        boolean weather = credentials.validateWeatherConfig();
-        boolean giphy = credentials.validateGiphyConfig();
 
         // Initialize Commands
+        new Birthday(this, messageHandler, mySQL);
         if (openAIChat) new Conversation(this, messageHandler, main.getOpenAI());
         new Counter(this, messageHandler, mySQL);
         new CustomCommand(this, messageHandler, mySQL);
@@ -231,6 +211,7 @@ public class BotClient {
         new Fact(this, messageHandler, mySQL);
         if (giphy) new Gif(this, messageHandler, credentials);
         new Help(this, messageHandler, mySQL);
+        if (openAIChat) new Horoscope(this, messageHandler, mySQL, main.getOpenAI());
         new Info(this, messageHandler, helixHandler);
         new Insult(this, messageHandler, mySQL);
         new Join(this, messageHandler);

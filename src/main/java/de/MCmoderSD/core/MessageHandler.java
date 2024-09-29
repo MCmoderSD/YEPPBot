@@ -3,6 +3,7 @@ package de.MCmoderSD.core;
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.commands.Command;
 import de.MCmoderSD.main.Main;
+import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
@@ -12,6 +13,9 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -23,9 +27,13 @@ public class MessageHandler {
     private final Frame frame;
 
     // Attributes
+    private final HashSet<Integer> congratulated;
+
+    // HashMaps
     private final HashMap<String, Command> commandList;
     private final HashMap<String, String> aliasMap;
     private final HashMap<Integer, Integer> lurkList;
+    private final HashMap<Integer, Birthdate> birthdateList;
     private final HashMap<Integer, HashSet<String>> blackList;
     private final HashMap<Integer, HashMap<String, String>> customCommands;
     private final HashMap<Integer, HashMap<String, String>> customAliases;
@@ -41,9 +49,17 @@ public class MessageHandler {
         this.frame = frame;
 
         // Initialize Attributes
+        congratulated = new HashSet<>();
+
+        // Reset Congratulated
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(this::resetCongratulated, 0, 96, TimeUnit.HOURS);
+
+        // Initialize HashMaps
         commandList = new HashMap<>();
         aliasMap = new HashMap<>();
         lurkList = new HashMap<>();
+        birthdateList = new HashMap<>();
         blackList = new HashMap<>();
         customCommands = new HashMap<>();
         customAliases = new HashMap<>();
@@ -52,6 +68,7 @@ public class MessageHandler {
 
         // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
+        updateBirthdateList(mySQL.getBirthdays());
         updateBlackList(mySQL.getChannelManager().getBlackList());
         updateCustomCommands(mySQL.getCustomManager().getCustomCommands(), mySQL.getCustomManager().getCustomAliases());
         updateCounters(mySQL.getCustomManager().getCustomCounters());
@@ -73,6 +90,9 @@ public class MessageHandler {
 
             // Check for Lurk
             if (lurkList.containsKey(event.getUserId())) handleLurk(event);
+
+            // Check for Birthday
+            if (birthdateList.containsKey(event.getUserId())) handleBirthday(event);
 
             // Check for Command
             if (event.hasCommand()) {
@@ -148,6 +168,23 @@ public class MessageHandler {
                         event.getBits()
                 ), "traitor", tagUser(event) + " ist ein verräter, hab den kek gerade im chat von " + tagChannel(event) + " gesehen!");
             }
+        }).start();
+    }
+
+    private void handleBirthday(TwitchMessageEvent event) {
+
+        // Variables
+        var userID = event.getUserId();
+        Birthdate birthday = birthdateList.get(userID);
+
+        // Check for Birthday
+        if (!birthday.isBirthday() || congratulated.contains(userID)) new Thread(() -> {
+
+            // Add user to congratulated list
+            congratulated.add(userID);
+
+            // Send message
+            botClient.respond(event, "birthday", String.format("Alles Gute zu deinem %d. Geburtstag, %s! YEPP", birthday.getAge(), tagUser(event)));
         }).start();
     }
 
@@ -239,6 +276,13 @@ public class MessageHandler {
         this.lurkList.putAll(lurkList);
     }
 
+    // Update Birthdate List
+    public void updateBirthdateList(HashMap<Integer, Birthdate> birthdateList) {
+        if (birthdateList == null || birthdateList.isEmpty()) return;
+        this.birthdateList.clear();
+        this.birthdateList.putAll(birthdateList);
+    }
+
     // Update Black List
     public void updateBlackList(HashMap<Integer, HashSet<String>> blackList) {
         this.blackList.clear();
@@ -267,6 +311,11 @@ public class MessageHandler {
 
     public void updateCustomTimers(int channelID, HashSet<Timer> customTimers) {
         this.customTimers.replace(channelID, customTimers);
+    }
+
+    // Reset Congratulated
+    public void resetCongratulated() {
+        congratulated.clear();
     }
 
     // Getter

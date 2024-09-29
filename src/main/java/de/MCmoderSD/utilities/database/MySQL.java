@@ -1,6 +1,8 @@
 package de.MCmoderSD.utilities.database;
 
 import de.MCmoderSD.main.Main;
+import de.MCmoderSD.objects.Birthdate;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.manager.AssetManager;
 import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import de.MCmoderSD.utilities.database.manager.CustomManager;
@@ -9,6 +11,7 @@ import de.MCmoderSD.utilities.database.manager.LurkManager;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
 import de.MCmoderSD.utilities.database.manager.YEPPConnect;
 
+import javax.management.InvalidAttributeValueException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -67,7 +70,8 @@ public class MySQL extends Driver {
                             """
                             users (
                             id INT PRIMARY KEY NOT NULL,
-                            name VARCHAR(25) NOT NULL
+                            name VARCHAR(25) NOT NULL,
+                            birthdate VARCHAR(10)
                             )
                             """
             ).execute();
@@ -172,6 +176,61 @@ public class MySQL extends Driver {
         if (!channel && isChannel) {
             checkUser(id, name, true);
             channelCache.put(id, name);
+        }
+    }
+
+    // Set Birthday
+    public void setBirthday(TwitchMessageEvent event, Birthdate birthdate) {
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Variables
+            var id = event.getUserId();
+
+            // Check Cache
+            checkCache(id, event.getUser(), false);
+            checkCache(event.getChannelId(), event.getChannel(), true);
+
+            // Update Birthday
+            String updateQuery = "UPDATE users SET birthdate = ? WHERE id = ?";
+            PreparedStatement updatePreparedStatement = connection.prepareStatement(updateQuery);
+            updatePreparedStatement.setString(1, birthdate.getDate());
+            updatePreparedStatement.setInt(2, id);
+            updatePreparedStatement.executeUpdate(); // execute
+            updatePreparedStatement.close(); // close the updatePreparedStatement
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    // Get Birthdays
+    public HashMap<Integer, Birthdate> getBirthdays() {
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Variables
+            HashMap<Integer, Birthdate> birthdays = new HashMap<>();
+
+            // Query
+            String query = "SELECT * FROM users WHERE birthdate IS NOT NULL";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add Birthdays
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String date = resultSet.getString("birthdate");
+                birthdays.put(id, new Birthdate(date));
+            }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close(); // close the preparedStatement
+
+            return birthdays;
+        } catch (SQLException | InvalidAttributeValueException | NumberFormatException e) {
+            System.err.println(e.getMessage());
+            return null;
         }
     }
 

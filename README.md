@@ -27,9 +27,11 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 ## Features
 
 - Commands:
+  - [x] Birthday
   - [x] Conversation (ChatGPT)  
   - [x] Fact
   - [x] Gif
+  - [ ] Horoscope
   - [x] Insult
   - [x] Joke
   - [x] Lurk (with timer)
@@ -85,7 +87,7 @@ But remember **DON'T POST** or **SHARE** the token anywhere!!! <br> <br>
 
 You can download the latest version of the bot from the [releases](https://github.com/MCmoderSD/YEPPBot/releases/latest) page. <br>
 You can create the Config files yourself or use the ```-generate``` argument to create the config files. <br>
-You can skip to [Step 9](#9-compile-the-bot) if you use the downloaded jar file. <br> <br>
+You can skip to [Step 8](#8-compile-the-bot) if you use the downloaded jar file. <br> <br>
 
 You can also clone the repository and compile the bot yourself.
 For that need to have git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
@@ -168,13 +170,38 @@ You can generate a self-signed certificate using the following command: <br>
 ```keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks -storepass password -validity 360 -keysize 2048``` <br>
 
 As password, you have set the bot token, but as SHA-256 hash, encoded in base64.<br>
-You can use this [SHA-256 hash tool](https://emn178.github.io/online-tools/sha256.html) to convert the bot token into a SHA-256 Base64 encoded hash. <br>
+You can use this [SHA-256 hash tool](https://emn178.github.io/online-tools/sha256.html) to convert the bot token into an SHA-256 Base64 encoded hash. <br>
 Just make sure to set **UTF-8** as input and **Base64** as output format. <br>
 
 If you have a domain, you **NEED** to use a valid certificate, if you use a self-signed jks file you need to use localhost. <br>
 You can get a free valid certificate from [Let's Encrypt](https://letsencrypt.org/). <br> <br>
 
-### 5. Add a ChatGPT API key
+
+### 5. Add API Keys
+You need to create a file called ```apiKeys.json``` in the ```/src/main/resources/api/``` folder. <br>
+The file should have the following structure: <br>
+
+```json
+{
+  "astrology": "YOUR_ASTROLOGY_API_KEY",
+  "giphy": "YOUR_GIPHY_API_KEY",
+  "openWeatherMap": "YOUR_OPEN_WEATHER_MAP_API_KEY"
+}
+```
+
+You can use the ```-generate``` argument to generate an example config file. <br> 
+
+If you don't want to use the API or just don't have the API key, you can just delete the part of the config. <br> <br>
+
+The astrology API is currently not used, but it's planned to be used in the future. <br>
+You can obtain the AstrologyAPI key from [AstrologyAPI](http://freeastrologyapi.com/). <br>
+You can obtain the OpenWeatherMap API key from [OpenWeatherMap](https://openweathermap.org/api). <br>
+You can obtain the Giphy API key from [Giphy](https://developers.giphy.com/). <br> 
+
+For the astrology and weather feature, you also need the ChatGPT API key. <br> <br>
+
+
+### 6. Add a ChatGPT API key
 
 You only need to configure the module if you want to use, if you for example doesn't want to use the image module, you can just delete the image part of the config. <br>
 You need to create a file called ```ChatGPT.json``` in the ```/src/main/resources/api/``` folder. <br>
@@ -323,42 +350,14 @@ But if you don't want to use the ChatGPT module, you can just delete the chat pa
 - The **speed** is the speed of the speech. <br>
   The min value is 0.25 and the max value is 4, the default value is 1. <br> <br>
 
-### 6. Add an OpenWeatherMap API key
-You need to create a file called ```OpenWeatherMap.json``` in the ```/src/main/resources/api/``` folder. <br>
-The file should have the following structure: <br>
 
-```json
-{
-  "url": "https://api.openweathermap.org/data/2.5/weather?q=",
-  "api_key": "YOUR_API_KEY"
-}
-```
-
-You need a ChatGPT API key to use the weather command. <br>
-You can get the API key from [OpenWeatherMap](https://openweathermap.org/api). <br> <br>
-
-### 7. Add a Giphy API key
-You need to create a file called ```Giphy.json``` in the ```/src/main/resources/api/``` folder. <br>
-The file should have the following structure: <br>
-
-```json
-{
-  "url": "https://api.giphy.com/v1/gifs/random?api_key=",
-  "api_key": "YOUR_API_KEY",
-  "query": "&tag="
-}
-```
-
-You can get the API key from [Giphy](https://developers.giphy.com/). <br> <br>
-
-
-### 8. Add assets to the database
+### 7. Add assets to the database
 
 For the fact, insult and joke command you need to add the assets to the database. <br>
 You can import the existing ones to the database from the .tsv files in the ```/storage/assets/``` folder. <br> <br>
 You can also add your own assets to the database, just pay attention to the format. <br>
 
-### 9. Compile the bot
+### 8. Compile the bot
 
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
 ```java -jar NAME_OF_THE_JAR_FILE.jar``` 
@@ -382,9 +381,9 @@ For the configs you can use: <br>
 - ```-channellist "/PATH/TO/Channel.list"``` argument to specify the path to the Channel.list file. <br>
 - ```-mysqlconfig "/PATH/TO/mySQL.json"``` argument to specify the path to the mySQL.json file. <br>
 - ```-httpsserver "/PATH/TO/httpsserver.json"``` argument to specify the path to the httpserver.json file. <br>
+- ```-apiconfig "/PATH/TO/apiKeys.json"``` argument to specify the path to the apiKeys.json file. <br>
 - ```-openaiconfig "/PATH/TO/ChatGPT.json"``` argument to specify the path to the ChatGPT.json file. <br>
-- ```-openweathermapconfig "/PATH/TO/OpenWeatherMap.json"``` argument to specify the path to the OpenWeatherMap.json file. <br>
-- ```-giphyconfig "/PATH/TO/Giphy.json"``` argument to specify the path to the Giphy.json file. <br> <br>
+
 
 ## Usage and commands
 

@@ -1,7 +1,5 @@
 package de.MCmoderSD.commands;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.main.Credentials;
@@ -21,9 +19,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Gif {
 
     // Attributes
-    private final String url;
     private final String apiKey;
-    private final String query;
 
     // Constructor
     public Gif(BotClient botClient, MessageHandler messageHandler, Credentials credentials) {
@@ -36,12 +32,7 @@ public class Gif {
         String description = "Sendet ein GIF zu einem bestimmten Thema. " + syntax;
 
         // Load API key
-        JsonNode config = credentials.getGiphyConfig();
-
-        // Init Attributes
-        url = config.get("url").asText();
-        apiKey = config.get("api_key").asText();
-        query = config.get("query").asText();
+        apiKey = credentials.getAPIConfig().get("giphy").asText();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -61,7 +52,7 @@ public class Gif {
     // Get GIF
     private String gif(String topic) {
         try {
-            URI uri = new URI(this.url + apiKey + query + topic);
+            URI uri = new URI(String.format("https://api.giphy.com/v1/gifs/random?api_key=%s&tag=%s", apiKey, topic));
             HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
             conn.setRequestMethod("GET");
             conn.connect();

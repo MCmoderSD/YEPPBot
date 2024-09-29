@@ -34,10 +34,8 @@ public class Main {
     public static final String HTTPS_SERVER = "/config/httpsServer.json";
 
     // API Credentials
+    public static final String API_CONFIG = "/api/apiKeys.json";
     public static final String OPENAI_CONFIG = "/api/ChatGPT.json";
-    public static final String WEATHER_CONFIG = "/api/OpenWeatherMap.json";
-    public static final String GIPHY_CONFIG = "/api/Giphy.json";
-
     // Dev Credentials
     public static final String DEV_CONFIG = "/config/BotConfig.json.dev";
     public static final String DEV_LIST = "/config/Channel.list.dev";
@@ -93,9 +91,8 @@ public class Main {
         String httpsServerPath = null;
 
         // API Paths
+        String apiKeysPath;
         String openAIConfigPath;
-        String weatherConfigPath;
-        String giphyConfigPath;
 
         // Bot Config
         if (hasArg(Argument.BOT_CONFIG)) botConfigPath = args.get(args.indexOf("-botconfig") + 1);
@@ -109,18 +106,13 @@ public class Main {
         // Https Server
         if (hasArg(Argument.HTTPS_SERVER)) httpsServerPath = args.get(args.indexOf("-httpsserver") + 1);
 
+        // API Config
+        if (hasArg(Argument.API_CONFIG)) apiKeysPath = args.get(args.indexOf("-apiconfig") + 1);
+        else apiKeysPath = API_CONFIG;
+
         // OpenAI Config
         if (hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = args.get(args.indexOf("-openaiconfig") + 1);
         else openAIConfigPath = OPENAI_CONFIG;
-
-        // Weather Config
-        if (hasArg(Argument.OPENWEATHERMAP_CONFIG))
-            weatherConfigPath = args.get(args.indexOf("-openweathermapconfig") + 1);
-        else weatherConfigPath = WEATHER_CONFIG;
-
-        // Giphy Config
-        if (hasArg(Argument.GIPHY_CONFIG)) giphyConfigPath = args.get(args.indexOf("-giphyconfig") + 1);
-        else giphyConfigPath = GIPHY_CONFIG;
 
         // CLI Mode
         if (!hasArg(Argument.CLI)) {
@@ -150,7 +142,7 @@ public class Main {
         if (hasArg(Argument.HOST) && hasArg(Argument.PORT)) arguments = new String[]{args.get(args.indexOf("-host") + 1), args.get(args.indexOf("-port") + 1)};
 
         // Initialize Credentials
-        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, httpsServerPath, openAIConfigPath, weatherConfigPath, giphyConfigPath);
+        credentials = new Credentials(this, botConfigPath, channelListPath, mysqlConfigPath, httpsServerPath, apiKeysPath, openAIConfigPath);
 
         // Initialize OpenAI
         if (credentials.validateOpenAIConfig()) openAI = new OpenAI(credentials.getOpenAIConfig());
@@ -181,7 +173,7 @@ public class Main {
     private void generateConfigFiles() {
 
         // Files
-        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "httpsServer.json", "ChatGPT.json", "OpenWeatherMap.json", "Giphy.json"};
+        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "httpsServer.json", "apiKeys.json","ChatGPT.json"};
 
         for (String fileName : fileNames) {
 
@@ -281,9 +273,8 @@ public class Main {
         System.out.println(
                         """
                         API Config:
+                            -apiconfig: Path to API Config
                             -openaiconfig: Path to OpenAI Config
-                            -openweathermap: Path to Weather Config
-                            -giphyconfig: Path to Giphy Config
                         """);
 
         // Exit
@@ -339,9 +330,8 @@ public class Main {
         CHANNEL_LIST("channellist"),
         MYSQL_CONFIG("mysqlconfig"),
         HTTPS_SERVER("httpsserver"),
-        OPENAI_CONFIG("openaiconfig"),
-        OPENWEATHERMAP_CONFIG("openweathermapconfig"),
-        GIPHY_CONFIG("giphyconfig");
+        API_CONFIG("apiconfig"),
+        OPENAI_CONFIG("openaiconfig");
 
         // Attributes
         private final String[] aliases;
