@@ -12,6 +12,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
@@ -109,7 +110,8 @@ public class Encryption {
         String password = "your_password";
 
         // Connect to database
-        Connection connection = java.sql.DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password); // connect
+
+        Connection connection = DriverManager.getConnection(String.format("jdbc:mysql://%s:%d/%s", host, port, database), username, password); // connect
 
         // Replace old token with new token
         ResultSet resultSet = connection.prepareStatement("SELECT * FROM AuthTokens").executeQuery();

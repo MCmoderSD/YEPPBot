@@ -3,6 +3,7 @@ package de.MCmoderSD.utilities.database;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 @SuppressWarnings("unused")
@@ -73,7 +74,7 @@ public abstract class Driver {
     public void connect() {
         try {
             if (isConnected()) return; // already connected
-            connection = java.sql.DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password); // connect
+            connection = DriverManager.getConnection(String.format("jdbc:mysql://%s:%d/%s", host, port, database), username, password); // connect
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

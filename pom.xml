@@ -7,7 +7,7 @@
 
     <groupId>de.MCmoderSD</groupId>
     <artifactId>YEPPBot</artifactId>
-    <version>1.21.5</version>
+    <version>1.22.0</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.github.twitch4j</groupId>
             <artifactId>twitch4j</artifactId>
-            <version>1.21.0</version>
+            <version>1.22.0</version>
         </dependency>
 
 
@@ -74,18 +74,20 @@
             <version>1.18.1</version>
         </dependency>
 
+
         <!-- Apache HttpClient -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.4</version>
         </dependency>
+
 
         <!-- Logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.6</version>
+            <version>1.5.8</version>
         </dependency>
     </dependencies>
 </project>
