@@ -102,7 +102,7 @@ The first file is ```BotConfig.json``` and it should have the following structur
 ```json
 {
   "botId": "YOUR_BOT_ID",
-  "botName": "YOUR_BOT_NAME",
+  "botName": "YOUR_BOT_NAME, YOUR_BOT_ALIAS, YOUR_BOT_ALIAS",
   "botToken": "YOUR_BOT_TOKEN",
   "clientId": "YOUR_CLIENT_ID",
   "clientSecret": "YOUR_CLIENT_SECRET",
