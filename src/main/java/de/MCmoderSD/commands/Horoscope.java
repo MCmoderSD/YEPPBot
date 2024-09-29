@@ -2,7 +2,6 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.openAI.OpenAI;

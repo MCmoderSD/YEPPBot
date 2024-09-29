@@ -13,12 +13,8 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.sql.Date;
 
 
-@SuppressWarnings("unused")
 public class Calculate {
 
     // Constants
@@ -220,40 +216,5 @@ public class Calculate {
 
     public static String getFormattedTimestamp() {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(getTimestamp()) + "]";
-    }
-
-
-    public static Date convertToBerlinTime(Date date) {
-
-        // Create a calendar instance and set the time zone to UTC
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(date);
-
-        // Get the time in milliseconds
-        long timeInMillis = calendar.getTimeInMillis();
-
-        // Create a new calendar instance for Berlin time zone
-        Calendar berlinCalendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-        berlinCalendar.setTimeInMillis(timeInMillis);
-
-        // Return the converted date
-        return (java.sql.Date) berlinCalendar.getTime();
-    }
-
-    public static Date convertToUTC(Date date) {
-
-        // Create a calendar instance and set the time zone to Berlin
-        Calendar berlinCalendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-        berlinCalendar.setTime(date);
-
-        // Get the time in milliseconds
-        long timeInMillis = berlinCalendar.getTimeInMillis();
-
-        // Create a new calendar instance for UTC time zone
-        Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        utcCalendar.setTimeInMillis(timeInMillis);
-
-        // Return the converted date
-        return (java.sql.Date) utcCalendar.getTime();
     }
 }

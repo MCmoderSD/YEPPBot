@@ -88,7 +88,7 @@ public class Wiki {
 
     // Get Wikipedia summary
     private String getWikipediaSummary(String topic) throws IOException {
-        String apiUrl = "https://de.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&redirects=true&titles=" + URLEncoder.encode(topic, StandardCharsets.UTF_8);
+        String apiUrl = String.format("https://de.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&redirects=true&titles=%s", URLEncoder.encode(topic, StandardCharsets.UTF_8));
         Document doc = Jsoup.connect(apiUrl).ignoreContentType(true).get();
         JSONObject json = new JSONObject(doc.text());
         JSONObject pages = json.getJSONObject("query").getJSONObject("pages");
