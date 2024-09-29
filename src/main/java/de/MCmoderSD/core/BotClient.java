@@ -419,24 +419,28 @@ public class BotClient {
     }
 
     public boolean isEditor(TwitchMessageEvent event) {
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.CHANNEL_READ_EDITORS)) return false;
         HashSet<Integer> ids = new HashSet<>();
         helixHandler.getEditors(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
         return ids.contains(event.getUserId());
     }
 
     public boolean isModerator(TwitchMessageEvent event) {
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATION_READ)) return false;
         HashSet<Integer> ids = new HashSet<>();
         helixHandler.getModerators(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
         return ids.contains(event.getUserId());
     }
 
     public boolean isVIP(TwitchMessageEvent event) {
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.CHANNEL_READ_VIPS)) return false;
         HashSet<Integer> ids = new HashSet<>();
         helixHandler.getVIPs(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
         return ids.contains(event.getUserId());
     }
 
     public boolean isFollowing(TwitchMessageEvent event) {
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATOR_READ_FOLLOWERS, HelixHandler.Scope.USER_READ_FOLLOWS)) return false;
         HashSet<Integer> ids = new HashSet<>();
         helixHandler.getFollowers(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
         return ids.contains(event.getUserId());

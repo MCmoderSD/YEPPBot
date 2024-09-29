@@ -10,6 +10,8 @@ import javax.management.InvalidAttributeValueException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static de.MCmoderSD.utilities.other.Calculate.*;
+
 public class Birthday {
 
     // Association
@@ -17,12 +19,14 @@ public class Birthday {
     private final MySQL mySQL;
     // Attributes
     private final String syntax;
+    private final String setSyntax;
 
     // Constructor
     public Birthday(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
 
         // Syntax
-        syntax = "Syntax: " + botClient.getPrefix() + "birthday set <DD.MM.CCYY> / get <days|hours|seconds>";
+        syntax = "Syntax: " + botClient.getPrefix() + "birthday set/get <days|hours|seconds>";
+        setSyntax = "Syntax: " + botClient.getPrefix() + "birthday set <DD.MM.CCYY>";
 
         // About
         String[] name = {"birthday", "bday", "geburtstag"};
@@ -40,7 +44,7 @@ public class Birthday {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Check Arguments
-                if (args.size() > 1) {
+                if (args.isEmpty()) {
                     botClient.respond(event, getCommand(), syntax);
                     return;
                 }
@@ -64,9 +68,12 @@ public class Birthday {
 
     private String setBirthday(TwitchMessageEvent event, ArrayList<String> args) {
 
+        // Check Syntax
+        if (args.size() != 2) return setSyntax;
+
         // Check Birthday
         String[] date = args.get(1).split("\\.");
-        if (date.length != 3) return syntax;
+        if (date.length != 3) return setSyntax;
 
         // Set Birthday
         Birthdate birthdate;
@@ -75,6 +82,9 @@ public class Birthday {
         } catch (InvalidAttributeValueException | NumberFormatException e) {
             return "Invalid Date: " + date[0] + "." + date[1] + "." + date[2];
         }
+
+        // Check Age (13+)
+        if (!checkAge((byte) 13, birthdate)) return "Du musst mindestens 13 Jahre alt sein.";
 
         // Set Birthday
         mySQL.setBirthday(event, birthdate);

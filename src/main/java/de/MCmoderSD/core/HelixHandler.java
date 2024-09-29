@@ -45,7 +45,7 @@ import de.MCmoderSD.utilities.server.Server;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-@SuppressWarnings({"unused", "FieldCanBeLocal", "deprecation"})
+@SuppressWarnings({"unused", "FieldCanBeLocal", "deprecation", "BooleanMethodIsAlwaysInverted"})
 public class HelixHandler {
 
     // Constants
@@ -210,6 +210,11 @@ public class HelixHandler {
                 server.getPort(),
                 scopeBuilder.substring(0, scopeBuilder.length() - 1)
         );
+    }
+
+    // Check Scope
+    public boolean checkScope(int channelId, Scope ... scopes) {
+        return authTokens.containsKey(channelId) && authTokens.get(channelId).hasScope(scopes);
     }
 
     // Get user with name

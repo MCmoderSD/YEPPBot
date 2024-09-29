@@ -178,7 +178,7 @@ public class MessageHandler {
         Birthdate birthday = birthdateList.get(userID);
 
         // Check for Birthday
-        if (!birthday.isBirthday() || congratulated.contains(userID)) new Thread(() -> {
+        if (birthday.isBirthday() && !congratulated.contains(userID)) new Thread(() -> {
 
             // Add user to congratulated list
             congratulated.add(userID);

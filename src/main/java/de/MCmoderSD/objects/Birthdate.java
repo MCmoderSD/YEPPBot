@@ -8,7 +8,7 @@ import java.util.TimeZone;
 public class Birthdate {
 
     // Set Timezone
-    public static final Calendar CALENDAR = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+    public static final TimeZone TIME_ZONE = TimeZone.getTimeZone("Europe/Berlin");
 
     // Constants
     private final byte day;
@@ -55,18 +55,18 @@ public class Birthdate {
         }
 
         // Check Year
-        if (year < 0 || year > (short) CALENDAR.get(Calendar.YEAR))
+        if (year < 0 || year > (short) Calendar.getInstance(TIME_ZONE).get(Calendar.YEAR))
             throw new InvalidAttributeValueException("Invalid year: " + year);
 
         // Set Values
         this.day = day;
-        this.month = month;
+        this.month = (byte) (month - 1);
         this.year = year;
     }
 
     // Get Date
     public String getDate() {
-        return day + "." + month + "." + year;
+        return day + "." + (month + 1) + "." + year;
     }
 
     // Get Day
@@ -86,9 +86,9 @@ public class Birthdate {
 
     // Get Age
     public byte getAge() {
-        byte age = (byte) (CALENDAR.get(Calendar.YEAR) - year);
-        if (CALENDAR.get(Calendar.MONTH) < month) age--;
-        else if (CALENDAR.get(Calendar.MONTH) == month && CALENDAR.get(Calendar.DAY_OF_MONTH) < day) age--;
+        byte age = (byte) (Calendar.getInstance(TIME_ZONE).get(Calendar.YEAR) - year);
+        if (Calendar.getInstance(TIME_ZONE).get(Calendar.MONTH) < month) age--;
+        else if (Calendar.getInstance(TIME_ZONE).get(Calendar.MONTH) == month && Calendar.getInstance(TIME_ZONE).get(Calendar.DAY_OF_MONTH) < day) age--;
         return age;
     }
 
@@ -105,69 +105,13 @@ public class Birthdate {
     }
 
     public int getDaysUntilBirthday() {
-        int days = 0;
-        if (CALENDAR.get(Calendar.MONTH) < month) {
-            days += 31 - CALENDAR.get(Calendar.DAY_OF_MONTH);
-            for (int i = CALENDAR.get(Calendar.MONTH) + 1; i < month; i++) {
-                switch (i) {
-                    case 4:
-                    case 6:
-                    case 9:
-                    case 11:
-                        days += 30;
-                        break;
-                    case 2:
-                        if (year % 4 == 0) days += 29;
-                        else days += 28;
-                        break;
-                    default:
-                        days += 31;
-                        break;
-                }
-            }
-            days += day;
-        } else if (CALENDAR.get(Calendar.MONTH) == month) {
-            if (CALENDAR.get(Calendar.DAY_OF_MONTH) < day) days += day - CALENDAR.get(Calendar.DAY_OF_MONTH);
-            else days += 365 - CALENDAR.get(Calendar.DAY_OF_YEAR) + day;
-        } else {
-            days += 365 - CALENDAR.get(Calendar.DAY_OF_YEAR);
-            for (int i = CALENDAR.get(Calendar.MONTH) + 1; i < 12; i++) {
-                switch (i) {
-                    case 4:
-                    case 6:
-                    case 9:
-                    case 11:
-                        days += 30;
-                        break;
-                    case 2:
-                        if (year % 4 == 0) days += 29;
-                        else days += 28;
-                        break;
-                    default:
-                        days += 31;
-                        break;
-                }
-            }
-            for (int i = 0; i < month; i++) {
-                switch (i) {
-                    case 4:
-                    case 6:
-                    case 9:
-                    case 11:
-                        days += 30;
-                        break;
-                    case 2:
-                        if (year % 4 == 0) days += 29;
-                        else days += 28;
-                        break;
-                    default:
-                        days += 31;
-                        break;
-                }
-            }
-            days += day;
-        }
-        return days;
+        Calendar today = Calendar.getInstance(TIME_ZONE);
+        Calendar nextBirthday = Calendar.getInstance(TIME_ZONE);
+        nextBirthday.set(Calendar.DAY_OF_MONTH, day);
+        nextBirthday.set(Calendar.MONTH, month);
+        if (today.after(nextBirthday)) nextBirthday.add(Calendar.YEAR, 1);
+        long diff = nextBirthday.getTimeInMillis() - today.getTimeInMillis();
+        return (int) (diff / (1000 * 60 * 60 * 24));
     }
 
     public int getHoursUntilBirthday() {
@@ -188,7 +132,7 @@ public class Birthdate {
 
     // Is Birthday
     public boolean isBirthday() {
-        return CALENDAR.get(Calendar.DAY_OF_MONTH) == day && CALENDAR.get(Calendar.MONTH) == month;
+        return Calendar.getInstance(TIME_ZONE).get(Calendar.DAY_OF_MONTH) == day && Calendar.getInstance(TIME_ZONE).get(Calendar.MONTH) == month;
     }
 
     // Get Zodiac Sign
@@ -210,5 +154,9 @@ public class Birthdate {
 
         // Default
         return "Unknown";
+    }
+
+    public TimeZone getTimeZone() {
+        return TIME_ZONE;
     }
 }

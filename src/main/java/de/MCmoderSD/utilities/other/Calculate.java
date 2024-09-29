@@ -1,6 +1,7 @@
 package de.MCmoderSD.utilities.other;
 
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import javax.swing.JFrame;
@@ -13,6 +14,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Calendar;
 
 
 public class Calculate {
@@ -216,5 +218,9 @@ public class Calculate {
 
     public static String getFormattedTimestamp() {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(getTimestamp()) + "]";
+    }
+
+    public static boolean checkAge(byte minAge, Birthdate birthdate) {
+        return (byte) (Calendar.getInstance(birthdate.getTimeZone()).get(Calendar.YEAR) - birthdate.getYear()) >= minAge;
     }
 }

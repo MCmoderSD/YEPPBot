@@ -123,9 +123,6 @@ public class MySQL extends Driver {
     private void checkUser(int id, String name, boolean isChannel) throws SQLException {
         if (!isConnected()) connect(); // connect
 
-        // Ensure the user exists in the users table
-        if (!isChannel) checkUser(id, name, false);
-
         // Check Channel
         String selectQuery;
         if (isChannel) selectQuery = "SELECT * FROM channels WHERE id = ?";
