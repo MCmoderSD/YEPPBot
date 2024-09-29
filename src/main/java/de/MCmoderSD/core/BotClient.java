@@ -84,6 +84,7 @@ public class BotClient {
 
     // Constants
     public static String botName;
+    public static String[] botNames;
     public static String prefix;
     public static HashSet<String> admins;
     public static HelixHandler.Scope[] requiredScopes = {
@@ -143,7 +144,8 @@ public class BotClient {
         credentialManager = CredentialManagerBuilder.builder().build();
 
         // Init Bot
-        botName = botConfig.get("botName").asText().toLowerCase();
+        botNames = botConfig.get("botName").asText().toLowerCase().split(", ");
+        botName = botNames[0];
         prefix = botConfig.get("prefix").asText();
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
@@ -446,6 +448,10 @@ public class BotClient {
 
     public String getBotName() {
         return botName;
+    }
+
+    public String[] getBotNames() {
+        return botNames;
     }
 
     public String getPrefix() {
