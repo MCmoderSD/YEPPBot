@@ -49,7 +49,7 @@ public class LogManager {
             connection.prepareStatement(condition +
                     """
                 MessageLog (
-                timestamp DATETIME PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 type VARCHAR(5) NOT NULL,
                 channel_id INT NOT NULL,
                 user_id INT NOT NULL,
@@ -68,7 +68,7 @@ public class LogManager {
             connection.prepareStatement(condition +
                     """
                     CommandLog (
-                    timestamp DATETIME PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     user_id INT NOT NULL,
                     command TEXT NOT NULL,
@@ -87,7 +87,7 @@ public class LogManager {
             connection.prepareStatement(condition +
                     """
                     ResponseLog (
-                    timestamp DATETIME PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     user_id INT NOT NULL,
                     command TEXT NOT NULL,
@@ -107,7 +107,7 @@ public class LogManager {
             connection.prepareStatement(condition +
                     """
                     RoleLog (
-                    timestamp DATETIME PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     user_id INT NOT NULL,
                     role varchar(3) NOT NULL,
@@ -122,7 +122,7 @@ public class LogManager {
             connection.prepareStatement(condition +
                     """
                     LoyaltyLog (
-                    timestamp DATETIME PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     user_id INT NOT NULL,
                     type VARCHAR(5) NOT NULL,
@@ -139,7 +139,7 @@ public class LogManager {
             connection.prepareStatement(condition +
                     """
                     RaidLog (
-                    timestamp DATETIME PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     raider_id INT NOT NULL,
                     viwerAmount INT NOT NULL DEFAULT 0,
@@ -153,7 +153,7 @@ public class LogManager {
             connection.prepareStatement(condition +
                     """
                     TTSLog (
-                    timestamp DATETIME PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     user_id INT NOT NULL,
                     message VARCHAR(500),
