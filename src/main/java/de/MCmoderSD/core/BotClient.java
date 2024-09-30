@@ -235,7 +235,7 @@ public class BotClient {
         new Fact(this, messageHandler, mySQL);
         if (giphy) new Gif(this, messageHandler, credentials);
         new Help(this, messageHandler, mySQL);
-        if (openAIChat) new Horoscope(this, messageHandler, mySQL, main.getOpenAI());
+        // if (openAIChat) new Horoscope(this, messageHandler, mySQL, main.getOpenAI()); ToDo: Make Horoscope work
         new Info(this, messageHandler, helixHandler);
         new Insult(this, messageHandler, mySQL);
         new Join(this, messageHandler);
