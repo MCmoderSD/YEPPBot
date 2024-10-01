@@ -16,7 +16,7 @@ public class Birthdate {
     private final short year;
 
     // Constructor
-    public Birthdate(String date) throws InvalidAttributeValueException, NumberFormatException{
+    public Birthdate(String date) throws InvalidAttributeValueException, NumberFormatException {
 
         // Split Date
         String[] split = date.split("\\.");
@@ -69,6 +69,11 @@ public class Birthdate {
         return day + "." + (month + 1) + "." + year;
     }
 
+    // Get Day and Month
+    public String getDayAndMonth() {
+        return day + "." + (month + 1);
+    }
+
     // Get Day
     public byte getDay() {
         return day;
@@ -76,7 +81,7 @@ public class Birthdate {
 
     // Get Month
     public byte getMonth() {
-        return month;
+        return (byte) (month + 1);
     }
 
     // Get Year

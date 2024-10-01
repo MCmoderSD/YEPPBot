@@ -227,7 +227,7 @@ public class BotClient {
         boolean openAITTS = credentials.validateOpenAITTSConfig();
 
         // Initialize Commands
-        new Birthday(this, messageHandler, mySQL);
+        new Birthday(this, messageHandler, mySQL, helixHandler);
         if (openAIChat) new Conversation(this, messageHandler, main.getOpenAI());
         new Counter(this, messageHandler, mySQL);
         new CustomCommand(this, messageHandler, mySQL);

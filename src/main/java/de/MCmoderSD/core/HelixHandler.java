@@ -365,7 +365,7 @@ public class HelixHandler {
                     botClient.addCredential(accessToken);
 
                     // Get user
-                    UserList userList = helix.getUsers(null, null, null).execute();
+                    UserList userList = helix.getUsers(accessToken, null, null).execute();
                     if (!userList.getUsers().isEmpty()) {
 
                         // Extract user data
