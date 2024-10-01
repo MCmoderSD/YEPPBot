@@ -123,7 +123,7 @@ public class Birthday {
         }
 
         // Check Age (13+)
-        if (!checkAge((byte) 13, birthdate)) return "Du musst mindestens 13 Jahre alt sein.";
+        if (!checkAge(13, birthdate)) return "Du musst mindestens 13 Jahre alt sein.";
 
         // Set Birthday
         mySQL.setBirthday(event, birthdate);
