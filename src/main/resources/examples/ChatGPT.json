@@ -25,5 +25,12 @@
     "voice": "onyx",
     "speed": 1,
     "format": "wav"
+  },
+
+  "transcription": {
+    "transcriptionModel": "whisper-1",
+    "prompt": "Transcribe the following audio file to German.",
+    "language": "German",
+    "temperature": 1
   }
 }

@@ -74,6 +74,11 @@ public class Weather {
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
+
                 String response;
                 if (args.isEmpty()) response = syntax;
                 else response = trimMessage(generateFormattedResponse(args));

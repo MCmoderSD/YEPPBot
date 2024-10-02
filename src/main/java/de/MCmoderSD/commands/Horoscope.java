@@ -8,6 +8,8 @@ import de.MCmoderSD.utilities.openAI.OpenAI;
 
 import java.util.ArrayList;
 
+import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
+
 public class Horoscope {
 
     // Constructor
@@ -26,6 +28,11 @@ public class Horoscope {
 
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Check Arguments
                 if (args.isEmpty()) {

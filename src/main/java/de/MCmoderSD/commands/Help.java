@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
+
 public class Help {
 
     // Associations
@@ -39,6 +41,11 @@ public class Help {
 
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Variables
                 String arg = !args.isEmpty() ? args.getFirst().toLowerCase() : "";

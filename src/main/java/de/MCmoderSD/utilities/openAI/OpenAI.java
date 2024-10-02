@@ -5,11 +5,13 @@ import com.theokanning.openai.service.OpenAiService;
 import de.MCmoderSD.utilities.openAI.enums.ChatModel;
 import de.MCmoderSD.utilities.openAI.enums.ImageModel;
 import de.MCmoderSD.utilities.openAI.enums.TTSModel;
+import de.MCmoderSD.utilities.openAI.enums.TranscriptionModel;
 import de.MCmoderSD.utilities.openAI.modules.Chat;
 import de.MCmoderSD.utilities.openAI.modules.Image;
 import de.MCmoderSD.utilities.openAI.modules.Speech;
+import de.MCmoderSD.utilities.openAI.modules.Transcription;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "SwitchStatementWithTooFewBranches"})
 public class OpenAI {
 
     // Constants
@@ -22,16 +24,19 @@ public class OpenAI {
     private final boolean chatActive;
     private final boolean imageActive;
     private final boolean speechActive;
+    private final boolean transcriptionActive;
 
     // Associations
     private final Chat chat;
     private final Image image;
     private final Speech speech;
+    private final Transcription transcription;
 
     // Enums
     private final ChatModel chatModel;
     private final ImageModel imageModel;
     private final TTSModel ttsModel;
+    private final TranscriptionModel transcriptionModel;
 
     // Constructor
     public OpenAI(JsonNode config) {
@@ -46,6 +51,7 @@ public class OpenAI {
         chatActive = config.has("chat");
         imageActive = config.has("image");
         speechActive = config.has("speech");
+        transcriptionActive = config.has("transcription");
 
         // Initialize Chat Module
         if (chatActive) {
@@ -127,6 +133,31 @@ public class OpenAI {
             ttsModel = null;
             speech = null;
         }
+
+        // Initialize Transcription Module
+        if (transcriptionActive) {
+
+            // Get Transcription Config
+            JsonNode transcriptionConfig = config.get("transcription");
+            String transcriptionModelName = transcriptionConfig.get("transcriptionModel").asText();
+
+            // Check Transcription Model
+            if (transcriptionModelName == null) throw new IllegalArgumentException("Transcription model is null");
+            if (transcriptionModelName.isEmpty() || transcriptionModelName.isBlank())
+                throw new IllegalArgumentException("Transcription model is empty");
+
+            // Set Transcription Model
+            transcriptionModel = switch (transcriptionModelName) {
+                case "whisper-1" -> TranscriptionModel.WHISPER;
+                default -> throw new IllegalArgumentException("Invalid transcription model");
+            };
+
+            // Initialize Transcription
+            transcription = new Transcription(transcriptionModel, transcriptionConfig, service);
+        } else {
+            transcriptionModel = null;
+            transcription = null;
+        }
     }
 
     // Getter
@@ -154,6 +185,10 @@ public class OpenAI {
         return speech;
     }
 
+    public Transcription getTranscription() {
+        return transcription;
+    }
+
     public boolean isChatActive() {
         return chatActive;
     }
@@ -164,6 +199,10 @@ public class OpenAI {
 
     public boolean isSpeechActive() {
         return speechActive;
+    }
+
+    public boolean isTranscriptionActive() {
+        return transcriptionActive;
     }
 
     // Enums
@@ -177,5 +216,9 @@ public class OpenAI {
 
     public TTSModel getTtsModel() {
         return ttsModel;
+    }
+
+    public TranscriptionModel getTranscriptionModel() {
+        return transcriptionModel;
     }
 }

@@ -28,6 +28,11 @@ public class Insult {
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
+
                 // Determine language
                 boolean isEnglish = false;
                 if (args.size() > 1) isEnglish = trimMessage(args.get(1)).toLowerCase().startsWith("en");

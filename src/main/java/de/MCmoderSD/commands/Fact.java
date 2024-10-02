@@ -28,6 +28,11 @@ public class Fact {
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
+
                 // Determine language
                 boolean isEnglish = false;
                 if (!args.isEmpty()) isEnglish = args.getFirst().toLowerCase().startsWith("en");

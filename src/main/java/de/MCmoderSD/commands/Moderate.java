@@ -10,6 +10,8 @@ import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
+
 public class Moderate {
 
     // Associations
@@ -45,6 +47,11 @@ public class Moderate {
                 String channel = event.getChannel();
                 String user = event.getUser();
                 String response = syntax;
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Check args
                 if (args.isEmpty()) {

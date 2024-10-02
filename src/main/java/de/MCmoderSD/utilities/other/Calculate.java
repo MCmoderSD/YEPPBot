@@ -9,12 +9,11 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Color;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Calendar;
+import java.util.*;
 
 
 public class Calculate {
@@ -103,6 +102,13 @@ public class Calculate {
         while (message.startsWith(" ") || message.startsWith("\n")) message = message.substring(1);
         while (message.endsWith(" ") || message.endsWith("\n")) message = message.trim();
         return message;
+    }
+
+    // Clean Args
+    public static ArrayList<String> cleanArgs(ArrayList<String> args) {
+        ArrayList<String> cleaned = new ArrayList<>();
+        for (String arg : args) cleaned.add(trimMessage(arg));
+        return cleaned;
     }
 
     // Trim Args
@@ -222,5 +228,17 @@ public class Calculate {
 
     public static boolean checkAge(int minAge, Birthdate birthdate) {
         return (Calendar.getInstance(birthdate.getTimeZone()).get(Calendar.YEAR) - birthdate.getYear()) >= minAge;
+    }
+
+    // Calculate Tokens
+    public static String getSHA256(byte[] data) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(data);
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("SHA-256 algorithm not found");
+            return null;
+        }
     }
 }

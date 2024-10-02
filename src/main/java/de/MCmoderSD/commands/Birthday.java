@@ -179,6 +179,11 @@ public class Birthday {
         HashMap<Integer, Birthdate> birthdays = mySQL.getBirthdays();
         var id = event.getUserId();
 
+        // Clean Args
+        ArrayList<String> cleanArgs = cleanArgs(args);
+        args.clear();
+        args.addAll(cleanArgs);
+
         // Check Birthday
         if (!birthdays.containsKey(id)) return "Du hast noch keinen Geburtstag gesetzt.";
 

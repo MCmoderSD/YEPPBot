@@ -40,6 +40,11 @@ public class Gif {
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
+
                 // Check arguments
                 String topic = trimMessage(convertToAscii(processArgs(args)));
 

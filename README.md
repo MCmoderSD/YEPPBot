@@ -235,6 +235,13 @@ The file should have the following structure: <br>
     "voice": "alloy",
     "speed": 1,
     "format": "wav"
+  },
+
+  "transcription": {
+    "transcriptionModel": "whisper-1",
+    "prompt": "Transcribe the following audio file to German.",
+    "language": "German",
+    "temperature": 1
   }
 }
 ```
@@ -296,7 +303,7 @@ But if you don't want to use the ChatGPT module, you can just delete the chat pa
   The min value is 0 and the max value is 1. <br>
 
 
-- The **instruction** is the way the bot should behave and how he should reply to the prompt.
+- The **instruction** is the way the bot should behave and how he should reply to the prompt. <br>
 
 
 ### Image Configuration
@@ -349,6 +356,29 @@ But if you don't want to use the ChatGPT module, you can just delete the chat pa
 
 - The **speed** is the speed of the speech. <br>
   The min value is 0.25 and the max value is 4, the default value is 1. <br> <br>
+
+
+### Transcription Configuration
+
+- The **transcriptionModel** is the model that the bot will use to generate the transcription. <br>
+  The available models are: <br>
+
+| **Model** | **Pricing**                                     |
+|:---------:|:------------------------------------------------|
+| whisper-1 | $0.006 / minute (rounded to the nearest second) |
+
+
+- The **prompt** is the prompt that the model will use to generate the transcription. <br>
+
+
+- The **language** is the language of the audio. <br>
+
+
+- The **temperature** is the randomness of the transcription. <br>
+  Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic
+  and repetitive. <br>
+  Higher temperature results in more random completions. <br>
+  The min value is 0 and the max value is 2. <br> <br>
 
 
 ### 7. Add assets to the database

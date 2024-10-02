@@ -220,9 +220,8 @@ public class TwitchMessageEvent {
     }
 
     public boolean hasBotName() {
-        boolean hasBotName = false;
-        for (String name : BotClient.botNames) if (message.contains(name)) return true;
-        return hasBotName;
+        for (String name : BotClient.botNames) if (message.toLowerCase().contains(name)) return true;
+        return false;
     }
 
     public boolean hasCommand() {

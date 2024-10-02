@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
+
 public class Info {
 
     // Constructor
@@ -28,6 +30,11 @@ public class Info {
 
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Check syntax
                 if (args.isEmpty()) {

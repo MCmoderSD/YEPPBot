@@ -2,15 +2,17 @@ package de.MCmoderSD.objects;
 
 import okhttp3.ResponseBody;
 
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 @SuppressWarnings("unused")
@@ -37,6 +39,19 @@ public class AudioFile {
         initializeAudio();
     }
 
+    // Byte array constructor with audio format
+    public AudioFile(byte[] audioData, AudioFormat format) {
+
+        // Set audio data
+        this.audioData = audioData;
+        this.audioFormat = format;
+        byteArrayInputStream = new ByteArrayInputStream(audioData);
+
+        // Initialize audio
+        audioInputStream = new AudioInputStream(byteArrayInputStream, audioFormat, audioData.length / audioFormat.getFrameSize());
+        initializeAudio();
+    }
+
     // ResponseBody constructor
     public AudioFile(ResponseBody responseBody) {
         try {
@@ -60,20 +75,22 @@ public class AudioFile {
     private void initializeAudio() {
         try {
 
-            // Check if the system has an audio line
-            audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
-            audioFormat = audioInputStream.getFormat();
-            info = new DataLine.Info(SourceDataLine.class, audioFormat);
-            if (AudioSystem.isLineSupported(info)) {
-                audioLine = (SourceDataLine) AudioSystem.getLine(info);
-                audioLine.open(audioFormat);
-            } else {
-                audioLine = null;
-                audioInputStream = null;
-                audioFormat = null;
-                info = null;
+            // Check if audio format is null
+            if (audioFormat == null) {
+                audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+                audioFormat = audioInputStream.getFormat();
             }
-        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+
+            // Check if the audio format is supported
+            info = new DataLine.Info(SourceDataLine.class, audioFormat);
+            if (!AudioSystem.isLineSupported(info)) throw new UnsupportedAudioFileException("Audio format not supported!");
+
+            // Open audio line
+            audioLine = (SourceDataLine) AudioSystem.getLine(info);
+            audioLine.open(audioFormat);
+
+        } catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
+            System.err.println("Error initializing audio: " + e.getMessage());
             audioLine = null;
             audioInputStream = null;
             audioFormat = null;
@@ -86,7 +103,6 @@ public class AudioFile {
         if (audioLine == null) return;
         new Thread(() -> {
             try {
-
                 // Start audio line
                 audioLine.start();
 
@@ -150,5 +166,27 @@ public class AudioFile {
 
     public SourceDataLine getAudioLine() {
         return audioLine;
+    }
+
+    public int getSize() {
+        return audioData.length;
+    }
+
+    public int getDuration() {
+        return (int) ((float) audioData.length / audioFormat.getFrameSize() / audioFormat.getFrameRate());
+    }
+
+    public File exportToWav(String filePath) {
+        try {
+            File wavFile = new File(filePath);
+            ByteArrayInputStream exportStream = new ByteArrayInputStream(audioData);
+            AudioInputStream exportAudioStream = new AudioInputStream(exportStream, audioFormat, audioData.length / audioFormat.getFrameSize());
+            AudioSystem.write(exportAudioStream, AudioFileFormat.Type.WAVE, wavFile);
+            exportAudioStream.close();
+            return wavFile;
+        } catch (IOException e) {
+            System.err.println("Error exporting audio to WAV: " + e.getMessage());
+            return null;
+        }
     }
 }

@@ -48,6 +48,11 @@ public class Translate {
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
+
                 String response;
                 if (args.size() < 2) response = syntax;
                 else {

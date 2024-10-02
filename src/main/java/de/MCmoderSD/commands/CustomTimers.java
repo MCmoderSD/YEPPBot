@@ -42,6 +42,11 @@ public class CustomTimers {
                 // Check if user is a moderator
                 if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
 
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
+
                 // Get Custom Timers
                 HashMap<String, Timer> customTimers = customManager.getCustomTimers(event, botClient);
 

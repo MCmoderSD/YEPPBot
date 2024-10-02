@@ -37,6 +37,11 @@ public class CustomCommand {
                 // Check if user is permitted
                 if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
 
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
+
                 // Check for list
                 if (!args.isEmpty() && args.getFirst().equalsIgnoreCase("list") || args.getFirst().equalsIgnoreCase("show")) {
                     botClient.respond(event, getCommand(), getCommandNames(event, customManager));
