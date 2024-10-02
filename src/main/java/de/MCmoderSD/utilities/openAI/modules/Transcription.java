@@ -107,8 +107,4 @@ public class Transcription {
     public BigDecimal calculatePrice(AudioFile audioFile) {
         return model.calculateCost(audioFile);
     }
-
-    public static void main(String[] args) {
-        System.out.println(System.getProperty("java.io.tmpdir"));
-    }
 }
