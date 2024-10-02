@@ -144,18 +144,18 @@ public class Birthdate {
     public String getZodiacSign() {
 
         // Zodiac Signs
-        if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquarius";
-        if (month == 2 || month == 3 && day <= 20) return "Pisces";
-        if (month == 3 || month == 4 && day <= 19) return "Aries";
-        if (month == 4 || month == 5 && day <= 20) return "Taurus";
-        if (month == 5 || month == 6 && day <= 20) return "Gemini";
-        if (month == 6 || month == 7 && day <= 22) return "Cancer";
-        if (month == 7 || month == 8 && day <= 22) return "Leo";
-        if (month == 8 || month == 9 && day <= 22) return "Virgo";
-        if (month == 9 || month == 10 && day <= 22) return "Libra";
-        if (month == 10 || month == 11 && day <= 21) return "Scorpio";
-        if (month == 11 || month == 12 && day <= 21) return "Sagittarius";
-        if (month == 12 || month == 1) return "Capricorn";
+        if ((month == 0 && day >= 20) || (month == 1 && day <= 18)) return "Wassermann";
+        if (month == 1 || month == 2 && day <= 20) return "Fische";
+        if (month == 2 || month == 3 && day <= 19) return "Widder";
+        if (month == 3 || month == 4 && day <= 20) return "Stier";
+        if (month == 4 || month == 5 && day <= 20) return "Zwilling";
+        if (month == 5 || month == 6 && day <= 22) return "Krebs";
+        if (month == 6 || month == 7 && day <= 22) return "Löwe";
+        if (month == 7 || month == 8 && day <= 22) return "Jungfrau";
+        if (month == 8 || month == 9 && day <= 22) return "Waage";
+        if (month == 9 || month == 10 && day <= 21) return "Skorpion";
+        if (month == 10 || month == 11 && day <= 21) return "Schütze";
+        if (month == 11 || month == 0) return "Steinbock";
 
         // Default
         return "Unknown";
