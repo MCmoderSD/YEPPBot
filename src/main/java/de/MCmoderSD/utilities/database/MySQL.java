@@ -1,5 +1,6 @@
 package de.MCmoderSD.utilities.database;
 
+import com.sun.jdi.request.StepRequest;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -188,10 +189,14 @@ public class MySQL extends Driver {
             checkCache(id, event.getUser(), false);
             checkCache(event.getChannelId(), event.getChannel(), true);
 
+            // Get Birthday
+            String[] date = birthdate.getDate().split("\\.");
+            String birthday = date[2] + "." + date[1] + "." + date[1];
+
             // Update Birthday
             String updateQuery = "UPDATE users SET birthdate = ? WHERE id = ?";
             PreparedStatement updatePreparedStatement = connection.prepareStatement(updateQuery);
-            updatePreparedStatement.setString(1, birthdate.getDate());
+            updatePreparedStatement.setString(1, birthday);
             updatePreparedStatement.setInt(2, id);
             updatePreparedStatement.executeUpdate(); // execute
             updatePreparedStatement.close(); // close the updatePreparedStatement
@@ -216,8 +221,9 @@ public class MySQL extends Driver {
             // Add Birthdays
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
-                String date = resultSet.getString("birthdate");
-                birthdays.put(id, new Birthdate(date));
+                String[] date = resultSet.getString("birthdate").split("\\.");
+                String birthday = date[2] + "." + date[1] + "." + date[0];
+                birthdays.put(id, new Birthdate(birthday));
             }
 
             // Close resources

@@ -9,9 +9,17 @@ import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.openAI.OpenAI;
 import de.MCmoderSD.utilities.openAI.modules.Chat;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
 
@@ -59,9 +67,6 @@ public class Horoscope {
                     birthdate.getZodiacSign();
                     botClient.respond(event, getCommand(), openAI.getChat().prompt(botClient.getBotName(), instruction, birthdate.getZodiacSign(), temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
                 }
-
-                // Send Message
-
             }
         });
     }
