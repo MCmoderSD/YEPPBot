@@ -1,6 +1,5 @@
 package de.MCmoderSD.utilities.database;
 
-import com.sun.jdi.request.StepRequest;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
