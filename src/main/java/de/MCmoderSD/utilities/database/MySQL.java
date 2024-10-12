@@ -190,7 +190,7 @@ public class MySQL extends Driver {
 
             // Get Birthday
             String[] date = birthdate.getDate().split("\\.");
-            String birthday = date[2] + "." + date[1] + "." + date[1];
+            String birthday = date[2] + "." + date[1] + "." + date[0];
 
             // Update Birthday
             String updateQuery = "UPDATE users SET birthdate = ? WHERE id = ?";

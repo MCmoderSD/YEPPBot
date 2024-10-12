@@ -31,7 +31,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - [x] Conversation (ChatGPT)  
   - [x] Fact
   - [x] Gif
-  - [ ] Horoscope
+  - [x] Horoscope
   - [x] Insult
   - [x] Joke
   - [x] Lurk (with timer)
@@ -183,7 +183,11 @@ The file should have the following structure: <br>
 
 ```json
 {
-  "astrology": "YOUR_ASTROLOGY_API_KEY",
+  "astrology": {
+    "clientId": "YOUR_ASTROLOGY_CLIENT_ID",
+    "clientSecret": "YOUR_ASTROLOGY_CLIENT_SECRET"
+  },
+
   "giphy": "YOUR_GIPHY_API_KEY",
   "openWeatherMap": "YOUR_OPEN_WEATHER_MAP_API_KEY"
 }
@@ -194,7 +198,7 @@ You can use the ```-generate``` argument to generate an example config file. <br
 If you don't want to use the API or just don't have the API key, you can just delete the part of the config. <br> <br>
 
 The astrology API is currently not used, but it's planned to be used in the future. <br>
-You can obtain the AstrologyAPI key from [AstrologyAPI](http://freeastrologyapi.com/). <br>
+You can obtain the AstrologyAPI key from [Prokerala](https://api.prokerala.com/). <br>
 You can obtain the OpenWeatherMap API key from [OpenWeatherMap](https://openweathermap.org/api). <br>
 You can obtain the Giphy API key from [Giphy](https://developers.giphy.com/). <br> 
 

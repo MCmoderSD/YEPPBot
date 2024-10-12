@@ -1,5 +1,9 @@
 {
-  "astrology": "YOUR_ASTROLOGY_API_KEY",
+  "astrology": {
+    "clientId": "YOUR_ASTROLOGY_CLIENT_ID",
+    "clientSecret": "YOUR_ASTROLOGY_CLIENT_SECRET"
+  },
+
   "giphy": "YOUR_GIPHY_API_KEY",
   "openWeatherMap": "YOUR_OPEN_WEATHER_MAP_API_KEY"
 }
