@@ -130,7 +130,7 @@ public class ProkeralaAPI {
                         .getJSONObject("daily_prediction")
                         .getString("prediction");
 
-            } else throw new RuntimeException("Failed to connect to the API. Response code: " + responseCode);
+            } else return "Failed to connect to the API. Response code: " + responseCode;
         } catch (Exception e) {
             throw new RuntimeException("Failed to connect to the API. " + e.getMessage());
         }

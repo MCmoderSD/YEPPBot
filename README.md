@@ -35,6 +35,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - [x] Insult
   - [x] Joke
   - [x] Lurk (with timer)
+  - [ ] Match
   - [x] Prompt (ChatGPT)
   - [x] Translate
   - [x] TTS (Text to Speech)
@@ -184,8 +185,8 @@ The file should have the following structure: <br>
 ```json
 {
   "astrology": {
-    "clientId": "YOUR_ASTROLOGY_CLIENT_ID",
-    "clientSecret": "YOUR_ASTROLOGY_CLIENT_SECRET"
+    "clientId": "YOUR_ASTROLOGY_CLIENT_ID, OPTIONAL_SECOND_CLIENT_ID",
+    "clientSecret": "YOUR_ASTROLOGY_CLIENT_SECRET, OPTIONAL_SECOND_CLIENT_SECRET"
   },
 
   "giphy": "YOUR_GIPHY_API_KEY",

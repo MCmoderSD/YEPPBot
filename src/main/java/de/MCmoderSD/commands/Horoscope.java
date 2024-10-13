@@ -20,6 +20,15 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Horoscope {
 
+    // Credentials
+    private final String[] clientIDs;
+    private final String[] clientSecrets;
+
+    // Attributes
+    private ProkeralaAPI prokeralaAPI;
+    private int apiIndex = 0;
+    private int apiSwaps = 0;
+
     // Constructor
     public Horoscope(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, Credentials credentials, HelixHandler helixHandler, OpenAI openAI) {
 
@@ -27,12 +36,14 @@ public class Horoscope {
         String syntax = "Syntax: " + botClient.getPrefix() + "horoscope @<user> <language>";
 
         // About
-        String[] name = {"horoscope", "horoskop", "horoskope"};
+        String[] name = {"horoscope", "horoscop", "horoskop", "horoskope"};
         String description = "Zeigt dein Horoskop an. " + syntax;
 
-        // Initialize ProkeralaAPI
+        // Load ProkeralaAPI Credentials
         JsonNode prokeralaConfig = credentials.getAPIConfig().get("astrology");
-        ProkeralaAPI prokeralaAPI = new ProkeralaAPI(prokeralaConfig.get("clientId").asText(), prokeralaConfig.get("clientSecret").asText());
+        clientIDs = prokeralaConfig.get("clientId").asText().split(", ");
+        clientSecrets = prokeralaConfig.get("clientSecret").asText().split(", ");
+        initAPI();
 
         // Get Chat Module and Config
         Chat chat = openAI.getChat();
@@ -59,7 +70,7 @@ public class Horoscope {
 
                 // Variables
                 HashMap<Integer, Birthdate> birthdayList = mySQL.getBirthdays();
-                String language = "de";             // Default: German
+                String language = "german";         // Default: German
                 var targetID = event.getUserId();   // Default: User
                 boolean hasTarget = false;
                 Birthdate birthdate = null;
@@ -89,11 +100,14 @@ public class Horoscope {
                 }
 
                 // Get Horoscope
-                String dailyPrediction = prokeralaAPI.dailyPrediction(birthdate);
-                if (dailyPrediction == null || dailyPrediction.isEmpty() || dailyPrediction.isBlank()) {
+                String dailyPrediction = getDailyPrediction(birthdate);
+                if (dailyPrediction.isEmpty() || dailyPrediction.isBlank()) {
                     botClient.respond(event, getCommand(), "Fehler beim Abrufen des Horoskops.");
                     return;
                 }
+
+                // Reset API Swaps
+                apiSwaps = 0;
 
                 // Translate Horoscope
                 if (Arrays.asList("en", "english", "englisch", "eng").contains(language)) botClient.respond(event, getCommand(), dailyPrediction);
@@ -104,5 +118,29 @@ public class Horoscope {
                 }
             }
         });
+    }
+
+    // Get Daily Prediction
+    private String getDailyPrediction(Birthdate birthdate) {
+        String dailyPrediction = prokeralaAPI.dailyPrediction(birthdate);
+        if (dailyPrediction.equals("Failed to connect to the API. Response code: 403")) initAPI();
+        if (apiSwaps >= clientIDs.length) return "Failed to connect to the API. Please try again later.";
+        else if (dailyPrediction.equals("Failed to connect to the API. Response code: 403")) {
+            apiSwaps++;
+            return getDailyPrediction(birthdate);
+        } else return dailyPrediction;
+    }
+
+    // Load Horoscope List
+    private void initAPI() {
+
+        // Swap API
+        if (prokeralaAPI != null) {
+            apiIndex++;
+            if (apiIndex >= clientIDs.length) apiIndex = 0;
+        }
+
+        // Initialize API
+        prokeralaAPI = new ProkeralaAPI(clientIDs[apiIndex], clientSecrets[apiIndex]);
     }
 }

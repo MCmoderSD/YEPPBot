@@ -161,6 +161,24 @@ public class Birthdate {
         return "Unknown";
     }
 
+    public String getTranslatedZodiacSign() {
+        return switch (getZodiacSign()) {
+            case "aquarius" -> "Wassermann";
+            case "pisces" -> "Fische";
+            case "aries" -> "Widder";
+            case "taurus" -> "Stier";
+            case "gemini" -> "Zwillinge";
+            case "cancer" -> "Krebs";
+            case "leo" -> "Löwe";
+            case "virgo" -> "Jungfrau";
+            case "libra" -> "Waage";
+            case "scorpio" -> "Skorpion";
+            case "sagittarius" -> "Schütze";
+            case "capricorn" -> "Steinbock";
+            default -> "Unbekannt";
+        };
+    }
+
     public TimeZone getTimeZone() {
         return TIME_ZONE;
     }
