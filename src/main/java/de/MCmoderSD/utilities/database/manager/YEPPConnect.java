@@ -44,7 +44,7 @@ public class YEPPConnect {
             connection.prepareStatement(condition +
                     """
                     MinecraftWhitelist (
-                    channel_id INT PRIMARY KEY NOT NULL,
+                    channel_id INT PRIMARY KEY,
                     whitelist TEXT,
                     user_pair TEXT,
                     last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

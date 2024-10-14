@@ -8,6 +8,7 @@ import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import de.MCmoderSD.utilities.database.manager.CustomManager;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.database.manager.LurkManager;
+import de.MCmoderSD.utilities.database.manager.QuoteManager;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
 import de.MCmoderSD.utilities.database.manager.YEPPConnect;
 
@@ -26,6 +27,7 @@ public class MySQL extends Driver {
     private final CustomManager customManager;
     private final LogManager logManager;
     private final LurkManager lurkManager;
+    private final QuoteManager quoteManager;
     private final TokenManager tokenManager;
     private final YEPPConnect yeppConnect;
 
@@ -53,6 +55,7 @@ public class MySQL extends Driver {
         customManager = new CustomManager(this);
         logManager = new LogManager(this, !main.hasArg(Main.Argument.LOG));
         lurkManager = new LurkManager(this);
+        quoteManager = new QuoteManager(this);
         tokenManager = new TokenManager(this);
         yeppConnect = new YEPPConnect(this);
     }
@@ -264,6 +267,10 @@ public class MySQL extends Driver {
 
     public LurkManager getLurkManager() {
         return lurkManager;
+    }
+
+    public QuoteManager getQuoteManager() {
+        return quoteManager;
     }
 
     public TokenManager getTokenManager() {

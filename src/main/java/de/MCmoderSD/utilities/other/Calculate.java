@@ -99,6 +99,7 @@ public class Calculate {
 
     // Trim Message
     public static String trimMessage(String message) {
+        message = message.replaceAll("\uDB40\uDC00", "");
         while (message.startsWith(" ") || message.startsWith("\n")) message = message.substring(1);
         while (message.endsWith(" ") || message.endsWith("\n")) message = message.trim();
         return message;
@@ -107,7 +108,10 @@ public class Calculate {
     // Clean Args
     public static ArrayList<String> cleanArgs(ArrayList<String> args) {
         ArrayList<String> cleaned = new ArrayList<>();
-        for (String arg : args) cleaned.add(trimMessage(arg));
+        for (String arg : args) {
+            String clean = trimMessage(arg);
+            if (!(clean.isEmpty() || clean.isBlank())) cleaned.add(clean);
+        }
         return cleaned;
     }
 

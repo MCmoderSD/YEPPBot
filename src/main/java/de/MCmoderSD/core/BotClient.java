@@ -222,6 +222,7 @@ public class BotClient {
         new Ping(this, messageHandler);
         new Play(this, messageHandler);
         if (openAIChat) new Prompt(this, messageHandler, main.getOpenAI());
+        new Quote(this, messageHandler, mySQL);
         new Say(this, messageHandler);
         new Status(this, messageHandler);
         if (openAIChat) new Translate(this, messageHandler, main.getOpenAI());

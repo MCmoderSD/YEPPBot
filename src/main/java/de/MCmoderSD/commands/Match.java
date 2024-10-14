@@ -17,7 +17,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
 
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -137,7 +144,8 @@ public class Match {
                 while (combinedUsers.size() > amount) combinedUsers.remove((Integer) combinedUsers.toArray()[new Random().nextInt(combinedUsers.size())]);
 
                 // Get Compatible Usernames
-                HashSet<String> compatibleUserNames = getCompatibleUserNames(helixHandler, combinedUsers);
+                HashSet<String> compatibleUserNames = new HashSet<>();
+                compatibleUsers.forEach(id -> compatibleUserNames.add(helixHandler.getUser(id).getName()));
                 StringBuilder finalResponse = response;
                 finalResponse.append(" ");
                 compatibleUserNames.forEach(name -> finalResponse.append(name).append(", "));
@@ -164,13 +172,6 @@ public class Match {
             randomUsers.add((Integer) compatibleUsers.toArray()[randomIndex]);
         }
         return randomUsers;
-    }
-
-    // Get Compatible Usernames
-    private HashSet<String> getCompatibleUserNames(HelixHandler helixHandler, HashSet<Integer> compatibleUsers) {
-        HashSet<String> compatibleUserNames = new HashSet<>();
-        compatibleUsers.forEach(id -> compatibleUserNames.add(helixHandler.getUser(id).getName()));
-        return compatibleUserNames;
     }
 
     @SuppressWarnings("SameParameterValue")
