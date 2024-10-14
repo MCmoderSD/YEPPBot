@@ -141,6 +141,6 @@ public class MenuPanel extends JPanel {
     // Get Channel
     public String getChannel() {
         String channel = channelField.getText().replaceAll(" ", "").toLowerCase();
-        return channel.length() < 3 ? "" : channel.equalsIgnoreCase("channel") ? "" : channel;
+        return channel.length() < 4 ? "" : channel.equalsIgnoreCase("channel") ? "" : channel;
     }
 }

@@ -217,7 +217,7 @@ public class BotClient {
         new Join(this, messageHandler);
         new Joke(this, messageHandler, mySQL);
         new Lurk(this, messageHandler, mySQL);
-        //if (openAIChat) new Match(this, messageHandler, mySQL, helixHandler, main.getOpenAI());
+        if (openAIChat) new Match(this, messageHandler, mySQL, helixHandler, main.getOpenAI());
         new Moderate(this, messageHandler, mySQL, helixHandler);
         new Ping(this, messageHandler);
         new Play(this, messageHandler);
