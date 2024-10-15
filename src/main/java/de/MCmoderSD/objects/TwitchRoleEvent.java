@@ -139,4 +139,8 @@ public class TwitchRoleEvent {
     public String getLog() {
         return getFormattedTimestamp() + " " + EVENT + " <" + getChannel() + "> " + getUser() + ": " + (isAdded() ? "Added" : "Removed") + " " + getRole();
     }
+
+    public void logToConsole() {
+        System.out.println(getLog());
+    }
 }

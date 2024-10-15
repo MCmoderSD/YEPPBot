@@ -7,18 +7,8 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.core.EventManager;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
+import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
-import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
-import com.github.twitch4j.eventsub.events.ChannelVipAddEvent;
-import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
-import com.github.twitch4j.eventsub.events.ChannelModeratorAddEvent;
-import com.github.twitch4j.eventsub.events.ChannelModeratorRemoveEvent;
-import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
-import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
-import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
-import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.UI.Frame;
@@ -27,9 +17,7 @@ import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.database.manager.LogManager;
 import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
 import de.MCmoderSD.utilities.server.AudioBroadcast;
@@ -70,7 +58,6 @@ public class BotClient {
             HelixHandler.Scope.CHAT_READ,
             HelixHandler.Scope.BITS_READ,
             HelixHandler.Scope.CHANNEL_READ_EDITORS,
-            HelixHandler.Scope.USER_READ_FOLLOWS,
             HelixHandler.Scope.MODERATOR_READ_FOLLOWERS,
             HelixHandler.Scope.MODERATION_READ,
             HelixHandler.Scope.CHANNEL_READ_VIPS,
@@ -92,8 +79,10 @@ public class BotClient {
     private final TwitchChat chat;
     private final TwitchHelix helix;
     private final EventManager eventManager;
+    private final TwitchClientHelper clientHelper;
 
     // Handler
+    private final EventHandler eventHandler;
     private final HelixHandler helixHandler;
     private final MessageHandler messageHandler;
 
@@ -110,7 +99,7 @@ public class BotClient {
         jsonUtility = main.getJsonUtility();
         reader = main.getReader();
 
-        // Init Credentials
+        // Init Bot Credentials
         botConfig = credentials.getBotConfig();
         botId = botConfig.get("botId").asInt();
         botToken = botConfig.get("botToken").asText();
@@ -121,16 +110,16 @@ public class BotClient {
         defaultAuthToken = new OAuth2Credential(PROVIDER, botToken);
         credentialManager = CredentialManagerBuilder.builder().build();
 
-        // Init Bot
+        // Init Bot Settings
         botNames = botConfig.get("botName").asText().toLowerCase().split(", ");
         botName = botNames[0];
         prefix = botConfig.get("prefix").asText();
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
-        // Init Server
+        // Init HTTPS Server
         JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
-        if (!hasArg(DEV) && httpsServerConfig.get("hostname").asText().contains(".")) server = new Server(this, httpsServerConfig);
-        else {
+        if (!hasArg(DEV) && httpsServerConfig.get("hostname").asText().contains(".")) server = new Server(this, httpsServerConfig); // Default
+        else { // Custom or Dev Mode
             String hostname = hasArg(HOST) ? Main.arguments[0] : httpsServerConfig.get("hostname").asText();
             int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpsServerConfig.get("port").asInt();
             server = new Server(this, hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
@@ -153,6 +142,7 @@ public class BotClient {
         chat = client.getChat();
         helix = client.getHelix();
         eventManager = client.getEventManager();
+        clientHelper = client.getClientHelper();
 
         // Init Helix Handler
         helixHandler = new HelixHandler(this, mySQL, server);
@@ -168,30 +158,9 @@ public class BotClient {
         channelList.remove(botName);
         joinChannel(channelList);
 
-        // Event Handler
-        messageHandler = new MessageHandler(this, mySQL, main.getFrame());
-
-        // Message Events
-        eventManager.onEvent(ChannelMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));              // chat:read
-        eventManager.onEvent(ChannelCheerEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));                // bits:read
-        eventManager.onEvent(ChannelSubscriptionMessageEvent.class, event -> messageHandler.handleMessage(new TwitchMessageEvent(event)));  // channel_subscriptions:read
-
-        // Initialize LogManager
-        LogManager logManager = mySQL.getLogManager();
-
-        // Role Events
-        eventManager.onEvent(ChannelVipAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));            // channel_vips:read
-        eventManager.onEvent(ChannelVipRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));         // channel_vips:read
-        eventManager.onEvent(ChannelModeratorAddEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));      // moderation:read
-        eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> logManager.logRole(new TwitchRoleEvent(event)));   // moderation:read
-
-        // Loyalty Events
-        eventManager.onEvent(ChannelFollowEvent.class, logManager::logLoyalty);                                             // user:read:follows
-        eventManager.onEvent(ChannelSubscribeEvent.class, logManager::logLoyalty);                                          // channel_subscriptions:read
-        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, logManager::logLoyalty);                                   // channel_subscriptions:read
-
-        // Raid Events
-        eventManager.onEvent(ChannelRaidEvent.class, logManager::logRaid);                                                  // channel:mange:raids
+        // Init Handlers
+        messageHandler = new MessageHandler(this, mySQL);
+        eventHandler = new EventHandler(this, frame, mySQL.getLogManager(), eventManager, messageHandler);
 
         // Validate Configs
         boolean astrology = credentials.hasAstrology();
@@ -304,11 +273,19 @@ public class BotClient {
         if (channel.length() < 3 || channel.length() > 25) return;
         if (channel.contains(" ") || chat.isChannelJoined(channel) || botName.equals(channel)) return;
 
+        // Get Channel ID
+        var id = helixHandler.getUser(channel).getId();
+
         // Log
         System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
 
         // Join Channel
         chat.joinChannel(channel);
+
+        // Enable Additional Event Listeners
+        clientHelper.enableStreamEventListener(channel);
+        if (helixHandler.checkScope(id, HelixHandler.Scope.MODERATOR_READ_FOLLOWERS)) clientHelper.enableFollowEventListener(channel);    // moderator:read:followers
+        clientHelper.enableClipEventListener(channel);
 
         // Register Broadcast
         audioBroadcast.registerBroadcast(channel);

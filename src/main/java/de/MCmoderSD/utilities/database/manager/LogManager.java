@@ -18,18 +18,14 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class LogManager {
     
-    // Assosiations
+    // Associations
     private final MySQL mySQL;
     
-    // Variables
-    private boolean log;
-    
     // Constructor
-    public LogManager(MySQL mySQL, boolean log) {
+    public LogManager(MySQL mySQL) {
 
         // Set associations
         this.mySQL = mySQL;
-        this.log = log;
 
         // Initialize
         initTables();
@@ -175,14 +171,42 @@ public class LogManager {
 
     // Log Message
     public void logMessage(TwitchMessageEvent event) {
-        if (log) new Thread(() -> {
-            event.logToMySQL(this); // log to MySQL
+        new Thread(() -> {
+
+            // Log message
+            try {
+                if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+                // Variables
+                var channelId = event.getChannelId();
+                var userId = event.getUserId();
+
+                // Check Channel and User
+                mySQL.checkCache(userId, event.getUser(), false);
+                mySQL.checkCache(channelId, event.getChannel(), true);
+
+                // Prepare statement
+                String query = "INSERT INTO " + "MessageLog" + " (timestamp, type, channel_id, user_id, message, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
+                preparedStatement.setString(2, event.getType()); // set type
+                preparedStatement.setInt(3, channelId); // set channel
+                preparedStatement.setInt(4, userId); // set user
+                preparedStatement.setString(5, event.getMessage()); // set message
+                preparedStatement.setInt(6, event.getLogBits()); // set bits
+                preparedStatement.setInt(7, event.getLogSubMonths()); // set subMonths
+                preparedStatement.setInt(8, event.getLogSubStreak()); // set subStreak
+                preparedStatement.setString(9, event.getSubTier()); // set subPlan
+                preparedStatement.executeUpdate(); // execute
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
         }).start();
     }
 
     // Log Command
     public void logCommand(TwitchMessageEvent event, String trigger, String args) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = event.getChannelId();
@@ -218,7 +242,7 @@ public class LogManager {
 
     // Log Command Response
     public void logResponse(TwitchMessageEvent event, String command, String response) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = event.getChannelId();
@@ -255,7 +279,7 @@ public class LogManager {
 
     // Log Bot Response
     public void logResponse(String channel, String user, String message, HelixHandler helixHandler) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = helixHandler.getUser(channel).getId();
@@ -285,7 +309,7 @@ public class LogManager {
     }
 
     public void logRole(TwitchRoleEvent event) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = event.getChannelId();
@@ -317,7 +341,7 @@ public class LogManager {
     }
 
     public void logLoyalty(ChannelFollowEvent event) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = Integer.parseInt(event.getBroadcasterUserId());
@@ -350,7 +374,7 @@ public class LogManager {
     }
 
     public void logLoyalty(ChannelSubscribeEvent event) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = Integer.parseInt(event.getBroadcasterUserId());
@@ -385,7 +409,7 @@ public class LogManager {
     }
 
     public void logLoyalty(ChannelSubscriptionGiftEvent event) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = Integer.parseInt(event.getBroadcasterUserId());
@@ -432,7 +456,7 @@ public class LogManager {
     }
 
     public void logRaid(ChannelRaidEvent event) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = Integer.parseInt(event.getToBroadcasterUserId());
@@ -466,7 +490,7 @@ public class LogManager {
     }
 
     public void logTTS(TwitchMessageEvent event, AudioFile audioFile) {
-        if (log) new Thread(() -> {
+        new Thread(() -> {
 
             // Variables
             var channelID = event.getChannelId();
@@ -503,14 +527,5 @@ public class LogManager {
     // Getter
     public MySQL getMySQL() {
         return mySQL;
-    }
-
-    public boolean isLog() {
-        return log;
-    }
-
-    // Setter
-    public void setLog(boolean log) {
-        this.log = log;
     }
 }

@@ -53,7 +53,7 @@ public class MySQL extends Driver {
         assetManager = new AssetManager(this);
         channelManager = new ChannelManager(this);
         customManager = new CustomManager(this);
-        logManager = new LogManager(this, !main.hasArg(Main.Argument.LOG));
+        logManager = new LogManager(this);
         lurkManager = new LurkManager(this);
         quoteManager = new QuoteManager(this);
         tokenManager = new TokenManager(this);

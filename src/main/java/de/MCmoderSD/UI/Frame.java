@@ -2,6 +2,7 @@ package de.MCmoderSD.UI;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.main.Main;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.image.ImageReader;
 
 import javax.swing.JFrame;
@@ -58,6 +59,10 @@ public class Frame extends JFrame {
     // Setter
     public void log(String type, String channel, String user, String message) {
         logPanel.appendText(type, channel, user, message);
+    }
+
+    public void log(TwitchMessageEvent event) {
+        logPanel.appendText(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
     }
 
     // Getter

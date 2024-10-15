@@ -1,8 +1,6 @@
 package de.MCmoderSD.core;
 
-import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.commands.Command;
-import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -24,7 +22,6 @@ public class MessageHandler {
     // Associations
     private final BotClient botClient;
     private final MySQL mySQL;
-    private final Frame frame;
 
     // Attributes
     private final HashSet<Integer> congratulated;
@@ -41,12 +38,11 @@ public class MessageHandler {
     private final HashMap<Integer, HashSet<Timer>> customTimers;
 
     // Constructor
-    public MessageHandler(BotClient botClient, MySQL mySQL, Frame frame) {
+    public MessageHandler(BotClient botClient, MySQL mySQL) {
 
         // Initialize Associations
         this.botClient = botClient;
         this.mySQL = mySQL;
-        this.frame = frame;
 
         // Initialize Attributes
         congratulated = new HashSet<>();
@@ -77,38 +73,25 @@ public class MessageHandler {
 
     // Handle Twitch Message
     public void handleMessage(TwitchMessageEvent event) {
-        new Thread(() -> {
 
-            // Log Message
-            mySQL.getLogManager().logMessage(event);
-            event.logToConsole();
-            if (!botClient.hasArg(Main.Argument.CLI))
-                frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
+        // Handle Timers;
+        handleTimers(event);
 
-            // Handle Timers;
-            handleTimers(event);
+        // Check for Lurk
+        if (lurkList.containsKey(event.getUserId())) handleLurk(event);
 
-            // Check for Lurk
-            if (lurkList.containsKey(event.getUserId())) handleLurk(event);
+        // Check for Birthday
+        if (birthdateList.containsKey(event.getUserId())) handleBirthday(event);
 
-            // Check for Birthday
-            if (birthdateList.containsKey(event.getUserId())) handleBirthday(event);
+        // Check for Command
+        if (event.hasCommand()) {
+            handleCommand(event);
+            return;
+        }
 
-            // Check for Command
-            if (event.hasCommand()) {
-                handleCommand(event);
-                return;
-            }
-
-            // Reply YEPP
-            if (event.hasBotName()) {
-                botClient.respond(event, "replyYEPP", tagUser(event) + " YEPP");
-                return;
-            }
-
-            // Say YEPP
-            if (event.hasYEPP()) botClient.respond(event, "YEPP", "YEPP");
-        }).start();
+        // YEPP
+        if (event.hasBotName()) botClient.respond(event, "replyYEPP", tagUser(event) + " YEPP"); // Reply YEPP
+        else if (event.hasYEPP()) botClient.respond(event, "YEPP", "YEPP"); // YEPP
     }
 
     private void handleTimers(TwitchMessageEvent event) {

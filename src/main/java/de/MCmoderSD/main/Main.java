@@ -323,7 +323,7 @@ public class Main {
         GENERATE("generate", "gen"),
         DEV("dev", "development", "debug", "test"),
         CLI("cli", "nogui", "console", "terminal"),
-        LOG("nolog", "disablelog"),
+        NOLOG("nolog", "disablelog"),
         HOST("host"),
         PORT("port"),
         BOT_CONFIG("botconfig"),

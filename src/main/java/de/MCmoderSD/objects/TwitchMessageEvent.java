@@ -5,12 +5,7 @@ import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
 
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.utilities.database.manager.LogManager;
-import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.other.Calculate;
-
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -124,37 +119,7 @@ public class TwitchMessageEvent {
         this.bits = bits;
     }
 
-    // Methods
-    public void logToMySQL(LogManager logManager) {
-
-        MySQL mySQL = logManager.getMySQL();
-
-        // Log message
-        try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
-
-            // Check Channel and User
-            mySQL.checkCache(userId, user, false);
-            mySQL.checkCache(channelId, channel, true);
-
-            // Prepare statement
-            String query = "INSERT INTO " + "MessageLog" + " (timestamp, type, channel_id, user_id, message, bits, subMonths, subStreak, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-            preparedStatement.setTimestamp(1, timestamp); // set timestamp
-            preparedStatement.setString(2, getType()); // set type
-            preparedStatement.setInt(3, channelId); // set channel
-            preparedStatement.setInt(4, userId); // set user
-            preparedStatement.setString(5, message); // set message
-            preparedStatement.setInt(6, getLogBits()); // set bits
-            preparedStatement.setInt(7, getLogSubMonths()); // set subMonths
-            preparedStatement.setInt(8, getLogSubStreak()); // set subStreak
-            preparedStatement.setString(9, getSubTier()); // set subPlan
-            preparedStatement.executeUpdate(); // execute
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
+    // Log
     public void logToConsole() {
         System.out.println(getLog());
     }
