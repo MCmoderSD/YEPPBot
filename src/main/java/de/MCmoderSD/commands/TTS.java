@@ -14,6 +14,9 @@ import java.util.ArrayList;
 
 public class TTS {
 
+    // Constants
+    private final String ttsWasSent;
+
     // Constructor
     public TTS(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, OpenAI openAI) {
 
@@ -23,6 +26,9 @@ public class TTS {
         // About
         String[] name = {"tts", "texttospeech"}; // Command name and aliases
         String description = "Lässt den YEPPBot Sprechen. " + syntax;
+
+        // Constants
+        ttsWasSent = "TTS wurde gesendet YEPP";
 
         // Get TTS Module and Config
         Speech speech = openAI.getSpeech();
@@ -53,7 +59,7 @@ public class TTS {
 
                 // Send Audio
                 botClient.sendAudio(event, audioFile);
-                botClient.respond(event, getCommand(), "TTS wurde gesendet YEPP");
+                botClient.respond(event, getCommand(), ttsWasSent);
             }
         });
     }

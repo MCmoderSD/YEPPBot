@@ -36,9 +36,9 @@ public class Info {
         thereAreNoEditors = "Es gibt keine Editoren in diesem Channel.";
         thereAreNoMods = "Es gibt keine Moderatoren in diesem Channel.";
         thereAreNoVIPs = "Es gibt keine VIPs in diesem Channel.";
-        listEditors = "Editoren: ";
-        listMods = "Moderatoren: ";
-        listVips = "VIPs: ";
+        listEditors = "Editoren:";
+        listMods = "Moderatoren:";
+        listVips = "VIPs:";
 
 
         // Register command
@@ -67,7 +67,7 @@ public class Info {
 
                 switch (option) {
                     case "editor", "editors" -> {
-                        StringBuilder editors = new StringBuilder(listEditors);
+                        StringBuilder editors = new StringBuilder(String.format("%s ", listEditors));
                         HashSet<TwitchUser> editorList = helixHandler.getEditors(event.getChannelId());
 
                         if (editorList == null || editorList.isEmpty()) {
@@ -80,7 +80,7 @@ public class Info {
                         botClient.respond(event, getCommand(), editors.substring(0, editors.length() - 2));
                     }
                     case "mod", "mods", "moderator" -> {
-                        StringBuilder mods = new StringBuilder(listMods);
+                        StringBuilder mods = new StringBuilder(String.format("%s ", listMods));
                         HashSet<TwitchUser> modList = helixHandler.getModerators(event.getChannelId());
 
                         if (modList == null || modList.isEmpty()) {
@@ -93,7 +93,7 @@ public class Info {
                         botClient.respond(event, getCommand(), mods.substring(0, mods.length() - 2));
                     }
                     case "vip", "vips" -> {
-                        StringBuilder vips = new StringBuilder(listVips);
+                        StringBuilder vips = new StringBuilder(String.format("%s ", listVips));
                         HashSet<TwitchUser> vipList = helixHandler.getVIPs(event.getChannelId());
 
                         if (vipList == null || vipList.isEmpty()) {

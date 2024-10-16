@@ -37,6 +37,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - [x] Lurk (with timer)
   - [x] Match
   - [x] Prompt (ChatGPT)
+  - [x] Quote
   - [x] Translate
   - [x] TTS (Text to Speech)
   - [x] Weather

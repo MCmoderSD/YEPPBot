@@ -23,6 +23,10 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Wiki {
 
+    // Constants
+    private final String errorRetrievingWeatherData;
+    private final String noSummaryFoundForThisTopic;
+
     // Attributes
     private final double temperature;
     private final int maxTokens;
@@ -39,6 +43,10 @@ public class Wiki {
         // About
         String[] name = {"wiki", "wikipedia", "summarize", "zusammenfassung"};
         String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. " + syntax;
+
+        // Constants
+        errorRetrievingWeatherData = "Fehler beim Abrufen der Wikipedia-Zusammenfassung:";
+        noSummaryFoundForThisTopic = "Keine Zusammenfassung für dieses Thema gefunden.";
 
         // Get Chat Module and Config
         Chat chat = openAI.getChat();
@@ -81,7 +89,7 @@ public class Wiki {
                         else response = trimMessage(chat.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
 
                     } catch (IOException e) {
-                        response = trimMessage("Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage());
+                        response = trimMessage(String.format("%s %s", errorRetrievingWeatherData, e.getMessage()));
                     }
                 }
 
@@ -100,6 +108,6 @@ public class Wiki {
         String firstPageKey = pages.keys().next();
         JSONObject page = pages.getJSONObject(firstPageKey);
         if (page.has("extract")) return page.getString("extract");
-        else throw new IOException("Keine Zusammenfassung für dieses Thema gefunden.");
+        else throw new IOException(noSummaryFoundForThisTopic);
     }
 }

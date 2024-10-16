@@ -25,7 +25,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Main {
 
     // Constants
-    public static final String VERSION = "1.21.5";
+    public static final String VERSION = "1.22.0";
 
     // Bot Config
     public static final String BOT_CONFIG = "/config/BotConfig.json";

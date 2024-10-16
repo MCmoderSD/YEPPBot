@@ -80,14 +80,14 @@ public class Birthday {
         nobodyHasBirthdayOn = "Niemand hat am %s Geburtstag.";
         followingUsersHaveBirthdayOn = "Folgende User haben am %s Geburtstag: %s. YEPP";
         nobodyHasBirthdayThisMonth = "Niemand hat in diesem Monat Geburtstag.";
-        followingUsersHaveBirthdayThisMonth = "Folgende User haben in diesem Monat Geburtstag: ";
+        followingUsersHaveBirthdayThisMonth = "Folgende User haben in diesem Monat Geburtstag:";
         userOn = "@%s am %s";
         nobodyHasBirthdayToday = "Niemand hat heute Geburtstag.";
         followingUsersHaveBirthdayToday = "Folgende User haben heute Geburtstag: %s. YEPP";
         nobodyHasBirthdayThisWeek = "Niemand hat diese Woche Geburtstag.";
-        followingUsersHaveBirthdayThisWeek = "Folgende User haben diese Woche Geburtstag: ";
+        followingUsersHaveBirthdayThisWeek = "Folgende User haben diese Woche Geburtstag:";
         nobodyHasBirthdayThisYear = "Niemand hat dieses Jahr Geburtstag.";
-        followingUsersHaveBirthdayThisYear = "Folgende User haben dieses Jahr Geburtstag: ";
+        followingUsersHaveBirthdayThisYear = "Folgende User haben dieses Jahr Geburtstag:";
 
 
         // Association
@@ -369,7 +369,7 @@ public class Birthday {
         if (monthBirthdays.isEmpty()) return nobodyHasBirthdayThisMonth;
 
         // Build response
-        StringBuilder response = new StringBuilder(followingUsersHaveBirthdayThisMonth);
+        StringBuilder response = new StringBuilder(String.format("%s ", followingUsersHaveBirthdayThisMonth));
         for (Map.Entry<Integer, Birthdate> entry : monthBirthdays) {
             String username = helixHandler.getUser(entry.getKey()).getName();
             response.append(String.format(userOn, username, entry.getValue().getDayAndMonth()));
@@ -417,7 +417,7 @@ public class Birthday {
                     weekBirthdays.sort(Comparator.comparingInt(entry -> entry.getValue().getDay()));
                     if (weekBirthdays.isEmpty()) return nobodyHasBirthdayThisWeek;
                     else {
-                        StringBuilder response = new StringBuilder(followingUsersHaveBirthdayThisWeek);
+                        StringBuilder response = new StringBuilder(String.format("%s ", followingUsersHaveBirthdayThisWeek));
                         for (Map.Entry<Integer, Birthdate> entry : weekBirthdays) {
                             String username = helixHandler.getUser(entry.getKey()).getName();
                             response.append(String.format(userOn, username, entry.getValue().getDayAndMonth()));
@@ -444,7 +444,7 @@ public class Birthday {
                     monthBirthdays.sort(Comparator.comparingInt(entry -> entry.getValue().getDay()));
                     if (monthBirthdays.isEmpty()) return nobodyHasBirthdayThisMonth;
                     else {
-                        StringBuilder response = new StringBuilder(followingUsersHaveBirthdayThisMonth);
+                        StringBuilder response = new StringBuilder(String.format("%s ", followingUsersHaveBirthdayThisMonth));
                         for (Map.Entry<Integer, Birthdate> entry : monthBirthdays) {
                             String username = helixHandler.getUser(entry.getKey()).getName();
                             response.append(String.format(userOn, username, entry.getValue().getDayAndMonth()));
@@ -470,7 +470,7 @@ public class Birthday {
                     yearBirthdays.sort(Comparator.comparingInt(entry -> entry.getValue().getDaysUntilBirthday()));
                     if (yearBirthdays.isEmpty()) return nobodyHasBirthdayThisYear;
                     else {
-                        StringBuilder response = new StringBuilder(followingUsersHaveBirthdayThisYear);
+                        StringBuilder response = new StringBuilder(String.format("%s ", followingUsersHaveBirthdayThisYear));
                         for (Map.Entry<Integer, Birthdate> entry : yearBirthdays) {
                             String username = helixHandler.getUser(entry.getKey()).getName();
                             response.append(String.format(userOn, username, entry.getValue().getDayAndMonth()));

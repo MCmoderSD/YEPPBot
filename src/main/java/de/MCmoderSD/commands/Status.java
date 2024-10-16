@@ -8,12 +8,18 @@ import java.util.ArrayList;
 
 public class Status {
 
+    // Constants
+    private final String botIsActive;
+
     // Constructor
     public Status(BotClient botClient, MessageHandler messageHandler) {
 
         // About
         String[] name = {"status", "test"};
         String description = "Zeigt den Status des Bots an. Also ob er aktiv ist oder nicht.";
+
+        // Constants
+        botIsActive = "Bot ist aktiv!";
 
 
         // Register command
@@ -23,7 +29,7 @@ public class Status {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                botClient.respond(event, getCommand(), "Bot ist aktiv!");
+                botClient.respond(event, getCommand(), botIsActive);
             }
         });
     }

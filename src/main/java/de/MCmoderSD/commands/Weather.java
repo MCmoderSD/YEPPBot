@@ -26,7 +26,8 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Weather {
 
-    // Attributes
+    // Constants
+    private final String errorRetrievingWeatherData;
 
     // OpenWeatherMap API
     private final String apiKey;
@@ -52,6 +53,9 @@ public class Weather {
         // About
         String[] name = {"weather", "wetter"};
         String description = "Zeigt das Wetter in einer Stadt an. " + syntax;
+
+        // Constants
+        errorRetrievingWeatherData = "Fehler beim Abrufen der Wetterdaten.";
 
         // Load API key
         apiKey = credentials.getAPIConfig().get("openWeatherMap").asText();
@@ -118,7 +122,7 @@ public class Weather {
 
         // Query weather data
         String response = query(convertToAscii(finalCityName));
-        if (response == null || response.isEmpty() || response.isBlank()) return "Fehler beim Abrufen der Wetterdaten.";
+        if (response == null || response.isEmpty() || response.isBlank()) return errorRetrievingWeatherData;
         String formattedWeatherData = formatWeatherData(finalCityName, response);
 
         return chat.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);

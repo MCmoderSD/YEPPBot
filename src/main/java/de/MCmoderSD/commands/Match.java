@@ -31,6 +31,13 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Match {
 
+    // Constants
+    private final String noBirthdaySet;
+    private final String mostCompatible;
+    private final String and;
+    private final String noCompatibleUsersFound;
+    private final String thereforeYouAreMostCompatibleWith;
+
     // Attributes
     private final HashMap<String, LinkedHashMap<String, String>> matchMap;
 
@@ -43,6 +50,13 @@ public class Match {
         // About
         String[] name = {"match", "matching"};
         String description = "Zeigt dir welcher User am besten zu dir passt. " + syntax;
+
+        // Constants
+        noBirthdaySet = "Du hast noch kein Geburtsdatum angegeben.";
+        mostCompatible = "Am kompatibelsten mit deinem Sternzeichen %s sind";
+        and = "und";
+        noCompatibleUsersFound = "Es gibt keine kompatiblen User.";
+        thereforeYouAreMostCompatibleWith = "Demnach bist du am kompatibelsten mit";
 
         // Load Sternzeichen
         matchMap = loadMatchList("/assets/matchList.json");
@@ -78,7 +92,7 @@ public class Match {
 
                 // Check Zodiac Sign
                 if (zodiacSign == null || zodiacSign.isEmpty() || zodiacSign.isBlank()) {
-                    botClient.respond(event, getCommand(), "Du hast noch kein Geburtsdatum angegeben. Syntax: " + botClient.getPrefix() + "birthdate <Tag.Monat.Jahr>");
+                    botClient.respond(event, getCommand(), String.format("%s %s", noBirthdaySet, syntax));
                     return;
                 }
 
@@ -101,7 +115,7 @@ public class Match {
                 }
 
                 // Response
-                StringBuilder response = new StringBuilder("Am kompatibelsten mit deinem Sternzeichen " + zodiacSign + " sind ");
+                StringBuilder response = new StringBuilder(String.format("%s ", String.format(mostCompatible, zodiacSign)));
 
                 // Get Compatible Signs and Users
                 String[] compatibleSigns = Objects.requireNonNull(matchMap).get(zodiacSign).keySet().toArray(String[]::new);
@@ -110,7 +124,7 @@ public class Match {
                 HashSet<Integer> compatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[2], event.getUserId());
 
                 // Add Compatible Signs
-                response.append(compatibleSigns[0]).append(", ").append(compatibleSigns[1]).append(" und ").append(compatibleSigns[2]).append(".");
+                response.append(compatibleSigns[0]).append(", ").append(compatibleSigns[1]).append(String.format(" %s ", and)).append(compatibleSigns[2]).append(".");
 
                 // Trim Users
                 if (mostCompatibleUsers.size() > amount) mostCompatibleUsers = pickRandomUsers(mostCompatibleUsers, amount);
@@ -123,8 +137,8 @@ public class Match {
                 if (combinedUsers.size() < amount) combinedUsers.addAll(compatibleUsers);
 
                 // Check if there are any compatible Users
-                if (combinedUsers.isEmpty()) response = new StringBuilder("Es gibt keine kompatiblen User.");
-                else response.append(" Demnach bist du am kompatibelsten mit");
+                if (combinedUsers.isEmpty()) response = new StringBuilder(noCompatibleUsersFound);
+                else response.append(String.format(" %s", thereforeYouAreMostCompatibleWith));
 
                 // Translate Text
                 if (!Arrays.asList("de", "german", "deutsch", "ger").contains(language)) {

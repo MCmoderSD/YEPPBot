@@ -142,7 +142,7 @@ public class Moderate {
 
         // Check command
         command = messageHandler.checkCommand(command) ? command : messageHandler.getAliasMap().getOrDefault(command, null);
-        if (command == null) return "Der Befehl existiert nicht!";
+        if (command == null) return "Error: Command not found!";
 
         // Edit blacklist
         String response = channelManager.editBlacklist(channel, command, block, helixHandler);
