@@ -47,9 +47,9 @@ public class AudioBroadcast {
         HashSet<HttpContext> contexts = new HashSet<>();
 
         // Add Contexts
-        contexts.add(server.getHttpServer().createContext("/" + broadcastId, new FrontendHandler(broadcastId)));
-        contexts.add(server.getHttpServer().createContext("/audio/" + broadcastId, new AudioHandler(broadcastId)));
-        contexts.add(server.getHttpServer().createContext("/version/" + broadcastId, new VersionHandler(broadcastId)));
+        contexts.add(server.getHttpsServer().createContext("/" + broadcastId, new FrontendHandler(broadcastId)));
+        contexts.add(server.getHttpsServer().createContext("/audio/" + broadcastId, new AudioHandler(broadcastId)));
+        contexts.add(server.getHttpsServer().createContext("/version/" + broadcastId, new VersionHandler(broadcastId)));
 
         // Add Contexts to Server
         serverContexts.put(broadcastId, contexts);
@@ -61,7 +61,7 @@ public class AudioBroadcast {
     // Unregister Broadcast
     public boolean unregisterBroadcast(String broadcastId) {
         if (!serverContexts.containsKey(broadcastId)) return false;
-        serverContexts.get(broadcastId).forEach(server.getHttpServer()::removeContext);
+        serverContexts.get(broadcastId).forEach(server.getHttpsServer()::removeContext);
         serverContexts.remove(broadcastId);
         audioFiles.remove(broadcastId);
         versions.remove(broadcastId);

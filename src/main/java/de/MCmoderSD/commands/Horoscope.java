@@ -20,6 +20,12 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Horoscope {
 
+    // Constants
+    private final String noBirthdaySet;
+    private final String youHaveNoBirthdaySet;
+    private final String errorGettingBirthday;
+    private final String errorGettingHoroscope;
+
     // Credentials
     private final String[] clientIDs;
     private final String[] clientSecrets;
@@ -38,6 +44,12 @@ public class Horoscope {
         // About
         String[] name = {"horoscope", "horoscop", "horoskop", "horoskope"};
         String description = "Zeigt dein Horoskop an. " + syntax;
+
+        // Constants
+        noBirthdaySet = "Dieser Nutzer hat kein Geburtsdatum.";
+        youHaveNoBirthdaySet = "Du hast kein Geburtsdatum angegeben.";
+        errorGettingBirthday = "Fehler beim Abrufen des Geburtsdatums.";
+        errorGettingHoroscope = "Fehler beim Abrufen des Horoskops.";
 
         // Load ProkeralaAPI Credentials
         JsonNode prokeralaConfig = credentials.getAPIConfig().get("astrology");
@@ -86,23 +98,23 @@ public class Horoscope {
                 // Check Target
                 if (birthdayList.containsKey(targetID)) birthdate = birthdayList.get(targetID);
                 else {
-                    if (hasTarget) botClient.respond(event, getCommand(), "Dieser Nutzer hat kein Geburtsdatum.");
+                    if (hasTarget) botClient.respond(event, getCommand(), noBirthdaySet);
                     else {
-                        botClient.respond(event, getCommand(), "Du hast kein Geburtsdatum angegeben.");
+                        botClient.respond(event, getCommand(), youHaveNoBirthdaySet);
                         return;
                     }
                 }
 
                 // Check Birthdate
                 if (birthdate == null) {
-                    botClient.respond(event, getCommand(), "Fehler beim Abrufen des Geburtsdatums.");
+                    botClient.respond(event, getCommand(), errorGettingBirthday);
                     return;
                 }
 
                 // Get Horoscope
                 String dailyPrediction = getDailyPrediction(birthdate);
                 if (dailyPrediction.isEmpty() || dailyPrediction.isBlank()) {
-                    botClient.respond(event, getCommand(), "Fehler beim Abrufen des Horoskops.");
+                    botClient.respond(event, getCommand(), errorGettingHoroscope);
                     return;
                 }
 

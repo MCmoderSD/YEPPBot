@@ -25,14 +25,12 @@ import de.MCmoderSD.utilities.server.Server;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.MCmoderSD.main.Main.Argument.*;
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-
-@SuppressWarnings({"unused", "FieldCanBeLocal"})
+@SuppressWarnings("unused")
 public class BotClient {
 
     public static final String PROVIDER = "twitch";
@@ -74,17 +72,21 @@ public class BotClient {
     private final OAuth2Credential defaultAuthToken;
     private final CredentialManager credentialManager;
 
-    // Client
+    // Client Modules
     private final TwitchClient client;
+    private final TwitchClientHelper helper;
     private final TwitchChat chat;
     private final TwitchHelix helix;
     private final EventManager eventManager;
-    private final TwitchClientHelper clientHelper;
 
     // Handler
     private final EventHandler eventHandler;
     private final HelixHandler helixHandler;
     private final MessageHandler messageHandler;
+
+    // Attributes
+    private boolean cli;
+    private boolean log;
 
     // Constructor
     public BotClient(Main main) {
@@ -116,12 +118,16 @@ public class BotClient {
         prefix = botConfig.get("prefix").asText();
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
+        // Init Attributes
+        cli = main.hasArg(CLI);
+        log = !main.hasArg(NOLOG);
+
         // Init HTTPS Server
         JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
-        if (!hasArg(DEV) && httpsServerConfig.get("hostname").asText().contains(".")) server = new Server(this, httpsServerConfig); // Default
+        if (!main.hasArg(DEV) && httpsServerConfig.get("hostname").asText().contains(".")) server = new Server(this, httpsServerConfig); // Default
         else { // Custom or Dev Mode
-            String hostname = hasArg(HOST) ? Main.arguments[0] : httpsServerConfig.get("hostname").asText();
-            int port = hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpsServerConfig.get("port").asInt();
+            String hostname = main.hasArg(HOST) ? Main.arguments[0] : httpsServerConfig.get("hostname").asText();
+            int port = main.hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpsServerConfig.get("port").asInt();
             server = new Server(this, hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
         }
 
@@ -140,9 +146,9 @@ public class BotClient {
 
         // Init Modules
         chat = client.getChat();
+        helper = client.getClientHelper();
         helix = client.getHelix();
         eventManager = client.getEventManager();
-        clientHelper = client.getClientHelper();
 
         // Init Helix Handler
         helixHandler = new HelixHandler(this, mySQL, server);
@@ -151,16 +157,26 @@ public class BotClient {
         audioBroadcast = new AudioBroadcast(server);
 
         // Join Channels
-        Set<String> channelList = new HashSet<>();
+        HashSet<String> channelList = new HashSet<>();
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
-        if (!hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
-        channelList = channelList.stream().map(String::toLowerCase).collect(Collectors.toSet());
+        if (!main.hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
+        channelList = (HashSet<String>) channelList.stream().map(String::toLowerCase).collect(Collectors.toSet());
         channelList.remove(botName);
         joinChannel(channelList);
 
         // Init Handlers
         messageHandler = new MessageHandler(this, mySQL);
         eventHandler = new EventHandler(this, frame, mySQL.getLogManager(), eventManager, messageHandler);
+
+        // Init Commands
+        initCommands(credentials);
+
+        // Show UI
+        setUI(!cli);
+    }
+
+    // Command Initialization
+    private void initCommands(Credentials credentials) {
 
         // Validate Configs
         boolean astrology = credentials.hasAstrology();
@@ -199,9 +215,11 @@ public class BotClient {
         if (openAIChat && weather) new Weather(this, messageHandler, main.getOpenAI(), credentials);
         new Whitelist(this, messageHandler, mySQL);
         if (openAIChat) new Wiki(this, messageHandler, main.getOpenAI());
+    }
 
-        // Show UI
-        if (hasArg(CLI)) return;
+    // UI
+    private void setUI(boolean visible) {
+        if (frame == null || !visible) return;
         frame.setVisible(true);
         frame.requestFocusInWindow();
     }
@@ -221,10 +239,10 @@ public class BotClient {
         if (message.isEmpty() || message.isBlank()) return;
 
         // Update Frame
-        if (!hasArg(CLI)) frame.log(USER, channel, botName, message);
+        if (!cli) frame.log(USER, channel, botName, message);
 
         // Log
-        mySQL.getLogManager().logResponse(channel, botName, message, helixHandler);
+        if (log) mySQL.getLogManager().logResponse(channel, botName, message, helixHandler);
         System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
@@ -238,10 +256,10 @@ public class BotClient {
         var channel = event.getChannel();
 
         // Update Frame
-        if (!(message.isEmpty() || message.isBlank()) && !hasArg(CLI)) frame.log(RESPONSE, channel, botName, message);
+        if (!(message.isEmpty() || message.isBlank()) && !cli) frame.log(RESPONSE, channel, botName, message);
 
         // Log
-        mySQL.getLogManager().logResponse(event, command, message);
+        if (log) mySQL.getLogManager().logResponse(event, command, message);
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
         if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
@@ -259,7 +277,7 @@ public class BotClient {
         audioBroadcast.play(event.getChannel(), audioFile);
 
         // Update Frame
-        if (!hasArg(CLI)) audioFile.play();
+        if (!cli) audioFile.play();
     }
 
     // Join Channel
@@ -283,16 +301,16 @@ public class BotClient {
         chat.joinChannel(channel);
 
         // Enable Additional Event Listeners
-        clientHelper.enableStreamEventListener(channel);
-        if (helixHandler.checkScope(id, HelixHandler.Scope.MODERATOR_READ_FOLLOWERS)) clientHelper.enableFollowEventListener(channel);    // moderator:read:followers
-        clientHelper.enableClipEventListener(channel);
+        helper.enableStreamEventListener(channel);
+        if (helixHandler.checkScope(id, HelixHandler.Scope.MODERATOR_READ_FOLLOWERS)) helper.enableFollowEventListener(channel);    // moderator:read:followers
+        helper.enableClipEventListener(channel);
 
         // Register Broadcast
         audioBroadcast.registerBroadcast(channel);
     }
 
     // Bulk Join
-    public void joinChannel(Set<String> channels) {
+    public void joinChannel(HashSet<String> channels) {
         new Thread(() -> {
             try {
                 for (String channel : channels) {
@@ -326,7 +344,7 @@ public class BotClient {
     }
 
     // Bulk Leave
-    public void leaveChannel(Set<String> channels) {
+    public void leaveChannel(HashSet<String> channels) {
         new Thread(() -> {
             try {
                 for (String channel : channels) {
@@ -339,28 +357,37 @@ public class BotClient {
         }).start();
     }
 
-    // Disconnect
+
+    // Controls
+    public void connectChat() {
+        chat.connect();
+    }
+
+    public void reconnectChat() {
+        chat.reconnect();
+    }
+
     public void disconnectChat() {
         chat.disconnect();
     }
 
-    // Close Chat
     public void closeChat() {
         chat.close();
     }
 
-    // Close
     public void close() {
         client.close();
     }
 
-    // Getter
-
-    // Checker
-    public boolean hasArg(Main.Argument arg) {
-        return main.hasArg(arg);
+    public void setCli(boolean cli) {
+        this.cli = cli;
     }
 
+    public void setLog(boolean log) {
+        this.log = log;
+    }
+
+    // Checker
     public boolean isAdmin(TwitchMessageEvent event) {
         return admins.contains(event.getUser());
     }
@@ -373,17 +400,17 @@ public class BotClient {
         return event.getChannelId() == event.getUserId();
     }
 
-    public boolean isEditor(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.CHANNEL_READ_EDITORS)) return false;
-        HashSet<Integer> ids = new HashSet<>();
-        helixHandler.getEditors(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
-        return ids.contains(event.getUserId());
-    }
-
     public boolean isModerator(TwitchMessageEvent event) {
         if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATION_READ)) return false;
         HashSet<Integer> ids = new HashSet<>();
         helixHandler.getModerators(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
+        return ids.contains(event.getUserId());
+    }
+
+    public boolean isEditor(TwitchMessageEvent event) {
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.CHANNEL_READ_EDITORS)) return false;
+        HashSet<Integer> ids = new HashSet<>();
+        helixHandler.getEditors(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
         return ids.contains(event.getUserId());
     }
 
@@ -395,17 +422,34 @@ public class BotClient {
     }
 
     public boolean isFollowing(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATOR_READ_FOLLOWERS, HelixHandler.Scope.USER_READ_FOLLOWS)) return false;
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATOR_READ_FOLLOWERS)) return false;
         HashSet<Integer> ids = new HashSet<>();
         helixHandler.getFollowers(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
         return ids.contains(event.getUserId());
     }
 
-    public boolean isInChannel(String channel) {
+    public boolean isInChat(String channel) {
         return chat.isChannelJoined(channel);
     }
 
-    // Attribute Getter
+    public boolean isLog() {
+        return log;
+    }
+
+    public boolean isCli() {
+        return cli;
+    }
+
+    // Getter
+    public HashSet<String> getChannels() {
+        return (HashSet<String>) chat.getChannels();
+    }
+
+    public long getLatency() {
+        return chat.getLatency();
+    }
+
+    // Constants Getter
     public String getProvider() {
         return PROVIDER;
     }
@@ -430,6 +474,7 @@ public class BotClient {
         return requiredScopes;
     }
 
+    // Credentials Getter
     public JsonNode getConfig() {
         return botConfig;
     }
@@ -463,6 +508,10 @@ public class BotClient {
         return client;
     }
 
+    public TwitchClientHelper getHelper() {
+        return helper;
+    }
+
     public TwitchChat getChat() {
         return chat;
     }
@@ -475,12 +524,38 @@ public class BotClient {
         return eventManager;
     }
 
+    // Handler Getter
+    public EventHandler getEventHandler() {
+        return eventHandler;
+    }
+
     public HelixHandler getHelixHandler() {
         return helixHandler;
     }
 
     public MessageHandler getMessageHandler() {
         return messageHandler;
+    }
+
+    // Association Getter
+    public Main getMain() {
+        return main;
+    }
+
+    public MySQL getMySQL() {
+        return mySQL;
+    }
+
+    public Frame getFrame() {
+        return frame;
+    }
+
+    public Server getServer() {
+        return server;
+    }
+
+    public AudioBroadcast getAudioBroadcast() {
+        return audioBroadcast;
     }
 
     // Utility Getter

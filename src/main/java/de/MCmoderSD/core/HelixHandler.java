@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.philippheuer.events4j.core.EventManager;
 import com.github.twitch4j.TwitchClient;
+import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 import com.github.twitch4j.helix.domain.User;
@@ -45,7 +46,7 @@ import de.MCmoderSD.utilities.server.Server;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
-@SuppressWarnings({"unused", "FieldCanBeLocal", "deprecation", "BooleanMethodIsAlwaysInverted"})
+@SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class HelixHandler {
 
     // Constants
@@ -63,6 +64,7 @@ public class HelixHandler {
 
     // Client
     private final TwitchClient client;
+    private final TwitchClientHelper helper;
     private final TwitchChat chat;
     private final TwitchHelix helix;
     private final EventManager eventManager;
@@ -87,6 +89,7 @@ public class HelixHandler {
 
         // Initialize Client
         client = botClient.getClient();
+        helper = botClient.getHelper();
         chat = botClient.getChat();
         helix = botClient.getHelix();
         eventManager = botClient.getEventManager();
@@ -98,7 +101,7 @@ public class HelixHandler {
         authTokens = tokenManager.getAuthTokens(encryption);
 
         // Init Server Context
-        server.getHttpServer().createContext("/callback", new CallbackHandler());
+        server.getHttpsServer().createContext("/callback", new CallbackHandler());
 
         // Update Loop
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -242,6 +245,7 @@ public class HelixHandler {
     }
 
     // Get bits leader board
+    @SuppressWarnings("deprecation")
     public BitsLeaderboard getBitsLeaderboard(Integer channelId) {
 
         // Get access token

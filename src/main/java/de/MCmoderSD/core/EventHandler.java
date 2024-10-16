@@ -21,7 +21,6 @@ import com.github.twitch4j.eventsub.events.ChannelVipAddEvent;
 import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
 
 import de.MCmoderSD.UI.Frame;
-import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.manager.LogManager;
@@ -47,8 +46,8 @@ public class EventHandler {
         this.messageHandler = messageHandler;
 
         // Get Config
-        cli = botClient.hasArg(Main.Argument.CLI);
-        log = !botClient.hasArg(Main.Argument.NOLOG);
+        cli = botClient.isCli();
+        log = !botClient.isCli();
 
         // Message Events
         eventManager.onEvent(ChannelMessageEvent.class, this::handleMessageEvent);                                              

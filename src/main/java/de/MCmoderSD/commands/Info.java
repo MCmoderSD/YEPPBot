@@ -14,6 +14,14 @@ import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
 
 public class Info {
 
+    // Constants
+    private final String thereAreNoEditors;
+    private final String thereAreNoMods;
+    private final String thereAreNoVIPs;
+    private final String listEditors;
+    private final String listMods;
+    private final String listVips;
+
     // Constructor
     public Info(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler) {
 
@@ -23,6 +31,14 @@ public class Info {
         // About
         String[] name = {"info", "information"};
         String description = "Zeigt dir infos über einen Channel. " + syntax;
+
+        // Constants
+        thereAreNoEditors = "Es gibt keine Editoren in diesem Channel.";
+        thereAreNoMods = "Es gibt keine Moderatoren in diesem Channel.";
+        thereAreNoVIPs = "Es gibt keine VIPs in diesem Channel.";
+        listEditors = "Editoren: ";
+        listMods = "Moderatoren: ";
+        listVips = "VIPs: ";
 
 
         // Register command
@@ -38,7 +54,7 @@ public class Info {
 
                 // Check syntax
                 if (args.isEmpty()) {
-                    botClient.respond(event, getCommand(), "Syntax: " + botClient.getPrefix() + "info <editor/mod/vip>");
+                    botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
@@ -51,11 +67,11 @@ public class Info {
 
                 switch (option) {
                     case "editor", "editors" -> {
-                        StringBuilder editors = new StringBuilder("Editoren: ");
+                        StringBuilder editors = new StringBuilder(listEditors);
                         HashSet<TwitchUser> editorList = helixHandler.getEditors(event.getChannelId());
 
                         if (editorList == null || editorList.isEmpty()) {
-                            botClient.respond(event, getCommand(), "Es gibt keine Editoren in diesem Channel.");
+                            botClient.respond(event, getCommand(), thereAreNoEditors);
                             return;
                         }
 
@@ -64,11 +80,11 @@ public class Info {
                         botClient.respond(event, getCommand(), editors.substring(0, editors.length() - 2));
                     }
                     case "mod", "mods", "moderator" -> {
-                        StringBuilder mods = new StringBuilder("Moderatoren: ");
+                        StringBuilder mods = new StringBuilder(listMods);
                         HashSet<TwitchUser> modList = helixHandler.getModerators(event.getChannelId());
 
                         if (modList == null || modList.isEmpty()) {
-                            botClient.respond(event, getCommand(), "Es gibt keine Moderatoren in diesem Channel.");
+                            botClient.respond(event, getCommand(), thereAreNoMods);
                             return;
                         }
 
@@ -77,11 +93,11 @@ public class Info {
                         botClient.respond(event, getCommand(), mods.substring(0, mods.length() - 2));
                     }
                     case "vip", "vips" -> {
-                        StringBuilder vips = new StringBuilder("VIPs: ");
+                        StringBuilder vips = new StringBuilder(listVips);
                         HashSet<TwitchUser> vipList = helixHandler.getVIPs(event.getChannelId());
 
                         if (vipList == null || vipList.isEmpty()) {
-                            botClient.respond(event, getCommand(), "Es gibt keine VIPs in diesem Channel.");
+                            botClient.respond(event, getCommand(), thereAreNoVIPs);
                             return;
                         }
 

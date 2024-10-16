@@ -35,7 +35,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - [x] Insult
   - [x] Joke
   - [x] Lurk (with timer)
-  - [ ] Match
+  - [x] Match
   - [x] Prompt (ChatGPT)
   - [x] Translate
   - [x] TTS (Text to Speech)

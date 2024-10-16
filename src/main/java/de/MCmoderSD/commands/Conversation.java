@@ -15,6 +15,9 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class Conversation {
 
+    // Constants
+    private final String conversationSuspened;
+
     // Constructor
     public Conversation(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
@@ -24,6 +27,9 @@ public class Conversation {
         // About
         String[] name = {"conversation", "chat", "unterhalten", "unterhaltung", "converse"}; // Command name and aliases
         String description = "Benutzt ChatGPT, um eine Unterhaltung zu beginnen. " + syntax;
+
+        // Constants
+        conversationSuspened = "Die Unterhaltung wurde beendet YEPP";
 
         // Get Chat Module and Config
         Chat chat = openAI.getChat();
@@ -48,7 +54,7 @@ public class Conversation {
                 // Check for end of conversation
                 if (!args.isEmpty() && Arrays.asList("stop", "end", "clear", "hs", "reset").contains(args.getFirst().toLowerCase())) {
                     chat.clearConversation(event.getUserId());
-                    botClient.respond(event, getCommand(), "Die Unterhaltung wurde beendet YEPP");
+                    botClient.respond(event, getCommand(), conversationSuspened);
                     return;
                 }
 

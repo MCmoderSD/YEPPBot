@@ -69,7 +69,7 @@ public class Server {
 
             // Get the keystore file
             InputStream keystore;
-            if (botClient.hasArg(Main.Argument.HTTPS_SERVER)) keystore = new FileInputStream(jksPath);
+            if (botClient.getMain().hasArg(Main.Argument.HTTPS_SERVER)) keystore = new FileInputStream(jksPath);
             else keystore = getClass().getResourceAsStream(jksPath);
 
             // Hash the bot token with SHA-256
@@ -189,7 +189,7 @@ public class Server {
     }
 
     // Getter
-    public HttpsServer getHttpServer() {
+    public HttpsServer getHttpsServer() {
         return server;
     }
 
