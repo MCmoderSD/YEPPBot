@@ -80,6 +80,7 @@ public class BotClient {
     public static HashSet<String> admins;
     public static HelixHandler.Scope[] requiredScopes = {
             HelixHandler.Scope.USER_READ_EMAIL,
+            HelixHandler.Scope.USER_READ_BLOCKED_USERS,
             HelixHandler.Scope.CHAT_READ,
             HelixHandler.Scope.BITS_READ,
             HelixHandler.Scope.CHANNEL_READ_EDITORS,
@@ -250,9 +251,6 @@ public class BotClient {
         frame.setVisible(true);
         frame.requestFocusInWindow();
     }
-
-
-    // Bot Controls
 
     // Credential
     public void addCredential(String accessToken) {
@@ -428,10 +426,7 @@ public class BotClient {
     }
 
     public boolean isModerator(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATION_READ)) return false;
-        HashSet<Integer> ids = new HashSet<>();
-        helixHandler.getModerators(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
-        return ids.contains(event.getUserId());
+        return helixHandler.isModerator(event.getChannelId(), event.getUserId());
     }
 
     public boolean isEditor(TwitchMessageEvent event) {
@@ -442,17 +437,11 @@ public class BotClient {
     }
 
     public boolean isVIP(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.CHANNEL_READ_VIPS)) return false;
-        HashSet<Integer> ids = new HashSet<>();
-        helixHandler.getVIPs(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
-        return ids.contains(event.getUserId());
+        return helixHandler.isVIP(event.getChannelId(), event.getUserId());
     }
 
     public boolean isFollowing(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATOR_READ_FOLLOWERS)) return false;
-        HashSet<Integer> ids = new HashSet<>();
-        helixHandler.getFollowers(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
-        return ids.contains(event.getUserId());
+        return helixHandler.isFollower(event.getChannelId(), event.getUserId());
     }
 
     public boolean isInChat(String channel) {

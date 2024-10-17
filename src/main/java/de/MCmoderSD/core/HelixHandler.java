@@ -9,7 +9,6 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 import com.github.twitch4j.helix.domain.User;
-import com.github.twitch4j.helix.domain.BitsLeaderboard;
 import com.github.twitch4j.helix.domain.ChannelEditor;
 import com.github.twitch4j.helix.domain.ChannelEditorList;
 import com.github.twitch4j.helix.domain.ChannelVip;
@@ -26,8 +25,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -220,23 +219,11 @@ public class HelixHandler {
         return authTokens.containsKey(channelId) && authTokens.get(channelId).hasScope(scopes);
     }
 
-    // Get user with name
-    public TwitchUser getUser(String username) {
-
-        // Get access token
-        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL);
-
-        // Get user ID
-        UserList userList = helix.getUsers(accessToken, null, Collections.singletonList(username)).execute();
-        if (userList.getUsers().isEmpty()) return null;
-        return new TwitchUser(userList.getUsers().getFirst());
-    }
-
     // Get user with ID
-    public TwitchUser getUser(int id) {
+    public TwitchUser getUser(Integer id) {
 
         // Get access token
-        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL);
+        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL, Scope.USER_READ_BLOCKED_USERS);
 
         // Get user ID
         UserList userList = helix.getUsers(accessToken, Collections.singletonList(String.valueOf(id)), null).execute();
@@ -244,15 +231,58 @@ public class HelixHandler {
         return new TwitchUser(userList.getUsers().getFirst());
     }
 
-    // Get bits leader board
-    @SuppressWarnings("deprecation")
-    public BitsLeaderboard getBitsLeaderboard(Integer channelId) {
+    // Get user with name
+    public TwitchUser getUser(String username) {
 
         // Get access token
-        String accessToken = getAccessToken(channelId, Scope.BITS_READ);
+        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL, Scope.USER_READ_BLOCKED_USERS);
 
-        // Get bits leaderboard
-        return helix.getBitsLeaderboard(accessToken, channelId.toString(), null, null, null).execute();
+        // Get user ID
+        UserList userList = helix.getUsers(accessToken, null, Collections.singletonList(username)).execute();
+        if (userList.getUsers().isEmpty()) return null;
+        return new TwitchUser(userList.getUsers().getFirst());
+    }
+
+    // Get user with ID and name
+    public TwitchUser getUser(Integer id, String username) {
+
+        // Get access token
+        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL, Scope.USER_READ_BLOCKED_USERS);
+
+        // Get user ID
+        UserList userList = helix.getUsers(accessToken, Collections.singletonList(String.valueOf(id)), Collections.singletonList(username)).execute();
+        if (userList.getUsers().isEmpty()) return null;
+        return new TwitchUser(userList.getUsers().getFirst());
+    }
+
+    // Get moderators
+    public HashSet<TwitchUser> getModerators(Integer channelId) {
+
+        // Get access token
+        String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
+
+        // Get moderators
+        ModeratorList moderatorList = helix.getModerators(accessToken, channelId.toString(), null, null, 100).execute();
+
+        // Variables
+        HashSet<TwitchUser> twitchUsers = new HashSet<>();
+
+        // Add moderators
+        for (Moderator moderator : moderatorList.getModerators()) twitchUsers.add(new TwitchUser(moderator));
+        return twitchUsers;
+    }
+
+    // Check if user is moderator
+    public boolean isModerator(Integer channelId, Integer userId) {
+
+        // Get access token
+        String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
+
+        // Get moderators
+        ModeratorList moderatorList = helix.getModerators(accessToken, channelId.toString(), Collections.singletonList(userId.toString()), null, 1).execute();
+
+        // Check if user is moderator
+        return !moderatorList.getModerators().isEmpty();
     }
 
     // Get editors
@@ -272,14 +302,44 @@ public class HelixHandler {
         return twitchUsers;
     }
 
+    // Get VIPs
+    public HashSet<TwitchUser> getVIPs(Integer channelId) {
+
+        // Get access token
+        String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
+
+        // Get VIPs
+        ChannelVipList vipList = helix.getChannelVips(accessToken, channelId.toString(), null, 100, null).execute();
+
+        // Variables
+        HashSet<TwitchUser> twitchUsers = new HashSet<>();
+
+        // Add VIPs
+        for (ChannelVip vip : vipList.getData()) twitchUsers.add(new TwitchUser(vip));
+        return twitchUsers;
+    }
+
+    // Check if user is VIP
+    public boolean isVIP(Integer channelId, Integer userId) {
+
+        // Get access token
+        String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
+
+        // Get moderators
+        ChannelVipList vipList = helix.getChannelVips(accessToken, channelId.toString(), Collections.singletonList(channelId.toString()), 1, null).execute();
+
+        // Check if user is moderator
+        return !vipList.getData().isEmpty();
+    }
+
     // Get followers
     public HashSet<TwitchUser> getFollowers(Integer channelId) {
 
         // Get access token
-        String accessToken = getAccessToken(channelId, Scope.USER_READ_FOLLOWS, Scope.MODERATOR_READ_FOLLOWERS);
+        String accessToken = getAccessToken(channelId, Scope.MODERATOR_READ_FOLLOWERS);
 
         // Get followers
-        InboundFollowers inboundFollowers = helix.getChannelFollowers(accessToken, channelId.toString(), null, null, null).execute();
+        InboundFollowers inboundFollowers = helix.getChannelFollowers(accessToken, channelId.toString(), null, 100, null).execute();
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
@@ -289,38 +349,17 @@ public class HelixHandler {
         return twitchUsers;
     }
 
-    // Get moderators
-    public HashSet<TwitchUser> getModerators(Integer channelId) {
+    // Check if user is follower
+    public boolean isFollower(Integer channelId, Integer userId) {
 
         // Get access token
-        String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
+        String accessToken = getAccessToken(channelId, Scope.MODERATOR_READ_FOLLOWERS);
 
-        // Get moderators
-        ModeratorList moderatorList = helix.getModerators(accessToken, channelId.toString(), null, null, null).execute();
+        // Get followers
+        InboundFollowers inboundFollowers = helix.getChannelFollowers(accessToken, channelId.toString(), userId.toString(), 1, null).execute();
 
-        // Variables
-        HashSet<TwitchUser> twitchUsers = new HashSet<>();
-
-        // Add moderators
-        for (Moderator moderator : moderatorList.getModerators()) twitchUsers.add(new TwitchUser(moderator));
-        return twitchUsers;
-    }
-
-    // Get VIPs
-    public HashSet<TwitchUser> getVIPs(Integer channelId) {
-
-        // Get access token
-        String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
-
-        // Get VIPs
-        ChannelVipList vipList = helix.getChannelVips(accessToken, channelId.toString(), null, null, null).execute();
-
-        // Variables
-        HashSet<TwitchUser> twitchUsers = new HashSet<>();
-
-        // Add VIPs
-        for (ChannelVip vip : vipList.getData()) twitchUsers.add(new TwitchUser(vip));
-        return twitchUsers;
+        // Check if user is follower
+        return !Objects.requireNonNull(inboundFollowers.getFollows()).isEmpty();
     }
 
     // Callback handler

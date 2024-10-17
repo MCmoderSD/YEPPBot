@@ -86,9 +86,16 @@ public class Match {
 
                 // Variables
                 HashMap<Integer, Birthdate> birthdayList = mySQL.getBirthdays();
+                if (birthdayList == null) {
+                    botClient.respond(event, getCommand(), noBirthdaySet);
+                    return;
+                }
                 String zodiacSign = birthdayList.get(event.getUserId()).getTranslatedZodiacSign();
                 String language = "german"; // Default: German
                 var amount = 5; // Default: 5
+
+                // Remove all non followers
+                birthdayList.keySet().removeIf(user -> !helixHandler.isFollower(event.getChannelId(), user));
 
                 // Check Zodiac Sign
                 if (zodiacSign == null || zodiacSign.isEmpty() || zodiacSign.isBlank()) {
@@ -122,19 +129,15 @@ public class Match {
                 HashSet<Integer> mostCompatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[0], event.getUserId());
                 HashSet<Integer> moreCompatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[1], event.getUserId());
                 HashSet<Integer> compatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[2], event.getUserId());
+                HashSet<Integer> combinedUsers = new HashSet<>();
 
                 // Add Compatible Signs
                 response.append(compatibleSigns[0]).append(", ").append(compatibleSigns[1]).append(String.format(" %s ", and)).append(compatibleSigns[2]).append(".");
 
                 // Trim Users
-                if (mostCompatibleUsers.size() > amount) mostCompatibleUsers = pickRandomUsers(mostCompatibleUsers, amount);
-                if (mostCompatibleUsers.size() < amount && moreCompatibleUsers.size() > amount) moreCompatibleUsers = pickRandomUsers(moreCompatibleUsers, amount - mostCompatibleUsers.size());
-                if (mostCompatibleUsers.size() + moreCompatibleUsers.size() < amount && compatibleUsers.size() > amount) compatibleUsers = pickRandomUsers(compatibleUsers, amount - mostCompatibleUsers.size() - moreCompatibleUsers.size());
-
-                // Combine Users
-                HashSet<Integer> combinedUsers = new HashSet<>(mostCompatibleUsers);
-                if (combinedUsers.size() < amount) combinedUsers.addAll(moreCompatibleUsers);
-                if (combinedUsers.size() < amount) combinedUsers.addAll(compatibleUsers);
+                if (mostCompatibleUsers.size() > amount) combinedUsers = pickRandomUsers(mostCompatibleUsers, amount);
+                if (combinedUsers.size() < amount && !moreCompatibleUsers.isEmpty()) combinedUsers.addAll(pickRandomUsers(moreCompatibleUsers, amount - combinedUsers.size()));
+                if (combinedUsers.size() < amount && !compatibleUsers.isEmpty()) pickRandomUsers(compatibleUsers, amount - combinedUsers.size());
 
                 // Check if there are any compatible Users
                 if (combinedUsers.isEmpty()) response = new StringBuilder(noCompatibleUsersFound);
@@ -180,12 +183,8 @@ public class Match {
     }
 
     private HashSet<Integer> pickRandomUsers(HashSet<Integer> compatibleUsers, int amount) {
-        HashSet<Integer> randomUsers = new HashSet<>();
-        for (var i = 0; i < amount; i++) {
-            var randomIndex = new Random().nextInt(compatibleUsers.size());
-            randomUsers.add((Integer) compatibleUsers.toArray()[randomIndex]);
-        }
-        return randomUsers;
+        while (compatibleUsers.size() > amount) compatibleUsers.remove(compatibleUsers.size() - 1);
+        return compatibleUsers;
     }
 
     @SuppressWarnings("SameParameterValue")

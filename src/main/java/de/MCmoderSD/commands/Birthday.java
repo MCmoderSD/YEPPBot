@@ -116,6 +116,9 @@ public class Birthday {
                 // Get Birthday List
                 birthdays = mySQL.getBirthdays();
 
+                // Remove all non followers
+                birthdays.keySet().removeIf(user -> !helixHandler.isFollower(event.getChannelId(), user));
+
                 // Check Verb
                 String verb = args.getFirst().toLowerCase();
 
