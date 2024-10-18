@@ -81,7 +81,7 @@ public class Info {
                     }
                     case "mod", "mods", "moderator" -> {
                         StringBuilder mods = new StringBuilder(String.format("%s ", listMods));
-                        HashSet<TwitchUser> modList = helixHandler.getModerators(event.getChannelId());
+                        HashSet<TwitchUser> modList = helixHandler.getModerators(event.getChannelId(), null);
 
                         if (modList == null || modList.isEmpty()) {
                             botClient.respond(event, getCommand(), thereAreNoMods);
@@ -94,7 +94,7 @@ public class Info {
                     }
                     case "vip", "vips" -> {
                         StringBuilder vips = new StringBuilder(String.format("%s ", listVips));
-                        HashSet<TwitchUser> vipList = helixHandler.getVIPs(event.getChannelId());
+                        HashSet<TwitchUser> vipList = helixHandler.getVIPs(event.getChannelId(), null);
 
                         if (vipList == null || vipList.isEmpty()) {
                             botClient.respond(event, getCommand(), thereAreNoVIPs);

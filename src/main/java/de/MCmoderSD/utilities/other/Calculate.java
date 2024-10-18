@@ -3,6 +3,7 @@ package de.MCmoderSD.utilities.other;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
+import de.MCmoderSD.objects.TwitchUser;
 
 import javax.swing.JFrame;
 import java.awt.Dimension;
@@ -13,13 +14,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Random;
-import java.util.HexFormat;
+import java.util.*;
 
 
+@SuppressWarnings({"BooleanMethodIsAlwaysInverted", "unused"})
 public class Calculate {
 
     // Constants
@@ -248,5 +246,25 @@ public class Calculate {
             System.err.println("SHA-256 algorithm not found");
             return null;
         }
+    }
+
+    public static boolean containsTwitchUser(HashSet<TwitchUser> list, TwitchUser user) {
+        for (TwitchUser u : list) if (u.equals(user)) return true;
+        return false;
+    }
+
+    public static boolean containsTwitchUsers(HashSet<TwitchUser> list, HashSet<TwitchUser> users) {
+        for (TwitchUser user : users) if (!containsTwitchUser(list, user)) return false;
+        return true;
+    }
+
+    public static boolean containsTwitchUser(HashSet<TwitchUser> list, int id) {
+        for (TwitchUser user : list) if (user.getId() == id) return true;
+        return false;
+    }
+
+    public static boolean containsTwitchUser(HashSet<TwitchUser> list, String name) {
+        for (TwitchUser user : list) if (user.getName().equalsIgnoreCase(name)) return true;
+        return false;
     }
 }

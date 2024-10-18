@@ -55,6 +55,13 @@ public class TwitchUser {
         this.name = follow.getUserName().toLowerCase();
     }
 
+    // Equals
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TwitchUser user) return user.getId() == id && user.getName().equals(name);
+        else return false;
+    }
+
     // Getter
     public int getId() {
         return id;

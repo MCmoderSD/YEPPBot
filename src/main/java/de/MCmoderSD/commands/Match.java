@@ -8,6 +8,7 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
+import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.openAI.OpenAI;
 import de.MCmoderSD.utilities.openAI.modules.Chat;
@@ -95,7 +96,10 @@ public class Match {
                 var amount = 5; // Default: 5
 
                 // Remove all non followers
-                birthdayList.keySet().removeIf(user -> !helixHandler.isFollower(event.getChannelId(), user));
+                HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
+                followers.add(new TwitchUser(event));                                       // Add User
+                followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
+                birthdayList.entrySet().removeIf(entry -> !containsTwitchUser(followers, entry.getKey()));
 
                 // Check Zodiac Sign
                 if (zodiacSign == null || zodiacSign.isEmpty() || zodiacSign.isBlank()) {
@@ -129,7 +133,7 @@ public class Match {
                 HashSet<Integer> mostCompatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[0], event.getUserId());
                 HashSet<Integer> moreCompatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[1], event.getUserId());
                 HashSet<Integer> compatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[2], event.getUserId());
-                HashSet<Integer> combinedUsers = new HashSet<>();
+                HashSet<Integer> combinedUsers = new HashSet<>(mostCompatibleUsers);
 
                 // Add Compatible Signs
                 response.append(compatibleSigns[0]).append(", ").append(compatibleSigns[1]).append(String.format(" %s ", and)).append(compatibleSigns[2]).append(".");
@@ -137,7 +141,7 @@ public class Match {
                 // Trim Users
                 if (mostCompatibleUsers.size() > amount) combinedUsers = pickRandomUsers(mostCompatibleUsers, amount);
                 if (combinedUsers.size() < amount && !moreCompatibleUsers.isEmpty()) combinedUsers.addAll(pickRandomUsers(moreCompatibleUsers, amount - combinedUsers.size()));
-                if (combinedUsers.size() < amount && !compatibleUsers.isEmpty()) pickRandomUsers(compatibleUsers, amount - combinedUsers.size());
+                if (combinedUsers.size() < amount && !compatibleUsers.isEmpty()) combinedUsers.addAll(pickRandomUsers(compatibleUsers, amount - combinedUsers.size()));
 
                 // Check if there are any compatible Users
                 if (combinedUsers.isEmpty()) response = new StringBuilder(noCompatibleUsersFound);
@@ -162,7 +166,7 @@ public class Match {
 
                 // Get Compatible Usernames
                 HashSet<String> compatibleUserNames = new HashSet<>();
-                compatibleUsers.forEach(id -> compatibleUserNames.add(helixHandler.getUser(id).getName()));
+                helixHandler.getUsersByID(compatibleUsers).forEach(user -> compatibleUserNames.add(user.getName()));
                 StringBuilder finalResponse = response;
                 finalResponse.append(" ");
                 compatibleUserNames.forEach(name -> finalResponse.append(name).append(", "));
@@ -183,8 +187,10 @@ public class Match {
     }
 
     private HashSet<Integer> pickRandomUsers(HashSet<Integer> compatibleUsers, int amount) {
-        while (compatibleUsers.size() > amount) compatibleUsers.remove(compatibleUsers.size() - 1);
-        return compatibleUsers;
+        HashSet<Integer> randomUsers = new HashSet<>();
+        if (compatibleUsers.size() <= amount) return compatibleUsers;
+        for (var i = 0; i < amount; i++ ) randomUsers.add(compatibleUsers.stream().toList().get(i));
+        return randomUsers;
     }
 
     @SuppressWarnings("SameParameterValue")

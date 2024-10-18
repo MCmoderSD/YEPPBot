@@ -31,14 +31,16 @@ public class Birthday {
     private final String youHaveNoBirthdaySet;
     private final String yourBirthdayIsOn;
     private final String nobodyHasBirthdayOn;
+    private final String noSavedBirthdays;
+    private final String theNextBirthday;
     private final String followingUsersHaveBirthdayOn;
-    private final String nobodyHasBirthdayThisMonth;
-    private final String followingUsersHaveBirthdayThisMonth;
     private final String userOn;
     private final String nobodyHasBirthdayToday;
     private final String followingUsersHaveBirthdayToday;
     private final String nobodyHasBirthdayThisWeek;
     private final String followingUsersHaveBirthdayThisWeek;
+    private final String nobodyHasBirthdayThisMonth;
+    private final String followingUsersHaveBirthdayThisMonth;
     private final String nobodyHasBirthdayThisYear;
     private final String followingUsersHaveBirthdayThisYear;
 
@@ -78,14 +80,16 @@ public class Birthday {
         youHaveNoBirthdaySet = "Du hast noch keinen Geburtstag gesetzt.";
         yourBirthdayIsOn = "Dein Geburtstag ist am %s. YEPP";
         nobodyHasBirthdayOn = "Niemand hat am %s Geburtstag.";
+        noSavedBirthdays = "Es gibt keine gespeicherten Geburtstage.";
+        theNextBirthday = "Der nächste Geburtstag ist von @%s am %s. YEPP";
         followingUsersHaveBirthdayOn = "Folgende User haben am %s Geburtstag: %s. YEPP";
-        nobodyHasBirthdayThisMonth = "Niemand hat in diesem Monat Geburtstag.";
-        followingUsersHaveBirthdayThisMonth = "Folgende User haben in diesem Monat Geburtstag:";
         userOn = "@%s am %s";
         nobodyHasBirthdayToday = "Niemand hat heute Geburtstag.";
         followingUsersHaveBirthdayToday = "Folgende User haben heute Geburtstag: %s. YEPP";
         nobodyHasBirthdayThisWeek = "Niemand hat diese Woche Geburtstag.";
         followingUsersHaveBirthdayThisWeek = "Folgende User haben diese Woche Geburtstag:";
+        nobodyHasBirthdayThisMonth = "Niemand hat in diesem Monat Geburtstag.";
+        followingUsersHaveBirthdayThisMonth = "Folgende User haben in diesem Monat Geburtstag:";
         nobodyHasBirthdayThisYear = "Niemand hat dieses Jahr Geburtstag.";
         followingUsersHaveBirthdayThisYear = "Folgende User haben dieses Jahr Geburtstag:";
 
@@ -117,7 +121,10 @@ public class Birthday {
                 birthdays = mySQL.getBirthdays();
 
                 // Remove all non followers
-                birthdays.keySet().removeIf(user -> !helixHandler.isFollower(event.getChannelId(), user));
+                HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
+                followers.add(new TwitchUser(event));                                       // Add User
+                followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
+                birthdays.entrySet().removeIf(entry -> !containsTwitchUser(followers, entry.getKey()));
 
                 // Check Verb
                 String verb = args.getFirst().toLowerCase();
@@ -206,7 +213,7 @@ public class Birthday {
         sortedBirthdays.sort(Comparator.comparingInt(Birthdate::getDaysUntilBirthday));
 
         // Check if empty
-        if (sortedBirthdays.isEmpty()) return "Es gibt keine gespeicherten Geburtstage.";
+        if (sortedBirthdays.isEmpty()) return noSavedBirthdays;
 
         // Get Next Birthday
         Birthdate nextBirthday = sortedBirthdays.get(next);
@@ -217,12 +224,12 @@ public class Birthday {
                 .orElseThrow(() -> new RuntimeException("User not found"))).getName();
 
         // Response
-        return String.format("Der nächste Geburtstag ist von @%s am %s. YEPP", nextBirthdayUser, nextBirthday.getDayAndMonth());
+        return String.format(theNextBirthday, nextBirthdayUser, nextBirthday.getDayAndMonth());
     }
 
     private String listBirthday(ArrayList<String> args) {
 
-        // Variablen
+        // Variables
         List<Birthdate> sortedBirthdays = new ArrayList<>(birthdays.values());
         int next = 10;
 
@@ -239,23 +246,41 @@ public class Birthday {
         sortedBirthdays.sort(Comparator.comparingInt(Birthdate::getDaysUntilBirthday));
 
         // Check if empty
-        if (sortedBirthdays.isEmpty()) return "Es gibt keine gespeicherten Geburtstage.";
+        if (sortedBirthdays.isEmpty()) return noSavedBirthdays;
 
-        // Get Next Birthdays
-        StringBuilder response = new StringBuilder("Die nächsten " + next + " Geburtstage sind: ");
-        for (int i = 0; i < Math.min(next, sortedBirthdays.size()); i++) {
+        // Collect user IDs
+        HashSet<Integer> userIds = new HashSet<>();
+        for (var i = 0; i < Math.min(next, sortedBirthdays.size()); i++) {
             Birthdate birthdate = sortedBirthdays.get(i);
-            String username = helixHandler.getUser(birthdays.entrySet().stream()
+            Integer userId = birthdays.entrySet().stream()
                     .filter(entry -> entry.getValue().equals(birthdate))
                     .findFirst()
                     .map(Map.Entry::getKey)
-                    .orElseThrow(() -> new RuntimeException("User not found"))).getName();
-            response.append(String.format("@%s am %s", username, birthdate.getDayAndMonth()));
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            userIds.add(userId);
+        }
+
+        // Fetch users by IDs
+        HashSet<TwitchUser> users = helixHandler.getUsersByID(userIds);
+
+        // Create a map for quick lookup
+        Map<Integer, TwitchUser> userMap = new HashMap<>();
+        for (TwitchUser user : users) userMap.put(user.getId(), user);
+
+        // Build the response
+        StringBuilder response = new StringBuilder();
+        for (var i = 0; i < Math.min(next, sortedBirthdays.size()); i++) {
+            Birthdate birthdate = sortedBirthdays.get(i);
+            Integer userId = birthdays.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(birthdate))
+                    .findFirst()
+                    .map(Map.Entry::getKey)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            String username = userMap.get(userId).getName();
+            response.append(String.format(userOn, username, birthdate.getDayAndMonth()));
             if (i < Math.min(next, sortedBirthdays.size()) - 1) response.append(", ");
         }
-        response.append(". YEPP");
 
-        // Response
         return response.toString();
     }
 
@@ -271,7 +296,7 @@ public class Birthday {
         var id = tagged ? helixHandler.getUser(taggedUser).getId() : event.getUserId();
 
         // Check Birthday
-        if (!birthdays.containsKey(id)) return "Dieser User hat noch keinen Geburtstag gesetzt.";
+        if (!birthdays.containsKey(id)) return noBirthdaySet;
 
         // Get Birthday
         Birthdate birthdate = birthdays.get(id);
@@ -306,7 +331,7 @@ public class Birthday {
 
                 // Check if found
                 HashSet<String> usernames = new HashSet<>();
-                for (int searchBirthday : searchBirthdays) usernames.add(helixHandler.getUser(searchBirthday).getName());
+                helixHandler.getUsersByID(searchBirthdays).forEach(user -> usernames.add(user.getName()));
 
                 // Response
                 if (usernames.isEmpty()) return String.format(nobodyHasBirthdayOn, searchBirthdate.getDayAndMonth());
@@ -384,7 +409,6 @@ public class Birthday {
     }
 
     private String getThis(String verb) {
-
         // Variables
         ArrayList<Map.Entry<Integer, Birthdate>> sortedBirthdays = new ArrayList<>(birthdays.entrySet());
         HashSet<String> usernames = new HashSet<>();
@@ -399,7 +423,10 @@ public class Birthday {
             switch (verb) {
                 case "today", "heute" -> {
                     Birthdate todayBirthdate = new Birthdate(String.format("%d.%d.%d", today.get(Calendar.DAY_OF_MONTH), (today.get(Calendar.MONTH) + 1), today.get(Calendar.YEAR)));
-                    for (int user : birthdays.keySet()) if (birthdays.get(user).getDayAndMonth().equals(todayBirthdate.getDayAndMonth())) usernames.add(helixHandler.getUser(user).getName());
+                    HashSet<Integer> ids = new HashSet<>();
+                    for (var user : birthdays.keySet()) if (birthdays.get(user).getDayAndMonth().equals(todayBirthdate.getDayAndMonth())) ids.add(user);
+                    HashSet<TwitchUser> users = helixHandler.getUsersByID(ids);
+                    users.forEach(user -> usernames.add(user.getName()));
                     if (usernames.isEmpty()) return nobodyHasBirthdayToday;
                     else return String.format(followingUsersHaveBirthdayToday, String.join(", ", usernames));
                 }
@@ -413,21 +440,17 @@ public class Birthday {
                         birthdateCalendar.set(Calendar.DAY_OF_MONTH, birthdate.getDay());
                         birthdateCalendar.set(Calendar.MONTH, birthdate.getMonth() - 1);
                         birthdateCalendar.set(Calendar.YEAR, currentYear);
-
                         if (birthdateCalendar.get(Calendar.WEEK_OF_YEAR) == currentWeek && birthdateCalendar.get(Calendar.DAY_OF_YEAR) >= currentDayOfYear) weekBirthdays.add(entry);
                     }
 
                     weekBirthdays.sort(Comparator.comparingInt(entry -> entry.getValue().getDay()));
                     if (weekBirthdays.isEmpty()) return nobodyHasBirthdayThisWeek;
                     else {
-                        StringBuilder response = new StringBuilder(String.format("%s ", followingUsersHaveBirthdayThisWeek));
-                        for (Map.Entry<Integer, Birthdate> entry : weekBirthdays) {
-                            String username = helixHandler.getUser(entry.getKey()).getName();
-                            response.append(String.format(userOn, username, entry.getValue().getDayAndMonth()));
-                            if (weekBirthdays.indexOf(entry) < weekBirthdays.size() - 1) response.append(", ");
-                        }
-                        response.append(". YEPP");
-                        return response.toString();
+                        HashSet<Integer> ids = new HashSet<>();
+                        for (var entry : weekBirthdays) ids.add(entry.getKey());
+                        HashSet<TwitchUser> users = helixHandler.getUsersByID(ids);
+                        users.forEach(user -> usernames.add(user.getName()));
+                        return String.format(followingUsersHaveBirthdayThisWeek, String.join(", ", usernames));
                     }
                 }
                 case "month", "monat" -> {
@@ -440,21 +463,17 @@ public class Birthday {
                         birthdateCalendar.set(Calendar.DAY_OF_MONTH, birthdate.getDay());
                         birthdateCalendar.set(Calendar.MONTH, birthdate.getMonth() - 1);
                         birthdateCalendar.set(Calendar.YEAR, currentYear);
-
                         if (birthdateCalendar.get(Calendar.MONTH) == currentMonth && birthdateCalendar.get(Calendar.DAY_OF_MONTH) >= currentDayOfMonth) monthBirthdays.add(entry);
                     }
 
                     monthBirthdays.sort(Comparator.comparingInt(entry -> entry.getValue().getDay()));
                     if (monthBirthdays.isEmpty()) return nobodyHasBirthdayThisMonth;
                     else {
-                        StringBuilder response = new StringBuilder(String.format("%s ", followingUsersHaveBirthdayThisMonth));
-                        for (Map.Entry<Integer, Birthdate> entry : monthBirthdays) {
-                            String username = helixHandler.getUser(entry.getKey()).getName();
-                            response.append(String.format(userOn, username, entry.getValue().getDayAndMonth()));
-                            if (monthBirthdays.indexOf(entry) < monthBirthdays.size() - 1) response.append(", ");
-                        }
-                        response.append(". YEPP");
-                        return response.toString();
+                        HashSet<Integer> ids = new HashSet<>();
+                        for (var entry : monthBirthdays) ids.add(entry.getKey());
+                        HashSet<TwitchUser> users = helixHandler.getUsersByID(ids);
+                        users.forEach(user -> usernames.add(user.getName()));
+                        return String.format(followingUsersHaveBirthdayThisMonth, String.join(", ", usernames));
                     }
                 }
                 case "year", "jahr" -> {
@@ -473,12 +492,13 @@ public class Birthday {
                     yearBirthdays.sort(Comparator.comparingInt(entry -> entry.getValue().getDaysUntilBirthday()));
                     if (yearBirthdays.isEmpty()) return nobodyHasBirthdayThisYear;
                     else {
+                        HashSet<Integer> ids = new HashSet<>();
+                        for (var entry : yearBirthdays) ids.add(entry.getKey());
+                        HashSet<TwitchUser> users = helixHandler.getUsersByID(ids);
+                        users.forEach(user -> usernames.add(user.getName()));
                         StringBuilder response = new StringBuilder(String.format("%s ", followingUsersHaveBirthdayThisYear));
-                        for (Map.Entry<Integer, Birthdate> entry : yearBirthdays) {
-                            String username = helixHandler.getUser(entry.getKey()).getName();
-                            response.append(String.format(userOn, username, entry.getValue().getDayAndMonth()));
-                            if (yearBirthdays.indexOf(entry) < yearBirthdays.size() - 1) response.append(", ");
-                        }
+                        for (var user : usernames) response.append(user).append(", ");
+                        response.setLength(response.length() - 2); // Remove trailing comma and space
                         response.append(". YEPP");
                         return response.toString();
                     }

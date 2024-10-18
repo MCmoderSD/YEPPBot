@@ -8,27 +8,14 @@ import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
-import com.github.twitch4j.helix.domain.User;
-import com.github.twitch4j.helix.domain.ChannelEditor;
-import com.github.twitch4j.helix.domain.ChannelEditorList;
-import com.github.twitch4j.helix.domain.ChannelVip;
-import com.github.twitch4j.helix.domain.ChannelVipList;
-import com.github.twitch4j.helix.domain.InboundFollow;
-import com.github.twitch4j.helix.domain.InboundFollowers;
-import com.github.twitch4j.helix.domain.Moderator;
-import com.github.twitch4j.helix.domain.ModeratorList;
-import com.github.twitch4j.helix.domain.UserList;
+import com.github.twitch4j.helix.domain.*;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +29,7 @@ import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
 import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.server.Server;
+import org.jetbrains.annotations.Nullable;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -73,6 +61,11 @@ public class HelixHandler {
 
     // Attributes
     private final HashMap<Integer, AuthToken> authTokens;
+
+    // Cache
+    private final HashMap<Integer, HashSet<TwitchUser>> moderators = new HashMap<>();
+    private final HashMap<Integer, HashSet<TwitchUser>> vips = new HashMap<>();
+    private final HashMap<Integer, HashSet<TwitchUser>> followers = new HashMap<>();
 
     // Constructor
     public HelixHandler(BotClient botClient, MySQL mySQL, Server server) {
@@ -126,6 +119,13 @@ public class HelixHandler {
         // Add tokens to refresh
         authTokens.forEach((id, token) -> {
             if (token.needsRefresh()) ids.add(id);
+        });
+
+        // Clean up cache
+        ids.forEach(id -> {
+            moderators.remove(id);
+            vips.remove(id);
+            followers.remove(id);
         });
 
         // Refresh tokens
@@ -243,6 +243,50 @@ public class HelixHandler {
         return new TwitchUser(userList.getUsers().getFirst());
     }
 
+    // Get user with ID
+    public HashSet<TwitchUser> getUsersByID(HashSet<Integer> ids) {
+
+        // Get access token
+        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL, Scope.USER_READ_BLOCKED_USERS);
+
+        // Convert to string
+        List<String> stringIds = new ArrayList<>();
+        ids.forEach(id -> stringIds.add(id.toString()));
+
+        // Get user ID
+        UserList userList = helix.getUsers(accessToken, stringIds, null).execute();
+        if (userList.getUsers().isEmpty()) return null;
+
+        // Variables
+        HashSet<TwitchUser> twitchUsers = new HashSet<>();
+
+        // Add users
+        for (User user : userList.getUsers()) twitchUsers.add(new TwitchUser(user));
+        return twitchUsers;
+    }
+
+    // Get user with ID
+    public HashSet<TwitchUser> getUsersByName(HashSet<String> names) {
+
+        // Get access token
+        String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL, Scope.USER_READ_BLOCKED_USERS);
+
+        // Convert to List
+        List<String> nameList = new ArrayList<>(names);
+        names.addAll(nameList);
+
+        // Variables
+        HashSet<TwitchUser> twitchUsers = new HashSet<>();
+
+        // Get user ID
+        UserList userList = helix.getUsers(accessToken, null, nameList).execute();
+        if (userList.getUsers().isEmpty()) return null;
+
+        // Add users
+        for (User user : userList.getUsers()) twitchUsers.add(new TwitchUser(user));
+        return twitchUsers;
+    }
+
     // Get user with ID and name
     public TwitchUser getUser(Integer id, String username) {
 
@@ -256,19 +300,35 @@ public class HelixHandler {
     }
 
     // Get moderators
-    public HashSet<TwitchUser> getModerators(Integer channelId) {
+    public HashSet<TwitchUser> getModerators(Integer channelId, @Nullable String cursor) {
 
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
 
         // Get moderators
-        ModeratorList moderatorList = helix.getModerators(accessToken, channelId.toString(), null, null, 100).execute();
+        ModeratorList moderatorList = helix.getModerators(accessToken, channelId.toString(), null, cursor, 100).execute();
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
 
         // Add moderators
         for (Moderator moderator : moderatorList.getModerators()) twitchUsers.add(new TwitchUser(moderator));
+
+
+        // Check if cache is up to date
+        boolean cacheUpToDate = cursor == null;
+        HashSet<TwitchUser> cache = moderators.get(channelId);
+        if (cacheUpToDate && cache != null && containsTwitchUsers(cache, twitchUsers)) return cache;
+
+        // Check if there are more moderators
+        HelixPagination pagination = moderatorList.getPagination();
+        String nextCursor = pagination != null ? pagination.getCursor() : null;
+        if (nextCursor != null) twitchUsers.addAll(getModerators(channelId, nextCursor));
+
+        // Update cache
+        moderators.replace(channelId, twitchUsers);
+
+        // Return moderators
         return twitchUsers;
     }
 
@@ -303,19 +363,35 @@ public class HelixHandler {
     }
 
     // Get VIPs
-    public HashSet<TwitchUser> getVIPs(Integer channelId) {
+    public HashSet<TwitchUser> getVIPs(Integer channelId, @Nullable String cursor) {
 
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
 
         // Get VIPs
-        ChannelVipList vipList = helix.getChannelVips(accessToken, channelId.toString(), null, 100, null).execute();
+        ChannelVipList vipList = helix.getChannelVips(accessToken, channelId.toString(), null, 100, cursor).execute();
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
 
         // Add VIPs
         for (ChannelVip vip : vipList.getData()) twitchUsers.add(new TwitchUser(vip));
+
+
+        // Check if cache is up to date
+        boolean cacheUpToDate = cursor == null;
+        HashSet<TwitchUser> cache = vips.get(channelId);
+        if (cacheUpToDate && cache != null && containsTwitchUsers(cache, twitchUsers)) return cache;
+
+        // Check if there are more VIPs
+        HelixPagination pagination = vipList.getPagination();
+        String nextCursor = pagination != null ? pagination.getCursor() : null;
+        if (nextCursor != null) twitchUsers.addAll(getVIPs(channelId, nextCursor));
+
+        // Update cache
+        vips.replace(channelId, twitchUsers);
+
+        // Return VIPs
         return twitchUsers;
     }
 
@@ -332,20 +408,36 @@ public class HelixHandler {
         return !vipList.getData().isEmpty();
     }
 
-    // Get followers
-    public HashSet<TwitchUser> getFollowers(Integer channelId) {
+
+    public HashSet<TwitchUser> getFollowers(Integer channelId, @Nullable String cursor) {
 
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.MODERATOR_READ_FOLLOWERS);
 
         // Get followers
-        InboundFollowers inboundFollowers = helix.getChannelFollowers(accessToken, channelId.toString(), null, 100, null).execute();
+        InboundFollowers inboundFollowers = helix.getChannelFollowers(accessToken, channelId.toString(), null, 100, cursor).execute();
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
 
         // Add followers
         for (InboundFollow follow : Objects.requireNonNull(inboundFollowers.getFollows())) twitchUsers.add(new TwitchUser(follow));
+
+        // Check if cache is up to date
+        boolean cacheUpToDate = cursor == null;
+        HashSet<TwitchUser> cache = followers.get(channelId);
+        if (cacheUpToDate && cache != null && containsTwitchUsers(cache, twitchUsers)) return cache;
+
+        // Check if there are more followers
+        HelixPagination pagination = inboundFollowers.getPagination();
+        String nextCursor = pagination != null ? pagination.getCursor() : null;
+        if (nextCursor != null) twitchUsers.addAll(getFollowers(channelId, inboundFollowers.getPagination().getCursor()));
+
+        // Update cache
+        followers.remove(channelId);
+        followers.put(channelId, twitchUsers);
+
+        // Return followers
         return twitchUsers;
     }
 
