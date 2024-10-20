@@ -61,6 +61,14 @@
         </dependency>
 
 
+        <!-- Encryption -->
+        <dependency>
+            <groupId>de.MCmoderSD</groupId>
+            <artifactId>encryption</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+
         <!-- Json -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
