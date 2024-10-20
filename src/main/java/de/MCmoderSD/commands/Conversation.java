@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.openAI.OpenAI;
-import de.MCmoderSD.utilities.openAI.modules.Chat;
+
+import de.MCmoderSD.OpenAI.OpenAI;
+import de.MCmoderSD.OpenAI.modules.Chat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +17,7 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Conversation {
 
     // Constants
-    private final String conversationSuspened;
+    private final String conversationSuspended;
 
     // Constructor
     public Conversation(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
@@ -29,7 +30,7 @@ public class Conversation {
         String description = "Benutzt ChatGPT, um eine Unterhaltung zu beginnen. " + syntax;
 
         // Constants
-        conversationSuspened = "Die Unterhaltung wurde beendet YEPP";
+        conversationSuspended = "Die Unterhaltung wurde beendet YEPP";
 
         // Get Chat Module and Config
         Chat chat = openAI.getChat();
@@ -54,7 +55,7 @@ public class Conversation {
                 // Check for end of conversation
                 if (!args.isEmpty() && Arrays.asList("stop", "end", "clear", "hs", "reset").contains(args.getFirst().toLowerCase())) {
                     chat.clearConversation(event.getUserId());
-                    botClient.respond(event, getCommand(), conversationSuspened);
+                    botClient.respond(event, getCommand(), conversationSuspended);
                     return;
                 }
 

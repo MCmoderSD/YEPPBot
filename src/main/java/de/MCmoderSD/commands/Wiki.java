@@ -6,8 +6,8 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.utilities.openAI.OpenAI;
-import de.MCmoderSD.utilities.openAI.modules.Chat;
+import de.MCmoderSD.OpenAI.OpenAI;
+import de.MCmoderSD.OpenAI.modules.Chat;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;

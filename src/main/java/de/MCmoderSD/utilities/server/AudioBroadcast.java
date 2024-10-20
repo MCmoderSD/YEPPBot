@@ -3,7 +3,8 @@ package de.MCmoderSD.utilities.server;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import de.MCmoderSD.objects.AudioFile;
+
+import de.MCmoderSD.jal.AudioFile;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -1,9 +1,11 @@
 package de.MCmoderSD.main;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import de.MCmoderSD.main.Main.Argument;
-import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
+
+import de.MCmoderSD.json.JsonUtility;
 
 import java.util.HashSet;
 

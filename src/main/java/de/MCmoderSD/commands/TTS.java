@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.openAI.OpenAI;
-import de.MCmoderSD.utilities.openAI.modules.Speech;
 import de.MCmoderSD.utilities.database.MySQL;
+
+import de.MCmoderSD.jal.AudioFile;
+
+import de.MCmoderSD.OpenAI.OpenAI;
+import de.MCmoderSD.OpenAI.modules.Speech;
 
 import java.util.ArrayList;
 

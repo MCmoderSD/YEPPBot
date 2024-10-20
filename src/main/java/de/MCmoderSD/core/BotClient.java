@@ -42,13 +42,14 @@ import de.MCmoderSD.commands.Wiki;
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
-import de.MCmoderSD.objects.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
 import de.MCmoderSD.utilities.server.AudioBroadcast;
 import de.MCmoderSD.utilities.server.Server;
+
+import de.MCmoderSD.jal.AudioFile;
+import de.MCmoderSD.json.JsonUtility;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -288,7 +289,7 @@ public class BotClient {
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
         if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
-        // Send Messag
+        // Send Message
         if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
     }
 

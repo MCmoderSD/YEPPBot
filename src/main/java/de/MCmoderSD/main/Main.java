@@ -2,10 +2,11 @@ package de.MCmoderSD.main;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.utilities.openAI.OpenAI;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.json.JsonUtility;
 import de.MCmoderSD.utilities.other.Reader;
+
+import de.MCmoderSD.json.JsonUtility;
+import de.MCmoderSD.OpenAI.OpenAI;
 
 import java.awt.HeadlessException;
 import java.io.InputStream;
