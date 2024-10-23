@@ -47,6 +47,14 @@
         </dependency>
 
 
+        <!-- ImageLoader -->
+        <dependency>
+            <groupId>de.MCmoderSD</groupId>
+            <artifactId>imageloader</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+
         <!-- MySQL -->
         <dependency>
             <groupId>mysql</groupId>

@@ -3,11 +3,13 @@ package de.MCmoderSD.UI;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.image.ImageReader;
+import de.MCmoderSD.imageloader.ImageLoader;
 
 import javax.swing.JFrame;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -36,8 +38,12 @@ public class Frame extends JFrame {
         this.main = main;
 
         // Icon
-        ImageReader imageReader = new ImageReader();
-        setIconImage(imageReader.read("/images/icon.png"));
+        ImageLoader imageLoader = new ImageLoader();
+        try {
+            setIconImage(imageLoader.load("/images/icon.png"));
+        } catch (IOException | URISyntaxException e) {
+            System.err.println("Error while loading icon: " + e.getMessage());
+        }
 
         // Variables
         var multiplier = 0.75;
