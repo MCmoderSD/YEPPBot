@@ -112,7 +112,16 @@ public class Calculate {
         ArrayList<String> cleaned = new ArrayList<>();
         for (String arg : args) {
             String clean = trimMessage(arg);
-            if (!(clean.isEmpty() || clean.isBlank())) cleaned.add(clean);
+
+            // Escape possible SQL injection characters
+            clean = clean.replaceAll("\"", "\\\"")
+                .replaceAll("\\", "\\\\")
+                .replaceAll(";", "\\;");
+                .replaceAll("'", "\\'");
+            
+            if (clean.isEmpty() || clean.isBlank()) continue;
+
+            cleaned.add(clean);
         }
         return cleaned;
     }
