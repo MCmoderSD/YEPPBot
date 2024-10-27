@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import de.MCmoderSD.jal.AudioFile;
+import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 
 import java.io.IOException;
 import java.io.OutputStream;

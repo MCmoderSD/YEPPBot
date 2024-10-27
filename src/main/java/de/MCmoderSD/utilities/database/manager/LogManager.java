@@ -5,7 +5,7 @@ import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
 import de.MCmoderSD.core.HelixHandler;
-import de.MCmoderSD.jal.AudioFile;
+import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.MySQL;
@@ -43,7 +43,7 @@ public class LogManager {
 
             // SQL statement for creating the message log table
             connection.prepareStatement(condition +
-                    """
+                """
                 MessageLog (
                 timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 type VARCHAR(5) NOT NULL,

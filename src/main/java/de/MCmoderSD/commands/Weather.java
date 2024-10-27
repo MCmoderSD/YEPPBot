@@ -88,6 +88,9 @@ public class Weather {
                 if (args.isEmpty()) response = syntax;
                 else response = trimMessage(generateFormattedResponse(args));
 
+                // Filter Response for argument injection
+                while (response.startsWith("!")) response = response.substring(1);
+
                 // Send Message
                 botClient.respond(event, getCommand(), response);
             }

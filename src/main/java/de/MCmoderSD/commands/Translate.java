@@ -67,6 +67,9 @@ public class Translate {
 
                     // Translate
                     response = chat.prompt(botClient.getBotName(), instruction, text, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
+
+                    // Filter Response for argument injection
+                    while (response.startsWith("!")) response = response.substring(1);
                 }
 
                 // Send Message

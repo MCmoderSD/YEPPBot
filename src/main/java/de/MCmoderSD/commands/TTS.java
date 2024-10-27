@@ -7,7 +7,7 @@ import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
-import de.MCmoderSD.jal.AudioFile;
+import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 
 import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Speech;

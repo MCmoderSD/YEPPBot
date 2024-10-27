@@ -48,7 +48,7 @@ import de.MCmoderSD.utilities.other.Reader;
 import de.MCmoderSD.utilities.server.AudioBroadcast;
 import de.MCmoderSD.utilities.server.Server;
 
-import de.MCmoderSD.jal.AudioFile;
+import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 import de.MCmoderSD.json.JsonUtility;
 
 import java.util.Arrays;
@@ -427,7 +427,8 @@ public class BotClient {
     }
 
     public boolean isModerator(TwitchMessageEvent event) {
-        return helixHandler.isModerator(event.getChannelId(), event.getUserId());
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATION_READ)) return false;
+        else return helixHandler.isModerator(event.getChannelId(), event.getUserId());
     }
 
     public boolean isEditor(TwitchMessageEvent event) {
@@ -438,10 +439,12 @@ public class BotClient {
     }
 
     public boolean isVIP(TwitchMessageEvent event) {
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.CHANNEL_READ_VIPS)) return false;
         return helixHandler.isVIP(event.getChannelId(), event.getUserId());
     }
 
     public boolean isFollowing(TwitchMessageEvent event) {
+        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATOR_READ_FOLLOWERS)) return false;
         return helixHandler.isFollower(event.getChannelId(), event.getUserId());
     }
 

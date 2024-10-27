@@ -1,6 +1,6 @@
 package de.MCmoderSD.utilities.database.manager;
 
-import de.MCmoderSD.jal.AudioFile;
+import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.other.Reader;
 
