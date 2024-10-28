@@ -7,11 +7,11 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
+import de.MCmoderSD.utilities.other.Calculate;
 
 import java.util.*;
 
@@ -68,7 +68,7 @@ public class Match {
                 args.addAll(cleanArgs);
 
                 // Variables
-                HashMap<Integer, Birthdate> birthdayList = mySQL.getBirthdays();
+                HashMap<Integer, Birthdate> birthdayList = Calculate.getBirthdayList(event, botClient);
                 if (birthdayList == null) {
                     botClient.respond(event, getCommand(), noBirthdaySet);
                     return;
@@ -76,12 +76,6 @@ public class Match {
                 Birthdate.ZodiacSign zodiacSign = birthdayList.get(event.getUserId()).getZodiacSign();
                 String language = "german"; // Default: German
                 var amount = 5; // Default: 5
-
-                // Remove all non followers
-                HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
-                followers.add(new TwitchUser(event));                                       // Add User
-                followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
-                birthdayList.entrySet().removeIf(entry -> !containsTwitchUser(followers, entry.getKey()));
 
                 // Check Args
                 if (!args.isEmpty()) {
@@ -115,10 +109,10 @@ public class Match {
                 response.append(compatibleSigns[0].getTranslatedName()).append(", ").append(compatibleSigns[1].getTranslatedName()).append(String.format(" %s ", and)).append(compatibleSigns[2].getTranslatedName()).append(".");
 
                 // Trim Users
-                if (mostCompatibleUsers.size() > amount) combinedUsers = pickRandomUsers(mostCompatibleUsers, amount);
+                if (mostCompatibleUsers.size() > amount) combinedUsers = stripRandomUser(mostCompatibleUsers, amount);
                 else {
-                    combinedUsers.addAll(pickRandomUsers(moreCompatibleUsers, amount - combinedUsers.size()));
-                    combinedUsers.addAll(pickRandomUsers(compatibleUsers, amount - combinedUsers.size()));
+                    combinedUsers.addAll(stripRandomUser(moreCompatibleUsers, amount - combinedUsers.size()));
+                    combinedUsers.addAll(stripRandomUser(compatibleUsers, amount - combinedUsers.size()));
                 }
 
                 // Check if no compatible users found
@@ -142,9 +136,12 @@ public class Match {
                 amount = Math.min(amount, remainingChars / 27);
                 while (combinedUsers.size() > amount) combinedUsers.remove((Integer) combinedUsers.toArray()[new Random().nextInt(combinedUsers.size())]);
 
+                System.out.println(combinedUsers);
+
                 // Get Compatible Usernames
                 HashSet<String> compatibleUserNames = new HashSet<>();
-                helixHandler.getUsersByID(compatibleUsers).forEach(user -> compatibleUserNames.add(user.getName()));
+                helixHandler.getUsersByID(combinedUsers).forEach(user -> compatibleUserNames.add(user.getName()));
+                System.out.println(compatibleUserNames);
                 StringBuilder finalResponse = response;
                 finalResponse.append(" ");
                 compatibleUserNames.forEach(name -> finalResponse.append(name).append(", "));
@@ -166,19 +163,14 @@ public class Match {
         return compatibleUsers;
     }
 
-    private HashSet<Integer> pickRandomUsers(HashSet<Integer> compatibleUsers, int amount) {
+    private HashSet<Integer> stripRandomUser(HashSet<Integer> compatibleUsers, int amount) {
 
-        // Variables
-        HashSet<Integer> pickedUsers = new HashSet<>();
-        Random random = new Random();
-        var usersToPick = Math.min(compatibleUsers.size(), amount);
-
-        // Pick Random Users
-        while (pickedUsers.size() < usersToPick) {
-            int randomUser = (int) compatibleUsers.toArray()[random.nextInt(compatibleUsers.size())];
-            pickedUsers.add(randomUser);
+        // Strip Random Users
+        while (compatibleUsers.size() > amount) {
+            var random = new Random().nextInt(compatibleUsers.size());
+            compatibleUsers.remove((Integer) compatibleUsers.toArray()[random]);
         }
 
-        return pickedUsers;
+        return compatibleUsers;
     }
 }

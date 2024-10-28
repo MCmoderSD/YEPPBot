@@ -234,6 +234,9 @@ public class HelixHandler {
     // Get user with name
     public TwitchUser getUser(String username) {
 
+        // Check Parameters
+        if (username == null || username.isEmpty()) throw new IllegalArgumentException("Username cannot be empty");
+
         // Get access token
         String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL, Scope.USER_READ_BLOCKED_USERS);
 
@@ -245,6 +248,9 @@ public class HelixHandler {
 
     // Get user with ID
     public HashSet<TwitchUser> getUsersByID(HashSet<Integer> ids) {
+
+        // Check Parameters
+        if (ids.isEmpty()) throw new IllegalArgumentException("IDs cannot be empty");
 
         // Get access token
         String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL, Scope.USER_READ_BLOCKED_USERS);
@@ -267,6 +273,9 @@ public class HelixHandler {
 
     // Get user with ID
     public HashSet<TwitchUser> getUsersByName(HashSet<String> names) {
+
+        // Check Parameters
+        if (names.isEmpty()) throw new IllegalArgumentException("Names cannot be empty");
 
         // Get access token
         String accessToken = getAccessToken(botClient.getBotId(), Scope.USER_READ_EMAIL, Scope.USER_READ_BLOCKED_USERS);

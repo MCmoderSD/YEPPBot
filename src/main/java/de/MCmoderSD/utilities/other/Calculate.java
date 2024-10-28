@@ -1,9 +1,12 @@
 package de.MCmoderSD.utilities.other;
 
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.core.HelixHandler;
+import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
+import de.MCmoderSD.utilities.database.MySQL;
 
 import javax.swing.JFrame;
 import java.awt.Dimension;
@@ -262,5 +265,22 @@ public class Calculate {
     public static boolean containsTwitchUser(HashSet<TwitchUser> list, String name) {
         for (TwitchUser user : list) if (user.getName().equalsIgnoreCase(name)) return true;
         return false;
+    }
+
+    public static HashMap<Integer, Birthdate> getBirthdayList(TwitchMessageEvent event, BotClient botClient) {
+
+        // Get Birthdays
+        HashMap<Integer, Birthdate> birthdays = botClient.getMySQL().getBirthdays();
+
+        // Return if dev mode
+        if (botClient.getMain().hasArg(Main.Argument.DEV)) return birthdays;
+
+        // Remove all non followers
+        HashSet<TwitchUser> followers = new HashSet<>(botClient.getHelixHandler().getFollowers(event.getChannelId(), null));
+        followers.add(new TwitchUser(event));                                       // Add User
+        followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
+        birthdays.entrySet().removeIf(entry -> !containsTwitchUser(followers, entry.getKey()));
+
+        return birthdays;
     }
 }

@@ -308,12 +308,12 @@ public class Birthday {
             case "years", "jahre" -> String.format("Es sind %f Jahr%s bis zu %s Geburtstag.", birthdate.getYearsUntilBirthday(), birthdate.getYearsUntilBirthday() > 1 ? "e" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
             case "months", "monate" -> String.format("Es sind %f Monat%s bis zu %s Geburtstag.", birthdate.getMonthsUntilBirthday(), birthdate.getMonthsUntilBirthday() > 1 ? "e" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
             case "weeks", "wochen" -> String.format("Es sind %f Woche%s bis zu %s Geburtstag.", birthdate.getWeeksUntilBirthday(), birthdate.getWeeksUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "hours", "stunden", "h" -> String.format("Es sind %d Stunde%s bis zu %s Geburtstag.", birthdate.getHoursUntilBirthday(), birthdate.getHoursUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "days", "tage", "d" -> String.format("Es sind %s Tag%s bis zu %s Geburtstag.", birthdate.getDaysUntilBirthday(), birthdate.getDaysUntilBirthday() > 1 ? "e" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "seconds", "sekunden", "s" -> String.format("Es sind %d Sekunde%s bis zu %s Geburtstag.", birthdate.getSecondsUntilBirthday(), birthdate.getSecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "milliseconds", "millisekunden", "ms" -> String.format("Es sind %d Millisekunde%s bis zu %s Geburtstag.", birthdate.getMillisecondsUntilBirthday(), birthdate.getMillisecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "microseconds", "mikrosekunden", "µs" -> String.format("Es sind %d Mikrosekunde%s bis zu %s Geburtstag.", birthdate.getMicrosecondsUntilBirthday(), birthdate.getMicrosecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "nanoseconds", "nanosekunden", "ns" -> String.format("Es sind %d Nanosekunde%s bis zu %s Geburtstag.", birthdate.getNanosecondsUntilBirthday(), birthdate.getNanosecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "hours", "stunden", "h" -> String.format("Es sind %deploy-main.yaml Stunde%s bis zu %s Geburtstag.", birthdate.getHoursUntilBirthday(), birthdate.getHoursUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "days", "tage", "deploy-main.yaml" -> String.format("Es sind %s Tag%s bis zu %s Geburtstag.", birthdate.getDaysUntilBirthday(), birthdate.getDaysUntilBirthday() > 1 ? "e" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "seconds", "sekunden", "s" -> String.format("Es sind %deploy-main.yaml Sekunde%s bis zu %s Geburtstag.", birthdate.getSecondsUntilBirthday(), birthdate.getSecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "milliseconds", "millisekunden", "ms" -> String.format("Es sind %deploy-main.yaml Millisekunde%s bis zu %s Geburtstag.", birthdate.getMillisecondsUntilBirthday(), birthdate.getMillisecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "microseconds", "mikrosekunden", "µs" -> String.format("Es sind %deploy-main.yaml Mikrosekunde%s bis zu %s Geburtstag.", birthdate.getMicrosecondsUntilBirthday(), birthdate.getMicrosecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "nanoseconds", "nanosekunden", "ns" -> String.format("Es sind %deploy-main.yaml Nanosekunde%s bis zu %s Geburtstag.", birthdate.getNanosecondsUntilBirthday(), birthdate.getNanosecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
             default -> "Invalid Argument: " + inSyntax;
         };
     }
@@ -428,7 +428,7 @@ public class Birthday {
         try {
             switch (verb) {
                 case "today", "heute" -> {
-                    Birthdate todayBirthdate = new Birthdate(String.format("%d.%d.%d", today.get(Calendar.DAY_OF_MONTH), (today.get(Calendar.MONTH) + 1), today.get(Calendar.YEAR)));
+                    Birthdate todayBirthdate = new Birthdate(String.format("%deploy-main.yaml.%deploy-main.yaml.%deploy-main.yaml", today.get(Calendar.DAY_OF_MONTH), (today.get(Calendar.MONTH) + 1), today.get(Calendar.YEAR)));
                     HashSet<Integer> ids = new HashSet<>();
                     for (var user : birthdays.keySet()) if (birthdays.get(user).getDayMonth().equals(todayBirthdate.getDayMonth())) ids.add(user);
                     HashSet<TwitchUser> users = helixHandler.getUsersByID(ids);
