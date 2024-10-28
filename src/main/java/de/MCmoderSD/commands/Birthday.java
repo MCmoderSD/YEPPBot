@@ -9,13 +9,8 @@ import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import javax.management.InvalidAttributeValueException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Calendar;
-import java.util.Comparator;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.MCmoderSD.objects.Birthdate.TIME_ZONE;
 import static de.MCmoderSD.utilities.other.Calculate.*;
@@ -23,18 +18,21 @@ import static de.MCmoderSD.utilities.other.Calculate.*;
 public class Birthday {
 
     // Constants
-    private final String noBirthdaySet;
+    private final String youHaveNoBirthdaySet;
+    private final String yourBirthdayIsOn;
+    private final String userHasNoBirthdaySet;
     private final String userHasBirthdayOn;
+
     private final String invalidDate;
     private final String ageRestriction;
     private final String birthWasSetOn;
-    private final String youHaveNoBirthdaySet;
-    private final String yourBirthdayIsOn;
+
     private final String nobodyHasBirthdayOn;
     private final String noSavedBirthdays;
     private final String theNextBirthday;
-    private final String followingUsersHaveBirthdayOn;
     private final String userOn;
+
+    private final String followingUsersHaveBirthdayOn;
     private final String nobodyHasBirthdayToday;
     private final String followingUsersHaveBirthdayToday;
     private final String nobodyHasBirthdayThisWeek;
@@ -56,7 +54,7 @@ public class Birthday {
     private final String inSyntax;
 
     // Variables
-    private HashMap<Integer, Birthdate> birthdays;
+    private LinkedHashMap<Integer, Birthdate> birthdays;
 
     // Constructor
     public Birthday(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler) {
@@ -72,11 +70,14 @@ public class Birthday {
         String description = "Setzt deinen Geburtstag. " + syntax;
 
         // Constants
-        noBirthdaySet = "User hat noch keinen Geburtstag gesetzt.";
+        userHasNoBirthdaySet = "User hat noch keinen Geburtstag gesetzt.";
         userHasBirthdayOn = "@%s hat am %s Geburtstag! YEPP";
+
         invalidDate = "Invalid Date: %s.%s.%s";
         ageRestriction = "Du musst mindestens 13 Jahre alt sein.";
-        birthWasSetOn = "Dein Geburtstag wurde auf den %s.%s.%s gesetzt.";
+
+        birthWasSetOn = "Dein Geburtstag wurde auf den %s gesetzt.";
+
         youHaveNoBirthdaySet = "Du hast noch keinen Geburtstag gesetzt.";
         yourBirthdayIsOn = "Dein Geburtstag ist am %s. YEPP";
         nobodyHasBirthdayOn = "Niemand hat am %s Geburtstag.";
@@ -117,24 +118,36 @@ public class Birthday {
                     return;
                 }
 
-                // Get Birthday List
-                birthdays = mySQL.getBirthdays();
+
+                // Get Birthdays
+                HashMap<Integer, Birthdate> mySQLBirthdays = mySQL.getBirthdays();
 
                 // Remove all non followers
                 HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
                 followers.add(new TwitchUser(event));                                       // Add User
                 followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
-                birthdays.entrySet().removeIf(entry -> !containsTwitchUser(followers, entry.getKey()));
+                mySQLBirthdays.entrySet().removeIf(entry -> !containsTwitchUser(followers, entry.getKey()));
+
+                birthdays = mySQLBirthdays.entrySet()
+                        .stream()
+                        .sorted(Map.Entry.comparingByValue(Comparator.comparing(b -> b.getTimeUntilBirthday().getDays())))
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (e1, e2) -> e1,
+                                LinkedHashMap::new
+                        ));
 
                 // Check Verb
                 String verb = args.getFirst().toLowerCase();
 
+                // Check for Tagged User
                 if (verb.startsWith("@")) {
 
                     // Check if tagged user
                     String response;
                     TwitchUser taggedUser = helixHandler.getUser(args.getFirst().substring(1).toLowerCase());
-                    if (!birthdays.containsKey(taggedUser.getId())) response = noBirthdaySet;
+                    if (!birthdays.containsKey(taggedUser.getId())) response = userHasNoBirthdaySet;
                     else response = String.format(userHasBirthdayOn, taggedUser.getName(), birthdays.get(taggedUser.getId()).getDate());
 
                     // Response
@@ -184,21 +197,20 @@ public class Birthday {
         }
 
         // Check Age (13+)
-        if (!checkAge(13, birthdate)) return ageRestriction;
+        if (birthdate.getAge() < 13) return ageRestriction;
 
         // Set Birthday
         mySQL.setBirthday(event, birthdate);
         botClient.getMessageHandler().updateBirthdateList(mySQL.getBirthdays());
 
         // Response
-        return String.format(birthWasSetOn, date[0], date[1], date[2]);
+        return String.format(birthWasSetOn, birthdate.getDate());
     }
 
     private String nextBirthday(ArrayList<String> args) {
 
         // Variablen
-        ArrayList<Birthdate> sortedBirthdays = new ArrayList<>(birthdays.values());
-        int next = 0;
+        var next = 0;
 
         // Check Argument
         if (args.size() > 1) {
@@ -209,14 +221,11 @@ public class Birthday {
             }
         }
 
-        // Sort
-        sortedBirthdays.sort(Comparator.comparingInt(Birthdate::getDaysUntilBirthday));
-
         // Check if empty
-        if (sortedBirthdays.isEmpty()) return noSavedBirthdays;
+        if (birthdays.isEmpty()) return noSavedBirthdays;
 
         // Get Next Birthday
-        Birthdate nextBirthday = sortedBirthdays.get(next);
+        Birthdate nextBirthday = birthdays.get(next);
         String nextBirthdayUser = helixHandler.getUser(birthdays.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(nextBirthday))
                 .findFirst()
@@ -224,14 +233,13 @@ public class Birthday {
                 .orElseThrow(() -> new RuntimeException("User not found"))).getName();
 
         // Response
-        return String.format(theNextBirthday, nextBirthdayUser, nextBirthday.getDayAndMonth());
+        return String.format(theNextBirthday, nextBirthdayUser, nextBirthday.getDayMonth());
     }
 
     private String listBirthday(ArrayList<String> args) {
 
         // Variables
-        List<Birthdate> sortedBirthdays = new ArrayList<>(birthdays.values());
-        int next = 10;
+        var next = 10;
 
         // Check Argument
         if (args.size() > 1) {
@@ -242,16 +250,13 @@ public class Birthday {
             }
         }
 
-        // Sort
-        sortedBirthdays.sort(Comparator.comparingInt(Birthdate::getDaysUntilBirthday));
-
         // Check if empty
-        if (sortedBirthdays.isEmpty()) return noSavedBirthdays;
+        if (birthdays.isEmpty()) return noSavedBirthdays;
 
         // Collect user IDs
         HashSet<Integer> userIds = new HashSet<>();
-        for (var i = 0; i < Math.min(next, sortedBirthdays.size()); i++) {
-            Birthdate birthdate = sortedBirthdays.get(i);
+        for (var i = 0; i < Math.min(next, birthdays.size()); i++) {
+            Birthdate birthdate = birthdays.get(i);
             Integer userId = birthdays.entrySet().stream()
                     .filter(entry -> entry.getValue().equals(birthdate))
                     .findFirst()
@@ -269,18 +274,17 @@ public class Birthday {
 
         // Build the response
         StringBuilder response = new StringBuilder();
-        for (var i = 0; i < Math.min(next, sortedBirthdays.size()); i++) {
-            Birthdate birthdate = sortedBirthdays.get(i);
+        for (var i = 0; i < Math.min(next, birthdays.size()); i++) {
+            Birthdate birthdate = birthdays.get(i);
             Integer userId = birthdays.entrySet().stream()
                     .filter(entry -> entry.getValue().equals(birthdate))
                     .findFirst()
                     .map(Map.Entry::getKey)
                     .orElseThrow(() -> new RuntimeException("User not found"));
             String username = userMap.get(userId).getName();
-            response.append(String.format(userOn, username, birthdate.getDayAndMonth()));
-            if (i < Math.min(next, sortedBirthdays.size()) - 1) response.append(", ");
+            response.append(String.format(userOn, username, birthdate.getDayMonth()));
+            if (i < Math.min(next, birthdays.size()) - 1) response.append(", ");
         }
-
         return response.toString();
     }
 
@@ -296,7 +300,7 @@ public class Birthday {
         var id = tagged ? helixHandler.getUser(taggedUser).getId() : event.getUserId();
 
         // Check Birthday
-        if (!birthdays.containsKey(id)) return noBirthdaySet;
+        if (!birthdays.containsKey(id)) return tagged ? userHasNoBirthdaySet : youHaveNoBirthdaySet;
 
         // Get Birthday
         Birthdate birthdate = birthdays.get(id);
@@ -308,6 +312,8 @@ public class Birthday {
             case "days", "tage", "d" -> String.format("Es sind %s Tag%s bis zu %s Geburtstag.", birthdate.getDaysUntilBirthday(), birthdate.getDaysUntilBirthday() > 1 ? "e" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
             case "seconds", "sekunden", "s" -> String.format("Es sind %d Sekunde%s bis zu %s Geburtstag.", birthdate.getSecondsUntilBirthday(), birthdate.getSecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
             case "milliseconds", "millisekunden", "ms" -> String.format("Es sind %d Millisekunde%s bis zu %s Geburtstag.", birthdate.getMillisecondsUntilBirthday(), birthdate.getMillisecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "microseconds", "mikrosekunden", "µs" -> String.format("Es sind %d Mikrosekunde%s bis zu %s Geburtstag.", birthdate.getMicrosecondsUntilBirthday(), birthdate.getMicrosecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "nanoseconds", "nanosekunden", "ns" -> String.format("Es sind %d Nanosekunde%s bis zu %s Geburtstag.", birthdate.getNanosecondsUntilBirthday(), birthdate.getNanosecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
             default -> "Invalid Argument: " + inSyntax;
         };
     }
@@ -327,15 +333,15 @@ public class Birthday {
                 String[] searchDateParts = args.get(1).split("\\.");
                 Birthdate searchBirthdate = new Birthdate(String.format("%s.%s.%s", searchDateParts[0], searchDateParts[1], searchDateParts.length == 3 ? searchDateParts[2] : "1990"));
                 HashSet<Integer> searchBirthdays = new HashSet<>();
-                for (Integer user: birthdays.keySet()) if (birthdays.get(user).getDayAndMonth().equals(searchBirthdate.getDayAndMonth())) searchBirthdays.add(user);
+                for (Integer user: birthdays.keySet()) if (birthdays.get(user).getDayMonth().equals(searchBirthdate.getDayMonth())) searchBirthdays.add(user);
 
                 // Check if found
                 HashSet<String> usernames = new HashSet<>();
                 helixHandler.getUsersByID(searchBirthdays).forEach(user -> usernames.add(user.getName()));
 
                 // Response
-                if (usernames.isEmpty()) return String.format(nobodyHasBirthdayOn, searchBirthdate.getDayAndMonth());
-                else return String.format(followingUsersHaveBirthdayOn, searchBirthdate.getDayAndMonth(), String.join(", ", usernames));
+                if (usernames.isEmpty()) return String.format(nobodyHasBirthdayOn, searchBirthdate.getDayMonth());
+                else return String.format(followingUsersHaveBirthdayOn, searchBirthdate.getDayMonth(), String.join(", ", usernames));
             } catch (InvalidAttributeValueException e) {
                     throw new RuntimeException(e);
             }
@@ -344,7 +350,7 @@ public class Birthday {
         // Check for Tagged User
         if (args.size() > 1 && args.get(1).startsWith("@")) {
             TwitchUser taggedUser = helixHandler.getUser(args.get(1).substring(1).toLowerCase());
-            if (!birthdays.containsKey(taggedUser.getId())) return noBirthdaySet;
+            if (!birthdays.containsKey(taggedUser.getId())) return userHasNoBirthdaySet;
             else return String.format(userHasBirthdayOn, taggedUser.getName(), birthdays.get(taggedUser.getId()).getDate());
         }
 
@@ -400,7 +406,7 @@ public class Birthday {
         StringBuilder response = new StringBuilder(String.format("%s ", followingUsersHaveBirthdayThisMonth));
         for (Map.Entry<Integer, Birthdate> entry : monthBirthdays) {
             String username = helixHandler.getUser(entry.getKey()).getName();
-            response.append(String.format(userOn, username, entry.getValue().getDayAndMonth()));
+            response.append(String.format(userOn, username, entry.getValue().getDayMonth()));
             if (monthBirthdays.indexOf(entry) < monthBirthdays.size() - 1) response.append(", ");
         }
         response.append(". YEPP");
@@ -424,7 +430,7 @@ public class Birthday {
                 case "today", "heute" -> {
                     Birthdate todayBirthdate = new Birthdate(String.format("%d.%d.%d", today.get(Calendar.DAY_OF_MONTH), (today.get(Calendar.MONTH) + 1), today.get(Calendar.YEAR)));
                     HashSet<Integer> ids = new HashSet<>();
-                    for (var user : birthdays.keySet()) if (birthdays.get(user).getDayAndMonth().equals(todayBirthdate.getDayAndMonth())) ids.add(user);
+                    for (var user : birthdays.keySet()) if (birthdays.get(user).getDayMonth().equals(todayBirthdate.getDayMonth())) ids.add(user);
                     HashSet<TwitchUser> users = helixHandler.getUsersByID(ids);
                     users.forEach(user -> usernames.add(user.getName()));
                     if (usernames.isEmpty()) return nobodyHasBirthdayToday;
@@ -489,7 +495,7 @@ public class Birthday {
                         if (birthdateCalendar.get(Calendar.DAY_OF_YEAR) >= currentDayOfYear) yearBirthdays.add(entry);
                     }
 
-                    yearBirthdays.sort(Comparator.comparingInt(entry -> entry.getValue().getDaysUntilBirthday()));
+                    yearBirthdays.sort(Comparator.comparingInt(entry -> entry.getValue().getDay()));
                     if (yearBirthdays.isEmpty()) return nobodyHasBirthdayThisYear;
                     else {
                         HashSet<Integer> ids = new HashSet<>();

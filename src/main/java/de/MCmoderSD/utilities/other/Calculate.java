@@ -232,10 +232,6 @@ public class Calculate {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(getTimestamp()) + "]";
     }
 
-    public static boolean checkAge(int minAge, Birthdate birthdate) {
-        return (Calendar.getInstance(birthdate.getTimeZone()).get(Calendar.YEAR) - birthdate.getYear()) >= minAge;
-    }
-
     // Calculate Tokens
     public static String getSHA256(byte[] data) {
         try {

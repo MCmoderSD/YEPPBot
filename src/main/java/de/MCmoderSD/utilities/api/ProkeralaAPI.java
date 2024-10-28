@@ -100,9 +100,9 @@ public class ProkeralaAPI {
 
         // Get the daily prediction
         String url = "https://api.prokerala.com/v2/horoscope/daily";
-        String sign = birthdate.getZodiacSign();
+        Birthdate.ZodiacSign sign = birthdate.getZodiacSign();
         String currentDatetime = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC));
-        String fullUrl = url + "?sign=" + sign + "&datetime=" + currentDatetime;
+        String fullUrl = url + "?sign=" + sign.getName() + "&datetime=" + currentDatetime;
 
         try {
 
@@ -146,9 +146,9 @@ public class ProkeralaAPI {
         // Get the daily love prediction
         String url = "https://api.prokerala.com/v2/horoscope/daily/love-compatibility";
         String currentDatetime = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC));
-        String userSign = user.getZodiacSign();
-        String partnerSign = partner.getZodiacSign();
-        String fullUrl = url + "?datetime=" + currentDatetime + "&sign_one=" + userSign + "&sign_two=" + partnerSign;
+        Birthdate.ZodiacSign userSign = user.getZodiacSign();
+        Birthdate.ZodiacSign partnerSign = partner.getZodiacSign();
+        String fullUrl = url + "?datetime=" + currentDatetime + "&sign_one=" + userSign.getName().toLowerCase() + "&sign_two=" + partnerSign.getName().toLowerCase();
 
         try {
 
