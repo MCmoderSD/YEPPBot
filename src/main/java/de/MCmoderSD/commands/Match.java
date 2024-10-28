@@ -7,14 +7,17 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
 
 import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.utilities.other.Calculate;
 
-import java.util.*;
-
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Random;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
@@ -28,7 +31,7 @@ public class Match {
     private final String thereforeYouAreMostCompatibleWith;
 
     // Constructor
-    public Match(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler, OpenAI openAI) {
+    public Match(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, OpenAI openAI) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "match <amount> <language>";
@@ -69,10 +72,14 @@ public class Match {
 
                 // Variables
                 HashMap<Integer, Birthdate> birthdayList = Calculate.getBirthdayList(event, botClient);
+
+                // Null Check
                 if (birthdayList == null) {
                     botClient.respond(event, getCommand(), noBirthdaySet);
                     return;
                 }
+
+                // Get Zodiac Sign and set Default Values
                 Birthdate.ZodiacSign zodiacSign = birthdayList.get(event.getUserId()).getZodiacSign();
                 String language = "german"; // Default: German
                 var amount = 5; // Default: 5
@@ -95,56 +102,54 @@ public class Match {
                     }
                 }
 
-                // Response
-                StringBuilder response = new StringBuilder(String.format("%s ", String.format(mostCompatible, zodiacSign.getTranslatedName())));
-
                 // Get Compatible Signs and Users
                 Birthdate.ZodiacSign[] compatibleSigns = zodiacSign.getCompatibleSigns();
-                HashSet<Integer> mostCompatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[0], event.getUserId());
-                HashSet<Integer> moreCompatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[1], event.getUserId());
-                HashSet<Integer> compatibleUsers = getCompatibleUsers(birthdayList, compatibleSigns[2], event.getUserId());
-                HashSet<Integer> combinedUsers = new HashSet<>(mostCompatibleUsers);
-
-                // Add Compatible Signs
-                response.append(compatibleSigns[0].getTranslatedName()).append(", ").append(compatibleSigns[1].getTranslatedName()).append(String.format(" %s ", and)).append(compatibleSigns[2].getTranslatedName()).append(".");
+                HashSet<Integer> mostCompatibleUsersIds = getCompatibleUserIds(birthdayList, compatibleSigns[0], event.getUserId());
+                HashSet<Integer> moreCompatibleUsersIds = getCompatibleUserIds(birthdayList, compatibleSigns[1], event.getUserId());
+                HashSet<Integer> compatibleUsersIds = getCompatibleUserIds(birthdayList, compatibleSigns[2], event.getUserId());
+                ArrayList<Integer> combinedUsersIds = new ArrayList<>(mostCompatibleUsersIds);
 
                 // Trim Users
-                if (mostCompatibleUsers.size() > amount) combinedUsers = stripRandomUser(mostCompatibleUsers, amount);
+                if (mostCompatibleUsersIds.size() > amount) combinedUsersIds = stripRandomUserIds(mostCompatibleUsersIds, amount);
                 else {
-                    combinedUsers.addAll(stripRandomUser(moreCompatibleUsers, amount - combinedUsers.size()));
-                    combinedUsers.addAll(stripRandomUser(compatibleUsers, amount - combinedUsers.size()));
+                    combinedUsersIds.addAll(stripRandomUserIds(moreCompatibleUsersIds, amount - combinedUsersIds.size()));
+                    combinedUsersIds.addAll(stripRandomUserIds(compatibleUsersIds, amount - combinedUsersIds.size()));
                 }
 
+                // Build Response
+                StringBuilder response = new StringBuilder(String.format("%s ", String.format(mostCompatible, zodiacSign.getTranslatedName())));
+                response.append(compatibleSigns[0].getTranslatedName()).append(", ").append(compatibleSigns[1].getTranslatedName()).append(String.format(" %s ", and)).append(compatibleSigns[2].getTranslatedName()).append(".");
+
                 // Check if no compatible users found
-                if (combinedUsers.isEmpty()) response = new StringBuilder(noCompatibleUsersFound);
+                if (combinedUsersIds.isEmpty()) response = new StringBuilder(noCompatibleUsersFound);
                 else response.append(String.format(" %s", thereforeYouAreMostCompatibleWith));
 
-                // Translate Text
+                // Translate Response
                 if (!Arrays.asList("de", "german", "deutsch", "ger").contains(language)) {
                     String instruction = trimMessage("Please translate the following text into " + language + ":");
                     response = new StringBuilder(chat.prompt(botClient.getBotName(), instruction, response.toString(), temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
                 }
 
-                // Send Response
-                if (combinedUsers.isEmpty()) {
+                // Check if no compatible users found
+                if (combinedUsersIds.isEmpty()) {
                     botClient.respond(event, getCommand(), response.toString());
                     return;
                 }
 
-                // Check Length
+                // Check Response Length
                 var remainingChars = 500 - response.length() - 5;
                 amount = Math.min(amount, remainingChars / 27);
-                while (combinedUsers.size() > amount) combinedUsers.remove((Integer) combinedUsers.toArray()[new Random().nextInt(combinedUsers.size())]);
+                while (combinedUsersIds.size() > amount) combinedUsersIds.removeLast();
 
-                System.out.println(combinedUsers);
+                // Get Compatible Users
+                LinkedHashMap<Integer, String> compatibleUsers = new LinkedHashMap<>();
+                for (Integer id : combinedUsersIds) //noinspection OptionalGetWithoutIsPresent
+                    compatibleUsers.put(id, helixHandler.getUsersByID(new HashSet<>(combinedUsersIds)).stream().filter(user -> user.getId() == id).findFirst().get().getName());
 
-                // Get Compatible Usernames
-                HashSet<String> compatibleUserNames = new HashSet<>();
-                helixHandler.getUsersByID(combinedUsers).forEach(user -> compatibleUserNames.add(user.getName()));
-                System.out.println(compatibleUserNames);
+                // Final Response
                 StringBuilder finalResponse = response;
                 finalResponse.append(" ");
-                compatibleUserNames.forEach(name -> finalResponse.append(name).append(", "));
+                compatibleUsers.forEach((key, value) -> finalResponse.append(value).append(", "));
                 finalResponse.deleteCharAt(finalResponse.length() - 2);
                 finalResponse.append(" YEPP");
 
@@ -155,22 +160,37 @@ public class Match {
     }
 
     // Get Compatible User IDs
-    private HashSet<Integer> getCompatibleUsers(HashMap<Integer, Birthdate> birthdayList, Birthdate.ZodiacSign zodiacSign, int id) {
-        HashSet<Integer> compatibleUsers = new HashSet<>();
+    private HashSet<Integer> getCompatibleUserIds(HashMap<Integer, Birthdate> birthdayList, Birthdate.ZodiacSign zodiacSign, int id) {
+
+        // Variables
+        HashSet<Integer> compatibleUserIds = new HashSet<>();
+
+        // Get Compatible Users
         birthdayList.forEach((key, value) -> {
-            if (value.getZodiacSign() == zodiacSign && key != id) compatibleUsers.add(key);
+            if (value.getZodiacSign() == zodiacSign && key != id) compatibleUserIds.add(key);
         });
-        return compatibleUsers;
+
+        // Return
+        return compatibleUserIds;
     }
 
-    private HashSet<Integer> stripRandomUser(HashSet<Integer> compatibleUsers, int amount) {
+    // Strip Random User
+    private ArrayList<Integer> stripRandomUserIds(HashSet<Integer> compatibleUserIds, int amount) {
 
-        // Strip Random Users
-        while (compatibleUsers.size() > amount) {
-            var random = new Random().nextInt(compatibleUsers.size());
-            compatibleUsers.remove((Integer) compatibleUsers.toArray()[random]);
-        }
+        // Check if amount is 0
+        if (amount == 0) return new ArrayList<>();
 
-        return compatibleUsers;
+        // Variables
+        ArrayList<Integer> compatibleUserIdList = new ArrayList<>(compatibleUserIds);
+        Random random = new Random();
+
+        // Check if amount is bigger than list
+        if (amount > compatibleUserIds.size()) return compatibleUserIdList;
+
+        // Remove Random Users
+        while (compatibleUserIdList.size() > amount) compatibleUserIdList.remove(random.nextInt(compatibleUserIdList.size()));
+
+        // Return
+        return compatibleUserIdList;
     }
 }
