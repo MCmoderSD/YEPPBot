@@ -6,12 +6,19 @@ import de.MCmoderSD.json.JsonUtility;
 import javax.management.InvalidAttributeValueException;
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
+
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.Period;
 
-import java.util.*;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 @SuppressWarnings("unused")
 public class Birthdate {
@@ -47,6 +54,12 @@ public class Birthdate {
         zodiacSign = ZodiacSign.getZodiacSign(this.date);
     }
 
+    // Getter
+    public boolean isBirthday() {
+        LocalDate today = LocalDate.now(TIME_ZONE.toZoneId());
+        return today.getMonthValue() == date.getMonthValue() && today.getDayOfMonth() == date.getDayOfMonth();
+    }
+
     // Get Day
     public int getDay() {
         return date.getDayOfMonth();
@@ -77,17 +90,18 @@ public class Birthdate {
         return date;
     }
 
+    public TimeZone getTimeZone() {
+        return TIME_ZONE;
+    }
+
+    public ZodiacSign getZodiacSign() {
+        return zodiacSign;
+    }
+
     public int getAge() {
         LocalDate today = LocalDate.now(TIME_ZONE.toZoneId());
         LocalDate birthDate = LocalDate.of(year, date.getMonthValue(), date.getDayOfMonth());
         return Period.between(birthDate, today).getYears();
-    }
-
-    public Period getTimeUntilBirthday() {
-        LocalDate today = LocalDate.now(TIME_ZONE.toZoneId());
-        LocalDate birthday = LocalDate.of(year, date.getMonthValue(), date.getDayOfMonth());
-        if (today.isAfter(birthday)) birthday = birthday.plusYears(1);
-        return Period.between(today, birthday);
     }
 
     public long getNanosecondsUntilBirthday() {
@@ -115,7 +129,15 @@ public class Birthdate {
     }
 
     public int getDaysUntilBirthday() {
-        return getTimeUntilBirthday().getDays();
+
+        // Get Birthday
+        LocalDate today = LocalDate.now(TIME_ZONE.toZoneId());
+        LocalDate birthday = LocalDate.of(today.getYear(), date.getMonthValue(), date.getDayOfMonth());
+
+        // If birthday has already occurred this year, set it to next year
+        if (today.isAfter(birthday) || today.isEqual(birthday)) birthday = birthday.plusYears(1);
+
+        return (int) ChronoUnit.DAYS.between(today, birthday);
     }
 
     public float getWeeksUntilBirthday() {
@@ -130,23 +152,10 @@ public class Birthdate {
         return getDaysUntilBirthday() / 365f;
     }
 
-    // Is Birthday
-    public boolean isBirthday() {
-        LocalDate today = LocalDate.now(TIME_ZONE.toZoneId());
-        return today.getMonthValue() == date.getMonthValue() && today.getDayOfMonth() == date.getDayOfMonth();
-    }
-
-    public TimeZone getTimeZone() {
-        return TIME_ZONE;
-    }
-
-    public ZodiacSign getZodiacSign() {
-        return zodiacSign;
-    }
-
+    // Zodiac Sign
     public enum ZodiacSign {
 
-        // Zodiac signs with their start and end dates
+        // Constants
         ARIES(MonthDay.of(3, 21), MonthDay.of(4, 20)),
         TAURUS(MonthDay.of(4, 21), MonthDay.of(5, 20)),
         GEMINI(MonthDay.of(5, 21), MonthDay.of(6, 21)),
@@ -160,28 +169,30 @@ public class Birthdate {
         AQUARIUS(MonthDay.of(1, 21), MonthDay.of(2, 19)),
         PISCES(MonthDay.of(2, 20), MonthDay.of(3, 20));
 
-        // Start and end date of the zodiac sign
+        // Attributes
         private final MonthDay startDate;
         private final MonthDay endDate;
-        //private final Iterator<Map.Entry<String, JsonNode>> matches;
+        private final Iterator<Map.Entry<String, JsonNode>> matches;
 
-        // Compatible zodiac signs
+        // Static Attributes
         private ZodiacSign[] compatibleSigns;
 
+        // Constructor
         ZodiacSign(MonthDay startDate, MonthDay endDate) {
 
-            // Set the start and end date of the zodiac sign
+            // Set Attributes
             this.startDate = startDate;
             this.endDate = endDate;
 
-            // Load the matches from the JSON file
-            /*try {
+            // Load Matches
+            try {
                 matches = JsonUtility.loadJson("/assets/matchList.json", false).get(getName()).fields();
             } catch (IOException | URISyntaxException e) {
-                throw new RuntimeException(e);
-            }*/
+                throw new RuntimeException("Failed to load match list for " + getName() + "!", e);
+            }
         }
 
+        // Static Initializer
         static {
             ARIES.compatibleSigns = new ZodiacSign[]{GEMINI, LEO, SAGITTARIUS};
             TAURUS.compatibleSigns = new ZodiacSign[]{CANCER, LIBRA, PISCES};
@@ -195,6 +206,64 @@ public class Birthdate {
             CAPRICORN.compatibleSigns = new ZodiacSign[]{CAPRICORN, TAURUS, PISCES};
             AQUARIUS.compatibleSigns = new ZodiacSign[]{ARIES, GEMINI, AQUARIUS};
             PISCES.compatibleSigns = new ZodiacSign[]{TAURUS, CANCER, CAPRICORN};
+        }
+
+        // Methods
+        public String getName() {
+            return name().charAt(0) + name().substring(1).toLowerCase();
+        }
+
+        public MonthDay getStartDate() {
+            return startDate;
+        }
+
+        public MonthDay getEndDate() {
+            return endDate;
+        }
+
+        public ZodiacSign[] getCompatibleSigns() {
+            return compatibleSigns;
+        }
+
+        public ZodiacSign getComatibleSign(int index) {
+            return compatibleSigns[index];
+        }
+
+        public String getTranslatedName() {
+            return switch (name().toLowerCase()) {
+                case "aquarius" -> "Wassermann";
+                case "pisces" -> "Fische";
+                case "aries" -> "Widder";
+                case "taurus" -> "Stier";
+                case "gemini" -> "Zwillinge";
+                case "cancer" -> "Krebs";
+                case "leo" -> "Löwe";
+                case "virgo" -> "Jungfrau";
+                case "libra" -> "Waage";
+                case "scorpio" -> "Skorpion";
+                case "sagittarius" -> "Schütze";
+                case "capricorn" -> "Steinbock";
+                default -> "Unbekannt";
+            };
+        }
+        public LinkedHashMap<ZodiacSign, String> getMatches() {
+            LinkedHashMap<ZodiacSign, String> matches = new LinkedHashMap<>();
+            this.matches.forEachRemaining(entry -> matches.put(getZodiacSign(entry.getKey()), entry.getValue().asText()));
+            return matches;
+        }
+
+        public String getMatchDescription(ZodiacSign sign) {
+            return getMatches().get(sign);
+        }
+
+        // Static Methods
+        public static ZodiacSign getZodiacSign(String name) {
+            for (ZodiacSign zodiacSign : values()) if (zodiacSign.getName().equalsIgnoreCase(name)) return zodiacSign;
+            return null;
+        }
+
+        public static ZodiacSign getZodiacSign(int month, int day) {
+            return getZodiacSign(MonthDay.of(month, day));
         }
 
         public static ZodiacSign getZodiacSign(MonthDay monthDay) {
@@ -218,70 +287,5 @@ public class Birthdate {
             // Invalid date
             throw new IllegalArgumentException("Invalid date: " + monthDay);
         }
-
-        public static ZodiacSign getZodiacSign(int month, int day) {
-            return getZodiacSign(MonthDay.of(month, day));
-        }
-
-        public static ZodiacSign getZodiacSign(String name) {
-            for (ZodiacSign zodiacSign : values()) if (zodiacSign.getName().equalsIgnoreCase(name)) return zodiacSign;
-            return null;
-        }
-
-        public String getName() {
-            return name().charAt(0) + name().substring(1).toLowerCase();
-        }
-
-        public String getTranslatedName() {
-            return switch (name().toLowerCase()) {
-                case "aquarius" -> "Wassermann";
-                case "pisces" -> "Fische";
-                case "aries" -> "Widder";
-                case "taurus" -> "Stier";
-                case "gemini" -> "Zwillinge";
-                case "cancer" -> "Krebs";
-                case "leo" -> "Löwe";
-                case "virgo" -> "Jungfrau";
-                case "libra" -> "Waage";
-                case "scorpio" -> "Skorpion";
-                case "sagittarius" -> "Schütze";
-                case "capricorn" -> "Steinbock";
-                default -> "Unbekannt";
-            };
-        }
-
-        public MonthDay getStartDate() {
-            return startDate;
-        }
-
-        public MonthDay getEndDate() {
-            return endDate;
-        }
-
-        public ZodiacSign[] getCompatibleSigns() {
-            return compatibleSigns;
-        }
-
-        public ZodiacSign getComatibleSign(int index) {
-            return compatibleSigns[index];
-        }
-
-        public static ZodiacSign[] getCompatibleSigns(ZodiacSign sign) {
-            return sign.compatibleSigns;
-        }
-
-        public static ZodiacSign getCompatibleSign(ZodiacSign sign, int index) {
-            return sign.compatibleSigns[index];
-        }
-
-        /*public LinkedHashMap<ZodiacSign, String> getMatches() {
-            LinkedHashMap<ZodiacSign, String> matches = new LinkedHashMap<>();
-            this.matches.forEachRemaining(entry -> matches.put(getZodiacSign(entry.getKey()), entry.getValue().asText()));
-            return matches;
-        }
-
-        public String getMatchDescription(ZodiacSign sign) {
-            return getMatches().get(sign);
-        }*/
     }
 }
