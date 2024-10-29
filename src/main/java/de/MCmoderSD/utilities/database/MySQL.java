@@ -191,14 +191,10 @@ public class MySQL extends Driver {
             checkCache(id, event.getUser(), false);
             checkCache(event.getChannelId(), event.getChannel(), true);
 
-            // Get Birthday
-            String[] date = birthdate.getDate().split("\\.");
-            String birthday = date[2] + "." + date[1] + "." + date[0];
-
             // Update Birthday
             String updateQuery = "UPDATE users SET birthdate = ? WHERE id = ?";
             PreparedStatement updatePreparedStatement = connection.prepareStatement(updateQuery);
-            updatePreparedStatement.setString(1, birthday);
+            updatePreparedStatement.setString(1, birthdate.getMySQLDate());
             updatePreparedStatement.setInt(2, id);
             updatePreparedStatement.executeUpdate(); // execute
             updatePreparedStatement.close(); // close the updatePreparedStatement

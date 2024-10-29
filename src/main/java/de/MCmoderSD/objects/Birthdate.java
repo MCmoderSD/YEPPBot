@@ -80,6 +80,11 @@ public class Birthdate {
         return getDay() + "." + getMonth() + "." + getYear();
     }
 
+    // Get YYYY.MM.DD
+    public String getMySQLDate() {
+        return getYear() + "." + getMonth() + "." + getDay();
+    }
+
     // Get DD/MM
     public String getDayMonth() {
         return getDay() + "." + getMonth();
