@@ -3,14 +3,7 @@ package de.MCmoderSD.utilities.database;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.manager.AssetManager;
-import de.MCmoderSD.utilities.database.manager.ChannelManager;
-import de.MCmoderSD.utilities.database.manager.CustomManager;
-import de.MCmoderSD.utilities.database.manager.LogManager;
-import de.MCmoderSD.utilities.database.manager.LurkManager;
-import de.MCmoderSD.utilities.database.manager.QuoteManager;
-import de.MCmoderSD.utilities.database.manager.TokenManager;
-import de.MCmoderSD.utilities.database.manager.YEPPConnect;
+import de.MCmoderSD.utilities.database.manager.*;
 
 import javax.management.InvalidAttributeValueException;
 import java.sql.PreparedStatement;
@@ -25,6 +18,7 @@ public class MySQL extends Driver {
     private final AssetManager assetManager;
     private final ChannelManager channelManager;
     private final CustomManager customManager;
+    private final EventManager eventManager;
     private final LogManager logManager;
     private final LurkManager lurkManager;
     private final QuoteManager quoteManager;
@@ -53,6 +47,7 @@ public class MySQL extends Driver {
         assetManager = new AssetManager(this);
         channelManager = new ChannelManager(this);
         customManager = new CustomManager(this);
+        eventManager = new EventManager(this);
         logManager = new LogManager(this);
         lurkManager = new LurkManager(this);
         quoteManager = new QuoteManager(this);
@@ -255,6 +250,10 @@ public class MySQL extends Driver {
 
     public CustomManager getCustomManager() {
         return customManager;
+    }
+
+    public EventManager getEventManager() {
+        return eventManager;
     }
 
     public LogManager getLogManager() {

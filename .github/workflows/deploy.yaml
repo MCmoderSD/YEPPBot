@@ -1,9 +1,9 @@
 name: Publish Docker image
 
-on:
-  push:
-    branches:
-      - dev
+#on:
+#  push:
+#    branches:
+#      - dev
 
 jobs:
   push_to_registry:

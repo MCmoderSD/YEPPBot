@@ -11,7 +11,7 @@ import java.util.*;
 
 public class ChannelManager {
 
-    // Assosiations
+    // Associations
     private final MySQL mySQL;
 
     // Constructor

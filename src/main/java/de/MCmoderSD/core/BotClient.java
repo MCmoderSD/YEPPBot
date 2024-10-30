@@ -196,7 +196,7 @@ public class BotClient {
         new Counter(this, messageHandler, mySQL);
         new CustomCommand(this, messageHandler, mySQL);
         new CustomTimers(this, messageHandler, mySQL);
-        new DickDestroyDecember(this, messageHandler, mySQL);
+        new DickDestroyDecember(this, messageHandler, mySQL, helixHandler);
         new Fact(this, messageHandler, mySQL);
         if (giphy) new Gif(this, messageHandler, credentials);
         new Help(this, messageHandler, mySQL);
@@ -208,7 +208,7 @@ public class BotClient {
         new Lurk(this, messageHandler, mySQL);
         if (openAIChat) new Match(this, messageHandler, helixHandler, main.getOpenAI());
         new Moderate(this, messageHandler, mySQL, helixHandler);
-        new NoNutNovember(this, messageHandler, mySQL);
+        new NoNutNovember(this, messageHandler, mySQL, helixHandler);
         new Ping(this, messageHandler);
         new Play(this, messageHandler);
         if (openAIChat) new Prompt(this, messageHandler, main.getOpenAI());

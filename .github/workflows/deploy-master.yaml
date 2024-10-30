@@ -1,9 +1,9 @@
 name: Publish Master-Branch Docker image
 
-on:
-  push:
-    branches:
-      - master
+#on:
+#  push:
+#    branches:
+#      - master
 
 jobs:
   push_to_registry:
