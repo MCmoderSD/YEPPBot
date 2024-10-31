@@ -1,7 +1,6 @@
 package de.MCmoderSD.objects;
 
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.utilities.other.Format;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
@@ -61,7 +60,7 @@ public class Timer {
         counter = 1;
 
         // Log
-        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, Format.getFormattedTimestamp(), COMMAND, channel, "Timer: " + name + ": " + response, BREAK, UNBOLD);
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, "Timer: " + name + ": " + response, BREAK, UNBOLD);
 
         // Send Message
         botClient.respond(new TwitchMessageEvent(

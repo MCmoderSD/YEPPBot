@@ -466,7 +466,7 @@ public class CustomManager {
         // Variables
         HashMap<Integer, HashSet<Timer>> customTimers = new HashMap<>();
 
-        // Get CustomTimers
+        // Get CustomTimer
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 

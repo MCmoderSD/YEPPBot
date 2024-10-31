@@ -17,7 +17,7 @@ import de.MCmoderSD.commands.Birthday;
 import de.MCmoderSD.commands.Conversation;
 import de.MCmoderSD.commands.Counter;
 import de.MCmoderSD.commands.CustomCommand;
-import de.MCmoderSD.commands.CustomTimers;
+import de.MCmoderSD.commands.CustomTimer;
 import de.MCmoderSD.commands.DickDestroyDecember;
 import de.MCmoderSD.commands.Fact;
 import de.MCmoderSD.commands.Gif;
@@ -49,7 +49,6 @@ import de.MCmoderSD.main.Main;
 import de.MCmoderSD.main.Terminal;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.other.Format;
 import de.MCmoderSD.utilities.server.AudioBroadcast;
 import de.MCmoderSD.utilities.server.Server;
 
@@ -205,7 +204,7 @@ public class BotClient {
         // Loading Database Commands
         new Counter(this, messageHandler, mySQL);
         new CustomCommand(this, messageHandler, mySQL);
-        new CustomTimers(this, messageHandler, mySQL);
+        new CustomTimer(this, messageHandler, mySQL);
         new Fact(this, messageHandler, mySQL);
         new Help(this, messageHandler, mySQL);
         new Insult(this, messageHandler, mySQL);
@@ -280,7 +279,7 @@ public class BotClient {
 
         // Log
         if (log) mySQL.getLogManager().logResponse(channel, botName, message, helixHandler);
-        System.out.printf("%s %s <%s> %s: %s%s", Format.getFormattedTimestamp(), USER, channel, botName, message, BREAK);
+        System.out.printf("%s %s <%s> %s: %s%s", getFormattedTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
         chat.sendMessage(channel, message);
@@ -297,8 +296,8 @@ public class BotClient {
 
         // Log
         if (log) mySQL.getLogManager().logResponse(event, command, message);
-        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, Format.getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
-        if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, Format.getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
+        if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
         // Send Message
         if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
@@ -332,7 +331,7 @@ public class BotClient {
         var id = helixHandler.getUser(channel).getId();
 
         // Log
-        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
 
         // Join Channel
         chat.joinChannel(channel);
@@ -372,12 +371,12 @@ public class BotClient {
         if (channel.contains(" ") || !chat.isChannelJoined(channel) || botName.equals(channel)) return;
 
         // Leave Channel
-        if (chat.leaveChannel(channel)) System.out.printf("%s%s %s Left Channel: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
-        else System.out.printf("%s%s %s Failed to Leave Channel: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        if (chat.leaveChannel(channel)) System.out.printf("%s%s %s Left Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        else System.out.printf("%s%s %s Failed to Leave Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
 
         // Unregister Broadcast
-        if (audioBroadcast.unregisterBroadcast(channel)) System.out.printf("%s%s %s Unregistered Broadcast: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
-        else System.out.printf("%s%s %s Failed to Unregister Broadcast: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        if (audioBroadcast.unregisterBroadcast(channel)) System.out.printf("%s%s %s Unregistered Broadcast: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        else System.out.printf("%s%s %s Failed to Unregister Broadcast: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
     }
 
     // Bulk Leave

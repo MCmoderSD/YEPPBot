@@ -14,10 +14,10 @@ import java.util.HashSet;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
-public class CustomTimers {
+public class CustomTimer {
 
     // Constructor
-    public CustomTimers(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public CustomTimer(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
 
         // ToDo Make it possible to create timers with hours, minutes and seconds
 

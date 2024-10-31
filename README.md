@@ -26,46 +26,58 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 
 ## Features
 
-- Commands:
-  - [x] Birthday
-  - [x] Conversation (ChatGPT)  
-  - [x] Fact
-  - [x] Gif
-  - [x] Horoscope
-  - [x] Insult
-  - [x] Joke
-  - [x] Lurk (with timer)
-  - [x] Match
-  - [x] Prompt (ChatGPT)
-  - [x] Quote
-  - [x] Translate
-  - [x] TTS (Text to Speech)
-  - [x] Weather
-  - [x] Whitelist (YEPPConnect)
-  - [x] Wiki
+### Commands for everyone:
+
+- Conversation
+- Fact
+- Gift
+- Help
+- Horoscope
+- Insult
+- Joke
+- Lurk
+- Match
+- Prompt
+- Translate
+- Weather
+- Wiki
+
+### Commands for Broadcaster and Moderators:
+
+- Counter
+- CustomCommand
+- CustomTimer
+- Moderate
+- Quote
+- Say
+
+### Admin/Debug Commands:
+
+- Info
+- Ping
+- Status
+
+### Command Features:
+
+- Birthday
+  - The bot will congratulate the user on his birthday.
+  - You can set the birthday of the user with the ```!birthday set``` command.
+  - You can list all the birthdays with the ```!birthday list``` command.
+  - You can look up the next birthday with the ```!birthday next``` command.
 
 
-- Admin Commands:
-  - [x] Block/Unblock
-  - [x] Help
-  - [x] Info
-  - [x] Join/Leave
-  - [x] Ping
-  - [x] Say
-  - [x] Status
+- Seasoal Event Commands
+  - DickDestroyDecember
+  - NoNutNovember
+
+
+- Whitelist
+  - The bot can whitelist users for a Minecraft server.
+  - Viewers can whitelist themselves using the ```!whitelist add``` command.
   
 
-- Features:
-  - [x] Custom Commands
-  - [x] Custom Counters
-  - [x] Custom Timers (Still in development)
-  - [x] Helix API (Twitch API)
-  - [x] HTTPS Server
-  - [x] Database Logging
-  - [x] User Interface (Cheap with JavaSwing)
+### Planned Features:
 
-
-- Planned Features:
   - [ ] Web UI
   - [ ] Rank Command
   - [ ] Key Command
@@ -94,7 +106,9 @@ You can skip to [Step 8](#8-compile-the-bot) if you use the downloaded jar file.
 You can also clone the repository and compile the bot yourself.
 For that need to have git installed on your computer, you can download it from [here](https://git-scm.com/downloads). <br>
 Clone the repository using the following command: <br>
-```git clone https://www.github.com/MCmoderSD/YEPPBot.git ``` <br> <br>
+```bash
+git clone https://www.github.com/MCmoderSD/YEPPBot.git 
+``` 
 
 ### 2. Edit the config files
 
@@ -108,7 +122,7 @@ The first file is ```BotConfig.json``` and it should have the following structur
   "botToken": "YOUR_BOT_TOKEN",
   "clientId": "YOUR_CLIENT_ID",
   "clientSecret": "YOUR_CLIENT_SECRET",
-  "prefix": "!",
+  "prefix": "! ¡",
   "admins": "ADMIN_NAME; OTHER_ADMIN_NAME"
 }
 ```
@@ -169,8 +183,9 @@ Then the Twitch API will work, but OBS won't work with the browser source as it 
 You can use the ```-generate``` argument to generate an example config file. <br> <br>
 
 You can generate a self-signed certificate using the following command: <br>
-```keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks -storepass password -validity 360 -keysize 2048``` <br>
-
+```bash
+keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks -storepass password -validity 360 -keysize 2048
+```
 As password, you have set the bot token, but as SHA-256 hash, encoded in base64.<br>
 You can use this [SHA-256 hash tool](https://emn178.github.io/online-tools/sha256.html) to convert the bot token into an SHA-256 Base64 encoded hash. <br>
 Just make sure to set **UTF-8** as input and **Base64** as output format. <br>
@@ -396,13 +411,20 @@ You can also add your own assets to the database, just pay attention to the form
 ### 8. Compile the bot
 
 After you compiled the bot into a .jar file, you can run it using the following command: <br>
-```java -jar NAME_OF_THE_JAR_FILE.jar``` 
+```bash
+java -jar NAME_OF_THE_JAR_FILE.jar
+``` 
 
 If you use the downloaded jar file to generate example files, you can run it using the following command: <br>
-```java -jar YEPPBot.jar -generate``` <br> <br>
+```bash
+java -jar YEPPBot.jar -generate
+```
 
 After you edited the config files and put in the API keys, you can run the bot using the following command: <br>
-```java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -mysqlconfig "/PATH/TO/mySQL.json``` <br> <br>
+```bash
+java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -mysqlconfig "/PATH/TO/mySQL.json
+```
+
 and so on for the other config files. <br>
 
 You don't need a channel list file, but it's recommended to use one. <br>
