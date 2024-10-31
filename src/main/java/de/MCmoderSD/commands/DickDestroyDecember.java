@@ -53,7 +53,7 @@ public class DickDestroyDecember {
     public DickDestroyDecember(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler) {
 
         // Syntax
-        syntax = "Syntax: " + botClient.getPrefix() + "DDD [ join | leave | status ] <user>";
+        syntax = "Syntax: " + botClient.getPrefix() + "DDD [ join | leave | status | list ] <user>";
 
         // About
         String[] name = {"dickdestroydecember", "ddd", "destroydickdecember", "dicdestroydecember"};

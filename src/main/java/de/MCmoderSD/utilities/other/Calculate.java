@@ -1,29 +1,22 @@
 package de.MCmoderSD.utilities.other;
 
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
-import de.MCmoderSD.utilities.database.MySQL;
 
-import javax.swing.JFrame;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.Color;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.Normalizer;
 import java.util.*;
 
+import static de.MCmoderSD.core.BotClient.prefixes;
 
-@SuppressWarnings({"BooleanMethodIsAlwaysInverted", "unused"})
+
 public class Calculate {
 
-    // Constants
+    // Formatting
     public final static String BOLD = "\033[0;1m";
     public final static String UNBOLD = "\u001B[0m";
     public final static String BREAK = "\n";
@@ -49,14 +42,6 @@ public class Calculate {
 
     // Utilities
     public final static Random RANDOM = new Random();
-
-    // Center JFrame
-    public static Point centerJFrame(JFrame frame) {
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (dim.width - frame.getWidth()) / 2;
-        int y = (dim.height - frame.getHeight()) / 2;
-        return new Point(x, y);
-    }
 
     // Format Unix Timestamp
     public static String formatUnixTimestamp(long unixTimestamp) {
@@ -145,9 +130,13 @@ public class Calculate {
         // Variables
         String message = event.getMessage();
 
+        // Find Prefix
+        String prefix = BotClient.prefix;
+        for (String p : prefixes) if (message.contains(p)) prefix = p;
+
         // Find Start
-        if (message.indexOf(BotClient.prefix) == 0) message = message.substring(1);
-        else message = message.substring(message.indexOf(" " + BotClient.prefix) + 2);
+        if (message.indexOf(prefix) == 0) message = message.substring(1);
+        else message = message.substring(message.indexOf(" " + prefix) + 2);
 
         // Split Command
         String[] split = trimMessage(message).split(" ");
@@ -233,18 +222,6 @@ public class Calculate {
 
     public static String getFormattedTimestamp() {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(getTimestamp()) + "]";
-    }
-
-    // Calculate Tokens
-    public static String getSHA256(byte[] data) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(data);
-            return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("SHA-256 algorithm not found");
-            return null;
-        }
     }
 
     public static boolean containsTwitchUser(HashSet<TwitchUser> list, TwitchUser user) {

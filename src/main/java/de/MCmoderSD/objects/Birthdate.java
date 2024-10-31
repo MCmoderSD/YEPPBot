@@ -6,9 +6,7 @@ import de.MCmoderSD.json.JsonUtility;
 import javax.management.InvalidAttributeValueException;
 
 import java.io.IOException;
-
 import java.net.URISyntaxException;
-
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.Period;
@@ -251,6 +249,7 @@ public class Birthdate {
                 default -> "Unbekannt";
             };
         }
+
         public LinkedHashMap<ZodiacSign, String> getMatches() {
             LinkedHashMap<ZodiacSign, String> matches = new LinkedHashMap<>();
             this.matches.forEachRemaining(entry -> matches.put(getZodiacSign(entry.getKey()), entry.getValue().asText()));

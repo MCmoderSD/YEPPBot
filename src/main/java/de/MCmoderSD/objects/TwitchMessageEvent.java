@@ -8,6 +8,8 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.utilities.other.Calculate;
 import java.sql.Timestamp;
 
+import static de.MCmoderSD.core.BotClient.prefix;
+import static de.MCmoderSD.core.BotClient.prefixes;
 import static de.MCmoderSD.utilities.other.Calculate.*;
 
 @SuppressWarnings("unused")
@@ -190,7 +192,9 @@ public class TwitchMessageEvent {
     }
 
     public boolean hasCommand() {
-        return message.startsWith(BotClient.prefix) || message.contains(" " + BotClient.prefix);
+        for (String prefix : prefixes) if (message.startsWith(prefix)) return true;
+        for (String prefix : prefixes) if (message.contains(" " + prefix)) return true;
+        return false;
     }
 
     // Log

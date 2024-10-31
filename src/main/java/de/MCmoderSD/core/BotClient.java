@@ -52,6 +52,7 @@ public class BotClient {
     public static String botName;
     public static String[] botNames;
     public static String prefix;
+    public static String [] prefixes;
     public static HashSet<String> admins;
     public static HelixHandler.Scope[] requiredScopes = {
             HelixHandler.Scope.USER_READ_EMAIL,
@@ -118,7 +119,8 @@ public class BotClient {
         // Init Bot Settings
         botNames = botConfig.get("botName").asText().toLowerCase().split(", ");
         botName = botNames[0];
-        prefix = botConfig.get("prefix").asText();
+        prefixes = botConfig.get("prefix").asText().split(" ");
+        prefix = prefixes[0];
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
         // Init Attributes

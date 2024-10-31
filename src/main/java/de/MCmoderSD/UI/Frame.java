@@ -6,8 +6,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.imageloader.ImageLoader;
 
 import javax.swing.JFrame;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -58,8 +57,15 @@ public class Frame extends JFrame {
         menuPanel = new MenuPanel(this, size);
 
         // Set Visible
-        pack();
-        setLocation(centerJFrame(this));
+        centerJFrame(this);
+    }
+
+    public static void centerJFrame(JFrame frame) {
+        frame.pack();
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (dim.width - frame.getWidth()) / 2;
+        int y = (dim.height - frame.getHeight()) / 2;
+        frame.setLocation(x, y);
     }
 
     // Setter

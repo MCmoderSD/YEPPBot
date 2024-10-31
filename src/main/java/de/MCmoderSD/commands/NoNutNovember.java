@@ -49,7 +49,7 @@ public class NoNutNovember {
     public NoNutNovember(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler) {
 
         // Syntax
-        syntax = "Syntax: " + botClient.getPrefix() + "NNN [ join | leave | status ] <user>";
+        syntax = "Syntax: " + botClient.getPrefix() + "NNN [ join | leave | status | list ] <user>";
 
         // About
         String[] name = {"nonutnovember", "nnn"};
