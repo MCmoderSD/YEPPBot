@@ -117,7 +117,7 @@ public class Server {
         start();
 
         // Print server info
-        System.out.println("Server started on https://" + hostname + ":" + port);
+        //System.out.println("Server started on https://" + hostname + ":" + port);
     }
 
     public Server(String hostname, int port, String privKeyPath, String fullChainPath) {
@@ -177,7 +177,7 @@ public class Server {
         }
 
         start();
-        System.out.println("Server started on https://" + hostname + ":" + port);
+        //System.out.println("Server started on https://" + hostname + ":" + port);
     }
 
     // Start server

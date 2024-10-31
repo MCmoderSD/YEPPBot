@@ -58,7 +58,7 @@ public class EventHandler {
         eventManager.onEvent(ChannelVipAddEvent.class, event -> handleVIPRoleEvent(new TwitchRoleEvent(event)));                
         eventManager.onEvent(ChannelVipRemoveEvent.class, event -> handleVIPRoleEvent(new TwitchRoleEvent(event)));             
         eventManager.onEvent(ChannelModeratorAddEvent.class, event -> handleModeratorRoleEvent(new TwitchRoleEvent(event)));    
-        eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> handleModeratorRoleEvent(new TwitchRoleEvent(event))); 
+        eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> handleModeratorRoleEvent(new TwitchRoleEvent(event)));
 
         // Loyalty Events
         eventManager.onEvent(ChannelFollowCountUpdateEvent.class, this::handleFollowCountEvent);                                

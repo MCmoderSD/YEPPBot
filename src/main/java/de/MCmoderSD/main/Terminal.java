@@ -4,7 +4,11 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Scanner;
+
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Terminal {
 
@@ -21,8 +25,23 @@ public class Terminal {
     public Terminal(String[] args) {
 
         // Print Start Message
-        System.out.println("YEPPBot v" + Main.VERSION + " - Terminal");
-        System.out.println("Starting bot...");
+        System.out.println("""
+                ⠄⠄⠄⠄⠄⠄⠄⣠⣴⣶⣿⣿⡿⠶⠄⠄⠄⠄⠐⠒⠒⠲⠶⢄⠄⠄⠄⠄⠄⠄
+                ⠄⠄⠄⠄⠄⣠⣾⡿⠟⠋⠁⠄⢀⣀⡀⠤⣦⢰⣤⣶⢶⣤⣤⣈⣆⠄⠄⠄⠄⠄
+                ⠄⠄⠄⠄⢰⠟⠁⠄⢀⣤⣶⣿⡿⠿⣿⣿⣊⡘⠲⣶⣷⣶⠶⠶⠶⠦⠤⡀⠄⠄
+                ⠄⠔⠊⠁⠁⠄⠄⢾⡿⣟⡯⣖⠯⠽⠿⠛⠛⠭⠽⠊⣲⣬⠽⠟⠛⠛⠭⢵⣂⠄
+                ⡎⠄⠄⠄⠄⠄⠄⠄⢙⡷⠋⣴⡆⠄⠐⠂⢸⣿⣿⡶⢱⣶⡇⠄⠐⠂⢹⣷⣶⠆
+                ⡇⠄⠄⠄⠄⣀⣀⡀⠄⣿⡓⠮⣅⣀⣀⣐⣈⣭⠤⢖⣮⣭⣥⣀⣤⣤⣭⡵⠂⠄
+                ⣤⡀⢠⣾⣿⣿⣿⣿⣷⢻⣿⣿⣶⣶⡶⢖⣢⣴⣿⣿⣟⣛⠿⠿⠟⣛⠉⠄⠄⠄
+                ⣿⡗⣼⣿⣿⣿⣿⡿⢋⡘⠿⣿⣿⣷⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠄⠄
+                ⣿⠱⢿⣿⣿⠿⢛⠰⣞⡛⠷⣬⣙⡛⠻⠿⠿⠿⣿⣿⣿⣿⣿⣿⣿⠿⠛⣓⡀⠄
+                ⢡⣾⣷⢠⣶⣿⣿⣷⣌⡛⠷⣦⣍⣛⠻⠿⢿⣶⣶⣶⣦⣤⣴⣶⡶⠾⠿⠟⠁⠄
+                ⣿⡟⣡⣿⣿⣿⣿⣿⣿⣿⣷⣦⣭⣙⡛⠓⠒⠶⠶⠶⠶⠶⠶⠶⠶⠿⠟⠄⠄⠄
+                ⠿⡐⢬⣛⡻⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡶⠟⠃⠄⠄⠄⠄⠄⠄
+                ⣾⣿⣷⣶⣭⣝⣒⣒⠶⠬⠭⠭⠭⠭⠭⠭⠭⣐⣒⣤⣄⡀⠄⠄⠄⠄⠄⠄⠄⠄
+                ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠄⠄⠄⠄⠄⠄⠄""");
+
+        System.out.printf("%sYEPPBot v%s%s", BOLD, Main.VERSION, BREAK);
 
         // Init
         scanner = new Scanner(System.in);
@@ -39,10 +58,6 @@ public class Terminal {
         if (hasArg(Argument.HOST)) args[0] = args[Arrays.asList(args).indexOf("-host") + 1];
         if (hasArg(Argument.PORT)) args[1] = args[Arrays.asList(args).indexOf("-port") + 1];
 
-        // Print Help
-        System.out.println("Type help for a list of commands.");
-        System.out.println("Type exit to stop the bot.");
-
         // Start Input Loop
         new Thread(this::inputLoop).start();
     }
@@ -53,7 +68,7 @@ public class Terminal {
                 help();
                 break;
             case "exit":
-                System.out.println("Stopping bot...");
+                System.out.printf("%sStopping bot...", BOLD);
                 System.exit(0);
                 break;
             case "version":
@@ -67,7 +82,7 @@ public class Terminal {
                 System.out.println("Generating config files...");
                 if (generateConfigFiles()) {
                     System.out.println("Config files generated successfully");
-                    System.out.println("Stopping bot...");
+                    System.out.printf("%sStopping bot...", BOLD);
                     System.exit(0);
                 } else System.out.println("Error while generating config files");
                 break;
@@ -93,7 +108,7 @@ public class Terminal {
         scanner.close();
 
         // Exit
-        System.out.println("Stopping bot...");
+        System.out.printf("%sStopping bot...", BOLD);
         System.exit(0);
     }
 

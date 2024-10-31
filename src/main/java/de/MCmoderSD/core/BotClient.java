@@ -246,9 +246,7 @@ public class BotClient {
         setUI(!cli);
 
         // Print Startup Complete
-        System.out.println("Startup Complete");
-        System.out.println("Took " + (System.nanoTime() - Terminal.startTime) / 1_000_000 + "ms");
-        System.out.println("Bot is now running and started joining channels");
+        System.out.printf("Start-Up Compleate! Took: %dms%s%s%s", (System.nanoTime() - Terminal.startTime) / 1_000_000, UNBOLD, BREAK, BREAK);
 
         // Join Channels
         HashSet<String> channelList = new HashSet<>();
