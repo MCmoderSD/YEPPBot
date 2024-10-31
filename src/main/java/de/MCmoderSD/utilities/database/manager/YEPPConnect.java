@@ -53,9 +53,6 @@ public class YEPPConnect {
                     """
             ).execute();
 
-            // Close resources
-            connection.close();
-
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

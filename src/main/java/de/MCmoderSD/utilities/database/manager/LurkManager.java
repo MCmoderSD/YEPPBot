@@ -50,9 +50,6 @@ public class LurkManager {
                     """
             ).execute();
 
-            // Close resources
-            connection.close();
-
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

@@ -84,9 +84,6 @@ public class AssetManager {
                     """
             ).execute();
 
-            // Close resources
-            connection.close();
-
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
