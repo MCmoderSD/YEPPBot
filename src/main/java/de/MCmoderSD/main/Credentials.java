@@ -2,12 +2,11 @@ package de.MCmoderSD.main;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import de.MCmoderSD.main.Main.Argument;
-import de.MCmoderSD.utilities.other.Reader;
-
-import de.MCmoderSD.json.JsonUtility;
-
 import java.util.HashSet;
+
+import static de.MCmoderSD.main.Main.*;
+import static de.MCmoderSD.utilities.other.Util.readAllLines;
+
 
 @SuppressWarnings("unused")
 public class Credentials {
@@ -26,21 +25,16 @@ public class Credentials {
     private JsonNode openAITTSConfig;
 
     // APIs Provided
-    private boolean openAI;
     private boolean astrology;
     private boolean openWeatherMap;
     private boolean giphy;
 
     // Constructor
-    public Credentials(Main main, String botConfig, String channelList, String mySQL, String httpsServer, String apiKeys, String openAI) {
-
-        // Get Utilities
-        JsonUtility jsonUtility = main.getJsonUtility();
-        Reader reader = main.getReader();
+    public Credentials(String botConfig, String channelList, String mySQL, String httpsServer, String apiKeys, String openAI) {
 
         // Load Bot Config
         try {
-            this.botConfig = jsonUtility.load(botConfig, main.hasArg(Argument.BOT_CONFIG));
+            this.botConfig = jsonUtility.load(botConfig, terminal.hasArg(Terminal.Argument.BOT_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading Bot Config: " + e.getMessage());
             System.exit(1);
@@ -48,43 +42,50 @@ public class Credentials {
 
         // Load Channel List
         try {
-            this.channelList = new HashSet<>(reader.lineRead(channelList, main.hasArg(Argument.CHANNEL_LIST)));
+            this.channelList = new HashSet<>(readAllLines(channelList, terminal.hasArg(Terminal.Argument.CHANNEL_LIST)));
         } catch (Exception e) {
             System.err.println("Error loading Channel List: " + e.getMessage());
         }
 
         // Load MySQL Config
         try {
-            mySQLConfig = jsonUtility.load(mySQL, main.hasArg(Argument.MYSQL_CONFIG));
+            this.mySQLConfig = jsonUtility.load(mySQL, terminal.hasArg(Terminal.Argument.MYSQL_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading MySQL Config: " + e.getMessage());
-            System.exit(1);
         }
 
-        // Load Http Server Config
+        // Load HTTPS Server Config
         try {
-            if (!(main.hasArg(Argument.HOST) && main.hasArg(Argument.PORT))) this.httpsServerConfig = jsonUtility.load(httpsServer, main.hasArg(Argument.HTTPS_SERVER));
+            this.httpsServerConfig = jsonUtility.load(httpsServer, terminal.hasArg(Terminal.Argument.HTTPS_SERVER));
         } catch (Exception e) {
-            System.err.println("Error loading Http Server Config: " + e.getMessage());
+            System.err.println("Error loading HTTPS Server Config: " + e.getMessage());
         }
 
         // Load API Config
         try {
-            apiConfig = jsonUtility.load(apiKeys, main.hasArg(Argument.API_CONFIG));
-            if (apiConfig.has("astrology")) this.astrology = true;
-            if (apiConfig.has("openWeatherMap")) this.openWeatherMap = true;
-            if (apiConfig.has("giphy")) this.giphy = true;
+
+            // Load JSON
+            apiConfig = jsonUtility.load(apiKeys, terminal.hasArg(Terminal.Argument.API_CONFIG));
+
+            // Check for APIs
+            astrology = apiConfig.has("astrology");
+            openWeatherMap = apiConfig.has("openWeatherMap");
+            giphy = apiConfig.has("giphy");
+
         } catch (Exception e) {
             System.err.println("Error loading API Config: " + e.getMessage());
         }
 
         // Load OpenAI Config
         try {
-            openAIConfig = jsonUtility.load(openAI, main.hasArg(Argument.OPENAI_CONFIG));
+
+            // Load JSON
+            openAIConfig = jsonUtility.load(openAI, terminal.hasArg(Terminal.Argument.OPENAI_CONFIG));
+
+            // Load OpenAI Sub Configs
             if (openAIConfig.has("chat")) openAIChatConfig = openAIConfig.get("chat");
             if (openAIConfig.has("image")) openAIImageConfig = openAIConfig.get("image");
             if (openAIConfig.has("speech")) openAITTSConfig = openAIConfig.get("speech");
-            this.openAI = true;
         } catch (Exception e) {
             System.err.println("Error loading OpenAI Config: " + e.getMessage());
         }
@@ -144,10 +145,6 @@ public class Credentials {
         return httpsServerConfig != null;
     }
 
-    public boolean validateAPIConfig() {
-        return apiConfig != null;
-    }
-
     public boolean validateOpenAIConfig() {
         return openAIConfig != null;
     }
@@ -178,6 +175,18 @@ public class Credentials {
     }
 
     public boolean hasOpenAI() {
-        return openAI;
+        return openAIConfig != null;
+    }
+
+    public boolean hasOpenAIChat() {
+        return openAIChatConfig != null;
+    }
+
+    public boolean hasOpenAIImage() {
+        return openAIImageConfig != null;
+    }
+
+    public boolean hasOpenAITTS() {
+        return openAITTSConfig != null;
     }
 }

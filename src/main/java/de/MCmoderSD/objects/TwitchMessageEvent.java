@@ -5,18 +5,17 @@ import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
 
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.utilities.other.Calculate;
+
 import java.sql.Timestamp;
 
-import static de.MCmoderSD.core.BotClient.prefix;
 import static de.MCmoderSD.core.BotClient.prefixes;
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 @SuppressWarnings("unused")
 public class TwitchMessageEvent {
 
     // Constants
-    private final Timestamp timestamp;
+    private final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
     // ID
     private final int channelId;
@@ -37,9 +36,6 @@ public class TwitchMessageEvent {
 
     // Message Event
     public TwitchMessageEvent(ChannelMessageEvent event) {
-
-        // Set Timestamp
-        timestamp = Calculate.getTimestamp();
 
         // Get ID's
         channelId = Integer.parseInt(trimMessage(event.getChannel().getId()));
@@ -62,9 +58,6 @@ public class TwitchMessageEvent {
     // Cheer Event
     public TwitchMessageEvent(ChannelCheerEvent event) {
 
-        // Set Timestamp
-        timestamp = Calculate.getTimestamp();
-
         // Get ID's
         channelId = Integer.parseInt(trimMessage(event.getBroadcasterUserId()));
         userId = Integer.parseInt(trimMessage(event.getUserId()));
@@ -86,10 +79,7 @@ public class TwitchMessageEvent {
     // Sub Event
     public TwitchMessageEvent(ChannelSubscriptionMessageEvent event) {
 
-        // Set Timestamp
-        timestamp = Calculate.getTimestamp();
-
-        /// Get ID's
+        // Get ID's
         channelId = Integer.parseInt(trimMessage(event.getBroadcasterUserId()));
         userId = Integer.parseInt(trimMessage(event.getUserId()));
 
@@ -108,8 +98,7 @@ public class TwitchMessageEvent {
     }
 
     // Manual Event
-    public TwitchMessageEvent(Timestamp timestamp, int channelId, int userId, String channel, String user, String message, Integer subMonths, Integer subStreak, String subTier, Integer bits) {
-        this.timestamp = timestamp;
+    public TwitchMessageEvent(int channelId, int userId, String channel, String user, String message, Integer subMonths, Integer subStreak, String subTier, Integer bits) {
         this.channelId = channelId;
         this.userId = userId;
         this.channel = channel;

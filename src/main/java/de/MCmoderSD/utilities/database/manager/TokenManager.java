@@ -8,9 +8,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.sql.Timestamp;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import java.util.HashMap;
 
 public class TokenManager {
 
@@ -51,6 +51,10 @@ public class TokenManager {
                     )
                     """
             ).execute();
+
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -83,8 +87,12 @@ public class TokenManager {
             insertPreparedStatement.setString(3, refreshToken); // set refresh token
             insertPreparedStatement.setString(4, scopes); // set scopes
             insertPreparedStatement.setInt(5, expiresIn); // set expires in
-            insertPreparedStatement.setTimestamp(6, getTimestamp()); // set timestamp
+            insertPreparedStatement.setTimestamp(6, new Timestamp(System.currentTimeMillis())); // set timestamp
             insertPreparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            insertPreparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -101,9 +109,13 @@ public class TokenManager {
             updatePreparedStatement.setString(1, newAccessToken); // set access token
             updatePreparedStatement.setString(2, newRefreshToken); // set refresh token
             updatePreparedStatement.setInt(3, expiresIn); // set expires in
-            updatePreparedStatement.setTimestamp(4, getTimestamp()); // set timestamp
+            updatePreparedStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis())); // set timestamp
             updatePreparedStatement.setString(5, oldRefreshToken); // set old refresh token
             updatePreparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            updatePreparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -163,6 +175,11 @@ public class TokenManager {
                         )
                 );
             }
+
+            // Close resources
+            resultSet.close();
+            selectPreparedStatement.close();
+
             return authTokens;
         } catch (SQLException e) {
             System.err.println(e.getMessage());

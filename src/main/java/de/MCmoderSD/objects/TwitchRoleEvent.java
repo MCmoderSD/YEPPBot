@@ -7,7 +7,7 @@ import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
 
 import java.sql.Timestamp;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 @SuppressWarnings("unused")
 public class TwitchRoleEvent {

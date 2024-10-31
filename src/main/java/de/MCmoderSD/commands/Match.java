@@ -8,18 +8,17 @@ import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
-import de.MCmoderSD.utilities.other.Calculate;
+import de.MCmoderSD.utilities.database.MySQL;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Random;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
+import static de.MCmoderSD.utilities.other.Util.*;
 
 public class Match {
 
@@ -31,7 +30,7 @@ public class Match {
     private final String thereforeYouAreMostCompatibleWith;
 
     // Constructor
-    public Match(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, OpenAI openAI) {
+    public Match(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler, Chat chat) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "match <amount> <language>";
@@ -47,8 +46,7 @@ public class Match {
         noCompatibleUsersFound = "Es gibt keine kompatiblen User.";
         thereforeYouAreMostCompatibleWith = "Demnach bist du am kompatibelsten mit";
 
-        // Get Chat Module and Config
-        Chat chat = openAI.getChat();
+        // Get Chat Config
         JsonNode config = chat.getConfig();
 
         // Get Parameters
@@ -71,16 +69,16 @@ public class Match {
                 args.addAll(cleanArgs);
 
                 // Variables
-                HashMap<Integer, Birthdate> birthdayList = Calculate.getBirthdayList(event, botClient);
+                LinkedHashMap<Integer, Birthdate> birthdays = removeNonFollower(event, mySQL.getBirthdays(), helixHandler);
 
                 // Null Check
-                if (birthdayList == null) {
+                if (birthdays == null) {
                     botClient.respond(event, getCommand(), noBirthdaySet);
                     return;
                 }
 
                 // Get Zodiac Sign and set Default Values
-                Birthdate.ZodiacSign zodiacSign = birthdayList.get(event.getUserId()).getZodiacSign();
+                Birthdate.ZodiacSign zodiacSign = birthdays.get(event.getUserId()).getZodiacSign();
                 String language = "german"; // Default: German
                 var amount = 5; // Default: 5
 
@@ -104,9 +102,9 @@ public class Match {
 
                 // Get Compatible Signs and Users
                 Birthdate.ZodiacSign[] compatibleSigns = zodiacSign.getCompatibleSigns();
-                HashSet<Integer> mostCompatibleUsersIds = getCompatibleUserIds(birthdayList, compatibleSigns[0], event.getUserId());
-                HashSet<Integer> moreCompatibleUsersIds = getCompatibleUserIds(birthdayList, compatibleSigns[1], event.getUserId());
-                HashSet<Integer> compatibleUsersIds = getCompatibleUserIds(birthdayList, compatibleSigns[2], event.getUserId());
+                HashSet<Integer> mostCompatibleUsersIds = getCompatibleUserIds(birthdays, compatibleSigns[0], event.getUserId());
+                HashSet<Integer> moreCompatibleUsersIds = getCompatibleUserIds(birthdays, compatibleSigns[1], event.getUserId());
+                HashSet<Integer> compatibleUsersIds = getCompatibleUserIds(birthdays, compatibleSigns[2], event.getUserId());
                 ArrayList<Integer> combinedUsersIds = new ArrayList<>(mostCompatibleUsersIds);
 
                 // Trim Users
@@ -182,13 +180,12 @@ public class Match {
 
         // Variables
         ArrayList<Integer> compatibleUserIdList = new ArrayList<>(compatibleUserIds);
-        Random random = new Random();
 
         // Check if amount is bigger than list
         if (amount > compatibleUserIds.size()) return compatibleUserIdList;
 
         // Remove Random Users
-        while (compatibleUserIdList.size() > amount) compatibleUserIdList.remove(random.nextInt(compatibleUserIdList.size()));
+        while (compatibleUserIdList.size() > amount) compatibleUserIdList.remove(RANDOM.nextInt(compatibleUserIdList.size()));
 
         // Return
         return compatibleUserIdList;

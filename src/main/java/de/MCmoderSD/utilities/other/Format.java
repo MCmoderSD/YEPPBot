@@ -1,20 +1,19 @@
 package de.MCmoderSD.utilities.other;
 
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.main.Main;
-import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.objects.TwitchUser;
 
 import java.awt.Color;
 import java.sql.Timestamp;
 import java.text.Normalizer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static de.MCmoderSD.core.BotClient.prefixes;
+import static de.MCmoderSD.utilities.other.Util.RANDOM;
 
 
-public class Calculate {
+public class Format {
 
     // Formatting
     public final static String BOLD = "\033[0;1m";
@@ -40,30 +39,26 @@ public class Calculate {
     public final static Color PURPLE = new Color(0x771fe2);
     public final static Color WHITE = new Color(0xffffff);
 
-    // Utilities
-    public final static Random RANDOM = new Random();
-
     // Format Unix Timestamp
+    public static String getFormattedTimestamp() {
+        return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new Timestamp(System.currentTimeMillis())) + "]";
+    }
+
     public static String formatUnixTimestamp(long unixTimestamp) {
         return new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(unixTimestamp * 1000));
     }
-
     // Tag the channel
+
     public static String tagChannel(TwitchMessageEvent event) {
         return "@" + event.getChannel();
     }
-
     // Tag the user
+
     public static String tagUser(TwitchMessageEvent event) {
         return "@" + event.getUser();
     }
-
-    // Log timestamp
-    public static String logTimestamp() {
-        return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new java.util.Date()) + "]";
-    }
-
     // Convert to ASCII
+
     public static String convertToAscii(String input) {
 
         // Replace German Umlauts
@@ -86,16 +81,16 @@ public class Calculate {
 
         return ascii;
     }
-
     // Trim Message
+
     public static String trimMessage(String message) {
         message = message.replaceAll("\uDB40\uDC00", "");
         while (message.startsWith(" ") || message.startsWith("\n")) message = message.substring(1);
         while (message.endsWith(" ") || message.endsWith("\n")) message = message.trim();
         return message;
     }
-
     // Clean Args
+
     public static ArrayList<String> cleanArgs(ArrayList<String> args) {
         ArrayList<String> cleaned = new ArrayList<>();
         for (String arg : args) {
@@ -104,23 +99,23 @@ public class Calculate {
         }
         return cleaned;
     }
-
     // Trim Args
+
     public static String processArgs(ArrayList<String> args) {
         return trimMessage(String.join(" ", args)).trim();
     }
-
     // Replace Emojis
+
     public static String replaceEmojis(String input, String replacement) {
         return input.replaceAll("[\\p{So}\\p{Cn}]", replacement);
     }
-
     // Remove repetitions
+
     public static String removeRepetitions(String input, String repetition) {
         return input.replaceAll("\\b(" + repetition + ")\\s+\\1\\b", "$1");
     }
-
     // Format OpenAI Response
+
     public static String formatOpenAIResponse(String response, String emote) {
         return removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + " "), emote), emote);
     }
@@ -168,7 +163,7 @@ public class Calculate {
 
         // Variables
         StringBuilder response = new StringBuilder();
-        long time = getTimestamp().getTime() - startTime.getTime();
+        long time = System.currentTimeMillis() - startTime.getTime();
 
         // Years
         long years = time / 31536000000L;
@@ -213,51 +208,5 @@ public class Calculate {
 
         // Return
         return response.substring(0, response.length() - 2);
-    }
-
-    // Get Timestamp
-    public static Timestamp getTimestamp() {
-        return new Timestamp(System.currentTimeMillis());
-    }
-
-    public static String getFormattedTimestamp() {
-        return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(getTimestamp()) + "]";
-    }
-
-    public static boolean containsTwitchUser(HashSet<TwitchUser> list, TwitchUser user) {
-        for (TwitchUser u : list) if (u.equals(user)) return true;
-        return false;
-    }
-
-    public static boolean containsTwitchUsers(HashSet<TwitchUser> list, HashSet<TwitchUser> users) {
-        for (TwitchUser user : users) if (!containsTwitchUser(list, user)) return false;
-        return true;
-    }
-
-    public static boolean containsTwitchUser(HashSet<TwitchUser> list, int id) {
-        for (TwitchUser user : list) if (user.getId() == id) return true;
-        return false;
-    }
-
-    public static boolean containsTwitchUser(HashSet<TwitchUser> list, String name) {
-        for (TwitchUser user : list) if (user.getName().equalsIgnoreCase(name)) return true;
-        return false;
-    }
-
-    public static HashMap<Integer, Birthdate> getBirthdayList(TwitchMessageEvent event, BotClient botClient) {
-
-        // Get Birthdays
-        HashMap<Integer, Birthdate> birthdays = botClient.getMySQL().getBirthdays();
-
-        // Return if dev mode
-        if (botClient.getMain().hasArg(Main.Argument.DEV)) return birthdays;
-
-        // Remove all non followers
-        HashSet<TwitchUser> followers = new HashSet<>(botClient.getHelixHandler().getFollowers(event.getChannelId(), null));
-        followers.add(new TwitchUser(event));                                       // Add User
-        followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
-        birthdays.entrySet().removeIf(entry -> !containsTwitchUser(followers, entry.getKey()));
-
-        return birthdays;
     }
 }

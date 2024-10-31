@@ -7,7 +7,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ChannelManager {
 
@@ -34,6 +38,11 @@ public class ChannelManager {
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) channels.add(resultSet.getString("name"));
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -51,6 +60,10 @@ public class ChannelManager {
             preparedStatement.setInt(1, isActive ? 1 : 0); // set active
             preparedStatement.setString(2, channel); // set channel
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -76,6 +89,11 @@ public class ChannelManager {
                 String blacklist = resultSet.getString("blacklist");
                 if (blacklist != null) blackList.put(id, new HashSet<>(List.of(blacklist.toLowerCase().split("; "))));
             }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

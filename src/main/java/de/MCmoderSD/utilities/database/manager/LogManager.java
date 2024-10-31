@@ -4,6 +4,7 @@ import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
+
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -13,9 +14,11 @@ import de.MCmoderSD.utilities.database.MySQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class LogManager {
     
     // Associations
@@ -164,6 +167,9 @@ public class LogManager {
                     """
             ).execute();
 
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -198,6 +204,10 @@ public class LogManager {
                 preparedStatement.setInt(8, event.getLogSubStreak()); // set subStreak
                 preparedStatement.setString(9, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -234,6 +244,10 @@ public class LogManager {
                 preparedStatement.setInt(8, event.getLogSubStreak()); // set subStreak
                 preparedStatement.setString(9, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -271,6 +285,10 @@ public class LogManager {
                 preparedStatement.setInt(9, event.getLogSubStreak()); // set subStreak
                 preparedStatement.setString(10, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -295,13 +313,17 @@ public class LogManager {
                 // Prepare statement
                 String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-                preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+                preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelID); // set channel
                 preparedStatement.setInt(3, userID); // set user
                 preparedStatement.setString(4, USER); // set command
                 preparedStatement.setString(5, USER); // set args
                 preparedStatement.setString(6, message); // set response
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -328,12 +350,16 @@ public class LogManager {
                 // Prepare statement
                 String query = "INSERT INTO " + "RoleLog" + " (timestamp, channel_id, user_id, role, added) VALUES (?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-                preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+                preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelID); // set channel
                 preparedStatement.setInt(3, userID); // set user
                 preparedStatement.setString(4, event.getRole()); // set role
                 preparedStatement.setInt(5, event.isAdded() ? 1 : 0); // set added
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -362,11 +388,15 @@ public class LogManager {
                 // Prepare statement
                 String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type) VALUES (?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-                preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+                preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelID); // set channel
                 preparedStatement.setInt(3, userID); // set user
                 preparedStatement.setString(4, FOLLOW); // set type
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -396,12 +426,16 @@ public class LogManager {
                 // Prepare statement
                 String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subPlan) VALUES (?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-                preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+                preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelID); // set channel
                 preparedStatement.setInt(3, userID); // set user
                 preparedStatement.setString(4, SUBSCRIBE); // set type
                 preparedStatement.setString(5, tier); // set tier
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -441,7 +475,7 @@ public class LogManager {
                 // Prepare statement
                 String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subPlan, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-                preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+                preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelID); // set channel
                 preparedStatement.setInt(3, userID); // set user
                 preparedStatement.setString(4, GIFT); // set type
@@ -449,6 +483,10 @@ public class LogManager {
                 preparedStatement.setInt(6, giftAmount); // set giftAmount
                 preparedStatement.setInt(7, giftTotal); // set giftTotal
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -478,11 +516,15 @@ public class LogManager {
                 // Prepare statement
                 String query = "INSERT INTO " + "RaidLog" + " (timestamp, channel_id, raider_id, viwerAmount) VALUES (?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
-                preparedStatement.setTimestamp(1, getTimestamp()); // set timestamp
+                preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelID); // set channel
                 preparedStatement.setInt(3, raiderID); // set raider
                 preparedStatement.setInt(4, viewer); // set viewerAmount
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -518,6 +560,10 @@ public class LogManager {
                 preparedStatement.setInt(8, event.getLogSubStreak()); // set subStreak
                 preparedStatement.setString(9, event.getSubTier()); // set subPlan
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }

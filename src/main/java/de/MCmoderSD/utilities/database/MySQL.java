@@ -1,17 +1,30 @@
 package de.MCmoderSD.utilities.database;
 
-import de.MCmoderSD.main.Main;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.manager.*;
+
+import de.MCmoderSD.utilities.database.manager.AssetManager;
+import de.MCmoderSD.utilities.database.manager.ChannelManager;
+import de.MCmoderSD.utilities.database.manager.CustomManager;
+import de.MCmoderSD.utilities.database.manager.EventManager;
+import de.MCmoderSD.utilities.database.manager.LogManager;
+import de.MCmoderSD.utilities.database.manager.LurkManager;
+import de.MCmoderSD.utilities.database.manager.QuoteManager;
+import de.MCmoderSD.utilities.database.manager.TokenManager;
+import de.MCmoderSD.utilities.database.manager.YEPPConnect;
 
 import javax.management.InvalidAttributeValueException;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 
-@SuppressWarnings("unused")
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+@SuppressWarnings({"SqlSourceToSinkFlow", "unused"})
 public class MySQL extends Driver {
 
     // Managers
@@ -30,18 +43,18 @@ public class MySQL extends Driver {
     private final HashMap<Integer, String> channelCache;
 
     // Constructor
-    public MySQL(Main main) {
+    public MySQL(JsonNode config) {
 
         // Initialize Driver
-        super(main.getCredentials().getMySQLConfig());
+        super(config);
 
         // Connect to database
         new Thread(this::connect).start();
         initTables();
 
         // Load Cache
-        userCache = loadCache(false);
-        channelCache = loadCache(true);
+        userCache = loadCache(Table.USERS);
+        channelCache = loadCache(Table.CHANNELS);
 
         // Initialize Manager
         assetManager = new AssetManager(this);
@@ -67,7 +80,7 @@ public class MySQL extends Driver {
             connection.prepareStatement(condition +
                             """
                             users (
-                            id INT PRIMARY KEY NOT NULL,
+                            id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
                             birthdate VARCHAR(10)
                             )
@@ -78,7 +91,7 @@ public class MySQL extends Driver {
             connection.prepareStatement(condition +
                             """
                             channels (
-                            id INT PRIMARY KEY NOT NULL,
+                            id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
                             active BIT NOT NULL DEFAULT 1,
@@ -86,13 +99,17 @@ public class MySQL extends Driver {
                             )
                             """
             ).execute();
+
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }
 
     // Load Cache
-    private HashMap<Integer, String> loadCache(boolean isChannel) {
+    private HashMap<Integer, String> loadCache(Table table) {
 
         // Variables
         HashMap<Integer, String> cache = new HashMap<>();
@@ -102,49 +119,47 @@ public class MySQL extends Driver {
             if (!isConnected()) connect(); // connect
 
             // Query
-            String query;
-            if (isChannel) query = "SELECT * FROM " + "channels";
-            else query = "SELECT * FROM " + "users";
-
-            // Execute Query
-            PreparedStatement preparedStatement = getConnection().prepareStatement(query);
+            String query = "SELECT id, name FROM " + table.getName();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) cache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
+
+            // Add to Cache
+            while (resultSet.next()) {
+                var id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                cache.put(id, name);
+            }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close(); // close the preparedStatement
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
 
+        // Return
         return cache;
     }
 
     // Checks Channels
-    private void checkUser(int id, String name, boolean isChannel) throws SQLException {
+    private void checkUser(int id, String name, Table table) throws SQLException {
         if (!isConnected()) connect(); // connect
 
-        // Check Channel
-        String selectQuery;
-        if (isChannel) selectQuery = "SELECT * FROM channels WHERE id = ?";
-        else selectQuery = "SELECT * FROM users WHERE id = ?";
-
-        PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
+        // Query
+        String query = "SELECT id, name FROM " + table.getName() + " WHERE id = ?";
+        PreparedStatement selectPreparedStatement = connection.prepareStatement(query);
         selectPreparedStatement.setInt(1, id);
         ResultSet resultSet = selectPreparedStatement.executeQuery();
 
-        // Add Channel
+        // Check if user exists
         if (!resultSet.next()) {
-            String insertQuery;
-            if (isChannel) insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
-            else insertQuery = "INSERT INTO users (id, name) VALUES (?, ?)";
+            String insertQuery = "INSERT INTO " + table.getName() + " (id, name) VALUES (?, ?)";
             PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
-            insertPreparedStatement.setInt(1, id); // set id
-            insertPreparedStatement.setString(2, name); // set name
+            insertPreparedStatement.setInt(1, id);
+            insertPreparedStatement.setString(2, name);
             insertPreparedStatement.executeUpdate(); // execute
             insertPreparedStatement.close(); // close the insertPreparedStatement
         }
-
-        // Add to Cache
-        if (isChannel) channelCache.put(id, name);
-        else userCache.put(id, name);
 
         // Close resources
         resultSet.close();
@@ -163,13 +178,13 @@ public class MySQL extends Driver {
 
         // Update User Cache
         if (!user) {
-            checkUser(id, name, false);
+            checkUser(id, name, Table.USERS);
             userCache.put(id, name);
         }
 
         // Update Channel Cache
         if (!channel && isChannel) {
-            checkUser(id, name, true);
+            checkUser(id, name, Table.CHANNELS);
             channelCache.put(id, name);
         }
     }
@@ -199,15 +214,15 @@ public class MySQL extends Driver {
     }
 
     // Get Birthdays
-    public HashMap<Integer, Birthdate> getBirthdays() {
+    public LinkedHashMap<Integer, Birthdate> getBirthdays() {
         try {
             if (!isConnected()) connect(); // connect
 
             // Variables
-            HashMap<Integer, Birthdate> birthdays = new HashMap<>();
+            LinkedHashMap<Integer, Birthdate> birthdays = new LinkedHashMap<>();
 
             // Query
-            String query = "SELECT * FROM users WHERE birthdate IS NOT NULL";
+            String query = "SELECT id, birthdate FROM users WHERE birthdate IS NOT NULL";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -274,5 +289,25 @@ public class MySQL extends Driver {
 
     public YEPPConnect getYEPPConnect() {
         return yeppConnect;
+    }
+
+    public enum Table {
+
+        // Tables
+        USERS("users"),
+        CHANNELS("channels");
+
+        // Variables
+        private final String name;
+
+        // Constructor
+        Table(String name) {
+            this.name = name;
+        }
+
+        // Getter
+        public String getName() {
+            return name;
+        }
     }
 }

@@ -7,7 +7,7 @@ import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.ArrayList;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Insult {
 

@@ -6,6 +6,8 @@ import com.github.twitch4j.helix.domain.Moderator;
 import com.github.twitch4j.helix.domain.User;
 import com.github.twitch4j.helix.domain.InboundFollow;
 
+import java.util.HashSet;
+
 @SuppressWarnings("unused")
 public class TwitchUser {
 
@@ -60,6 +62,27 @@ public class TwitchUser {
     public boolean equals(Object obj) {
         if (obj instanceof TwitchUser user) return user.getId() == id && user.getName().equals(name);
         else return false;
+    }
+
+    // Contains
+    public static boolean containsTwitchUser(HashSet<TwitchUser> list, TwitchUser user) {
+        for (TwitchUser u : list) if (u.equals(user)) return true;
+        return false;
+    }
+
+    public static boolean containsTwitchUsers(HashSet<TwitchUser> list, HashSet<TwitchUser> users) {
+        for (TwitchUser user : users) if (!containsTwitchUser(list, user)) return false;
+        return true;
+    }
+
+    public static boolean containsTwitchUser(HashSet<TwitchUser> list, int id) {
+        for (TwitchUser user : list) if (user.getId() == id) return true;
+        return false;
+    }
+
+    public static boolean containsTwitchUser(HashSet<TwitchUser> list, String name) {
+        for (TwitchUser user : list) if (user.getName().equalsIgnoreCase(name)) return true;
+        return false;
     }
 
     // Getter

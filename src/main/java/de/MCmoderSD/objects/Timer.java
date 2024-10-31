@@ -1,10 +1,9 @@
 package de.MCmoderSD.objects;
 
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.utilities.other.Format;
 
-import java.sql.Timestamp;
-
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Timer {
 
@@ -62,11 +61,10 @@ public class Timer {
         counter = 1;
 
         // Log
-        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, "Timer: " + name + ": " + response, BREAK, UNBOLD);
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, Format.getFormattedTimestamp(), COMMAND, channel, "Timer: " + name + ": " + response, BREAK, UNBOLD);
 
         // Send Message
         botClient.respond(new TwitchMessageEvent(
-                new Timestamp(System.currentTimeMillis()),
                 botClient.getHelixHandler().getUser(channel).getId(),
                 botClient.getHelixHandler().getUser(channel).getId(),
                 channel,

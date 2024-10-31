@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import org.json.JSONArray;
@@ -16,14 +14,17 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import java.util.ArrayList;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Weather {
 
@@ -46,7 +47,7 @@ public class Weather {
 
 
     // Constructor
-    public Weather(BotClient botClient, MessageHandler messageHandler, OpenAI openAI, Credentials credentials) {
+    public Weather(BotClient botClient, MessageHandler messageHandler, Chat chat, JsonNode apiConfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "weather <city>, <language>";
@@ -59,10 +60,10 @@ public class Weather {
         errorRetrievingWeatherData = "Fehler beim Abrufen der Wetterdaten.";
 
         // Load API key
-        apiKey = credentials.getAPIConfig().get("openWeatherMap").asText();
+        apiKey = apiConfig.get("openWeatherMap").asText();
 
-        // Get Chat Module and Config
-        chat = openAI.getChat();
+        // Initialize OpenAI
+        this.chat = chat;
         JsonNode openAIConfig = chat.getConfig();
 
         // Get Parameters

@@ -10,7 +10,7 @@ import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
+import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 
 public class Moderate {
 

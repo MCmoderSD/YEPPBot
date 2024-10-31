@@ -9,7 +9,6 @@ import de.MCmoderSD.utilities.database.MySQL;
 
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 
-import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Speech;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public class TTS {
     private final String ttsWasSent;
 
     // Constructor
-    public TTS(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, OpenAI openAI) {
+    public TTS(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, Speech speech) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "prompt <Frage>";
@@ -32,8 +31,7 @@ public class TTS {
         // Constants
         ttsWasSent = "TTS wurde gesendet YEPP";
 
-        // Get TTS Module and Config
-        Speech speech = openAI.getSpeech();
+        // Get TTS Config
         JsonNode config = speech.getConfig();
 
         // Get Parameters

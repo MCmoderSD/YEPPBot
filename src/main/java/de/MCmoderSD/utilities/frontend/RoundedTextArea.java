@@ -15,7 +15,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 
-import static de.MCmoderSD.utilities.other.Calculate.BREAK;
+import static de.MCmoderSD.utilities.other.Format.BREAK;
 
 public class RoundedTextArea extends JScrollPane {
 

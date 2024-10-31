@@ -56,11 +56,11 @@ build/
 
 ### config ###
 /src/main/resources/config/BotConfig.json
-/src/main/resources/config/BotConfig.json.dev
+/src/main/resources/config/DevConfig.json
 /src/main/resources/config/Channel.list
-/src/main/resources/config/Channel.list.dev
+/src/main/resources/config/Dev.list
 /src/main/resources/config/httpsServer.json
-/src/main/resources/config/httpsServer.json.dev
+/src/main/resources/config/DevHttpsServer.json
 
 ### meta-inf ###
 /src/main/resources/META-INF/

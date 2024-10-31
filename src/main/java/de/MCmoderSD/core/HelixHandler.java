@@ -4,18 +4,36 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.philippheuer.events4j.core.EventManager;
+
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
-import com.github.twitch4j.helix.domain.*;
+import com.github.twitch4j.helix.domain.ChannelVip;
+import com.github.twitch4j.helix.domain.ChannelVipList;
+import com.github.twitch4j.helix.domain.ChannelEditor;
+import com.github.twitch4j.helix.domain.ChannelEditorList;
+import com.github.twitch4j.helix.domain.InboundFollow;
+import com.github.twitch4j.helix.domain.InboundFollowers;
+import com.github.twitch4j.helix.domain.Moderator;
+import com.github.twitch4j.helix.domain.ModeratorList;
+import com.github.twitch4j.helix.domain.User;
+import com.github.twitch4j.helix.domain.UserList;
+import com.github.twitch4j.helix.domain.HelixPagination;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,9 +47,8 @@ import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
 import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.server.Server;
-import org.jetbrains.annotations.Nullable;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class HelixHandler {
@@ -165,7 +182,7 @@ public class HelixHandler {
             tokenManager.refreshTokens(encryption.encrypt(token.getRefreshToken()), encryption.encrypt(accessToken), encryption.encrypt(refreshToken), expiresIn);
 
             // Return new token
-            return new AuthToken(token.getId(), accessToken, refreshToken, token.getScopesAsString(), expiresIn, getTimestamp());
+            return new AuthToken(token.getId(), accessToken, refreshToken, token.getScopesAsString(), expiresIn, new Timestamp(System.currentTimeMillis()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to refresh token");
         }
@@ -327,7 +344,7 @@ public class HelixHandler {
         // Check if cache is up to date
         boolean cacheUpToDate = cursor == null;
         HashSet<TwitchUser> cache = moderators.get(channelId);
-        if (cacheUpToDate && cache != null && containsTwitchUsers(cache, twitchUsers)) return cache;
+        if (cacheUpToDate && cache != null && TwitchUser.containsTwitchUsers(cache, twitchUsers)) return cache;
 
         // Check if there are more moderators
         HelixPagination pagination = moderatorList.getPagination();
@@ -390,7 +407,7 @@ public class HelixHandler {
         // Check if cache is up to date
         boolean cacheUpToDate = cursor == null;
         HashSet<TwitchUser> cache = vips.get(channelId);
-        if (cacheUpToDate && cache != null && containsTwitchUsers(cache, twitchUsers)) return cache;
+        if (cacheUpToDate && cache != null && TwitchUser.containsTwitchUsers(cache, twitchUsers)) return cache;
 
         // Check if there are more VIPs
         HelixPagination pagination = vipList.getPagination();
@@ -435,7 +452,7 @@ public class HelixHandler {
         // Check if cache is up to date
         boolean cacheUpToDate = cursor == null;
         HashSet<TwitchUser> cache = followers.get(channelId);
-        if (cacheUpToDate && cache != null && containsTwitchUsers(cache, twitchUsers)) return cache;
+        if (cacheUpToDate && cache != null && TwitchUser.containsTwitchUsers(cache, twitchUsers)) return cache;
 
         // Check if there are more followers
         HelixPagination pagination = inboundFollowers.getPagination();
@@ -521,7 +538,7 @@ public class HelixHandler {
                         tokenManager.addToken(id, name, encryption.encrypt(accessToken), encryption.encrypt(refreshToken), scopes, expiresIn);
 
                         // Add to cache
-                        authTokens.put(id, new AuthToken(id, accessToken, refreshToken, scopes, expiresIn, getTimestamp()));
+                        authTokens.put(id, new AuthToken(id, accessToken, refreshToken, scopes, expiresIn, new Timestamp(System.currentTimeMillis())));
                     }
                 }
             }

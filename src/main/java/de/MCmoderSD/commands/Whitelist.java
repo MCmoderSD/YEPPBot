@@ -8,7 +8,7 @@ import de.MCmoderSD.utilities.database.MySQL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
+import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 
 public class Whitelist {
 

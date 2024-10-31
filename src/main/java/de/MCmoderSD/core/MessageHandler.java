@@ -7,6 +7,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
+
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -15,7 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class MessageHandler {
 
@@ -139,7 +140,6 @@ public class MessageHandler {
 
                 // Send message
                 if (lurkChannel.size() < 3) botClient.respond(new TwitchMessageEvent(
-                        event.getTimestamp(),
                         lurkChannel.getFirst(),
                         event.getUserId(),
                         botClient.getHelixHandler().getUser(lurkChannel.getFirst()).getName(),

@@ -3,6 +3,7 @@ package de.MCmoderSD.objects;
 import de.MCmoderSD.core.HelixHandler;
 
 import java.sql.Timestamp;
+
 import java.util.Arrays;
 
 @SuppressWarnings("unused")
@@ -28,7 +29,7 @@ public class AuthToken {
         this.expiresIn = expiresIn;
         this.timestamp = timestamp;
 
-        // Calculate next refresh
+        // Format next refresh
         nextRefresh = new Timestamp(timestamp.getTime() + (expiresIn - 180) * 1000L);
     }
 

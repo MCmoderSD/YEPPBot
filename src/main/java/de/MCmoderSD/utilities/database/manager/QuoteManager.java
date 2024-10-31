@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 
 public class QuoteManager {
@@ -45,6 +46,10 @@ public class QuoteManager {
                     )
                     """
             ).execute();
+
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -65,6 +70,10 @@ public class QuoteManager {
 
             // Add Quotes
             while (resultSet.next()) quotes.add(resultSet.getString("quote"));
+
+            // Close resources
+            resultSet.close();
+            statement.close();
 
             // Return
             return quotes;
@@ -89,6 +98,9 @@ public class QuoteManager {
             statement.setString(3, quote);
             statement.execute();
 
+            // Close resources
+            statement.close();
+
             // Return
             return String.format("Added quote #%d: %s", quoteIndex + 1, quote);
         } catch (SQLException e) {
@@ -107,6 +119,9 @@ public class QuoteManager {
             statement.setInt(1, channel_id);
             statement.setInt(2, quote_id);
             statement.execute();
+
+            // Close resources
+            statement.close();
 
             // Reorder
             reorderQuotes(channel_id);
@@ -130,6 +145,9 @@ public class QuoteManager {
             statement.setInt(2, channel_id);
             statement.setInt(3, quote_id);
             statement.execute();
+
+            // Close resources
+            statement.close();
 
             // Return
             return String.format("Edited quote #%d to %s", quote_id + 1, quote);
@@ -156,13 +174,17 @@ public class QuoteManager {
             while (resultSet.next()) quoteIds.add(resultSet.getInt("quote_id"));
 
             // Reorder
-            for (int i = 0; i < quoteIds.size(); i++) {
+            for (var i = 0; i < quoteIds.size(); i++) {
                 PreparedStatement reorderStatement = connection.prepareStatement("UPDATE Quotes SET quote_id = ? WHERE channel_id = ? AND quote_id = ?");
                 reorderStatement.setInt(1, i);
                 reorderStatement.setInt(2, channel_id);
                 reorderStatement.setInt(3, quoteIds.get(i));
                 reorderStatement.execute();
             }
+
+            // Close resources
+            resultSet.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

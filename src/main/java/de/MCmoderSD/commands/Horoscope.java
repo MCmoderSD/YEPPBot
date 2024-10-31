@@ -5,20 +5,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.api.ProkeralaAPI;
 import de.MCmoderSD.utilities.database.MySQL;
 
-import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Horoscope {
 
@@ -38,7 +36,7 @@ public class Horoscope {
     private int apiSwaps = 0;
 
     // Constructor
-    public Horoscope(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, Credentials credentials, HelixHandler helixHandler, OpenAI openAI) {
+    public Horoscope(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler, Chat chat, JsonNode apiconfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "horoscope @<user> <language>";
@@ -54,13 +52,12 @@ public class Horoscope {
         errorGettingHoroscope = "Fehler beim Abrufen des Horoskops.";
 
         // Load ProkeralaAPI Credentials
-        JsonNode prokeralaConfig = credentials.getAPIConfig().get("astrology");
+        JsonNode prokeralaConfig = apiconfig.get("astrology");
         clientIDs = prokeralaConfig.get("clientId").asText().split(", ");
         clientSecrets = prokeralaConfig.get("clientSecret").asText().split(", ");
         initAPI();
 
-        // Get Chat Module and Config
-        Chat chat = openAI.getChat();
+        // Get Chat Config
         JsonNode config = chat.getConfig();
 
         // Get Parameters

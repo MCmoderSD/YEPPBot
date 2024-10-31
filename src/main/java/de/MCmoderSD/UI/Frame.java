@@ -1,29 +1,32 @@
 package de.MCmoderSD.UI;
 
-import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.imageloader.ImageLoader;
 
 import javax.swing.JFrame;
-import java.awt.*;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
 import java.io.IOException;
+
 import java.net.URISyntaxException;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.main.Main.VERSION;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Frame extends JFrame {
 
     // Associations
-    private final Main main;
     private final MenuPanel menuPanel;
     private final LogPanel logPanel;
 
     // Constructor
-    public Frame(Main main) {
+    public Frame() {
 
         // Init Frame
-        super("YEPPBot v" + Main.VERSION);
+        super("YEPPBot v" + VERSION);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -34,7 +37,6 @@ public class Frame extends JFrame {
 
         // Set Layout
         setLayout(new BorderLayout());
-        this.main = main;
 
         // Icon
         ImageLoader imageLoader = new ImageLoader();
@@ -80,9 +82,5 @@ public class Frame extends JFrame {
     // Getter
     public String getChannel() {
         return menuPanel.getChannel();
-    }
-
-    public BotClient getBotClient() {
-        return main.getBotClient();
     }
 }

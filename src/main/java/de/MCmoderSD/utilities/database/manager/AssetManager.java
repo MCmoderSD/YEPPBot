@@ -2,15 +2,16 @@ package de.MCmoderSD.utilities.database.manager;
 
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.other.Reader;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
+import static de.MCmoderSD.utilities.other.Util.readAllLines;
 
 public class AssetManager {
 
@@ -82,6 +83,10 @@ public class AssetManager {
                     )
                     """
             ).execute();
+
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -95,14 +100,13 @@ public class AssetManager {
             Connection connection = mySQL.getConnection();
 
             // Check if jokes are already in the database
-            String countQuery = "SELECT COUNT(*) FROM factList";
+            String countQuery = "SELECT COUNT(fact_id) FROM factList";
             PreparedStatement countStatement = connection.prepareStatement(countQuery);
             ResultSet countResult = countStatement.executeQuery();
             countResult.next();
             if (countResult.getInt(1) > 0) return;
 
-            Reader reader = new Reader();
-            ArrayList<String> facts = reader.lineRead("/assets/factList.tsv");
+            ArrayList<String> facts = readAllLines("/assets/factList.tsv");
             ArrayList<String> en_percent = new ArrayList<>();
             ArrayList<String> en_people = new ArrayList<>();
             ArrayList<String> en_verb = new ArrayList<>();
@@ -235,6 +239,9 @@ public class AssetManager {
                 preparedStatement.executeUpdate();
             }
 
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -248,14 +255,13 @@ public class AssetManager {
             Connection connection = mySQL.getConnection();
 
             // Check if jokes are already in the database
-            String countQuery = "SELECT COUNT(*) FROM insultList";
+            String countQuery = "SELECT COUNT(insult_id) FROM insultList";
             PreparedStatement countStatement = connection.prepareStatement(countQuery);
             ResultSet countResult = countStatement.executeQuery();
             countResult.next();
             if (countResult.getInt(1) > 0) return;
 
-            Reader reader = new Reader();
-            ArrayList<String> insults = reader.lineRead("/assets/insultList.tsv");
+            ArrayList<String> insults =  readAllLines("/assets/insultList.tsv");
             ArrayList<String> en = new ArrayList<>();
             ArrayList<String> de = new ArrayList<>();
 
@@ -288,6 +294,9 @@ public class AssetManager {
                 preparedStatement.executeUpdate();
             }
 
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -301,14 +310,13 @@ public class AssetManager {
             Connection connection = mySQL.getConnection();
 
             // Check if jokes are already in the database
-            String countQuery = "SELECT COUNT(*) FROM jokeList";
+            String countQuery = "SELECT COUNT(joke_id) FROM jokeList";
             PreparedStatement countStatement = connection.prepareStatement(countQuery);
             ResultSet countResult = countStatement.executeQuery();
             countResult.next();
             if (countResult.getInt(1) > 0) return;
 
-            Reader reader = new Reader();
-            ArrayList<String> jokes = reader.lineRead("/assets/jokeList.tsv");
+            ArrayList<String> jokes =  readAllLines("/assets/jokeList.tsv");
             ArrayList<String> en = new ArrayList<>();
             ArrayList<String> de = new ArrayList<>();
 
@@ -340,6 +348,9 @@ public class AssetManager {
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
+
+            // Close resources
+            connection.close();
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -374,7 +385,7 @@ public class AssetManager {
                 Connection connection = mySQL.getConnection();
 
                 // Get the total number of fact parts
-                String countQuery = "SELECT COUNT(*) FROM factList WHERE " + lang + part + " IS NOT NULL";
+                String countQuery = "SELECT COUNT(fact_id) FROM factList WHERE " + lang + part + " IS NOT NULL";
                 PreparedStatement countStatement = connection.prepareStatement(countQuery);
                 ResultSet countResult = countStatement.executeQuery();
 
@@ -391,6 +402,9 @@ public class AssetManager {
                 // Get the fact part
                 factResult.next();
                 fact.append(factResult.getString(lang + part)).append(" ");
+
+                // Close resources
+                factResult.close();
 
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
@@ -423,7 +437,7 @@ public class AssetManager {
 
 
             // Get the total number of insults
-            String countQuery = "SELECT COUNT(*) FROM insultList WHERE " + lang + " IS NOT NULL";
+            String countQuery = "SELECT COUNT(insult_id) FROM insultList WHERE " + lang + " IS NOT NULL";
             PreparedStatement countStatement = connection.prepareStatement(countQuery);
             ResultSet countResult = countStatement.executeQuery();
 
@@ -469,7 +483,7 @@ public class AssetManager {
             Connection connection = mySQL.getConnection();
 
             // Get the total number of jokes
-            String countQuery = "SELECT COUNT(*) FROM jokeList WHERE " + lang + " IS NOT NULL";
+            String countQuery = "SELECT COUNT(joke_id) FROM jokeList WHERE " + lang + " IS NOT NULL";
             PreparedStatement countStatement = connection.prepareStatement(countQuery);
             ResultSet countResult = countStatement.executeQuery();
 
@@ -505,6 +519,11 @@ public class AssetManager {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) return new AudioFile(resultSet.getBytes("audioData"));
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

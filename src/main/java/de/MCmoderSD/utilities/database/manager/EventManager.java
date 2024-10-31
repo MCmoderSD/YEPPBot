@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -46,6 +47,10 @@ public class EventManager {
                         )
                         """, table)).execute();
             }
+
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -64,6 +69,9 @@ public class EventManager {
             preparedStatement.setInt(1, Calendar.getInstance().get(Calendar.YEAR));
             preparedStatement.setInt(2, id);
             preparedStatement.executeUpdate();
+
+            // Close resources
+            preparedStatement.close();
 
             // Check if user is registered
             return isJoined(id, event);
@@ -90,6 +98,9 @@ public class EventManager {
             preparedStatement.setInt(1, Calendar.getInstance().get(Calendar.YEAR));
             preparedStatement.setInt(2, id);
             preparedStatement.executeUpdate();
+
+            // Close resources
+            preparedStatement.close();
 
             // Check if user has left
             return hasLeft(id, event);
@@ -144,6 +155,10 @@ public class EventManager {
             preparedStatement.setInt(1, Calendar.getInstance().get(Calendar.YEAR));
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) participants.put(resultSet.getInt("id"), resultSet.getObject("gave_up") != null);
+
+            // Close resources
+            preparedStatement.close();
+
             return participants;
         } catch (SQLException e) {
             System.err.println(e.getMessage());

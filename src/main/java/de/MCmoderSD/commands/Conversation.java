@@ -6,13 +6,12 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Conversation {
 
@@ -20,7 +19,7 @@ public class Conversation {
     private final String conversationSuspended;
 
     // Constructor
-    public Conversation(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
+    public Conversation(BotClient botClient, MessageHandler messageHandler, Chat chat) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "chat <message/reset>)";
@@ -32,8 +31,7 @@ public class Conversation {
         // Constants
         conversationSuspended = "Die Unterhaltung wurde beendet YEPP";
 
-        // Get Chat Module and Config
-        Chat chat = openAI.getChat();
+        // Get Chat Config
         JsonNode config = chat.getConfig();
 
         // Get Parameters

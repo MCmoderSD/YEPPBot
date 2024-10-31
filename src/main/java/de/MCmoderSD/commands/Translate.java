@@ -6,12 +6,11 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import java.util.ArrayList;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Translate {
 
@@ -23,7 +22,7 @@ public class Translate {
     private final double presencePenalty;
 
     // Constructor
-    public Translate(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
+    public Translate(BotClient botClient, MessageHandler messageHandler, Chat chat) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "translate <Sprache> <Text>";
@@ -33,7 +32,6 @@ public class Translate {
         String description = "Kann deine Sätze in jede erdenkliche Sprache übersetzen. " + syntax;
 
         // Load Config
-        Chat chat = openAI.getChat();
         JsonNode config = chat.getConfig();
 
         // Get Parameters

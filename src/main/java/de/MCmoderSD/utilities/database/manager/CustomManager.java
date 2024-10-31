@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,6 +79,10 @@ public class CustomManager {
                     )
                     """
             ).execute();
+
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -109,6 +114,10 @@ public class CustomManager {
                         .computeIfAbsent(channelId, k -> new HashMap<>())
                         .put(commandName, commandResponse);
             }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -149,6 +158,10 @@ public class CustomManager {
                 }
             }
 
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -172,6 +185,10 @@ public class CustomManager {
             preparedStatement.setInt(1, event.getChannelId()); // set channel
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) commands.add(resultSet.getString("command_name"));
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -205,6 +222,10 @@ public class CustomManager {
                 for (String name : aliasList) aliases.put(name, command);
             }
 
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -237,6 +258,10 @@ public class CustomManager {
             preparedStatement.setString(4, commandResponse); // set response
             preparedStatement.setBoolean(5, true); // set isEnabled
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -261,6 +286,10 @@ public class CustomManager {
             preparedStatement.setInt(2, event.getChannelId()); // set channel
             preparedStatement.setString(3, command); // set command
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -285,6 +314,10 @@ public class CustomManager {
             preparedStatement.setInt(1, event.getChannelId()); // set channel
             preparedStatement.setString(2, command); // set command
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -320,6 +353,10 @@ public class CustomManager {
                         .put(counterName, counterValue);
             }
 
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -346,6 +383,10 @@ public class CustomManager {
             // Add to List
             while (resultSet.next()) counters.put(resultSet.getString("name"), resultSet.getInt("value"));
 
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -364,6 +405,10 @@ public class CustomManager {
             preparedStatement.setString(2, counter); // set counter
             preparedStatement.setInt(3, 0); // set value
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -383,6 +428,10 @@ public class CustomManager {
             preparedStatement.setInt(2, event.getChannelId()); // set channel
             preparedStatement.setString(3, counter); // set counter
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -402,6 +451,10 @@ public class CustomManager {
             preparedStatement.setInt(1, event.getChannelId()); // set channel
             preparedStatement.setString(2, counter); // set counter
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -439,6 +492,10 @@ public class CustomManager {
                 customTimers.computeIfAbsent(channelId, k -> new HashSet<>(Set.of(timer)));
             }
 
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -470,6 +527,10 @@ public class CustomManager {
                 customTimers.put(name, new Timer(botClient, event.getChannel(), name, time, response));
             }
 
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -499,6 +560,10 @@ public class CustomManager {
                 customTimers.add(new Timer(botClient, event.getChannel(), name, time, response));
             }
 
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -519,6 +584,10 @@ public class CustomManager {
             preparedStatement.setString(3, time); // set time
             preparedStatement.setString(4, response); // set response
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -540,6 +609,10 @@ public class CustomManager {
             preparedStatement.setInt(4, event.getChannelId()); // set channel
             preparedStatement.setString(5, name); // set name
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";
@@ -559,6 +632,10 @@ public class CustomManager {
             preparedStatement.setInt(1, event.getChannelId()); // set channel
             preparedStatement.setString(2, name); // set name
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return "Error: Database error";

@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -48,6 +49,10 @@ public class LurkManager {
                     )
                     """
             ).execute();
+
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -75,6 +80,10 @@ public class LurkManager {
             preparedStatement.setInt(2, channelID); // set channel
             preparedStatement.setTimestamp(3, event.getTimestamp()); // set timestamp
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -98,6 +107,10 @@ public class LurkManager {
 
             // Add to List
             while (resultSet.next()) lurkList.put(resultSet.getInt("user_id"), resultSet.getInt("lurkChannel_ID"));
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -140,6 +153,10 @@ public class LurkManager {
                 for (String name : traitorChannel) if (!name.isEmpty()) channels.add(Integer.parseInt(name));
             }
 
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -159,6 +176,10 @@ public class LurkManager {
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, userID); // set user
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -180,6 +201,10 @@ public class LurkManager {
                 preparedStatement.setString(1, traitors); // set traitor
                 preparedStatement.setInt(2, userID); // set user
                 preparedStatement.executeUpdate(); // execute
+
+                // Close resources
+                preparedStatement.close();
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }

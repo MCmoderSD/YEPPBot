@@ -3,11 +3,12 @@ package de.MCmoderSD.UI;
 import de.MCmoderSD.utilities.frontend.RoundedTextArea;
 
 import javax.swing.JPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class LogPanel extends JPanel {
 

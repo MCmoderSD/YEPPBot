@@ -11,42 +11,70 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
-import de.MCmoderSD.commands.*;
+import de.MCmoderSD.OpenAI.OpenAI;
+import de.MCmoderSD.OpenAI.modules.Chat;
+import de.MCmoderSD.commands.Birthday;
+import de.MCmoderSD.commands.Conversation;
+import de.MCmoderSD.commands.Counter;
+import de.MCmoderSD.commands.CustomCommand;
+import de.MCmoderSD.commands.CustomTimers;
+import de.MCmoderSD.commands.DickDestroyDecember;
+import de.MCmoderSD.commands.Fact;
+import de.MCmoderSD.commands.Gif;
+import de.MCmoderSD.commands.Help;
+import de.MCmoderSD.commands.Horoscope;
+import de.MCmoderSD.commands.Info;
+import de.MCmoderSD.commands.Insult;
+import de.MCmoderSD.commands.Joke;
+import de.MCmoderSD.commands.Join;
+import de.MCmoderSD.commands.Lurk;
+import de.MCmoderSD.commands.Match;
+import de.MCmoderSD.commands.Moderate;
+import de.MCmoderSD.commands.NoNutNovember;
+import de.MCmoderSD.commands.Ping;
+import de.MCmoderSD.commands.Play;
+import de.MCmoderSD.commands.Prompt;
+import de.MCmoderSD.commands.Quote;
+import de.MCmoderSD.commands.Say;
+import de.MCmoderSD.commands.Status;
+import de.MCmoderSD.commands.TTS;
+import de.MCmoderSD.commands.Translate;
+import de.MCmoderSD.commands.Weather;
+import de.MCmoderSD.commands.Whitelist;
+import de.MCmoderSD.commands.Wiki;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
+import de.MCmoderSD.main.Terminal;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.other.Reader;
+import de.MCmoderSD.utilities.other.Format;
 import de.MCmoderSD.utilities.server.AudioBroadcast;
 import de.MCmoderSD.utilities.server.Server;
 
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
-import de.MCmoderSD.json.JsonUtility;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static de.MCmoderSD.main.Main.Argument.*;
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.main.Terminal.Argument.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 @SuppressWarnings("unused")
 public class BotClient {
 
     public static final String PROVIDER = "twitch";
+    public static final long RATE_LIMIT = 250L;
 
     // Associations
-    private final Main main;
     private final MySQL mySQL;
     private final Frame frame;
     private final Server server;
     private final AudioBroadcast audioBroadcast;
-
-    // Utilities
-    private final JsonUtility jsonUtility;
-    private final Reader reader;
 
     // Constants
     public static String botName;
@@ -93,17 +121,11 @@ public class BotClient {
     private boolean log;
 
     // Constructor
-    public BotClient(Main main) {
+    public BotClient(Credentials credentials, MySQL mySQL, @Nullable Frame frame, @Nullable OpenAI openAI) {
 
-        // Get Associations
-        Credentials credentials = main.getCredentials();
-        mySQL = main.getMySQL();
-        frame = main.getFrame();
-        this.main = main;
-
-        // Get Utilities
-        jsonUtility = main.getJsonUtility();
-        reader = main.getReader();
+        // Init Associations
+        this.mySQL = mySQL;
+        this.frame = frame;
 
         // Init Bot Credentials
         botConfig = credentials.getBotConfig();
@@ -124,15 +146,15 @@ public class BotClient {
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
         // Init Attributes
-        cli = main.hasArg(CLI);
-        log = !main.hasArg(NOLOG);
+        cli = Main.terminal.hasArg(CLI);
+        log = Main.terminal.hasArg(NO_LOG);
 
         // Init HTTPS Server
         JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
-        if (!main.hasArg(DEV) && httpsServerConfig.get("hostname").asText().contains(".")) server = new Server(this, httpsServerConfig); // Default
+        if (!Main.terminal.hasArg(DEV) && httpsServerConfig.get("hostname").asText().contains(".")) server = new Server(this, httpsServerConfig); // Default
         else { // Custom or Dev Mode
-            String hostname = main.hasArg(HOST) ? Main.arguments[0] : httpsServerConfig.get("hostname").asText();
-            int port = main.hasArg(PORT) ? Integer.parseInt(Main.arguments[1]) : httpsServerConfig.get("port").asInt();
+            String hostname = Main.terminal.hasArg(HOST) ? Main.terminal.getArgs()[0] : httpsServerConfig.get("hostname").asText();
+            int port = Main.terminal.hasArg(PORT) ? Integer.parseInt(Main.terminal.getArgs()[1]) : httpsServerConfig.get("port").asInt();
             server = new Server(this, hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
         }
 
@@ -161,67 +183,80 @@ public class BotClient {
         // Init Audio Broadcast
         audioBroadcast = new AudioBroadcast(server);
 
-        // Join Channels
-        HashSet<String> channelList = new HashSet<>();
-        if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
-        if (!main.hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
-        channelList = (HashSet<String>) channelList.stream().map(String::toLowerCase).collect(Collectors.toSet());
-        channelList.remove(botName);
-        joinChannel(channelList);
-
         // Init Handlers
         messageHandler = new MessageHandler(this, mySQL);
         eventHandler = new EventHandler(this, frame, mySQL.getLogManager(), eventManager, messageHandler);
 
-        // Init Commands
-        initCommands(credentials);
-
-        // Show UI
-        setUI(!cli);
-    }
-
-    // Command Initialization
-    private void initCommands(Credentials credentials) {
-
-        // Validate Configs
+        // Check Modules
         boolean astrology = credentials.hasAstrology();
         boolean weather = credentials.hasOpenWeatherMap();
         boolean giphy = credentials.hasGiphy();
-        boolean openAI = credentials.validateOpenAIConfig();
         boolean openAIChat = credentials.validateOpenAIChatConfig();
         boolean openAIImage = credentials.validateOpenAIImageConfig();
         boolean openAITTS = credentials.validateOpenAITTSConfig();
 
-        // Initialize Commands
-        new Birthday(this, messageHandler, mySQL, helixHandler);
-        if (openAIChat) new Conversation(this, messageHandler, main.getOpenAI());
+        // Loading Standard Commands
+        new Join(this, messageHandler);
+        new Ping(this, messageHandler);
+        new Play(this, messageHandler);
+        new Say(this, messageHandler);
+        new Status(this, messageHandler);
+
+        // Loading Database Commands
         new Counter(this, messageHandler, mySQL);
         new CustomCommand(this, messageHandler, mySQL);
         new CustomTimers(this, messageHandler, mySQL);
-        new DickDestroyDecember(this, messageHandler, mySQL, helixHandler);
         new Fact(this, messageHandler, mySQL);
-        if (giphy) new Gif(this, messageHandler, credentials);
         new Help(this, messageHandler, mySQL);
-        if (astrology && openAIChat) new Horoscope(this, messageHandler, mySQL, credentials, helixHandler, main.getOpenAI());
-        new Info(this, messageHandler, helixHandler);
         new Insult(this, messageHandler, mySQL);
-        new Join(this, messageHandler);
         new Joke(this, messageHandler, mySQL);
         new Lurk(this, messageHandler, mySQL);
-        if (openAIChat) new Match(this, messageHandler, helixHandler, main.getOpenAI());
+        new Quote(this, messageHandler, mySQL);
+        new Whitelist(this, messageHandler, mySQL);
+
+        // Loading Twitch API Commands
+        new Birthday(this, messageHandler, mySQL, helixHandler);
+        new DickDestroyDecember(this, messageHandler, mySQL, helixHandler);
+        new Info(this, messageHandler, helixHandler);
         new Moderate(this, messageHandler, mySQL, helixHandler);
         new NoNutNovember(this, messageHandler, mySQL, helixHandler);
-        new Ping(this, messageHandler);
-        new Play(this, messageHandler);
-        if (openAIChat) new Prompt(this, messageHandler, main.getOpenAI());
-        new Quote(this, messageHandler, mySQL);
-        new Say(this, messageHandler);
-        new Status(this, messageHandler);
-        if (openAIChat) new Translate(this, messageHandler, main.getOpenAI());
-        if (openAITTS) new TTS(this, messageHandler, mySQL, main.getOpenAI());
-        if (openAIChat && weather) new Weather(this, messageHandler, main.getOpenAI(), credentials);
-        new Whitelist(this, messageHandler, mySQL);
-        if (openAIChat) new Wiki(this, messageHandler, main.getOpenAI());
+
+        // Loading OpenAI Chat Commands
+        if (openAIChat) {
+            Chat chatModule = Objects.requireNonNull(openAI).getChat();
+            new Conversation(this, messageHandler, chatModule);
+            new Match(this, messageHandler, mySQL, helixHandler, chatModule);
+            new Translate(this, messageHandler, chatModule);
+            new Prompt(this, messageHandler, chatModule);
+            new Wiki(this, messageHandler, chatModule);
+        }
+
+        // Loading OpenAI TTS Commands
+        if (openAITTS) new TTS(this, messageHandler, mySQL, Objects.requireNonNull(openAI).getSpeech());
+
+        // API & OpenAI Commands
+        if (giphy || astrology || weather) {
+            JsonNode apiConfig = credentials.getAPIConfig();
+            if (giphy) new Gif(this, messageHandler, apiConfig);
+            if (openAIChat && astrology) new Horoscope(this, messageHandler, mySQL, helixHandler, openAI.getChat(), apiConfig);
+            if (openAIChat && weather) new Weather(this, messageHandler, openAI.getChat(), apiConfig);
+        }
+
+        // Show UI
+        setUI(!cli);
+
+        // Print Startup Complete
+        System.out.println("Startup Complete");
+        System.out.println("Took " + (System.nanoTime() - Terminal.startTime) / 1_000_000 + "ms");
+        System.out.println("Bot is now running and started joining channels");
+
+        // Join Channels
+        HashSet<String> channelList = new HashSet<>();
+        if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
+        if (!Main.terminal.hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
+        channelList = (HashSet<String>) channelList.stream().map(String::toLowerCase).collect(Collectors.toSet());
+        channelList.remove(botName);
+        joinChannel(channelList);
     }
 
     // UI
@@ -247,7 +282,7 @@ public class BotClient {
 
         // Log
         if (log) mySQL.getLogManager().logResponse(channel, botName, message, helixHandler);
-        System.out.printf("%s %s <%s> %s: %s%s", logTimestamp(), USER, channel, botName, message, BREAK);
+        System.out.printf("%s %s <%s> %s: %s%s", Format.getFormattedTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
         chat.sendMessage(channel, message);
@@ -264,8 +299,8 @@ public class BotClient {
 
         // Log
         if (log) mySQL.getLogManager().logResponse(event, command, message);
-        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
-        if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, logTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, Format.getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
+        if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, Format.getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
         // Send Message
         if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
@@ -299,7 +334,7 @@ public class BotClient {
         var id = helixHandler.getUser(channel).getId();
 
         // Log
-        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
 
         // Join Channel
         chat.joinChannel(channel);
@@ -319,7 +354,7 @@ public class BotClient {
             try {
                 for (String channel : channels) {
                     joinChannel(channel);
-                    Thread.sleep(250); // Prevent rate limit
+                    Thread.sleep(RATE_LIMIT); // Prevent rate limit
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -339,12 +374,12 @@ public class BotClient {
         if (channel.contains(" ") || !chat.isChannelJoined(channel) || botName.equals(channel)) return;
 
         // Leave Channel
-        if (chat.leaveChannel(channel)) System.out.printf("%s%s %s Left Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
-        else System.out.printf("%s%s %s Failed to Leave Channel: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        if (chat.leaveChannel(channel)) System.out.printf("%s%s %s Left Channel: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        else System.out.printf("%s%s %s Failed to Leave Channel: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
 
         // Unregister Broadcast
-        if (audioBroadcast.unregisterBroadcast(channel)) System.out.printf("%s%s %s Unregistered Broadcast: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
-        else System.out.printf("%s%s %s Failed to Unregister Broadcast: %s%s%s", BOLD, logTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        if (audioBroadcast.unregisterBroadcast(channel)) System.out.printf("%s%s %s Unregistered Broadcast: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        else System.out.printf("%s%s %s Failed to Unregister Broadcast: %s%s%s", BOLD, Format.getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
     }
 
     // Bulk Leave
@@ -353,7 +388,7 @@ public class BotClient {
             try {
                 for (String channel : channels) {
                     leaveChannel(channel);
-                    Thread.sleep(250); // Prevent rate limit
+                    Thread.sleep(RATE_LIMIT); // Prevent rate limit
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -464,6 +499,10 @@ public class BotClient {
         return prefix;
     }
 
+    public String[] getPrefixes() {
+        return prefixes;
+    }
+
     public HashSet<String> getAdmins() {
         return admins;
     }
@@ -536,10 +575,6 @@ public class BotClient {
     }
 
     // Association Getter
-    public Main getMain() {
-        return main;
-    }
-
     public MySQL getMySQL() {
         return mySQL;
     }
@@ -554,14 +589,5 @@ public class BotClient {
 
     public AudioBroadcast getAudioBroadcast() {
         return audioBroadcast;
-    }
-
-    // Utility Getter
-    public JsonUtility getJsonUtility() {
-        return jsonUtility;
-    }
-
-    public Reader getReader() {
-        return reader;
     }
 }

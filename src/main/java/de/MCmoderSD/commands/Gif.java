@@ -1,8 +1,8 @@
 package de.MCmoderSD.commands;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import org.json.JSONObject;
@@ -14,7 +14,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Gif {
 
@@ -22,7 +22,7 @@ public class Gif {
     private final String apiKey;
 
     // Constructor
-    public Gif(BotClient botClient, MessageHandler messageHandler, Credentials credentials) {
+    public Gif(BotClient botClient, MessageHandler messageHandler, JsonNode apiConfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "gif <Thema>";
@@ -32,7 +32,7 @@ public class Gif {
         String description = "Sendet ein GIF zu einem bestimmten Thema. " + syntax;
 
         // Load API key
-        apiKey = credentials.getAPIConfig().get("giphy").asText();
+        apiKey = apiConfig.get("giphy").asText();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {

@@ -7,20 +7,20 @@ import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.other.Calculate;
 
 import javax.management.InvalidAttributeValueException;
+
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.temporal.WeekFields;
+
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.cleanArgs;
+import static de.MCmoderSD.utilities.other.Util.removeNonFollower;
+import static de.MCmoderSD.utilities.other.Util.sortBirthdays;
 
 public class Birthday {
 
@@ -170,10 +170,7 @@ public class Birthday {
 
 
                 // Get Birthdays
-                birthdays = Calculate.getBirthdayList(event, botClient).entrySet()
-                        .stream()
-                        .sorted(Map.Entry.comparingByValue(Comparator.comparing(Birthdate::getDaysUntilBirthday)))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                birthdays = sortBirthdays(removeNonFollower(event, mySQL.getBirthdays(), helixHandler));
 
 
                 // Check Verb

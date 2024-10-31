@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static de.MCmoderSD.utilities.other.Calculate.cleanArgs;
+import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 
 public class Counter {
 

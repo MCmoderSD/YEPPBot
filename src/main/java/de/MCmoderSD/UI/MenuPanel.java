@@ -1,6 +1,6 @@
 package de.MCmoderSD.UI;
 
-import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.main.Main;
 import de.MCmoderSD.utilities.frontend.RoundedButton;
 import de.MCmoderSD.utilities.frontend.RoundedTextField;
 
@@ -8,20 +8,19 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import javax.swing.border.LineBorder;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
 import java.util.Stack;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 import static java.awt.event.KeyEvent.*;
 
 public class MenuPanel extends JPanel {
-
-    // Associations
-    private final Frame frame;
 
     // Attributes
     private final RoundedTextField channelField;
@@ -111,13 +110,12 @@ public class MenuPanel extends JPanel {
 
         frame.add(this, BorderLayout.SOUTH);
         frame.pack();
-        this.frame = frame;
     }
 
     // Send Message
     private void sendMessage() {
-        BotClient botClient = frame.getBotClient();
 
+        // Variables
         String channel = getChannel();
         String message = trimMessage(textField.getText());
 
@@ -128,11 +126,11 @@ public class MenuPanel extends JPanel {
 
         if (message.equalsIgnoreCase("message") || message.isEmpty()) {
             if (message.isEmpty()) new JOptionPane("Message must be at least 1 character long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
-            botClient.joinChannel(channel);
+            Main.botClient.joinChannel(channel);
             return;
         }
 
-        botClient.write(channel, message);
+        Main.botClient.write(channel, message);
         textField.setText("");
         messageHistory.push(message);
         messageIndex = messageHistory.size();

@@ -6,7 +6,6 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import org.json.JSONObject;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 
 import org.jsoup.nodes.Document;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Wiki {
 
@@ -35,7 +34,7 @@ public class Wiki {
     private final double presencePenalty;
 
     // Constructor
-    public Wiki(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
+    public Wiki(BotClient botClient, MessageHandler messageHandler, Chat chat) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "wiki <Thema>";
@@ -48,8 +47,7 @@ public class Wiki {
         errorRetrievingWeatherData = "Fehler beim Abrufen der Wikipedia-Zusammenfassung:";
         noSummaryFoundForThisTopic = "Keine Zusammenfassung für dieses Thema gefunden.";
 
-        // Get Chat Module and Config
-        Chat chat = openAI.getChat();
+        // Get Chat Config
         JsonNode config = chat.getConfig();
 
         // Get Parameters

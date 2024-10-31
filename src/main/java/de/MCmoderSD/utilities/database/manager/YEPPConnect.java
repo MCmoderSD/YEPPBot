@@ -7,13 +7,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import static de.MCmoderSD.utilities.other.Calculate.*;
 
 public class YEPPConnect {
 
@@ -52,6 +52,10 @@ public class YEPPConnect {
                     )
                     """
             ).execute();
+
+            // Close resources
+            connection.close();
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -119,6 +123,11 @@ public class YEPPConnect {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) return resultSet.getString(type);
+
+            // Close resources
+            resultSet.close();
+            statement.close();
+
         } catch (SQLException e) {
             System.err.printf("Error while getting whitelist: %s\n", e.getMessage());
         }
@@ -148,6 +157,10 @@ public class YEPPConnect {
                 PreparedStatement statement = mySQL.getConnection().prepareStatement("INSERT INTO MinecraftWhitelist (channel_id) VALUES (?)");
                 statement.setInt(1, id);
                 statement.executeUpdate();
+
+                // Close resources
+                statement.close();
+
             } catch (SQLException e) {
                 System.err.printf("Error while creating channel: %s\n", e.getMessage());
             }
@@ -173,9 +186,13 @@ public class YEPPConnect {
                 PreparedStatement statement = mySQL.getConnection().prepareStatement("UPDATE MinecraftWhitelist SET whitelist = ?, user_pair = ?, last_updated = ? WHERE channel_id = ?");
                 statement.setString(1, whitelistString.toString());
                 statement.setString(2, userPairString.toString());
-                statement.setTimestamp(3, getTimestamp());
+                statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
                 statement.setInt(4, id);
                 statement.executeUpdate();
+
+                // Close resources
+                statement.close();
+
             } catch (SQLException e) {
                 System.err.printf("Error while updating whitelist: %s\n", e.getMessage());
             }
