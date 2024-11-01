@@ -45,7 +45,7 @@ public class Prompt {
                 String response = formatOpenAIResponse(chat.prompt(botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP");
 
                 // Filter Response for argument injection
-                while (response.startsWith("!")) response = response.substring(1);
+                response = removePrefix(response);
 
                 // Send Message
                 botClient.respond(event, getCommand(), response);

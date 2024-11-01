@@ -28,6 +28,7 @@ public class DickDestroyDecember {
     private final EventManager.Event event = EventManager.Event.DDD;
 
     // Responses
+    private final String explanation;
     private final String itsNotDecember;
     private final String userNotFound;
     private final String userHasNotJoined;
@@ -58,31 +59,32 @@ public class DickDestroyDecember {
 
         // About
         String[] name = {"dickdestroydecember", "ddd", "destroydickdecember", "dicdestroydecember"};
-        String description = "Join, leave or check the status of the Dick Destroy December. " + syntax;
+        String description = "Join, leave or check the status of the Dick-Destroy-December. " + syntax;
 
         // Init Associations
         this.helixHandler = helixHandler;
         this.eventManager = mySQL.getEventManager();
 
         // Init Responses
+        explanation = "It's Dick-Destroy-December YEPP Type !ddd join in Chat to participate, type !ddd leave if you have sinned. Check the Status of others with !nnn status @user YEPP Happy December YEPP";
         itsNotDecember = "It's not December, you don't have to beat your meat. YEPP";
         userNotFound = "User not found.";
-        userHasNotJoined = "%s hasn't joined Dick Destroy December. YEPP";
-        userStillIn = "%s is still in Dick Destroy December. YEPP";
+        userHasNotJoined = "%s hasn't joined Dick-Destroy-December. YEPP";
+        userStillIn = "%s is still in Dick-Destroy-December. YEPP";
         userHasLeft = "Bro's meat already gave up on day %d YEPP";
 
-        youHaveNotJoined = "You haven't even joined Dick Destroy December. YEPP";
-        youAlreadyJoined = "You already joined Dick Destroy December. YEPP";
-        youAlreadyLeft = "You already left Dick Destroy December. YEPP";
-        youJoined = "You joined Dick Destroy December. YEPP";
-        youLeft = "You left Dick Destroy December. YEPP";
-        errorJoining = "Error: Couldn't join Dick Destroy December. YEPP";
-        errorLeaving = "Error: Couldn't leave Dick Destroy December. YEPP";
+        youHaveNotJoined = "You haven't even joined Dick-Destroy-December. YEPP";
+        youAlreadyJoined = "You already joined Dick-Destroy-December. YEPP";
+        youAlreadyLeft = "You already left Dick-Destroy-December. YEPP";
+        youJoined = "You joined Dick-Destroy-December. YEPP";
+        youLeft = "You left Dick-Destroy-December. YEPP";
+        errorJoining = "Error: Couldn't join Dick-Destroy-December. YEPP";
+        errorLeaving = "Error: Couldn't leave Dick-Destroy-December. YEPP";
 
-        nobodyJoined = "No one has joined Dick Destroy December. YEPP";
+        nobodyJoined = "No one has joined Dick-Destroy-December. YEPP";
         everyoneLeft = "Everyone's meat already gave up. YEPP";
-        everyoneStillIn = "Everyone is still in Dick Destroy December. YEPP";
-        listUsers = "%s is fighting, but %s already gave up. YEPP";
+        everyoneStillIn = "Everyone is still in Dick-Destroy-December. YEPP";
+        listUsers = "%s are fighting, but %s already gave up. YEPP";
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -102,13 +104,13 @@ public class DickDestroyDecember {
 
                 // Check args
                 if (args.isEmpty()) {
-                    botClient.respond(event, getCommand(), syntax);
+                    botClient.respond(event, getCommand(), explanation);
                     return;
                 }
 
                 // Check if just tagged
                 if (args.size() == 1 && args.getFirst().startsWith("@")) {
-                    botClient.respond(event, getCommand(), checkStatus(helixHandler.getUser(args.getFirst().substring(1))));
+                    botClient.respond(event, getCommand(), checkStatus(helixHandler.getUser(removeTag(args.getFirst()))));
                     return;
                 }
 
@@ -116,22 +118,23 @@ public class DickDestroyDecember {
                 String verb = args.getFirst().toLowerCase();
 
                 // Check Verb
-                if (!Arrays.asList("join", "leave", "status", "check", "list").contains(verb)) {
+                if (!Arrays.asList("join", "leave", "fail", "status", "check", "list", "liste").contains(verb)) {
                     botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
                 // Check Verb
-                if (args.size() < 2 || Arrays.asList("status", "check").contains(verb)) {
+                if (args.size() < 2 && Arrays.asList("status", "check").contains(verb)) {
                     botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
+                // Response
                 String response = switch (verb) {
                     case "join" -> join(event.getUserId());
-                    case "leave" -> leave(event.getUserId());
-                    case "status", "check" -> checkStatus(helixHandler.getUser(args.get(1)));
-                    case "list" -> list(event.getChannelId());
+                    case "leave", "fail" -> leave(event.getUserId());
+                    case "status", "check" -> checkStatus(helixHandler.getUser(removeTag(args.get(1))));
+                    case "list", "liste" -> list(event.getChannelId());
                     default -> syntax;
                 };
 
@@ -163,11 +166,12 @@ public class DickDestroyDecember {
         return String.format(userHasLeft, days);
     }
 
+    // Join
     private String join(Integer id) {
 
         // Check if user has already left or joined
         if (eventManager.hasLeft(id, event)) return youAlreadyLeft;
-        if (eventManager.joinEvent(id, event)) return youAlreadyJoined;
+        if (eventManager.isJoined(id, event)) return youAlreadyJoined;
 
         // Join
         if (eventManager.joinEvent(id, event)) return youJoined;
@@ -194,26 +198,23 @@ public class DickDestroyDecember {
         if (participants == null || participants.isEmpty()) return nobodyJoined;
 
         // Remove non-followers
-        HashSet<TwitchUser> followers = helixHandler.getFollowers(channelId, null);
-        participants.keySet().removeIf(id -> !followers.contains(helixHandler.getUser(id)));
+        participants.keySet().removeIf(id -> ! helixHandler.getFollowers(channelId, null).contains(helixHandler.getUser(id)));
 
         // Check if anyone is left
         if (participants.isEmpty()) return nobodyJoined;
-
-        HashSet<TwitchUser> users = helixHandler.getUsersByID((HashSet<Integer>) participants.keySet());
 
         // Variables
         StringBuilder stillIn = new StringBuilder();
         StringBuilder alreadyLeft = new StringBuilder();
 
-        for (TwitchUser user : users) {
+        for (TwitchUser user : helixHandler.getUsersByID(new HashSet<>(participants.keySet()))) {
             if (participants.get(user.getId())) stillIn.append("@").append(user.getName()).append(", ");
             else alreadyLeft.append("@").append(user.getName()).append(", ");
         }
 
         // Check if anyone is left
-        if (stillIn.isEmpty()) return everyoneLeft;
-        if (alreadyLeft.isEmpty()) return everyoneStillIn;
+        if (stillIn.isEmpty() && !alreadyLeft.isEmpty()) return everyoneLeft;
+        if (!stillIn.isEmpty() && alreadyLeft.isEmpty()) return everyoneStillIn;
 
         // Format
         stillIn.delete(stillIn.length() - 2, stillIn.length());

@@ -27,6 +27,7 @@ public class NoNutNovember {
     private final EventManager.Event event = EventManager.Event.NNN;
 
     // Responses
+    private final String explanation;
     private final String itsNotNovember;
     private final String userNotFound;
     private final String userHasNotJoined;
@@ -56,30 +57,33 @@ public class NoNutNovember {
         syntax = "Syntax: " + botClient.getPrefix() + "NNN [ join | leave | status | list ] <user>";
 
         // About
-        String[] name = {"nonutnovember", "nnn"};
-        String description = "Join, leave or check the status of the No Nut November. " + syntax;
+        String[] name = {"nonutnovember", "nnn", "no-nut-november"};
+        String description = "Join, leave or check the status of the No-Nut-November. " + syntax;
 
         // Init Associations
         this.helixHandler = helixHandler;
         this.eventManager = mySQL.getEventManager();
 
         // Init Responses
+        explanation = "It's Not-Nut-November YEPP Type !nnn join in Chat to participate, type !nnn leave if you have sinned. Check the Status of others with !nnn status @user YEPP Happy November YEPP";
         itsNotNovember = "It's not November, you can nut all you want! YEPP";
         userNotFound = "User not found.";
-        userHasNotJoined = "%s hasn't joined No Nut November. YEPP";
-        userStillIn = "%s is still in No Nut November. YEPP";
+        userHasNotJoined = "%s hasn't joined No-Nut-November. YEPP";
+        userStillIn = "%s is still in No-Nut-November. YEPP";
         userHasLeft = "Bro already busted a nut on day %d YEPP";
-        youHaveNotJoined = "You haven't even joined No Nut November. YEPP";
-        youAlreadyJoined = "You already joined No Nut November. YEPP";
-        youAlreadyLeft = "You already left No Nut November. YEPP";
-        youJoined = "You joined No Nut November. YEPP";
-        youLeft = "You left No Nut November. YEPP";
-        errorJoining = "Error: Couldn't join No Nut November. YEPP";
-        errorLeaving = "Error: Couldn't leave No Nut November. YEPP";
-        nobodyJoined = "No one has joined No Nut November. YEPP";
+
+        youHaveNotJoined = "You haven't even joined No-Nut-November. YEPP";
+        youAlreadyJoined = "You already joined No-Nut-November. YEPP";
+        youAlreadyLeft = "You already failed No-Nut-November - Try again next year! YEPP";
+        youJoined = "You joined No-Nut-November. YEPP";
+        youLeft = "You failed No-Nut-November - Try again next year! YEPP";
+        errorJoining = "Error: Couldn't join No-Nut-November. YEPP";
+        errorLeaving = "Error: Couldn't leave No-Nut-November. YEPP";
+
+        nobodyJoined = "No one has joined No-Nut-November. YEPP";
         everyoneLeft = "Everyone has already busted a nut. YEPP";
-        everyoneStillIn = "Everyone is still in No Nut November. YEPP";
-        listUsers = "%s is fighting, but %s already busted a nut. YEPP";
+        everyoneStillIn = "Everyone is still in No-Nut-November. YEPP";
+        listUsers = "%s are still fighting, but %s already busted a nut. YEPP";
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -99,13 +103,13 @@ public class NoNutNovember {
 
                 // Check args
                 if (args.isEmpty()) {
-                    botClient.respond(event, getCommand(), syntax);
+                    botClient.respond(event, getCommand(), explanation);
                     return;
                 }
 
                 // Check if just tagged
                 if (args.size() == 1 && args.getFirst().startsWith("@")) {
-                    botClient.respond(event, getCommand(), checkStatus(helixHandler.getUser(args.getFirst().substring(1))));
+                    botClient.respond(event, getCommand(), checkStatus(helixHandler.getUser(removeTag(args.getFirst()))));
                     return;
                 }
 
@@ -113,13 +117,13 @@ public class NoNutNovember {
                 String verb = args.getFirst().toLowerCase();
 
                 // Check Verb
-                if (!Arrays.asList("join", "leave", "status", "check", "list").contains(verb)) {
+                if (!Arrays.asList("join", "leave", "", "status", "check", "list").contains(verb)) {
                     botClient.respond(event, getCommand(), syntax);
                     return;
                 }
 
                 // Check Verb
-                if (args.size() < 2 || Arrays.asList("status", "check").contains(verb)) {
+                if (args.size() < 2 && Arrays.asList("status", "check").contains(verb)) {
                     botClient.respond(event, getCommand(), syntax);
                     return;
                 }
@@ -127,9 +131,9 @@ public class NoNutNovember {
                 // Response
                 String response = switch (verb) {
                     case "join" -> join(event.getUserId());
-                    case "leave" -> leave(event.getUserId());
-                    case "status", "check" -> checkStatus(helixHandler.getUser(args.get(1)));
-                    case "list" -> list(event.getChannelId());
+                    case "leave", "bust", "fail" -> leave(event.getUserId());
+                    case "status", "check" -> checkStatus(helixHandler.getUser(removeTag(args.get(1))));
+                    case "list", "liste" -> list(event.getChannelId());
                     default -> syntax;
                 };
 
@@ -166,7 +170,7 @@ public class NoNutNovember {
 
         // Check if user has already left or joined
         if (eventManager.hasLeft(id, event)) return youAlreadyLeft;
-        if (eventManager.joinEvent(id, event)) return youAlreadyJoined;
+        if (eventManager.isJoined(id, event)) return youAlreadyJoined;
 
         // Join
         if (eventManager.joinEvent(id, event)) return youJoined;
@@ -193,26 +197,23 @@ public class NoNutNovember {
         if (participants == null || participants.isEmpty()) return nobodyJoined;
 
         // Remove non-followers
-        HashSet<TwitchUser> followers = helixHandler.getFollowers(channelId, null);
-        participants.keySet().removeIf(id -> !followers.contains(helixHandler.getUser(id)));
+        participants.keySet().removeIf(id -> ! helixHandler.getFollowers(channelId, null).contains(helixHandler.getUser(id)));
 
         // Check if anyone is left
         if (participants.isEmpty()) return nobodyJoined;
-
-        HashSet<TwitchUser> users = helixHandler.getUsersByID((HashSet<Integer>) participants.keySet());
 
         // Variables
         StringBuilder stillIn = new StringBuilder();
         StringBuilder alreadyLeft = new StringBuilder();
 
-        for (TwitchUser user : users) {
+        for (TwitchUser user : helixHandler.getUsersByID(new HashSet<>(participants.keySet()))) {
             if (participants.get(user.getId())) stillIn.append("@").append(user.getName()).append(", ");
             else alreadyLeft.append("@").append(user.getName()).append(", ");
         }
 
         // Check if anyone is left
-        if (stillIn.isEmpty()) return everyoneLeft;
-        if (alreadyLeft.isEmpty()) return everyoneStillIn;
+        if (stillIn.isEmpty() && !alreadyLeft.isEmpty()) return everyoneLeft;
+        if (!stillIn.isEmpty() && alreadyLeft.isEmpty()) return everyoneStillIn;
 
         // Format
         stillIn.delete(stillIn.length() - 2, stillIn.length());

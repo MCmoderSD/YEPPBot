@@ -61,7 +61,7 @@ public class Conversation {
                 String response = formatOpenAIResponse(chat.converse(event.getUserId(), maxConversatitionCalls, maxTokenSpendingLimit, botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP");
 
                 // Filter Response for argument injection
-                while (response.startsWith("!")) response = response.substring(1);
+                response = removePrefix(response);
 
                 // Send Message
                 botClient.respond(event, getCommand(), response);

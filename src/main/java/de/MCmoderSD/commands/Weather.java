@@ -90,7 +90,7 @@ public class Weather {
                 else response = trimMessage(generateFormattedResponse(args));
 
                 // Filter Response for argument injection
-                while (response.startsWith("!")) response = response.substring(1);
+                response = removePrefix(response);
 
                 // Send Message
                 botClient.respond(event, getCommand(), response);

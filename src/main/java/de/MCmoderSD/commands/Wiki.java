@@ -87,7 +87,7 @@ public class Wiki {
                         else response = trimMessage(chat.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
 
                         // Filter Response for argument injection
-                        while (response.startsWith("!")) response = response.substring(1);
+                        response = removePrefix(response);
 
                     } catch (IOException e) {
                         response = trimMessage(String.format("%s %s", errorRetrievingWeatherData, e.getMessage()));

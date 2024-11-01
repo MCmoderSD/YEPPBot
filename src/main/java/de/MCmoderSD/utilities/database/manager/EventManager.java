@@ -151,7 +151,7 @@ public class EventManager {
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, Calendar.getInstance().get(Calendar.YEAR));
             ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) participants.put(resultSet.getInt("id"), resultSet.getObject("gave_up") != null);
+            while (resultSet.next()) participants.put(resultSet.getInt("id"), resultSet.getObject("gave_up") == null);
 
             // Close resources
             preparedStatement.close();
