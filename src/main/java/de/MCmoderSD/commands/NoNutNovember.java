@@ -7,7 +7,6 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.EventManager;
-import de.MCmoderSD.utilities.other.Util;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
