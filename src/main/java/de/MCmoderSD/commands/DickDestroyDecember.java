@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import static de.MCmoderSD.utilities.other.Format.*;
+import static de.MCmoderSD.utilities.other.Util.removeNonFollower;
 
 public class DickDestroyDecember {
 
@@ -134,7 +135,7 @@ public class DickDestroyDecember {
                     case "join" -> join(event.getUserId());
                     case "leave", "fail" -> leave(event.getUserId());
                     case "status", "check" -> checkStatus(helixHandler.getUser(removeTag(args.get(1))));
-                    case "list", "liste" -> list(event.getChannelId());
+                    case "list", "liste" -> list(event);
                     default -> syntax;
                 };
 
@@ -191,14 +192,15 @@ public class DickDestroyDecember {
     }
 
     // List
-    private String list(Integer channelId) {
+    private String list(TwitchMessageEvent event) {
 
         // Get Participants
-        HashMap<Integer, Boolean> participants = eventManager.getParticipants(event);
+        HashMap<Integer, Boolean> participants = eventManager.getParticipants(this.event);
         if (participants == null || participants.isEmpty()) return nobodyJoined;
 
         // Remove non-followers
-        participants.keySet().removeIf(id -> ! helixHandler.getFollowers(channelId, null).contains(helixHandler.getUser(id)));
+        HashSet<Integer> ids = new HashSet<>(participants.keySet());
+        HashSet<Integer> follower = removeNonFollower(event, ids, helixHandler);
 
         // Check if anyone is left
         if (participants.isEmpty()) return nobodyJoined;
@@ -207,7 +209,9 @@ public class DickDestroyDecember {
         StringBuilder stillIn = new StringBuilder();
         StringBuilder alreadyLeft = new StringBuilder();
 
-        for (TwitchUser user : helixHandler.getUsersByID(new HashSet<>(participants.keySet()))) {
+        // Get Users
+        HashSet<TwitchUser> users = helixHandler.getUsersByID(new HashSet<>(follower));
+        for (TwitchUser user : users) {
             if (participants.get(user.getId())) stillIn.append("@").append(user.getName()).append(", ");
             else alreadyLeft.append("@").append(user.getName()).append(", ");
         }

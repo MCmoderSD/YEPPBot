@@ -75,6 +75,21 @@ public class Util {
         return birthdays;
     }
 
+    public static HashSet<Integer> removeNonFollower(TwitchMessageEvent event, HashSet<Integer> ids, HelixHandler helixHandler) {
+
+            // Return if dev mode
+            if (Main.terminal.hasArg(Terminal.Argument.DEV)) return ids;
+
+            // Remove all non followers
+            HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
+            followers.add(new TwitchUser(event));                                       // Add User
+            followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
+            ids.removeIf(id -> !TwitchUser.containsTwitchUser(followers, id));
+
+            // Return
+            return ids;
+    }
+
     public static LinkedHashMap<Integer, Birthdate> sortBirthdays(LinkedHashMap<Integer, Birthdate> birthdays) {
         return birthdays.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparing(Birthdate::getDaysUntilBirthday))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
