@@ -34,13 +34,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Collections;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import de.MCmoderSD.executor.NanoLoop;
 import de.MCmoderSD.objects.AuthToken;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
@@ -80,9 +79,9 @@ public class HelixHandler {
     private final HashMap<Integer, AuthToken> authTokens;
 
     // Cache
-    private final HashMap<Integer, HashSet<TwitchUser>> moderators = new HashMap<>();
-    private final HashMap<Integer, HashSet<TwitchUser>> vips = new HashMap<>();
-    private final HashMap<Integer, HashSet<TwitchUser>> followers = new HashMap<>();
+    private final HashMap<Integer, HashSet<TwitchUser>> moderators;
+    private final HashMap<Integer, HashSet<TwitchUser>> vips;
+    private final HashMap<Integer, HashSet<TwitchUser>> followers;
 
     // Constructor
     public HelixHandler(BotClient botClient, MySQL mySQL, Server server) {
@@ -96,25 +95,29 @@ public class HelixHandler {
         clientId = botClient.getClientId();
         clientSecret = botClient.getClientSecret();
 
-        // Initialize Client
+        // Init Client
         client = botClient.getClient();
         helper = botClient.getHelper();
         chat = botClient.getChat();
         helix = botClient.getHelix();
         eventManager = botClient.getEventManager();
 
+        // Init Cache
+        moderators = new HashMap<>();
+        vips = new HashMap<>();
+        followers = new HashMap<>();
+
         // Set Utilities
         encryption = new Encryption(botClient.getBotToken());
 
-        // Initialize Attributes
+        // Init Attributes
         authTokens = tokenManager.getAuthTokens(encryption);
 
         // Init Server Context
         server.getHttpsServer().createContext("/callback", new CallbackHandler());
 
         // Update Loop
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(this::updateTokens, 2, 1, TimeUnit.MINUTES);
+        new NanoLoop(this::updateTokens, 1, TimeUnit.MINUTES);
     }
 
     // Send request
@@ -517,7 +520,7 @@ public class HelixHandler {
                 // Extract data
                 String accessToken = jsonNode.get("access_token").asText();
                 String refreshToken = jsonNode.get("refresh_token").asText();
-                int expiresIn = jsonNode.get("expires_in").asInt();
+                var expiresIn = jsonNode.get("expires_in").asInt();
 
                 // Use the access token to determine the user
                 if (accessToken != null) {
@@ -531,7 +534,7 @@ public class HelixHandler {
 
                         // Extract user data
                         User user = userList.getUsers().getFirst();
-                        int id = Integer.parseInt(user.getId());
+                        var id = Integer.parseInt(user.getId());
                         String name = user.getDisplayName();
 
                         // Save token

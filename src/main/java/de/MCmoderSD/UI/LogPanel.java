@@ -31,7 +31,7 @@ public class LogPanel extends JPanel {
         this.frame = frame;
 
         // Set Size
-        var height = Math.toIntExact(Math.round(size.height * 0.9));
+        var height = Math.round(size.height * 0.9f);
         Dimension panelSize = new Dimension(size.width, height);
         setPreferredSize(panelSize);
 

@@ -41,13 +41,13 @@ public class MenuPanel extends JPanel {
         setForeground(PURPLE);
 
         // Set Size
-        var height = Math.toIntExact(Math.round(size.height * 0.1));
+        var height = Math.round(size.height * 0.1f);
         Dimension panelSize = new Dimension(size.width, height);
         setPreferredSize(panelSize);
 
         // Variables
-        int fontSize = panelSize.width / 50;
-        int padding = panelSize.width / 100;
+        var fontSize = panelSize.width / 50;
+        var padding = panelSize.width / 100;
 
         Font font = new Font("Roboto", Font.PLAIN, fontSize);
         messageHistory = new Stack<>();
@@ -63,7 +63,7 @@ public class MenuPanel extends JPanel {
 
         // Text Input
         textField = new RoundedTextField(1, "Message");
-        textField.setBounds(panelSize.width / 5, padding, Math.toIntExact(Math.round(panelSize.width / 1.6)) + 2 * padding, panelSize.height - 3 * padding);
+        textField.setBounds(panelSize.width / 5, padding, Math.round(panelSize.width / 1.6f) + 2 * padding, panelSize.height - 3 * padding);
         textField.setFont(font);
         textField.setBackground(LIGHT);
         textField.setBorder(new LineBorder(LIGHT, padding / 2));
@@ -72,7 +72,7 @@ public class MenuPanel extends JPanel {
         // Key Listener
         textField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent evt) {
-                int keyCode = evt.getKeyCode();
+                var keyCode = evt.getKeyCode();
                 if (keyCode == VK_ENTER) sendMessage();
                 if (keyCode == VK_ESCAPE) textField.setText("");
                 if (keyCode == VK_TAB) channelField.requestFocus();
@@ -101,7 +101,7 @@ public class MenuPanel extends JPanel {
 
         // Send Button
         RoundedButton sendButton = new RoundedButton("Send");
-        sendButton.setBounds(Math.toIntExact(Math.round(panelSize.width - panelSize.width / 6.25 + 2 * padding)), padding, Math.toIntExact(Math.round(panelSize.width / 6.25 - 4 * padding)), panelSize.height - 3 * padding);
+        sendButton.setBounds(Math.round(panelSize.width - panelSize.width / 6.25f + 2f * padding), padding, Math.round(panelSize.width / 6.25f - 4f * padding), panelSize.height - 3 * padding);
         sendButton.setFont(font);
         sendButton.setBackground(PURPLE);
         sendButton.setForeground(WHITE);

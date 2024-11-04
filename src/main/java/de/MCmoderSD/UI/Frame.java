@@ -7,7 +7,6 @@ import javax.swing.JFrame;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Toolkit;
 
 import java.io.IOException;
 
@@ -15,6 +14,7 @@ import java.net.URISyntaxException;
 
 import static de.MCmoderSD.main.Main.VERSION;
 import static de.MCmoderSD.utilities.other.Format.*;
+import static java.awt.Toolkit.getDefaultToolkit;
 
 public class Frame extends JFrame {
 
@@ -39,19 +39,18 @@ public class Frame extends JFrame {
         setLayout(new BorderLayout());
 
         // Icon
-        ImageLoader imageLoader = new ImageLoader();
         try {
-            setIconImage(imageLoader.load("/images/icon.png"));
+            setIconImage(ImageLoader.loadImage("/images/icon.png", false));
         } catch (IOException | URISyntaxException e) {
             System.err.println("Error while loading icon: " + e.getMessage());
         }
 
         // Variables
-        var multiplier = 0.75;
-        var rawHeight = getToolkit().getScreenSize().getHeight() * multiplier;
-        var rawWidth = rawHeight * ((double) 4 / 3);
-        var height = Math.toIntExact(Math.round(rawHeight));
-        var width = Math.toIntExact(Math.round(rawWidth));
+        var multiplier = 0.75f;
+        var rawHeight = Math.round(getToolkit().getScreenSize().getHeight() * multiplier);
+        var rawWidth = rawHeight * (4f / 3f);
+        var height = Math.round(rawHeight);
+        var width = Math.round(rawWidth);
         Dimension size = new Dimension(width, height);
 
         // Add Panel
@@ -64,10 +63,8 @@ public class Frame extends JFrame {
 
     public static void centerJFrame(JFrame frame) {
         frame.pack();
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (dim.width - frame.getWidth()) / 2;
-        int y = (dim.height - frame.getHeight()) / 2;
-        frame.setLocation(x, y);
+        Dimension dim = getDefaultToolkit().getScreenSize();
+        frame.setLocation((dim.width - frame.getWidth()) / 2, (dim.height - frame.getHeight()) / 2);
     }
 
     // Setter
