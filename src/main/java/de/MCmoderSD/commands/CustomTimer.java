@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Timer;

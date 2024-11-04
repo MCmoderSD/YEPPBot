@@ -1,4 +1,4 @@
-package de.MCmoderSD.commands;
+package de.MCmoderSD.commands.blueprints;
 
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import org.apache.commons.lang.IncompleteArgumentException;

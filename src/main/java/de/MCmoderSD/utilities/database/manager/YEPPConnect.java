@@ -17,7 +17,7 @@ import java.util.Arrays;
 
 public class YEPPConnect {
 
-    // Assosiations
+    // Associations
     private final MySQL mySQL;
 
     // Constructor

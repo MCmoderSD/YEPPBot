@@ -2,6 +2,7 @@ package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;

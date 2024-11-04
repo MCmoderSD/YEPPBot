@@ -184,20 +184,26 @@ public class EventManager {
     public enum Event {
 
         // Enumerations
-        NNN("NoNutNovember"),
-        DDD("DickDestroyDecember");
+        NNN("NoNutNovember", Calendar.NOVEMBER),
+        DDD("DickDestroyDecember", Calendar.DECEMBER);
 
         // Variables
         private final String table;
+        private final int month;
 
         // Constructor
-        Event(String table) {
+        Event(String table, int month) {
             this.table = table;
+            this.month = month;
         }
 
         // Getter
         public String getTable() {
             return table;
+        }
+
+        public int getMonth() {
+            return month;
         }
     }
 }

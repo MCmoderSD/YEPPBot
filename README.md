@@ -3,7 +3,7 @@
 ## Description
 
 The YEPPBot is a Twitch bot that provides a variety of features to entertain your Twitch channel. <br>
-Originally created by [FoxxHimself](https://github.com/lennartfu) in Python and now compleatly rewritten in [Java 21](https://www.oracle.com/de/java/technologies/downloads/#java21) using the [Twitch4J](https://twitch4j.github.io/) library.
+Originally created by [FoxxHimself](https://github.com/lennartfu) in Python and now completely rewritten in [Java 21](https://www.oracle.com/de/java/technologies/downloads/#java21) using the [Twitch4J](https://twitch4j.github.io/) library.
 
 The bot is currently under active development and features can change a lot in the future. <br>
 So keep in mind setting up the bot can change from time to time. <br> <br>
@@ -66,7 +66,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
   - You can look up the next birthday with the ```!birthday next``` command.
 
 
-- Seasoal Event Commands
+- Seasonal Event Commands
   - DickDestroyDecember
   - NoNutNovember
 

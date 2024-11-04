@@ -15,7 +15,7 @@ import static de.MCmoderSD.utilities.other.Util.readAllLines;
 
 public class AssetManager {
 
-    // Assosiations
+    // Associations
     private final MySQL mySQL;
 
     // Constructor

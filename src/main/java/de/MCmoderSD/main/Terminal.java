@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -18,8 +19,7 @@ public class Terminal {
     // Attributes
     private final Scanner scanner;
     private final String[] args;
-    private final HashSet<Argument> arguments = new HashSet<>();
-
+    private final HashSet<Argument> arguments;
 
     // Constructor
     public Terminal(String[] args) {
@@ -46,6 +46,7 @@ public class Terminal {
         // Init
         scanner = new Scanner(System.in);
         this.args = args;
+        arguments = new HashSet<>();
 
         // Check Arguments
         for (String arg : args) {
@@ -149,7 +150,7 @@ public class Terminal {
                     -botconfig: Path to Bot Config
                     -channellist: Path to Channel List
                     -mysqlconfig: Path to MySQL Config
-                    -httpserver: Path to Http Server Config
+                    -httpsserver: Path to Https Server Config
                 """);
 
         // API Config
@@ -188,7 +189,8 @@ public class Terminal {
                 bufferedWriter.close();
 
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.err.println("Error generating " + fileName + ": " + e.getMessage());
+                return false;
             }
         }
 
@@ -275,6 +277,28 @@ public class Terminal {
 
         public boolean hasNameOrAlias(String input) {
             return name.equals(input.toLowerCase()) || alias.contains(input.toLowerCase());
+        }
+
+        public boolean hasNameOrAlias(ArrayList<String> args) {
+            if (args == null || args.isEmpty()) return false;
+            for (String arg : args) if (hasNameOrAlias(arg)) return true;
+            return false;
+        }
+
+        public String getConfig(ArrayList<String> args) {
+
+            // Check
+            if (this == HELP || this == VERSION || this == DEV || this == CLI || this == NO_LOG || this == GENERATE) return null;
+            if (args == null || args.isEmpty()) return null;
+            if (!hasNameOrAlias(args)) return null;
+
+            // Get Config
+            int index = args.indexOf("-" + name);
+            if (index == -1) index = args.indexOf("/" + name);
+            if (index == -1) index = args.indexOf(name);
+            if (index == -1) return null;
+            return args.get(index + 1);
+
         }
     }
 }

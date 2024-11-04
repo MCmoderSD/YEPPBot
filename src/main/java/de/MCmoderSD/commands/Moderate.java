@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
@@ -97,7 +98,7 @@ public class Moderate {
                         if (botClient.isAdmin(event) && args.size() == 2) response = editBlacklist(channel, args.get(1), false); // Admin
                         else if (botClient.isAdmin(event) && args.size() == 3) response = editBlacklist(args.get(2), args.get(1), false); // Admin
                         else if (botClient.isBroadcaster(event)) response = editBlacklist(user, args.get(1), false); // Broadcaster
-                        else if (botClient.isModerator(event)) response = editBlacklist(channel, args.get(1), false); // Moderatort
+                        else if (botClient.isModerator(event)) response = editBlacklist(channel, args.get(1), false); // Moderator
                 }
 
                 // Send Message

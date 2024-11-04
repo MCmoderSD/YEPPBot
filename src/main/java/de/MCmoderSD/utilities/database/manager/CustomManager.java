@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class CustomManager {
 
-    // Assosiations
+    // Associations
     private final MySQL mySQL;
 
     // Constructor

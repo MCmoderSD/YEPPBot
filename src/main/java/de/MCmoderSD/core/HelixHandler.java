@@ -73,7 +73,7 @@ public class HelixHandler {
     private final TwitchHelix helix;
     private final EventManager eventManager;
 
-    // Utilites
+    // Utilities
     private final Encryption encryption;
 
     // Attributes

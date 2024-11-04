@@ -230,7 +230,7 @@ public class Birthdate {
             return compatibleSigns;
         }
 
-        public ZodiacSign getComatibleSign(int index) {
+        public ZodiacSign getCompatibleSign(int index) {
             return compatibleSigns[index];
         }
 

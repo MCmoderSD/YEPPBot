@@ -61,23 +61,23 @@ public class Main {
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(args));
 
         // Bot Config
-        if (terminal.hasArg(Terminal.Argument.BOT_CONFIG)) botConfigPath = arguments.get(arguments.indexOf("-botconfig") + 1);
+        if (terminal.hasArg(Terminal.Argument.BOT_CONFIG)) botConfigPath = Terminal.Argument.BOT_CONFIG.getConfig(arguments);
 
         // Channel List
-        if (terminal.hasArg(Terminal.Argument.CHANNEL_LIST)) channelListPath = arguments.get(arguments.indexOf("-channellist") + 1);
+        if (terminal.hasArg(Terminal.Argument.CHANNEL_LIST)) channelListPath = Terminal.Argument.CHANNEL_LIST.getConfig(arguments);
 
         // MySQL Config
-        if (terminal.hasArg(Terminal.Argument.MYSQL_CONFIG)) mysqlConfigPath = arguments.get(arguments.indexOf("-mysqlconfig") + 1);
+        if (terminal.hasArg(Terminal.Argument.MYSQL_CONFIG)) mysqlConfigPath = Terminal.Argument.MYSQL_CONFIG.getConfig(arguments);
 
         // Https Server
-        if (terminal.hasArg(Terminal.Argument.HTTPS_SERVER)) httpsServerPath = arguments.get(arguments.indexOf("-httpsserver") + 1);
+        if (terminal.hasArg(Terminal.Argument.HTTPS_SERVER)) httpsServerPath = Terminal.Argument.HTTPS_SERVER.getConfig(arguments);
 
         // API Config
-        if (terminal.hasArg(Terminal.Argument.API_CONFIG)) apiKeysPath = arguments.get(arguments.indexOf("-apiconfig") + 1);
+        if (terminal.hasArg(Terminal.Argument.API_CONFIG)) apiKeysPath = Terminal.Argument.API_CONFIG.getConfig(arguments);
         else apiKeysPath = API_CONFIG;
 
         // OpenAI Config
-        if (terminal.hasArg(Terminal.Argument.OPENAI_CONFIG)) openAIConfigPath = arguments.get(arguments.indexOf("-openaiconfig") + 1);
+        if (terminal.hasArg(Terminal.Argument.OPENAI_CONFIG)) openAIConfigPath = Terminal.Argument.OPENAI_CONFIG.getConfig(arguments);
         else openAIConfigPath = OPENAI_CONFIG;
 
         // Instances

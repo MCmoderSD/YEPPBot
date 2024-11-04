@@ -13,35 +13,7 @@ import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
-import de.MCmoderSD.commands.Birthday;
-import de.MCmoderSD.commands.Conversation;
-import de.MCmoderSD.commands.Counter;
-import de.MCmoderSD.commands.CustomCommand;
-import de.MCmoderSD.commands.CustomTimer;
-import de.MCmoderSD.commands.DickDestroyDecember;
-import de.MCmoderSD.commands.Fact;
-import de.MCmoderSD.commands.Gif;
-import de.MCmoderSD.commands.Help;
-import de.MCmoderSD.commands.Horoscope;
-import de.MCmoderSD.commands.Info;
-import de.MCmoderSD.commands.Insult;
-import de.MCmoderSD.commands.Joke;
-import de.MCmoderSD.commands.Join;
-import de.MCmoderSD.commands.Lurk;
-import de.MCmoderSD.commands.Match;
-import de.MCmoderSD.commands.Moderate;
-import de.MCmoderSD.commands.NoNutNovember;
-import de.MCmoderSD.commands.Ping;
-import de.MCmoderSD.commands.Play;
-import de.MCmoderSD.commands.Prompt;
-import de.MCmoderSD.commands.Quote;
-import de.MCmoderSD.commands.Say;
-import de.MCmoderSD.commands.Status;
-import de.MCmoderSD.commands.TTS;
-import de.MCmoderSD.commands.Translate;
-import de.MCmoderSD.commands.Weather;
-import de.MCmoderSD.commands.Whitelist;
-import de.MCmoderSD.commands.Wiki;
+import de.MCmoderSD.commands.*;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.main.Credentials;
@@ -81,7 +53,7 @@ public class BotClient {
     public static String prefix;
     public static String [] prefixes;
     public static HashSet<String> admins;
-    public static HelixHandler.Scope[] requiredScopes = {
+    public static final HelixHandler.Scope[] requiredScopes = {
             HelixHandler.Scope.USER_READ_EMAIL,
             HelixHandler.Scope.USER_READ_BLOCKED_USERS,
             HelixHandler.Scope.CHAT_READ,
@@ -245,7 +217,7 @@ public class BotClient {
         setUI(!cli);
 
         // Print Startup Complete
-        System.out.printf("Start-Up Compleate! Took: %dms%s%s%s", (System.nanoTime() - Terminal.startTime) / 1_000_000, UNBOLD, BREAK, BREAK);
+        System.out.printf("Start-Up Complete! Took: %dms%s%s%s", (System.nanoTime() - Terminal.startTime) / 1_000_000, UNBOLD, BREAK, BREAK);
 
         // Join Channels
         HashSet<String> channelList = new HashSet<>();

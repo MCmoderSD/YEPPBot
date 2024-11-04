@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.HashSet;
 
-import static de.MCmoderSD.main.Main.*;
+import static de.MCmoderSD.main.Main.jsonUtility;
+import static de.MCmoderSD.main.Main.terminal;
 import static de.MCmoderSD.utilities.other.Util.readAllLines;
 
 

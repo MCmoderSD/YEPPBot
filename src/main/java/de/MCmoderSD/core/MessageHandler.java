@@ -1,6 +1,6 @@
 package de.MCmoderSD.core;
 
-import de.MCmoderSD.commands.Command;
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;

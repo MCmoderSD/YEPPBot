@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 public class TokenManager {
 
-    // Assosiations
+    // Associations
     private final MySQL mySQL;
 
     // Constructor

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class QuoteManager {
 
-    // Assosiations
+    // Associations
     private final MySQL mySQL;
 
     // Constructor
