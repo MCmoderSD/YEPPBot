@@ -10,7 +10,6 @@ import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.api.ProkeralaAPI;
 import de.MCmoderSD.utilities.database.MySQL;
-
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import java.util.ArrayList;

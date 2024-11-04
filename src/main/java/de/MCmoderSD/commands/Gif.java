@@ -1,6 +1,7 @@
 package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
@@ -9,9 +10,11 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import org.json.JSONObject;
 
 import java.io.IOException;
+
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 

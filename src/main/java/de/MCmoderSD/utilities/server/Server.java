@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
+
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.main.Terminal;
@@ -12,9 +13,11 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
@@ -31,6 +34,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.MessageDigest;
 import java.security.spec.PKCS8EncodedKeySpec;
+
 import java.util.Base64;
 
 @SuppressWarnings("unused")

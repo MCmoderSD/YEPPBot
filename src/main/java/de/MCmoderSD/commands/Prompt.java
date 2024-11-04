@@ -6,7 +6,6 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import java.util.ArrayList;

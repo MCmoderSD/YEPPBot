@@ -8,7 +8,6 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-
 import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.utilities.database.MySQL;
 

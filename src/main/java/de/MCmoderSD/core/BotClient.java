@@ -11,9 +11,35 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
-import de.MCmoderSD.OpenAI.OpenAI;
-import de.MCmoderSD.OpenAI.modules.Chat;
-import de.MCmoderSD.commands.*;
+import de.MCmoderSD.commands.Birthday;
+import de.MCmoderSD.commands.Conversation;
+import de.MCmoderSD.commands.Counter;
+import de.MCmoderSD.commands.CustomCommand;
+import de.MCmoderSD.commands.CustomTimer;
+import de.MCmoderSD.commands.DickDestroyDecember;
+import de.MCmoderSD.commands.Fact;
+import de.MCmoderSD.commands.Gif;
+import de.MCmoderSD.commands.Help;
+import de.MCmoderSD.commands.Horoscope;
+import de.MCmoderSD.commands.Info;
+import de.MCmoderSD.commands.Insult;
+import de.MCmoderSD.commands.Joke;
+import de.MCmoderSD.commands.Join;
+import de.MCmoderSD.commands.Lurk;
+import de.MCmoderSD.commands.Match;
+import de.MCmoderSD.commands.Moderate;
+import de.MCmoderSD.commands.NoNutNovember;
+import de.MCmoderSD.commands.Ping;
+import de.MCmoderSD.commands.Play;
+import de.MCmoderSD.commands.Prompt;
+import de.MCmoderSD.commands.Quote;
+import de.MCmoderSD.commands.Say;
+import de.MCmoderSD.commands.Status;
+import de.MCmoderSD.commands.Translate;
+import de.MCmoderSD.commands.TTS;
+import de.MCmoderSD.commands.Weather;
+import de.MCmoderSD.commands.Whitelist;
+import de.MCmoderSD.commands.Wiki;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.main.Credentials;
@@ -23,8 +49,10 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.server.AudioBroadcast;
 import de.MCmoderSD.utilities.server.Server;
-
+import de.MCmoderSD.OpenAI.OpenAI;
+import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -40,6 +68,18 @@ public class BotClient {
 
     public static final String PROVIDER = "twitch";
     public static final long RATE_LIMIT = 250L;
+    public static final HelixHandler.Scope[] REQUIRED_SCOPES = {
+            HelixHandler.Scope.USER_READ_EMAIL,
+            HelixHandler.Scope.USER_READ_BLOCKED_USERS,
+            HelixHandler.Scope.CHAT_READ,
+            HelixHandler.Scope.BITS_READ,
+            HelixHandler.Scope.CHANNEL_READ_EDITORS,
+            HelixHandler.Scope.MODERATOR_READ_FOLLOWERS,
+            HelixHandler.Scope.MODERATION_READ,
+            HelixHandler.Scope.CHANNEL_READ_VIPS,
+            HelixHandler.Scope.CHANNEL_READ_SUBSCRIPTIONS,
+            HelixHandler.Scope.CHANNEL_MANAGE_RAIDS,
+    };
 
     // Associations
     private final MySQL mySQL;
@@ -53,18 +93,6 @@ public class BotClient {
     public static String prefix;
     public static String [] prefixes;
     public static HashSet<String> admins;
-    public static final HelixHandler.Scope[] requiredScopes = {
-            HelixHandler.Scope.USER_READ_EMAIL,
-            HelixHandler.Scope.USER_READ_BLOCKED_USERS,
-            HelixHandler.Scope.CHAT_READ,
-            HelixHandler.Scope.BITS_READ,
-            HelixHandler.Scope.CHANNEL_READ_EDITORS,
-            HelixHandler.Scope.MODERATOR_READ_FOLLOWERS,
-            HelixHandler.Scope.MODERATION_READ,
-            HelixHandler.Scope.CHANNEL_READ_VIPS,
-            HelixHandler.Scope.CHANNEL_READ_SUBSCRIPTIONS,
-            HelixHandler.Scope.CHANNEL_MANAGE_RAIDS,
-    };
 
     // Credentials
     private final JsonNode botConfig;
@@ -477,7 +505,7 @@ public class BotClient {
     }
 
     public HelixHandler.Scope[] getRequiredScopes() {
-        return requiredScopes;
+        return REQUIRED_SCOPES;
     }
 
     // Credentials Getter

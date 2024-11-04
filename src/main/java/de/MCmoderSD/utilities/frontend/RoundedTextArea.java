@@ -8,6 +8,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultCaret;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;

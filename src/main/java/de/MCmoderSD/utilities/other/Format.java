@@ -4,8 +4,11 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import java.awt.Color;
+
 import java.sql.Timestamp;
+
 import java.text.Normalizer;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 

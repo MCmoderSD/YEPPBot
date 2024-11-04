@@ -10,6 +10,6 @@ public class Play extends Mimic {
     public Play(BotClient botClient, MessageHandler messageHandler) {
 
         // Call Mimic constructor
-        super(botClient, messageHandler, "join");
+        super(botClient, messageHandler, "play");
     }
 }

@@ -6,18 +6,16 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-
-import org.jsoup.nodes.Document;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
