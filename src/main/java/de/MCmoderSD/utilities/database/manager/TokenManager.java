@@ -1,5 +1,6 @@
 package de.MCmoderSD.utilities.database.manager;
 
+import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.objects.AuthToken;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.other.Encryption;
@@ -8,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 import java.util.HashMap;
 
@@ -58,11 +58,14 @@ public class TokenManager {
     }
 
     // Add or update token
-    public void addToken(int id, String name, String accessToken, String refreshToken, String scopes, int expiresIn) {
+    public void addToken(String name, AuthToken authToken, Encryption encryption) {
 
         // Log message
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Variables
+            var id = authToken.getId();
 
             // Check Channel and User
             mySQL.checkCache(id, name, false);
@@ -79,12 +82,12 @@ public class TokenManager {
                     "timestamp = VALUES(timestamp)";
 
             PreparedStatement insertPreparedStatement = mySQL.getConnection().prepareStatement(query);
-            insertPreparedStatement.setInt(1, id); // set id
-            insertPreparedStatement.setString(2, accessToken); // set access token
-            insertPreparedStatement.setString(3, refreshToken); // set refresh token
-            insertPreparedStatement.setString(4, scopes); // set scopes
-            insertPreparedStatement.setInt(5, expiresIn); // set expires in
-            insertPreparedStatement.setTimestamp(6, new Timestamp(System.currentTimeMillis())); // set timestamp
+            insertPreparedStatement.setInt(1, id);                                                  // set id
+            insertPreparedStatement.setString(2, encryption.encrypt(authToken.getAccessToken()));   // set access token
+            insertPreparedStatement.setString(3, encryption.encrypt(authToken.getRefreshToken()));  // set refresh token
+            insertPreparedStatement.setString(4, authToken.getScopesAsString());                    // set scopes
+            insertPreparedStatement.setInt(5, authToken.getExpiresIn());                            // set expires in
+            insertPreparedStatement.setTimestamp(6, authToken.getTimestamp());                      // set timestamp
             insertPreparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -96,18 +99,20 @@ public class TokenManager {
     }
 
     // Refresh tokens
-    public void refreshTokens(String oldRefreshToken, String newAccessToken, String newRefreshToken, int expiresIn) {
+    public void refreshTokens(String oldRefreshToken, AuthToken authToken, Encryption encryption) {
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
-            String query = "UPDATE AuthTokens SET accessToken = ?, refreshToken = ?, expires_in = ?, timestamp = ? WHERE refreshToken = ?";
+            String query = "UPDATE AuthTokens SET accessToken = ?, refreshToken = ?, scopes = ?, expires_in = ?, timestamp = ? WHERE id = ? AND refreshToken = ?";
             PreparedStatement updatePreparedStatement = mySQL.getConnection().prepareStatement(query);
-            updatePreparedStatement.setString(1, newAccessToken); // set access token
-            updatePreparedStatement.setString(2, newRefreshToken); // set refresh token
-            updatePreparedStatement.setInt(3, expiresIn); // set expires in
-            updatePreparedStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis())); // set timestamp
-            updatePreparedStatement.setString(5, oldRefreshToken); // set old refresh token
+            updatePreparedStatement.setString(1, encryption.encrypt(authToken.getAccessToken()));   // set access token
+            updatePreparedStatement.setString(2, encryption.encrypt(authToken.getRefreshToken()));  // set refresh token
+            updatePreparedStatement.setString(3, authToken.getScopesAsString());                    // set scopes
+            updatePreparedStatement.setInt(4, authToken.getExpiresIn());                            // set expires in
+            updatePreparedStatement.setTimestamp(5, authToken.getTimestamp());                      // set timestamp
+            updatePreparedStatement.setInt(6, authToken.getId());                                   // set id
+            updatePreparedStatement.setString(7, encryption.encrypt(oldRefreshToken));              // set old refresh token
             updatePreparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -119,7 +124,7 @@ public class TokenManager {
     }
 
     // Get access token
-    public AuthToken getAuthToken(int id) {
+    public AuthToken getAuthToken(HelixHandler helixHandler, int id, Encryption encryption) {
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
@@ -130,16 +135,8 @@ public class TokenManager {
             ResultSet resultSet = selectPreparedStatement.executeQuery();
 
             // Get AuthToken
-            if (resultSet.next()) {
-                return new AuthToken(
-                        resultSet.getInt("id"), // get id
-                        resultSet.getString("accessToken"), // get access token
-                        resultSet.getString("refreshToken"), // get refresh token
-                        resultSet.getString("scopes"), // get scopes
-                        resultSet.getInt("expires_in"), // get expires in
-                        resultSet.getTimestamp("timestamp") // get timestamp
-                );
-            } else return null;
+            if (resultSet.next()) return new AuthToken(helixHandler, resultSet, encryption);
+            else return null;
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return null;
@@ -147,7 +144,7 @@ public class TokenManager {
     }
 
     // Get all AuthTokens
-    public HashMap<Integer, AuthToken> getAuthTokens(Encryption encryption) {
+    public HashMap<Integer, AuthToken> getAuthTokens(HelixHandler helixHandler, Encryption encryption) {
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
@@ -158,25 +155,13 @@ public class TokenManager {
 
             // Get AuthTokens
             HashMap<Integer, AuthToken> authTokens = new HashMap<>();
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                authTokens.put(
-                        id,
-                        new AuthToken(
-                                id, // get id
-                                encryption.decrypt(resultSet.getString("accessToken")), // get access token
-                                encryption.decrypt(resultSet.getString("refreshToken")), // get refresh token
-                                resultSet.getString("scopes"), // get scopes
-                                resultSet.getInt("expires_in"), // get expires in
-                                resultSet.getTimestamp("timestamp") // get timestamp
-                        )
-                );
-            }
+            while (resultSet.next()) authTokens.put(resultSet.getInt("id"), new AuthToken(helixHandler, resultSet, encryption));
 
             // Close resources
             resultSet.close();
             selectPreparedStatement.close();
 
+            // Return AuthTokens
             return authTokens;
         } catch (SQLException e) {
             System.err.println(e.getMessage());

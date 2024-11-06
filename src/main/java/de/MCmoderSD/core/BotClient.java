@@ -67,7 +67,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class BotClient {
 
     public static final String PROVIDER = "twitch";
-    public static final long RATE_LIMIT = 250L;
+    public static final long RATE_LIMIT = 600L;
     public static final HelixHandler.Scope[] REQUIRED_SCOPES = {
             HelixHandler.Scope.USER_READ_EMAIL,
             HelixHandler.Scope.USER_READ_BLOCKED_USERS,

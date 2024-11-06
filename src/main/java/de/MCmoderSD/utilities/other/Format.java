@@ -1,5 +1,6 @@
 package de.MCmoderSD.utilities.other;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
@@ -123,6 +124,13 @@ public class Format {
     // Format OpenAI Response
     public static String formatOpenAIResponse(String response, String emote) {
         return removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + " "), emote), emote);
+    }
+
+    // Format Scopes
+    public static String formatScopes(JsonNode scopes) {
+        StringBuilder scopeString = new StringBuilder();
+        for (var i = 0; i < scopes.size(); i++) scopeString.append(scopes.get(i).asText()).append("+");
+        return scopeString.substring(0, scopeString.length() - 1);
     }
 
     // Convert to ASCII

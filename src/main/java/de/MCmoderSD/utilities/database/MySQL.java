@@ -2,6 +2,7 @@ package de.MCmoderSD.utilities.database;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import de.MCmoderSD.mysql.Driver;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
@@ -48,8 +49,7 @@ public class MySQL extends Driver {
         // Initialize Driver
         super(config);
 
-        // Connect to database
-        new Thread(this::connect).start();
+        // Initialize Tables
         initTables();
 
         // Load Cache

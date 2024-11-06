@@ -1,8 +1,6 @@
 package de.MCmoderSD.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.philippheuer.events4j.core.EventManager;
 
 import com.github.twitch4j.TwitchClient;
@@ -28,8 +26,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import java.sql.Timestamp;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,12 +33,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import de.MCmoderSD.executor.NanoLoop;
 import de.MCmoderSD.objects.AuthToken;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
@@ -52,7 +46,6 @@ import de.MCmoderSD.utilities.server.Server;
 
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class HelixHandler {
 
     // Constants
@@ -114,13 +107,10 @@ public class HelixHandler {
         encryption = new Encryption(botClient.getBotToken());
 
         // Init Attributes
-        authTokens = tokenManager.getAuthTokens(encryption);
+        authTokens = tokenManager.getAuthTokens(this, encryption);
 
         // Init Server Context
-        server.getHttpsServer().createContext("/callback", new CallbackHandler());
-
-        // Update Loop
-        new NanoLoop(this::updateTokens, 1, TimeUnit.MINUTES);
+        server.getHttpsServer().createContext("/callback", new CallbackHandler(this));
     }
 
     // Send request
@@ -133,38 +123,18 @@ public class HelixHandler {
         }
     }
 
-    // Update tokens
-    private void updateTokens() {
-
-        // Variables
-        HashSet<Integer> ids = new HashSet<>();
-
-        // Add tokens to refresh
-        authTokens.forEach((id, token) -> {
-            if (token.needsRefresh()) ids.add(id);
-        });
-
-        // Clean up cache
-        ids.forEach(id -> {
-            moderators.remove(id);
-            vips.remove(id);
-            followers.remove(id);
-        });
-
-        // Refresh tokens
-        ids.forEach(id -> authTokens.replace(id, refreshToken(authTokens.get(id))));
-    }
-
     // Refresh token
-    private AuthToken refreshToken(AuthToken token) {
+    public void refreshToken(AuthToken token) {
         try {
+
+            String oldRefreshToken = token.getRefreshToken();
 
             // Create body
             String body = String.format(
                     "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token",
                     clientId,
                     clientSecret,
-                    token.getRefreshToken()
+                    oldRefreshToken
             );
 
             // Create request
@@ -176,19 +146,21 @@ public class HelixHandler {
 
             // Send request
             HttpResponse<String> response = sendRequest(request);
-            JsonNode jsonNode = new ObjectMapper().readTree(Objects.requireNonNull(response).body());
-            String accessToken = jsonNode.get("access_token").asText();
-            String refreshToken = jsonNode.get("refresh_token").asText();
-            int expiresIn = jsonNode.get("expires_in").asInt();
+
+            // Create new token
+            AuthToken newToken = new AuthToken(this, Objects.requireNonNull(response).body());
 
             // Add Credentials
-            botClient.addCredential(accessToken);
+            botClient.addCredential(newToken.getAccessToken());
 
             // Update tokens in the database
-            tokenManager.refreshTokens(encryption.encrypt(token.getRefreshToken()), encryption.encrypt(accessToken), encryption.encrypt(refreshToken), expiresIn);
+            tokenManager.refreshTokens(oldRefreshToken, newToken, encryption);
 
-            // Return new token
-            return new AuthToken(token.getId(), accessToken, refreshToken, token.getScopesAsString(), expiresIn, new Timestamp(System.currentTimeMillis()));
+            System.out.println("Token refreshed");
+            System.out.println("Old Token: " + oldRefreshToken);
+            System.out.println("New Token: " + newToken.getRefreshToken());
+            System.out.println("New Access Token: " + newToken.getAccessToken());
+
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to refresh token");
         }
@@ -201,24 +173,15 @@ public class HelixHandler {
         boolean inCache = authTokens.containsKey(channelId);
 
         // Get access token
-        AuthToken token = inCache ? authTokens.get(channelId) : tokenManager.getAuthToken(channelId);
-        if (!inCache) {
-            if (token == null) return null;
-            token = new AuthToken(
-                    token.getId(),
-                    encryption.decrypt(token.getAccessToken()),
-                    encryption.decrypt(token.getRefreshToken()),
-                    token.getScopesAsString(),
-                    token.getExpiresIn(),
-                    token.getTimestamp()
-            );
-            authTokens.put(channelId, token);
-        }
+        AuthToken token = inCache ? authTokens.get(channelId) : tokenManager.getAuthToken(this, channelId, encryption);
+        if (token == null) return null;
+        if (!inCache) authTokens.put(channelId, token);
+
 
         // Check if token is valid
         boolean isValid = token.hasScope(scopes);
 
-        // Decrypt access token
+        // Return access token
         if (isValid) return token.getAccessToken();
         else return null;
     }
@@ -486,8 +449,20 @@ public class HelixHandler {
         return !Objects.requireNonNull(inboundFollowers.getFollows()).isEmpty();
     }
 
+    public TwitchHelix getHelix() {
+        return helix;
+    }
+
     // Callback handler
     private class CallbackHandler implements HttpHandler {
+
+        // Attributes
+        private final HelixHandler helixHandler;
+
+        // Constructor
+        public CallbackHandler(HelixHandler helixHandler) {
+            this.helixHandler = helixHandler;
+        }
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -495,9 +470,6 @@ public class HelixHandler {
             // Extract code and scopes
             String query = exchange.getRequestURI().getQuery();
             if (query != null && query.contains("code=")) {
-
-                // Extract code and scopes
-                String scopes = query.split("scope=")[1].split("&")[0];
 
                 // Create body
                 String body = String.format(
@@ -518,35 +490,15 @@ public class HelixHandler {
 
                 // Send request
                 HttpResponse<String> response = sendRequest(request);
-                JsonNode jsonNode = new ObjectMapper().readTree(Objects.requireNonNull(response).body());
 
-                // Extract data
-                String accessToken = jsonNode.get("access_token").asText();
-                String refreshToken = jsonNode.get("refresh_token").asText();
-                var expiresIn = jsonNode.get("expires_in").asInt();
+                // Create new token
+                AuthToken token = new AuthToken(helixHandler, Objects.requireNonNull(response).body());
 
-                // Use the access token to determine the user
-                if (accessToken != null) {
+                // Add Credentials
+                botClient.addCredential(token.getAccessToken());
 
-                    // Add Credentials
-                    botClient.addCredential(accessToken);
-
-                    // Get user
-                    UserList userList = helix.getUsers(accessToken, null, null).execute();
-                    if (!userList.getUsers().isEmpty()) {
-
-                        // Extract user data
-                        User user = userList.getUsers().getFirst();
-                        var id = Integer.parseInt(user.getId());
-                        String name = user.getDisplayName();
-
-                        // Save token
-                        tokenManager.addToken(id, name, encryption.encrypt(accessToken), encryption.encrypt(refreshToken), scopes, expiresIn);
-
-                        // Add to cache
-                        authTokens.put(id, new AuthToken(id, accessToken, refreshToken, scopes, expiresIn, new Timestamp(System.currentTimeMillis())));
-                    }
-                }
+                // Update tokens in the database
+                tokenManager.addToken(getUser(token.getId()).getName(), token, encryption);
             }
 
             // Send response
@@ -562,11 +514,12 @@ public class HelixHandler {
 
         // Scopes
         ANALYTICS_READ_EXTENSIONS("analytics:read:extensions", "View analytics data for your extensions."),
+        ANALYTICS_READ_GAMES("analytics:read:games", "View analytics data for your games."),
+        BITS_READ("bits:read", "View bits information for your channel."),
+        CHANNEL_BOT("channel:bot", "Allows the client's bot users access to a channel."),
         USER_EDIT("user:edit", "Manage a user object."),
         USER_READ_EMAIL("user:read:email", "Read authorized user's email address."),
         CLIPS_EDIT("clips:edit", "Create and edit clips as a specific user."),
-        BITS_READ("bits:read", "View bits information for your channel."),
-        ANALYTICS_READ_GAMES("analytics:read:games", "View analytics data for your games."),
         USER_EDIT_BROADCAST("user:edit:broadcast", "Edit your channel's broadcast configuration, including extension configuration."),
         USER_READ_BROADCAST("user:read:broadcast", "View your broadcasting configuration, including extension configurations."),
         CHAT_READ("chat:read", "View live Stream Chat and Rooms messages."),
@@ -623,7 +576,6 @@ public class HelixHandler {
         CHANNEL_MANAGE_GUEST_STAR("channel:manage:guest_star", "Manage Guest Star for your channel."),
         MODERATOR_READ_GUEST_STAR("moderator:read:guest_star", "Read Guest Star details for channels where you are a Guest Star moderator."),
         MODERATOR_MANAGE_GUEST_STAR("moderator:manage:guest_star", "Manage Guest Star for channels where you are a Guest Star moderator."),
-        CHANNEL_BOT("channel:bot", "Allows the client's bot users access to a channel."),
         USER_BOT("user:bot", "Allows client's bot to act as this user."),
         USER_READ_CHAT("user:read:chat", "View live stream chat and room messages."),
         CHANNEL_MANAGE_ADS("channel:manage:ads", "Manage ads schedule on a channel."),
@@ -646,6 +598,22 @@ public class HelixHandler {
             // Set Attributes
             this.scope = scope;
             this.description = description;
+        }
+
+        // Methods
+        public static Scope getScope(String scope) {
+            if (scope == null || scope.isEmpty() || scope.isBlank()) throw new IllegalArgumentException("Scope cannot be empty");
+            for (Scope s : Scope.values()) if (s.getScope().equals(scope)) return s;
+            return null;
+        }
+
+        public static Scope[] getScopes(String scopes) {
+            if (scopes == null || scopes.isEmpty() || scopes.isBlank())
+                throw new IllegalArgumentException("Scopes cannot be empty");
+            String[] scopeArray = scopes.split("\\+");
+            Scope[] scopeList = new Scope[scopeArray.length];
+            for (var i = 0; i < scopeArray.length; i++) scopeList[i] = getScope(scopeArray[i]);
+            return scopeList;
         }
 
         // Getters
