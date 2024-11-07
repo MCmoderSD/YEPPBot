@@ -30,7 +30,7 @@ public class Quote {
         QuoteManager quoteManager = mySQL.getQuoteManager();
 
         // Syntax
-        String syntax = "Syntax: " + botClient.getPrefix() + "quote <add|delete|edit> <number>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "quote <add|delete|edit|last> <number>";
 
         // Constants
         listEmpty = "There are no quotes!";
@@ -67,7 +67,17 @@ public class Quote {
                 // Check verb
                 String verb = args.getFirst().toLowerCase();
                 if (!Arrays.asList("add", "rem", "remove", "del", "delete", "edit", "change", "update").contains(verb)) {
+
+                    // Remove #
                     if (args.getFirst().startsWith("#")) verb = verb.substring(1);
+
+                    // Check Last
+                    if (Arrays.asList("last", "latest", "newest").contains(verb)) {
+                        botClient.respond(event, getCommand(), getQuote(event, quotes.size() - 1));
+                        return;
+                    }
+
+                    // Get Number
                     try {
                         var number = Integer.parseInt(verb) - 1;
                         botClient.respond(event, getCommand(), getQuote(event, number));

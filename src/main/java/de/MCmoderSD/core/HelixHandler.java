@@ -158,11 +158,6 @@ public class HelixHandler {
             // Update tokens in the database
             tokenManager.refreshTokens(oldRefreshToken, newToken, encryption);
 
-            System.out.println("Token refreshed");
-            System.out.println("Old Token: " + oldRefreshToken);
-            System.out.println("New Token: " + newToken.getRefreshToken());
-            System.out.println("New Access Token: " + newToken.getAccessToken());
-
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to refresh token");
         }

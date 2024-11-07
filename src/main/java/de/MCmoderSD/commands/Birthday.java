@@ -261,9 +261,6 @@ public class Birthday {
         // Check if empty
         if (birthdays.isEmpty()) return noSavedBirthdays;
 
-        // Debug Print Full Birthday List
-        birthdays.forEach((id, birthdate) -> System.out.println(id + ": " + birthdate.getDate()));
-
         // Get User-Id
         var nextBirthdayUserId = new ArrayList<>(birthdays.keySet()).get(next);
 
