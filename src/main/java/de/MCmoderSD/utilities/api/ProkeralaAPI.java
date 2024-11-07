@@ -1,5 +1,6 @@
 package de.MCmoderSD.utilities.api;
 
+import de.MCmoderSD.enums.ZodiacSign;
 import de.MCmoderSD.objects.Birthdate;
 
 import org.json.JSONObject;
@@ -104,7 +105,7 @@ public class ProkeralaAPI {
 
         // Get the daily prediction
         String url = "https://api.prokerala.com/v2/horoscope/daily";
-        Birthdate.ZodiacSign sign = birthdate.getZodiacSign();
+        ZodiacSign sign = birthdate.getZodiacSign();
         String currentDatetime = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC));
         String fullUrl = url + "?sign=" + sign.getName() + "&datetime=" + currentDatetime;
 
@@ -150,8 +151,8 @@ public class ProkeralaAPI {
         // Get the daily love prediction
         String url = "https://api.prokerala.com/v2/horoscope/daily/love-compatibility";
         String currentDatetime = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC));
-        Birthdate.ZodiacSign userSign = user.getZodiacSign();
-        Birthdate.ZodiacSign partnerSign = partner.getZodiacSign();
+        ZodiacSign userSign = user.getZodiacSign();
+        ZodiacSign partnerSign = partner.getZodiacSign();
         String fullUrl = url + "?datetime=" + currentDatetime + "&sign_one=" + userSign.getName().toLowerCase() + "&sign_two=" + partnerSign.getName().toLowerCase();
 
         try {

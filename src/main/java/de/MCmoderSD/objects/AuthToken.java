@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.MCmoderSD.core.HelixHandler;
+import de.MCmoderSD.enums.Scope;
 import de.MCmoderSD.utilities.other.Encryption;
 
 import java.sql.ResultSet;
@@ -14,13 +15,14 @@ import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.other.Format.formatScopes;
 
+@SuppressWarnings("unused")
 public class AuthToken {
 
     // Attributes
     private final int id;
     private final String accessToken;
     private final String refreshToken;
-    private final HelixHandler.Scope[] scopes;
+    private final Scope[] scopes;
     private final int expiresIn;
     private final Timestamp timestamp;
 
@@ -33,7 +35,7 @@ public class AuthToken {
         // Extract data
         accessToken = jsonNode.get("access_token").asText();
         refreshToken = jsonNode.get("refresh_token").asText();
-        scopes = HelixHandler.Scope.getScopes(formatScopes(jsonNode.get("scope")));
+        scopes = Scope.getScopes(formatScopes(jsonNode.get("scope")));
         expiresIn = jsonNode.get("expires_in").asInt();
         timestamp = new Timestamp(System.currentTimeMillis());
 
@@ -51,7 +53,7 @@ public class AuthToken {
         id = resultSet.getInt("id");
         accessToken = encryption.decrypt(resultSet.getString("accessToken"));
         refreshToken = encryption.decrypt(resultSet.getString("refreshToken"));
-        scopes = HelixHandler.Scope.getScopes(resultSet.getString("scopes"));
+        scopes = Scope.getScopes(resultSet.getString("scopes"));
         expiresIn = resultSet.getInt("expires_in");
         timestamp = resultSet.getTimestamp("timestamp");
 
@@ -74,7 +76,7 @@ public class AuthToken {
     }
 
     public String getScopesAsString() {
-        return Arrays.stream(scopes).map(HelixHandler.Scope::getScope).reduce((a, b) -> a + "+" + b).orElse("");
+        return Arrays.stream(scopes).map(Scope::getScope).reduce((s1, s2) -> s1 + "+" + s2).orElse("");
     }
 
     // Getters
@@ -91,11 +93,11 @@ public class AuthToken {
         return refreshToken;
     }
 
-    public HelixHandler.Scope[] getScopes() {
+    public Scope[] getScopes() {
         return scopes;
     }
 
-    public boolean hasScope(HelixHandler.Scope ... scopes) {
+    public boolean hasScope(Scope... scopes) {
         return Arrays.stream(scopes).allMatch(scope -> Arrays.asList(this.scopes).contains(scope));
     }
 

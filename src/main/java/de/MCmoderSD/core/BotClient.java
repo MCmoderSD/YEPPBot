@@ -42,6 +42,7 @@ import de.MCmoderSD.commands.Whitelist;
 import de.MCmoderSD.commands.Wiki;
 
 import de.MCmoderSD.UI.Frame;
+import de.MCmoderSD.enums.Scope;
 import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.main.Terminal;
@@ -60,7 +61,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static de.MCmoderSD.main.Terminal.Argument.*;
+import static de.MCmoderSD.enums.Argument.*;
 import static de.MCmoderSD.utilities.other.Format.*;
 
 @SuppressWarnings("unused")
@@ -68,17 +69,15 @@ public class BotClient {
 
     public static final String PROVIDER = "twitch";
     public static final long RATE_LIMIT = 600L;
-    public static final HelixHandler.Scope[] REQUIRED_SCOPES = {
-            HelixHandler.Scope.USER_READ_EMAIL,
-            HelixHandler.Scope.USER_READ_BLOCKED_USERS,
-            HelixHandler.Scope.CHAT_READ,
-            HelixHandler.Scope.BITS_READ,
-            HelixHandler.Scope.CHANNEL_READ_EDITORS,
-            HelixHandler.Scope.MODERATOR_READ_FOLLOWERS,
-            HelixHandler.Scope.MODERATION_READ,
-            HelixHandler.Scope.CHANNEL_READ_VIPS,
-            HelixHandler.Scope.CHANNEL_READ_SUBSCRIPTIONS,
-            HelixHandler.Scope.CHANNEL_MANAGE_RAIDS,
+    public static final Scope[] REQUIRED_SCOPES = {
+            Scope.CHANNEL_BOT,
+            Scope.MODERATION_READ,
+            Scope.CHANNEL_READ_VIPS,
+            Scope.MODERATOR_READ_FOLLOWERS,
+            Scope.BITS_READ,
+            Scope.CHANNEL_READ_SUBSCRIPTIONS,
+            Scope.ANALYTICS_READ_EXTENSIONS,
+            Scope.ANALYTICS_READ_GAMES,
     };
 
     // Associations
@@ -338,7 +337,7 @@ public class BotClient {
 
         // Enable Additional Event Listeners
         helper.enableStreamEventListener(channel);
-        if (helixHandler.checkScope(id, HelixHandler.Scope.MODERATOR_READ_FOLLOWERS)) helper.enableFollowEventListener(channel);    // moderator:read:followers
+        if (helixHandler.checkScope(id, Scope.MODERATOR_READ_FOLLOWERS)) helper.enableFollowEventListener(channel);    // moderator:read:followers
         helper.enableClipEventListener(channel);
 
         // Register Broadcast
@@ -437,24 +436,24 @@ public class BotClient {
     }
 
     public boolean isModerator(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATION_READ)) return false;
+        if (!helixHandler.checkScope(event.getChannelId(), Scope.MODERATION_READ)) return false;
         else return helixHandler.isModerator(event.getChannelId(), event.getUserId());
     }
 
     public boolean isEditor(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.CHANNEL_READ_EDITORS)) return false;
+        if (!helixHandler.checkScope(event.getChannelId(), Scope.CHANNEL_READ_EDITORS)) return false;
         HashSet<Integer> ids = new HashSet<>();
         helixHandler.getEditors(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
         return ids.contains(event.getUserId());
     }
 
     public boolean isVIP(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.CHANNEL_READ_VIPS)) return false;
+        if (!helixHandler.checkScope(event.getChannelId(), Scope.CHANNEL_READ_VIPS)) return false;
         return helixHandler.isVIP(event.getChannelId(), event.getUserId());
     }
 
     public boolean isFollowing(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), HelixHandler.Scope.MODERATOR_READ_FOLLOWERS)) return false;
+        if (!helixHandler.checkScope(event.getChannelId(), Scope.MODERATOR_READ_FOLLOWERS)) return false;
         return helixHandler.isFollower(event.getChannelId(), event.getUserId());
     }
 
@@ -504,7 +503,7 @@ public class BotClient {
         return admins;
     }
 
-    public HelixHandler.Scope[] getRequiredScopes() {
+    public Scope[] getRequiredScopes() {
         return REQUIRED_SCOPES;
     }
 

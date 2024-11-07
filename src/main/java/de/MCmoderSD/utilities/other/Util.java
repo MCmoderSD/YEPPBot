@@ -1,8 +1,8 @@
 package de.MCmoderSD.utilities.other;
 
 import de.MCmoderSD.core.HelixHandler;
+import de.MCmoderSD.enums.Argument;
 import de.MCmoderSD.main.Main;
-import de.MCmoderSD.main.Terminal;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
@@ -65,7 +65,7 @@ public class Util {
     public static LinkedHashMap<Integer, Birthdate> removeNonFollower(TwitchMessageEvent event, LinkedHashMap<Integer, Birthdate> birthdays, HelixHandler helixHandler) {
 
         // Return if dev mode
-        if (Main.terminal.hasArg(Terminal.Argument.DEV)) return birthdays;
+        if (Main.terminal.hasArg(Argument.DEV)) return birthdays;
 
         // Remove all non followers
         HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
@@ -79,17 +79,17 @@ public class Util {
 
     public static HashSet<Integer> removeNonFollower(TwitchMessageEvent event, HashSet<Integer> ids, HelixHandler helixHandler) {
 
-            // Return if dev mode
-            if (Main.terminal.hasArg(Terminal.Argument.DEV)) return ids;
+        // Return if dev mode
+        if (Main.terminal.hasArg(Argument.DEV)) return ids;
 
-            // Remove all non followers
-            HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
-            followers.add(new TwitchUser(event));                                       // Add User
-            followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
-            ids.removeIf(id -> !TwitchUser.containsTwitchUser(followers, id));
+        // Remove all non followers
+        HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
+        followers.add(new TwitchUser(event));                                       // Add User
+        followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
+        ids.removeIf(id -> !TwitchUser.containsTwitchUser(followers, id));
 
-            // Return
-            return ids;
+        // Return
+        return ids;
     }
 
     public static LinkedHashMap<Integer, Birthdate> sortBirthdays(LinkedHashMap<Integer, Birthdate> birthdays) {

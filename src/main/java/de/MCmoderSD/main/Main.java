@@ -2,6 +2,7 @@ package de.MCmoderSD.main;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.enums.Argument;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import de.MCmoderSD.json.JsonUtility;
@@ -61,23 +62,23 @@ public class Main {
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(args));
 
         // Bot Config
-        if (terminal.hasArg(Terminal.Argument.BOT_CONFIG)) botConfigPath = Terminal.Argument.BOT_CONFIG.getConfig(arguments);
+        if (terminal.hasArg(Argument.BOT_CONFIG)) botConfigPath = Argument.BOT_CONFIG.getConfig(arguments);
 
         // Channel List
-        if (terminal.hasArg(Terminal.Argument.CHANNEL_LIST)) channelListPath = Terminal.Argument.CHANNEL_LIST.getConfig(arguments);
+        if (terminal.hasArg(Argument.CHANNEL_LIST)) channelListPath = Argument.CHANNEL_LIST.getConfig(arguments);
 
         // MySQL Config
-        if (terminal.hasArg(Terminal.Argument.MYSQL_CONFIG)) mysqlConfigPath = Terminal.Argument.MYSQL_CONFIG.getConfig(arguments);
+        if (terminal.hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = Argument.MYSQL_CONFIG.getConfig(arguments);
 
         // Https Server
-        if (terminal.hasArg(Terminal.Argument.HTTPS_SERVER)) httpsServerPath = Terminal.Argument.HTTPS_SERVER.getConfig(arguments);
+        if (terminal.hasArg(Argument.HTTPS_SERVER)) httpsServerPath = Argument.HTTPS_SERVER.getConfig(arguments);
 
         // API Config
-        if (terminal.hasArg(Terminal.Argument.API_CONFIG)) apiKeysPath = Terminal.Argument.API_CONFIG.getConfig(arguments);
+        if (terminal.hasArg(Argument.API_CONFIG)) apiKeysPath = Argument.API_CONFIG.getConfig(arguments);
         else apiKeysPath = API_CONFIG;
 
         // OpenAI Config
-        if (terminal.hasArg(Terminal.Argument.OPENAI_CONFIG)) openAIConfigPath = Terminal.Argument.OPENAI_CONFIG.getConfig(arguments);
+        if (terminal.hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = Argument.OPENAI_CONFIG.getConfig(arguments);
         else openAIConfigPath = OPENAI_CONFIG;
 
         // Instances
@@ -86,7 +87,7 @@ public class Main {
         OpenAI openAI = null;
 
         // CLI Mode
-        if (!terminal.hasArg(Terminal.Argument.CLI)) {
+        if (!terminal.hasArg(Argument.CLI)) {
 
             // Try to create Frame
             try {
@@ -97,7 +98,7 @@ public class Main {
         }
 
         // Dev Mode
-        if (terminal.hasArg(Terminal.Argument.DEV)) {
+        if (terminal.hasArg(Argument.DEV)) {
             if (botConfigPath == null) botConfigPath = DEV_CONFIG;
             if (channelListPath == null) channelListPath = DEV_LIST;
             if (mysqlConfigPath == null) mysqlConfigPath = DEV_MYSQL;

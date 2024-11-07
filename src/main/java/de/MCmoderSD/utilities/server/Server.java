@@ -6,8 +6,8 @@ import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
 
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.enums.Argument;
 import de.MCmoderSD.main.Main;
-import de.MCmoderSD.main.Terminal;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -74,7 +74,7 @@ public class Server {
 
             // Get the keystore file
             InputStream keystore;
-            if (Main.terminal.hasArg(Terminal.Argument.HTTPS_SERVER)) keystore = new FileInputStream(jksPath);
+            if (Main.terminal.hasArg(Argument.HTTPS_SERVER)) keystore = new FileInputStream(jksPath);
             else keystore = getClass().getResourceAsStream(jksPath);
 
             // Hash the bot token with SHA-256

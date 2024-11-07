@@ -6,6 +6,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.enums.ZodiacSign;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.OpenAI.modules.Chat;
@@ -78,7 +79,7 @@ public class Match {
                 }
 
                 // Get Zodiac Sign and set Default Values
-                Birthdate.ZodiacSign zodiacSign = birthdays.get(event.getUserId()).getZodiacSign();
+                ZodiacSign zodiacSign = birthdays.get(event.getUserId()).getZodiacSign();
                 String language = "german"; // Default: German
                 var amount = 5; // Default: 5
 
@@ -101,7 +102,7 @@ public class Match {
                 }
 
                 // Get Compatible Signs and Users
-                Birthdate.ZodiacSign[] compatibleSigns = zodiacSign.getCompatibleSigns();
+                ZodiacSign[] compatibleSigns = zodiacSign.getCompatibleSigns();
                 HashSet<Integer> mostCompatibleUsersIds = getCompatibleUserIds(birthdays, compatibleSigns[0], event.getUserId());
                 HashSet<Integer> moreCompatibleUsersIds = getCompatibleUserIds(birthdays, compatibleSigns[1], event.getUserId());
                 HashSet<Integer> compatibleUsersIds = getCompatibleUserIds(birthdays, compatibleSigns[2], event.getUserId());
@@ -158,7 +159,7 @@ public class Match {
     }
 
     // Get Compatible User IDs
-    private HashSet<Integer> getCompatibleUserIds(HashMap<Integer, Birthdate> birthdayList, Birthdate.ZodiacSign zodiacSign, int id) {
+    private HashSet<Integer> getCompatibleUserIds(HashMap<Integer, Birthdate> birthdayList, ZodiacSign zodiacSign, int id) {
 
         // Variables
         HashSet<Integer> compatibleUserIds = new HashSet<>();
