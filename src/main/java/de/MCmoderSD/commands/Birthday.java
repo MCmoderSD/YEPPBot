@@ -125,7 +125,7 @@ public class Birthday {
         nobodyHasBirthdayInThisMonth = "Niemand hat in diesem Monat Geburtstag.";
 
         // Messages for getThis
-        followingUsersHaveBirthdayToday = "Folgende User haben heute Geburtstag: ";
+        followingUsersHaveBirthdayToday = "Folgende User haben heute Geburtstag: %s. YEPP";
         followingUsersHaveBirthdayThisWeek = "Folgende User haben diese Woche noch Geburtstag: ";
         followingUsersHaveBirthDayThisMonth = "Folgende User haben diesen Monat noch Geburtstag: ";
         followingUsersHaveBirthdayThisYear = "Folgenden Usern haben diesen Jahr noch Geburtstag: ";

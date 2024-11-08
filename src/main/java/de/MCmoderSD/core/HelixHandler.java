@@ -164,6 +164,9 @@ public class HelixHandler {
                 return;
             }
 
+            // Replace token
+            authTokens.replace(newToken.getId(), token, newToken);
+
             // Add Credentials
             botClient.addCredential(newToken.getAccessToken());
 
@@ -646,6 +649,9 @@ public class HelixHandler {
                     System.err.println("Failed to get access token");
                     return;
                 }
+
+                // Add token
+                authTokens.put(token.getId(), token);
 
                 // Add Credentials
                 botClient.addCredential(token.getAccessToken());

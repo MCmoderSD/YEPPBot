@@ -73,6 +73,7 @@ public class Terminal {
                 help();
                 break;
             case "exit":
+            case "stop":
                 System.out.printf("%sStopping bot...", BOLD);
                 System.exit(0);
                 break;
