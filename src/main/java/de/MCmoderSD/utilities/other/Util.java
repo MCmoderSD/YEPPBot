@@ -2,6 +2,7 @@ package de.MCmoderSD.utilities.other;
 
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.enums.Argument;
+import de.MCmoderSD.enums.Scope;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -67,6 +68,9 @@ public class Util {
         // Return if dev mode
         if (Main.terminal.hasArg(Argument.DEV)) return birthdays;
 
+        // Check Scope
+        if (!helixHandler.checkScope(event.getChannelId(), Scope.MODERATOR_READ_FOLLOWERS)) return null;
+
         // Remove all non followers
         HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
         followers.add(new TwitchUser(event));                                       // Add User
@@ -82,8 +86,11 @@ public class Util {
         // Return if dev mode
         if (Main.terminal.hasArg(Argument.DEV)) return ids;
 
-        // Remove all non followers
-        HashSet<TwitchUser> followers = new HashSet<>(helixHandler.getFollowers(event.getChannelId(), null));
+        // Check Scope
+        if (!helixHandler.checkScope(event.getChannelId(), Scope.MODERATOR_READ_FOLLOWERS)) return null;
+
+        // Remove all non followers>
+        HashSet<TwitchUser> followers = helixHandler.getFollowers(event.getChannelId(), null);
         followers.add(new TwitchUser(event));                                       // Add User
         followers.add(new TwitchUser(event.getChannelId(), event.getChannel()));    // Add Broadcaster
         ids.removeIf(id -> !TwitchUser.containsTwitchUser(followers, id));
@@ -93,6 +100,7 @@ public class Util {
     }
 
     public static LinkedHashMap<Integer, Birthdate> sortBirthdays(LinkedHashMap<Integer, Birthdate> birthdays) {
+        if (birthdays == null) return null;
         return birthdays.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparing(Birthdate::getDaysUntilBirthday))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 }

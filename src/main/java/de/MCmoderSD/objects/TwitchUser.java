@@ -8,7 +8,7 @@ import com.github.twitch4j.helix.domain.InboundFollow;
 
 import java.util.HashSet;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 public class TwitchUser {
 
     // Attributes

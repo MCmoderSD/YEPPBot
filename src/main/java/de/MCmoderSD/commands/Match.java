@@ -74,6 +74,12 @@ public class Match {
 
                 // Null Check
                 if (birthdays == null) {
+                    botClient.respond(event, getCommand(), "The bot is not authorized to read the followers of this channel. Type !mod auth to authorize the bot. YEPP");
+                    return;
+                }
+
+                // Check if empty
+                if (birthdays.isEmpty()) {
                     botClient.respond(event, getCommand(), noBirthdaySet);
                     return;
                 }

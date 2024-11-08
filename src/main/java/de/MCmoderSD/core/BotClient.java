@@ -47,6 +47,7 @@ import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.main.Main;
 import de.MCmoderSD.main.Terminal;
 import de.MCmoderSD.objects.TwitchMessageEvent;
+import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.server.AudioBroadcast;
 import de.MCmoderSD.utilities.server.Server;
@@ -64,7 +65,7 @@ import java.util.stream.Collectors;
 import static de.MCmoderSD.enums.Argument.*;
 import static de.MCmoderSD.utilities.other.Format.*;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "SameReturnValue"})
 public class BotClient {
 
     public static final String PROVIDER = "twitch";
@@ -270,11 +271,18 @@ public class BotClient {
     // Write
     public void write(String channel, String message) {
 
-        // Check Message
-        if (message.isEmpty() || message.isBlank()) return;
+        // Variables
+        boolean tooLong = message.length() > 500;
+        boolean valid = !(message.isEmpty() || message.isBlank() || tooLong);
 
         // Update Frame
-        if (!cli) frame.log(USER, channel, botName, message);
+        if (!cli) {
+            if (tooLong) frame.showMessage("The message was too long to send.", "Message Error");
+            else if (valid) frame.log(USER, channel, botName, message);
+        }
+
+        // Check
+        if (!valid) return;
 
         // Log
         if (log) mySQL.getLogManager().logResponse(channel, botName, message, helixHandler);
@@ -289,17 +297,22 @@ public class BotClient {
 
         // Variables
         var channel = event.getChannel();
+        boolean tooLong = message.length() > 500;
+        boolean valid = !(message.isEmpty() || message.isBlank() || tooLong);
 
         // Update Frame
-        if (!(message.isEmpty() || message.isBlank()) && !cli) frame.log(RESPONSE, channel, botName, message);
+        if (valid && !cli) frame.log(RESPONSE, channel, botName, message);
 
         // Log
         if (log) mySQL.getLogManager().logResponse(event, command, message);
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
-        if (!(message.isEmpty() || message.isBlank())) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
+        if (valid) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
         // Send Message
-        if (!(message.isEmpty() || message.isBlank())) chat.sendMessage(channel, message);
+        if (valid) chat.sendMessage(channel, message);
+
+        // Error Message
+        if (tooLong) respond(event, command, "The response was too long to send. YEPP");
     }
 
     // Send Audio
@@ -436,24 +449,22 @@ public class BotClient {
     }
 
     public boolean isModerator(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), Scope.MODERATION_READ)) return false;
-        else return helixHandler.isModerator(event.getChannelId(), event.getUserId());
+        return helixHandler.isModerator(event.getChannelId(), event.getUserId());
     }
 
     public boolean isEditor(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), Scope.CHANNEL_READ_EDITORS)) return false;
         HashSet<Integer> ids = new HashSet<>();
-        helixHandler.getEditors(event.getChannelId()).forEach(twitchUser -> ids.add(twitchUser.getId()) );
+        HashSet<TwitchUser> editors = helixHandler.getEditors(event.getChannelId());
+        if (editors.isEmpty()) return false;
+        for (TwitchUser editor : editors) ids.add(editor.getId());
         return ids.contains(event.getUserId());
     }
 
     public boolean isVIP(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), Scope.CHANNEL_READ_VIPS)) return false;
         return helixHandler.isVIP(event.getChannelId(), event.getUserId());
     }
 
     public boolean isFollowing(TwitchMessageEvent event) {
-        if (!helixHandler.checkScope(event.getChannelId(), Scope.MODERATOR_READ_FOLLOWERS)) return false;
         return helixHandler.isFollower(event.getChannelId(), event.getUserId());
     }
 

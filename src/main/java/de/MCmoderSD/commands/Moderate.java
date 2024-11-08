@@ -67,7 +67,7 @@ public class Moderate {
                 }
 
                 if (Arrays.asList("authenticate", "auth", "oauth").contains(verb) && (botClient.isBroadcaster(event) || botClient.isAdmin(event))) {
-                    botClient.respond(event, getCommand(), helixHandler.getAuthorizationUrl(BotClient.REQUIRED_SCOPES));
+                    botClient.respond(event, getCommand(), helixHandler.getAuthorizationUrl(botClient.getRequiredScopes()));
                     return;
                 }
 

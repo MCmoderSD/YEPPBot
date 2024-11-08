@@ -3,7 +3,7 @@ package de.MCmoderSD.UI;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.imageloader.ImageLoader;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -74,6 +74,11 @@ public class Frame extends JFrame {
 
     public void log(TwitchMessageEvent event) {
         logPanel.appendText(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
+    }
+
+    // Setter
+    public void showMessage(String message, String title) {
+        new Thread(() -> JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE)).start();
     }
 
     // Getter

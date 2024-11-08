@@ -32,6 +32,8 @@ public class DickDestroyDecember extends Event {
                 "Everyone's meat already gave up. YEPP",
                 "Everyone is still in Dick-Destroy-December. YEPP",
                 "%s are fighting, but %s already gave up. YEPP",
+                "%s are still fighting. YEPP",
+                "%s gave already up. YEPP",
                 "Dick-Destroy-December",
                 "dickdestroydecember", "ddd", "destroydickdecember", "dicdestroydecember"
         );

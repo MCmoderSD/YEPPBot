@@ -32,6 +32,8 @@ public class NoNutNovember extends Event {
                 "Everyone has already busted a nut. YEPP",
                 "Everyone is still in No-Nut-November. YEPP",
                 "%s are still fighting, but %s already busted a nut. YEPP",
+                "%s are still fighting. YEPP",
+                "%s already busted a nut. YEPP",
                 "No-Nut-November",
         "nonutnovember", "nnn", "no-nut-november"
         );

@@ -12,6 +12,7 @@ import java.text.Normalizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import static de.MCmoderSD.core.BotClient.prefixes;
 import static de.MCmoderSD.utilities.other.Util.RANDOM;
@@ -131,6 +132,26 @@ public class Format {
         StringBuilder scopeString = new StringBuilder();
         for (var i = 0; i < scopes.size(); i++) scopeString.append(scopes.get(i).asText()).append("+");
         return scopeString.substring(0, scopeString.length() - 1);
+    }
+
+    // Format Ids to String
+    public static ArrayList<String> formatIdsToString(HashSet<Integer> ids) {
+
+        // Check if empty
+        if (ids.isEmpty()) return new ArrayList<>();
+
+        // Variables
+        ArrayList<String> strings = new ArrayList<>();
+
+        for (Integer id : ids) {
+            if (id == null || id < 1) continue;
+            String string = id.toString();
+            if (string.isEmpty() || string.isBlank() || strings.contains(string)) continue;
+            strings.add(string);
+        }
+
+        // Return
+        return strings;
     }
 
     // Convert to ASCII

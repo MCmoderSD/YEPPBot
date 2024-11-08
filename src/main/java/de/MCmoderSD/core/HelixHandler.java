@@ -28,7 +28,6 @@ import java.net.http.HttpResponse;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
@@ -43,6 +42,7 @@ import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
 import de.MCmoderSD.utilities.other.Encryption;
+import de.MCmoderSD.utilities.other.Format;
 import de.MCmoderSD.utilities.server.Server;
 
 import org.jetbrains.annotations.Nullable;
@@ -149,8 +149,20 @@ public class HelixHandler {
             // Send request
             HttpResponse<String> response = sendRequest(request);
 
+            // Null check
+            if (response == null || response.body() == null || response.body().isEmpty() || response.body().isBlank()) {
+                System.err.println("Failed to get response");
+                return;
+            }
+
             // Create new token
             AuthToken newToken = new AuthToken(this, Objects.requireNonNull(response).body());
+
+            // Null check
+            if (newToken.getAccessToken() == null) {
+                System.err.println("Failed to refresh token");
+                return;
+            }
 
             // Add Credentials
             botClient.addCredential(newToken.getAccessToken());
@@ -166,21 +178,21 @@ public class HelixHandler {
     // Get access token
     private String getAccessToken(int channelId, Scope... scopes) {
 
-        // Variables
-        boolean inCache = authTokens.containsKey(channelId);
+        // Get token
+        AuthToken token = authTokens.containsKey(channelId) ? authTokens.get(channelId) : tokenManager.getAuthToken(this, channelId, encryption);
 
-        // Get access token
-        AuthToken token = inCache ? authTokens.get(channelId) : tokenManager.getAuthToken(this, channelId, encryption);
-        if (token == null) return null;
-        if (!inCache) authTokens.put(channelId, token);
+        // Null check
+        if (token == null) {
+            System.err.println("Failed to get access token");
+            return null;
+        }
 
+        // Return if token has scope
+        if (token.hasScope(scopes)) return token.getAccessToken();
 
-        // Check if token is valid
-        boolean isValid = token.hasScope(scopes);
-
-        // Return access token
-        if (isValid) return token.getAccessToken();
-        else return null;
+        // Error message
+        System.err.println("Token does not have the required scope");
+        return null;
     }
 
     // Get authorization URL
@@ -198,19 +210,28 @@ public class HelixHandler {
     }
 
     // Check Scope
-    public boolean checkScope(int channelId, Scope ... scopes) {
+    public boolean checkScope(Integer channelId, Scope ... scopes) {
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
+        if (scopes == null || scopes.length == 0) throw new IllegalArgumentException("Scopes cannot be null or empty");
         return authTokens.containsKey(channelId) && authTokens.get(channelId).hasScope(scopes);
     }
 
     // Get user with ID
     public TwitchUser getUser(Integer id) {
 
-        // Get access token
-        String accessToken = getAccessToken(botClient.getBotId());
+        // Check Parameters
+        if (id == null || id < 1) throw new IllegalArgumentException("ID cannot be null or less than 1");
 
         // Get user ID
-        UserList userList = helix.getUsers(accessToken, Collections.singletonList(String.valueOf(id)), null).execute();
-        if (userList.getUsers().isEmpty()) return null;
+        UserList userList = helix.getUsers(null, Collections.singletonList(String.valueOf(id)), null).execute();
+
+        // Null check
+        if (userList == null || userList.getUsers() == null || userList.getUsers().isEmpty()) {
+            System.err.println("Failed to get user with ID: " + id);
+            return null;
+        }
+
+        // Return user
         return new TwitchUser(userList.getUsers().getFirst());
     }
 
@@ -218,36 +239,70 @@ public class HelixHandler {
     public TwitchUser getUser(String username) {
 
         // Check Parameters
-        if (username == null || username.isEmpty()) throw new IllegalArgumentException("Username cannot be empty");
-
-        // Get access token
-        String accessToken = getAccessToken(botClient.getBotId());
+        if (username == null || username.isEmpty() || username.isBlank()) throw new IllegalArgumentException("Username cannot be empty");
 
         // Get user ID
-        UserList userList = helix.getUsers(accessToken, null, Collections.singletonList(username)).execute();
-        if (userList.getUsers().isEmpty()) return null;
+        UserList userList = helix.getUsers(null, null, Collections.singletonList(username)).execute();
+
+        // Null check
+        if (userList == null || userList.getUsers() == null || userList.getUsers().isEmpty()) {
+            System.err.println("Failed to get user with name: " + username);
+            return null;
+        }
+
+        // Return user
+        return new TwitchUser(userList.getUsers().getFirst());
+    }
+
+    // Get user with ID and name
+    public TwitchUser getUser(Integer id, String username) {
+
+        // Check Parameters
+        if (id == null || id < 1) throw new IllegalArgumentException("ID cannot be null or less than 1");
+        if (username == null || username.isEmpty() || username.isBlank()) throw new IllegalArgumentException("Username cannot be empty");
+
+        // Get user ID
+        UserList userList = helix.getUsers(null, Collections.singletonList(String.valueOf(id)), Collections.singletonList(username)).execute();
+
+        // Null check
+        if (userList == null || userList.getUsers() == null || userList.getUsers().isEmpty()) {
+            System.err.println("Failed to get user with ID: " + id + " and name: " + username);
+            return null;
+        }
+
+        // Return user
         return new TwitchUser(userList.getUsers().getFirst());
     }
 
     // Get user with ID
     public HashSet<TwitchUser> getUsersByID(HashSet<Integer> ids) {
 
-        // Check Parameters
-        if (ids.isEmpty()) throw new IllegalArgumentException("IDs cannot be empty");
-
-        // Get access token
-        String accessToken = getAccessToken(botClient.getBotId());
-
-        // Convert to string
-        List<String> stringIds = new ArrayList<>();
-        ids.forEach(id -> stringIds.add(id.toString()));
-
-        // Get user ID
-        UserList userList = helix.getUsers(accessToken, stringIds, null).execute();
-        if (userList.getUsers().isEmpty()) return null;
-
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
+        ArrayList<String> stringIds = Format.formatIdsToString(ids);
+
+        // Check Parameters
+        if (stringIds.isEmpty()) throw new IllegalArgumentException("IDs cannot be empty");
+
+        // Check Limits
+        if (stringIds.size() > 100) {
+
+            // Shrink to 100
+            HashSet<String> temp = new HashSet<>();
+            while (stringIds.size() > 100) temp.add(stringIds.removeFirst());
+
+            // Recursion
+            twitchUsers.addAll(getUsersByName(temp));
+        }
+
+        // Get user ID
+        UserList userList = helix.getUsers(null, stringIds, null).execute();
+
+        // Null check
+        if (userList == null || userList.getUsers() == null || userList.getUsers().isEmpty()) {
+            System.err.println("Failed to get users with IDs: " + stringIds);
+            return null;
+        }
 
         // Add users
         for (User user : userList.getUsers()) twitchUsers.add(new TwitchUser(user));
@@ -260,52 +315,67 @@ public class HelixHandler {
         // Check Parameters
         if (names.isEmpty()) throw new IllegalArgumentException("Names cannot be empty");
 
-        // Get access token
-        String accessToken = getAccessToken(botClient.getBotId());
-
-        // Convert to List
-        List<String> nameList = new ArrayList<>(names);
-        names.addAll(nameList);
-
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
 
+        // Check Limits
+        if (names.size() > 100) {
+
+            // Shrink to 100
+            HashSet<String> temp = new HashSet<>();
+            while (names.size() > 100) {
+                String name = names.iterator().next();
+                temp.add(name);
+                names.remove(name);
+            }
+
+            // Recursion
+            twitchUsers.addAll(getUsersByName(temp));
+        }
+
         // Get user ID
-        UserList userList = helix.getUsers(accessToken, null, nameList).execute();
-        if (userList.getUsers().isEmpty()) return null;
+        UserList userList = helix.getUsers(null, null, new ArrayList<>(names)).execute();
+
+        // Null check
+        if (userList == null || userList.getUsers() == null || userList.getUsers().isEmpty()) {
+            System.err.println("Failed to get users with names: " + names);
+            return null;
+        }
 
         // Add users
         for (User user : userList.getUsers()) twitchUsers.add(new TwitchUser(user));
         return twitchUsers;
     }
 
-    // Get user with ID and name
-    public TwitchUser getUser(Integer id, String username) {
-
-        // Get access token
-        String accessToken = getAccessToken(botClient.getBotId());
-
-        // Get user ID
-        UserList userList = helix.getUsers(accessToken, Collections.singletonList(String.valueOf(id)), Collections.singletonList(username)).execute();
-        if (userList.getUsers().isEmpty()) return null;
-        return new TwitchUser(userList.getUsers().getFirst());
-    }
-
     // Get moderators
     public HashSet<TwitchUser> getModerators(Integer channelId, @Nullable String cursor) {
+
+        // Check Parameters
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
 
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
 
+        // Null check
+        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+            System.err.println("Failed to get access token");
+            return null;
+        }
+
         // Get moderators
         ModeratorList moderatorList = helix.getModerators(accessToken, channelId.toString(), null, cursor, 100).execute();
+
+        // Null check
+        if (moderatorList == null || moderatorList.getModerators() == null || moderatorList.getModerators().isEmpty()) {
+            System.err.println("Failed to get moderators");
+            return null;
+        }
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
 
         // Add moderators
         for (Moderator moderator : moderatorList.getModerators()) twitchUsers.add(new TwitchUser(moderator));
-
 
         // Check if cache is up to date
         boolean cacheUpToDate = cursor == null;
@@ -327,8 +397,18 @@ public class HelixHandler {
     // Check if user is moderator
     public boolean isModerator(Integer channelId, Integer userId) {
 
+        // Check Parameters
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
+        if (userId == null || userId < 1) throw new IllegalArgumentException("User ID cannot be null or less than 1");
+
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
+
+        // Null check
+        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+            System.err.println("Failed to get access token");
+            return false;
+        }
 
         // Get moderators
         ModeratorList moderatorList = helix.getModerators(accessToken, channelId.toString(), Collections.singletonList(userId.toString()), null, 1).execute();
@@ -340,11 +420,26 @@ public class HelixHandler {
     // Get editors
     public HashSet<TwitchUser> getEditors(Integer channelId) {
 
+        // Check Parameters
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
+
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_EDITORS);
 
+        // Null check
+        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+            System.err.println("Failed to get access token");
+            return null;
+        }
+
         // Get editors
         ChannelEditorList editorList = helix.getChannelEditors(accessToken, channelId.toString()).execute();
+
+        // Null check
+        if (editorList == null || editorList.getEditors() == null || editorList.getEditors().isEmpty()) {
+            System.err.println("Failed to get editors");
+            return null;
+        }
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
@@ -357,11 +452,26 @@ public class HelixHandler {
     // Get VIPs
     public HashSet<TwitchUser> getVIPs(Integer channelId, @Nullable String cursor) {
 
+        // Check Parameters
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
+
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
 
+        // Null check
+        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+            System.err.println("Failed to get access token");
+            return null;
+        }
+
         // Get VIPs
         ChannelVipList vipList = helix.getChannelVips(accessToken, channelId.toString(), null, 100, cursor).execute();
+
+        // Null check
+        if (vipList == null || vipList.getData() == null || vipList.getData().isEmpty()) {
+            System.err.println("Failed to get VIPs");
+            return null;
+        }
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
@@ -390,8 +500,18 @@ public class HelixHandler {
     // Check if user is VIP
     public boolean isVIP(Integer channelId, Integer userId) {
 
+        // Check Parameters
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
+        if (userId == null || userId < 1) throw new IllegalArgumentException("User ID cannot be null or less than 1");
+
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
+
+        // Null check
+        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+            System.err.println("Failed to get access token");
+            return false;
+        }
 
         // Get moderators
         ChannelVipList vipList = helix.getChannelVips(accessToken, channelId.toString(), Collections.singletonList(channelId.toString()), 1, null).execute();
@@ -403,11 +523,26 @@ public class HelixHandler {
 
     public HashSet<TwitchUser> getFollowers(Integer channelId, @Nullable String cursor) {
 
+        // Check Parameters
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
+
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.MODERATOR_READ_FOLLOWERS);
 
+        // Null check
+        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+            System.err.println("Failed to get access token");
+            return null;
+        }
+
         // Get followers
         InboundFollowers inboundFollowers = helix.getChannelFollowers(accessToken, channelId.toString(), null, 100, cursor).execute();
+
+        // Null check
+        if (inboundFollowers == null) {
+            System.err.println("Failed to get followers");
+            return null;
+        }
 
         // Variables
         HashSet<TwitchUser> twitchUsers = new HashSet<>();
@@ -426,8 +561,7 @@ public class HelixHandler {
         if (nextCursor != null) twitchUsers.addAll(getFollowers(channelId, inboundFollowers.getPagination().getCursor()));
 
         // Update cache
-        followers.remove(channelId);
-        followers.put(channelId, twitchUsers);
+        followers.replace(channelId, twitchUsers);
 
         // Return followers
         return twitchUsers;
@@ -436,8 +570,18 @@ public class HelixHandler {
     // Check if user is follower
     public boolean isFollower(Integer channelId, Integer userId) {
 
+        // Check Parameters
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
+        if (userId == null || userId < 1) throw new IllegalArgumentException("User ID cannot be null or less than 1");
+
         // Get access token
         String accessToken = getAccessToken(channelId, Scope.MODERATOR_READ_FOLLOWERS);
+
+        // Null check
+        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+            System.err.println("Failed to get access token");
+            return false;
+        }
 
         // Get followers
         InboundFollowers inboundFollowers = helix.getChannelFollowers(accessToken, channelId.toString(), userId.toString(), 1, null).execute();
@@ -488,8 +632,20 @@ public class HelixHandler {
                 // Send request
                 HttpResponse<String> response = sendRequest(request);
 
+                // Null check
+                if (response == null || response.body() == null || response.body().isEmpty() || response.body().isBlank()) {
+                    System.err.println("Failed to get response");
+                    return;
+                }
+
                 // Create new token
                 AuthToken token = new AuthToken(helixHandler, Objects.requireNonNull(response).body());
+
+                // Null check
+                if (token.getAccessToken() == null) {
+                    System.err.println("Failed to get access token");
+                    return;
+                }
 
                 // Add Credentials
                 botClient.addCredential(token.getAccessToken());
@@ -499,7 +655,7 @@ public class HelixHandler {
             }
 
             // Send response
-            String response = "You can close this window now.";
+            String response = "You successfully authenticated the bot. You can now close this tab.";
             exchange.sendResponseHeaders(200, response.length());
             exchange.getResponseBody().write(response.getBytes());
             exchange.close();

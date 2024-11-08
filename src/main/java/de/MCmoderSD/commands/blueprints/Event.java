@@ -46,6 +46,8 @@ public abstract class Event {
     private final String everyoneLeft;
     private final String everyoneStillIn;
     private final String listUsers;
+    private final String usersStillIn;
+    private final String usersAlreadyLeft;
 
     // Syntax
     private final String syntax;
@@ -70,6 +72,8 @@ public abstract class Event {
                  String everyoneLeft,
                  String everyoneStillIn,
                  String listUsers,
+                 String usersStillIn,
+                 String usersAlreadyLeft,
                  String eventName,
                  String... name
     ) {
@@ -103,6 +107,8 @@ public abstract class Event {
         this.everyoneLeft = everyoneLeft;
         this.everyoneStillIn = everyoneStillIn;
         this.listUsers = listUsers;
+        this.usersStillIn = usersStillIn;
+        this.usersAlreadyLeft = usersAlreadyLeft;
 
 
         // Register command
@@ -149,12 +155,17 @@ public abstract class Event {
                     return;
                 }
 
+                // List
+                if (Arrays.asList("list", "liste").contains(verb)) {
+                    list(botClient, messageEvent, getCommand(), args);
+                    return;
+                }
+
                 // Response
                 String response = switch (verb) {
                     case "join" -> join(messageEvent.getUserId());
                     case "leave", "fail" -> leave(messageEvent.getUserId());
                     case "status", "check" -> checkStatus(helixHandler.getUser(removeTag(args.get(1))));
-                    case "list", "liste" -> list(messageEvent);
                     default -> syntax;
                 };
 
@@ -211,18 +222,30 @@ public abstract class Event {
     }
 
     // List
-    private String list(TwitchMessageEvent event) {
+    private void list(BotClient botClient, TwitchMessageEvent event, String command, ArrayList<String> args) {
 
         // Get Participants
         HashMap<Integer, Boolean> participants = eventManager.getParticipants(this.event);
-        if (participants == null || participants.isEmpty()) return nobodyJoined;
+        if (participants == null || participants.isEmpty()) {
+            botClient.respond(event, command, nobodyJoined);
+            return;
+        }
 
         // Remove non-followers
         HashSet<Integer> ids = new HashSet<>(participants.keySet());
         HashSet<Integer> follower = removeNonFollower(event, ids, helixHandler);
 
+        // Null check
+        if (follower == null) {
+            botClient.respond(event, command, "The bot is not authorized to read the followers of this channel. Type !mod auth to authorize the bot. YEPP");
+            return;
+        }
+
         // Check if anyone is left
-        if (participants.isEmpty()) return nobodyJoined;
+        if (participants.isEmpty()) {
+            botClient.respond(event, command, nobodyJoined);
+            return;
+        }
 
         // Variables
         StringBuilder stillIn = new StringBuilder();
@@ -236,12 +259,27 @@ public abstract class Event {
         }
 
         // Check if anyone is left
-        if (stillIn.isEmpty() && !alreadyLeft.isEmpty()) return everyoneLeft;
-        if (!stillIn.isEmpty() && alreadyLeft.isEmpty()) return everyoneStillIn;
+        if (stillIn.isEmpty() && !alreadyLeft.isEmpty()) {
+            botClient.respond(event, command, everyoneLeft);
+            return;
+        } else if (!stillIn.isEmpty() && alreadyLeft.isEmpty()) {
+            botClient.respond(event, command, everyoneStillIn);
+            return;
+        }
 
         // Format
         stillIn.delete(stillIn.length() - 2, stillIn.length());
         alreadyLeft.delete(alreadyLeft.length() - 2, alreadyLeft.length());
-        return String.format(listUsers, stillIn, alreadyLeft);
+
+        // Check for args
+        String arg = args.size() > 1 ? args.get(1) : "";
+        String response = switch (arg) {
+            case "in", "still", "fighting" -> String.format(usersStillIn, stillIn);
+            case "out", "left", "busted" -> String.format(usersAlreadyLeft, alreadyLeft);
+            default -> String.format(listUsers, stillIn, alreadyLeft);
+        };
+
+        // Respond
+        botClient.respond(event, command, response);
     }
 }
