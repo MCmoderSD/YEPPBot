@@ -50,34 +50,34 @@ public class EventHandler {
         log = !botClient.isCli();
 
         // Message Events
-        eventManager.onEvent(ChannelMessageEvent.class, this::handleMessageEvent);                                              
-        eventManager.onEvent(ChannelCheerEvent.class, this::handleCheerEvent);                                                  
-        eventManager.onEvent(ChannelSubscriptionMessageEvent.class, this::handleSubscriptionMessageEvent);                      
+        eventManager.onEvent(ChannelMessageEvent.class, this::handleMessageEvent);
+        eventManager.onEvent(ChannelCheerEvent.class, this::handleCheerEvent);
+        eventManager.onEvent(ChannelSubscriptionMessageEvent.class, this::handleSubscriptionMessageEvent);
 
         // Role Events
-        eventManager.onEvent(ChannelVipAddEvent.class, event -> handleVIPRoleEvent(new TwitchRoleEvent(event)));                
-        eventManager.onEvent(ChannelVipRemoveEvent.class, event -> handleVIPRoleEvent(new TwitchRoleEvent(event)));             
-        eventManager.onEvent(ChannelModeratorAddEvent.class, event -> handleModeratorRoleEvent(new TwitchRoleEvent(event)));    
+        eventManager.onEvent(ChannelVipAddEvent.class, event -> handleVIPRoleEvent(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelVipRemoveEvent.class, event -> handleVIPRoleEvent(new TwitchRoleEvent(event)));
+        eventManager.onEvent(ChannelModeratorAddEvent.class, event -> handleModeratorRoleEvent(new TwitchRoleEvent(event)));
         eventManager.onEvent(ChannelModeratorRemoveEvent.class, event -> handleModeratorRoleEvent(new TwitchRoleEvent(event)));
 
         // Loyalty Events
-        eventManager.onEvent(ChannelFollowCountUpdateEvent.class, this::handleFollowCountEvent);                                
+        eventManager.onEvent(ChannelFollowCountUpdateEvent.class, this::handleFollowCountEvent);
         eventManager.onEvent(ChannelFollowEvent.class, this::handleFollowEvent);
-        eventManager.onEvent(ChannelSubscribeEvent.class, this::handleSubscribeEvent);                                          
-        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, this::handleSubscriptionGiftEvent);                            
+        eventManager.onEvent(ChannelSubscribeEvent.class, this::handleSubscribeEvent);
+        eventManager.onEvent(ChannelSubscriptionGiftEvent.class, this::handleSubscriptionGiftEvent);
 
         // Raid Events
-        eventManager.onEvent(ChannelRaidEvent.class, this::handleRaidEvent);                                                    
+        eventManager.onEvent(ChannelRaidEvent.class, this::handleRaidEvent);
 
         // Clip Events
-        eventManager.onEvent(ChannelClipCreatedEvent.class, this::handleClipCreationEvent);                                     
+        eventManager.onEvent(ChannelClipCreatedEvent.class, this::handleClipCreationEvent);
         
         // Stream Events
-        eventManager.onEvent(ChannelGoLiveEvent.class, this::handleGoLiveEvent);                                                
-        eventManager.onEvent(ChannelGoOfflineEvent.class, this::handleGoOfflineEvent);                                          
-        eventManager.onEvent(ChannelChangeGameEvent.class, this::handleChangeGameEvent);                                        
-        eventManager.onEvent(ChannelChangeTitleEvent.class, this::ChangeTitleEvent);                                            
-        eventManager.onEvent(ChannelViewerCountUpdateEvent.class, this::viewerCountEvent);                                      
+        eventManager.onEvent(ChannelGoLiveEvent.class, this::handleGoLiveEvent);
+        eventManager.onEvent(ChannelGoOfflineEvent.class, this::handleGoOfflineEvent);
+        eventManager.onEvent(ChannelChangeGameEvent.class, this::handleChangeGameEvent);
+        eventManager.onEvent(ChannelChangeTitleEvent.class, this::ChangeTitleEvent);
+        eventManager.onEvent(ChannelViewerCountUpdateEvent.class, this::viewerCountEvent);
     }
 
     // Handle Events

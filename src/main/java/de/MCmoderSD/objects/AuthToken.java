@@ -75,12 +75,8 @@ public class AuthToken {
         helixHandler.refreshToken(this);
     }
 
-    public String getScopesAsString() {
-        return Arrays.stream(scopes).map(Scope::getScope).reduce((s1, s2) -> s1 + "+" + s2).orElse("");
-    }
 
     // Getters
-
     public int getId() {
         return id;
     }
@@ -95,6 +91,10 @@ public class AuthToken {
 
     public Scope[] getScopes() {
         return scopes;
+    }
+
+    public String getScopesAsString() {
+        return Arrays.stream(scopes).map(Scope::getScope).reduce((s1, s2) -> s1 + "+" + s2).orElse("");
     }
 
     public boolean hasScope(Scope... scopes) {

@@ -1,11 +1,7 @@
 package de.MCmoderSD.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.philippheuer.events4j.core.EventManager;
 
-import com.github.twitch4j.TwitchClient;
-import com.github.twitch4j.TwitchClientHelper;
-import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 import com.github.twitch4j.helix.domain.ChannelVip;
 import com.github.twitch4j.helix.domain.ChannelVipList;
@@ -47,7 +43,7 @@ import de.MCmoderSD.utilities.server.Server;
 
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings({"unused", "FieldCanBeLocal"})
+@SuppressWarnings("unused")
 public class HelixHandler {
 
     // Constants
@@ -64,11 +60,7 @@ public class HelixHandler {
     private final TokenManager tokenManager;
 
     // Client
-    private final TwitchClient client;
-    private final TwitchClientHelper helper;
-    private final TwitchChat chat;
     private final TwitchHelix helix;
-    private final EventManager eventManager;
 
     // Utilities
     private final Encryption encryption;
@@ -86,6 +78,7 @@ public class HelixHandler {
 
         // Set Associations
         this.botClient = botClient;
+        helix = botClient.getHelix();
         tokenManager = mySQL.getTokenManager();
         this.server = server;
 
@@ -93,22 +86,15 @@ public class HelixHandler {
         clientId = botClient.getClientId();
         clientSecret = botClient.getClientSecret();
 
-        // Init Client
-        client = botClient.getClient();
-        helper = botClient.getHelper();
-        chat = botClient.getChat();
-        helix = botClient.getHelix();
-        eventManager = botClient.getEventManager();
-
         // Init Cache
         moderators = new HashMap<>();
         vips = new HashMap<>();
         followers = new HashMap<>();
 
-        // Set Utilities
+        // Init Encryption
         encryption = new Encryption(botClient.getBotToken());
 
-        // Init Attributes
+        // Load Tokens
         authTokens = tokenManager.getAuthTokens(this, encryption);
 
         // Init Server Context
@@ -125,57 +111,44 @@ public class HelixHandler {
         }
     }
 
-    // Refresh token
-    public void refreshToken(AuthToken token) {
-        try {
+    private static HttpRequest createRequest(String body) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(HelixHandler.TOKEN_URL))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+    }
 
-            String oldRefreshToken = token.getRefreshToken();
+    // Parse token
+    private boolean parseToken(HttpResponse<String> response, @Nullable String oldRefreshToken) throws JsonProcessingException {
 
-            // Create body
-            String body = String.format(
-                    "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token",
-                    clientId,
-                    clientSecret,
-                    oldRefreshToken
-            );
-
-            // Create request
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(TOKEN_URL))
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .build();
-
-            // Send request
-            HttpResponse<String> response = sendRequest(request);
-
-            // Null check
-            if (response == null || response.body() == null || response.body().isEmpty() || response.body().isBlank()) {
-                System.err.println("Failed to get response");
-                return;
-            }
-
-            // Create new token
-            AuthToken newToken = new AuthToken(this, Objects.requireNonNull(response).body());
-
-            // Null check
-            if (newToken.getAccessToken() == null) {
-                System.err.println("Failed to refresh token");
-                return;
-            }
-
-            // Replace token
-            authTokens.replace(newToken.getId(), token, newToken);
-
-            // Add Credentials
-            botClient.addCredential(newToken.getAccessToken());
-
-            // Update tokens in the database
-            tokenManager.refreshTokens(oldRefreshToken, newToken, encryption);
-
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to refresh token");
+        // Null check
+        if (response == null || response.body() == null || response.body().isEmpty() || response.body().isBlank()) {
+            System.err.println("Failed to get response");
+            return false;
         }
+
+        // Create new token
+        AuthToken token = new AuthToken(this, response.body());
+
+        // Null check
+        if (token.getAccessToken() == null) {
+            System.err.println("Failed to get access token");
+            return false;
+        }
+
+        // Add token
+        authTokens.replace(token.getId(), token);
+
+        // Add Credentials
+        botClient.addCredential(token.getAccessToken());
+
+        // Update tokens in the database
+        if (oldRefreshToken == null) tokenManager.addToken(getUser(token.getId()).getName(), token, encryption);
+        else tokenManager.refreshTokens(oldRefreshToken, token, encryption);
+
+        // Return
+        return true;
     }
 
     // Get access token
@@ -196,6 +169,33 @@ public class HelixHandler {
         // Error message
         System.err.println("Token does not have the required scope");
         return null;
+    }
+
+
+    // Refresh token
+    public void refreshToken(AuthToken token) {
+        try {
+
+            // Variables
+            String oldRefreshToken = token.getRefreshToken();
+
+            // Create body
+            String body = String.format(
+                    "client_id=%s&client_secret=%s&refresh_token=%s&grant_type=refresh_token",
+                    clientId,
+                    clientSecret,
+                    oldRefreshToken
+            );
+
+            // Request token
+            boolean success = parseToken(sendRequest(createRequest(body)), oldRefreshToken);
+
+            // Error message
+            if (!success) System.err.println("Failed to refresh token");
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to refresh token");
+        }
     }
 
     // Get authorization URL
@@ -290,12 +290,20 @@ public class HelixHandler {
         // Check Limits
         if (stringIds.size() > 100) {
 
-            // Shrink to 100
-            HashSet<String> temp = new HashSet<>();
-            while (stringIds.size() > 100) temp.add(stringIds.removeFirst());
+            // Create Batches
+            HashSet<HashSet<Integer>> batches = new HashSet<>();
+            while (stringIds.size() > 100) {
+                HashSet<Integer> batch = new HashSet<>();
+                while (batch.size() < 100) {
+                    String id = stringIds.getFirst();
+                    batch.add(Integer.parseInt(id));
+                    stringIds.remove(id);
+                }
+                batches.add(batch);
+            }
 
-            // Recursion
-            twitchUsers.addAll(getUsersByName(temp));
+            // Loop through batches
+            for (HashSet<Integer> batch : batches) twitchUsers.addAll(getUsersByID(batch));
         }
 
         // Get user ID
@@ -324,16 +332,20 @@ public class HelixHandler {
         // Check Limits
         if (names.size() > 100) {
 
-            // Shrink to 100
-            HashSet<String> temp = new HashSet<>();
+            // Create Batches
+            HashSet<HashSet<String>> batches = new HashSet<>();
             while (names.size() > 100) {
-                String name = names.iterator().next();
-                temp.add(name);
-                names.remove(name);
+                HashSet<String> batch = new HashSet<>();
+                while (batch.size() < 100) {
+                    String name = names.iterator().next();
+                    batch.add(name);
+                    names.remove(name);
+                }
+                batches.add(batch);
             }
 
-            // Recursion
-            twitchUsers.addAll(getUsersByName(temp));
+            // Loop through batches
+            for (HashSet<String> batch : batches) twitchUsers.addAll(getUsersByName(batch));
         }
 
         // Get user ID
@@ -611,6 +623,9 @@ public class HelixHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
 
+            // Variables
+            String text;
+
             // Extract code and scopes
             String query = exchange.getRequestURI().getQuery();
             if (query != null && query.contains("code=")) {
@@ -625,46 +640,16 @@ public class HelixHandler {
                         server.getPort()
                 );
 
-                // Create request
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(TOKEN_URL))
-                        .header("Content-Type", "application/x-www-form-urlencoded")
-                        .POST(HttpRequest.BodyPublishers.ofString(body))
-                        .build();
+                // Parse token
+                boolean success = helixHandler.parseToken(sendRequest(createRequest(body)), null);
 
-                // Send request
-                HttpResponse<String> response = sendRequest(request);
-
-                // Null check
-                if (response == null || response.body() == null || response.body().isEmpty() || response.body().isBlank()) {
-                    System.err.println("Failed to get response");
-                    return;
-                }
-
-                // Create new token
-                AuthToken token = new AuthToken(helixHandler, Objects.requireNonNull(response).body());
-
-                // Null check
-                if (token.getAccessToken() == null) {
-                    System.err.println("Failed to get access token");
-                    return;
-                }
-
-                // Add token
-                authTokens.put(token.getId(), token);
-
-                // Add Credentials
-                botClient.addCredential(token.getAccessToken());
-
-                // Update tokens in the database
-                tokenManager.addToken(getUser(token.getId()).getName(), token, encryption);
-            }
+                text = success ? "Successfully authenticated! \nYou can close this tab now!" : "Failed to authenticate, please try again";
+            } else text = "Failed to authenticate, please try again";
 
             // Send response
-            String response = "You successfully authenticated the bot. You can now close this tab.";
-            exchange.sendResponseHeaders(200, response.length());
-            exchange.getResponseBody().write(response.getBytes());
-            exchange.close();
+            exchange.sendResponseHeaders(200, text.length());
+            exchange.getResponseBody().write(text.getBytes());
+            exchange.getResponseBody().close();
         }
     }
 }
