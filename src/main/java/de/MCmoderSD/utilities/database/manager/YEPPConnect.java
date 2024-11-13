@@ -170,12 +170,12 @@ public class YEPPConnect {
 
             // Format whitelist
             StringBuilder whitelistString = new StringBuilder();
-            for (String name : whitelist) if (!(name.isEmpty() && name.isBlank())) whitelistString.append(name).append(" ");
+            for (String name : whitelist) if (!name.isEmpty()) whitelistString.append(name).append(" ");
             if (!whitelistString.isEmpty()) whitelistString.deleteCharAt(whitelistString.length() - 1);
 
             // Format userPair
             StringBuilder userPairString = new StringBuilder();
-            for (String pair : userPair) if (!(pair.isEmpty() && pair.isBlank())) userPairString.append(pair).append(" - ");
+            for (String pair : userPair) if (!pair.isEmpty()) userPairString.append(pair).append(" - ");
             if (!userPairString.isEmpty()) userPairString.delete(userPairString.length() - 3, userPairString.length());
 
             try {

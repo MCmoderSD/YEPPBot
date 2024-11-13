@@ -11,35 +11,7 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
-import de.MCmoderSD.commands.Birthday;
-import de.MCmoderSD.commands.Conversation;
-import de.MCmoderSD.commands.Counter;
-import de.MCmoderSD.commands.CustomCommand;
-import de.MCmoderSD.commands.CustomTimer;
-import de.MCmoderSD.commands.DickDestroyDecember;
-import de.MCmoderSD.commands.Fact;
-import de.MCmoderSD.commands.Gif;
-import de.MCmoderSD.commands.Help;
-import de.MCmoderSD.commands.Horoscope;
-import de.MCmoderSD.commands.Info;
-import de.MCmoderSD.commands.Insult;
-import de.MCmoderSD.commands.Joke;
-import de.MCmoderSD.commands.Join;
-import de.MCmoderSD.commands.Lurk;
-import de.MCmoderSD.commands.Match;
-import de.MCmoderSD.commands.Moderate;
-import de.MCmoderSD.commands.NoNutNovember;
-import de.MCmoderSD.commands.Ping;
-import de.MCmoderSD.commands.Play;
-import de.MCmoderSD.commands.Prompt;
-import de.MCmoderSD.commands.Quote;
-import de.MCmoderSD.commands.Say;
-import de.MCmoderSD.commands.Status;
-import de.MCmoderSD.commands.Translate;
-import de.MCmoderSD.commands.TTS;
-import de.MCmoderSD.commands.Weather;
-import de.MCmoderSD.commands.Whitelist;
-import de.MCmoderSD.commands.Wiki;
+import de.MCmoderSD.commands.*;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.enums.Scope;
@@ -79,6 +51,7 @@ public class BotClient {
             Scope.CHANNEL_READ_SUBSCRIPTIONS,
             Scope.ANALYTICS_READ_EXTENSIONS,
             Scope.ANALYTICS_READ_GAMES,
+            Scope.MODERATOR_MANAGE_SHOUTOUTS
     };
 
     // Associations
@@ -219,6 +192,7 @@ public class BotClient {
         new Info(this, messageHandler, helixHandler);
         new Moderate(this, messageHandler, mySQL, helixHandler);
         new NoNutNovember(this, messageHandler, mySQL, helixHandler);
+        new Shoutout(this, messageHandler, eventHandler, helixHandler);
 
         // Loading OpenAI Chat Commands
         if (openAIChat) {
@@ -273,7 +247,7 @@ public class BotClient {
 
         // Variables
         boolean tooLong = message.length() > 500;
-        boolean valid = !(message.isEmpty() || message.isBlank() || tooLong);
+        boolean valid = !(message.isBlank() || tooLong);
 
         // Update Frame
         if (!cli) {
@@ -298,7 +272,7 @@ public class BotClient {
         // Variables
         var channel = event.getChannel();
         boolean tooLong = message.length() > 500;
-        boolean valid = !(message.isEmpty() || message.isBlank() || tooLong);
+        boolean valid = !(message.isBlank() || tooLong);
 
         // Update Frame
         if (valid && !cli) frame.log(RESPONSE, channel, botName, message);
@@ -335,7 +309,7 @@ public class BotClient {
         channel = channel.toLowerCase();
 
         // Check Channel
-        if (channel.isEmpty() || channel.isBlank()) return;
+        if (channel.isBlank()) return;
         if (channel.length() < 3 || channel.length() > 25) return;
         if (channel.contains(" ") || chat.isChannelJoined(channel) || botName.equals(channel)) return;
 
@@ -378,7 +352,7 @@ public class BotClient {
         channel = channel.toLowerCase();
 
         // Check Channel
-        if (channel.isEmpty() || channel.isBlank()) return;
+        if (channel.isBlank()) return;
         if (channel.length() < 3 || channel.length() > 25) return;
         if (channel.contains(" ") || !chat.isChannelJoined(channel) || botName.equals(channel)) return;
 
@@ -445,7 +419,7 @@ public class BotClient {
     }
 
     public boolean isBroadcaster(TwitchMessageEvent event) {
-        return event.getChannelId() == event.getUserId();
+        return Objects.equals(event.getChannelId(), event.getUserId());
     }
 
     public boolean isModerator(TwitchMessageEvent event) {

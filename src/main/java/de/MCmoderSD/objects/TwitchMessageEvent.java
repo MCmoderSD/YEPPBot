@@ -18,8 +18,8 @@ public class TwitchMessageEvent {
     private final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
     // ID
-    private final int channelId;
-    private final int userId;
+    private final Integer channelId;
+    private final Integer userId;
 
     // Attributes
     private final String channel;
@@ -98,7 +98,7 @@ public class TwitchMessageEvent {
     }
 
     // Manual Event
-    public TwitchMessageEvent(int channelId, int userId, String channel, String user, String message, Integer subMonths, Integer subStreak, String subTier, Integer bits) {
+    public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, Integer subMonths, Integer subStreak, String subTier, Integer bits) {
         this.channelId = channelId;
         this.userId = userId;
         this.channel = channel;
@@ -122,11 +122,11 @@ public class TwitchMessageEvent {
         return MESSAGE;
     }
 
-    public int getChannelId() {
+    public Integer getChannelId() {
         return channelId;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
@@ -199,15 +199,15 @@ public class TwitchMessageEvent {
         return getFormattedTimestamp() + " " + getType() + " <" + getChannel() + "> " + getUser() + ": " + getMessage();
     }
 
-    public int getLogSubMonths() {
+    public Integer getLogSubMonths() {
         return subMonths == null ? 0 : subMonths;
     }
 
-    public int getLogSubStreak() {
+    public Integer getLogSubStreak() {
         return subStreak == null ? 0 : subStreak;
     }
 
-    public int getLogBits() {
+    public Integer getLogBits() {
         return bits == null ? 0 : bits;
     }
 }

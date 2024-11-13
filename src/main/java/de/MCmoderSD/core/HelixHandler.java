@@ -34,6 +34,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import de.MCmoderSD.enums.Scope;
 import de.MCmoderSD.objects.AuthToken;
+import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
@@ -198,6 +199,32 @@ public class HelixHandler {
         }
     }
 
+    // Send shoutout
+    public boolean sendShoutout(TwitchMessageEvent event, TwitchUser user) {
+
+        // Check Parameters
+        if (event == null || user == null) throw new IllegalArgumentException("Event and user cannot be null");
+
+        // Variables
+        String channel = event.getChannelId().toString();
+        String raider = user.getId().toString();
+
+        // Get access token
+        String accessToken = getAccessToken(event.getChannelId(), Scope.MODERATOR_MANAGE_SHOUTOUTS);
+
+        // Null check
+        if (accessToken == null || accessToken.isBlank()) {
+            System.err.println("Failed to get access token");
+            return false;
+        }
+
+        // Send shoutout
+        helix.sendShoutout(accessToken, channel, raider, channel).execute();
+
+        // Return
+        return true;
+    }
+
     // Get authorization URL
     public String getAuthorizationUrl(Scope... scopes) {
         StringBuilder scopeBuilder = new StringBuilder();
@@ -242,7 +269,7 @@ public class HelixHandler {
     public TwitchUser getUser(String username) {
 
         // Check Parameters
-        if (username == null || username.isEmpty() || username.isBlank()) throw new IllegalArgumentException("Username cannot be empty");
+        if (username == null || username.isBlank()) throw new IllegalArgumentException("Username cannot be empty");
 
         // Get user ID
         UserList userList = helix.getUsers(null, null, Collections.singletonList(username)).execute();
@@ -262,7 +289,7 @@ public class HelixHandler {
 
         // Check Parameters
         if (id == null || id < 1) throw new IllegalArgumentException("ID cannot be null or less than 1");
-        if (username == null || username.isEmpty() || username.isBlank()) throw new IllegalArgumentException("Username cannot be empty");
+        if (username == null || username.isBlank()) throw new IllegalArgumentException("Username cannot be empty");
 
         // Get user ID
         UserList userList = helix.getUsers(null, Collections.singletonList(String.valueOf(id)), Collections.singletonList(username)).execute();
@@ -372,7 +399,7 @@ public class HelixHandler {
         String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
 
         // Null check
-        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+        if (accessToken == null || accessToken.isBlank()) {
             System.err.println("Failed to get access token");
             return null;
         }
@@ -420,7 +447,7 @@ public class HelixHandler {
         String accessToken = getAccessToken(channelId, Scope.MODERATION_READ);
 
         // Null check
-        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+        if (accessToken == null || accessToken.isBlank()) {
             System.err.println("Failed to get access token");
             return false;
         }
@@ -442,7 +469,7 @@ public class HelixHandler {
         String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_EDITORS);
 
         // Null check
-        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+        if (accessToken == null || accessToken.isBlank()) {
             System.err.println("Failed to get access token");
             return null;
         }
@@ -474,7 +501,7 @@ public class HelixHandler {
         String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
 
         // Null check
-        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+        if (accessToken == null || accessToken.isBlank()) {
             System.err.println("Failed to get access token");
             return null;
         }
@@ -523,7 +550,7 @@ public class HelixHandler {
         String accessToken = getAccessToken(channelId, Scope.CHANNEL_READ_VIPS);
 
         // Null check
-        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+        if (accessToken == null || accessToken.isBlank()) {
             System.err.println("Failed to get access token");
             return false;
         }
@@ -545,7 +572,7 @@ public class HelixHandler {
         String accessToken = getAccessToken(channelId, Scope.MODERATOR_READ_FOLLOWERS);
 
         // Null check
-        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+        if (accessToken == null || accessToken.isBlank()) {
             System.err.println("Failed to get access token");
             return null;
         }
@@ -593,7 +620,7 @@ public class HelixHandler {
         String accessToken = getAccessToken(channelId, Scope.MODERATOR_READ_FOLLOWERS);
 
         // Null check
-        if (accessToken == null || accessToken.isEmpty() || accessToken.isBlank()) {
+        if (accessToken == null || accessToken.isBlank()) {
             System.err.println("Failed to get access token");
             return false;
         }

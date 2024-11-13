@@ -115,13 +115,13 @@ public enum Scope {
 
     // Methods
     public static Scope getScope(String scope) {
-        if (scope == null || scope.isEmpty() || scope.isBlank()) throw new IllegalArgumentException("Scope cannot be empty");
+        if (scope == null || scope.isBlank()) throw new IllegalArgumentException("Scope cannot be empty");
         for (Scope s : Scope.values()) if (s.getScope().equals(scope)) return s;
         return null;
     }
 
     public static Scope[] getScopes(String scopes) {
-        if (scopes == null || scopes.isEmpty() || scopes.isBlank()) throw new IllegalArgumentException("Scopes cannot be empty");
+        if (scopes == null || scopes.isBlank()) throw new IllegalArgumentException("Scopes cannot be empty");
         String[] scopeArray = scopes.split("\\+");
         Scope[] scopeList = new Scope[scopeArray.length];
         for (var i = 0; i < scopeArray.length; i++) scopeList[i] = getScope(scopeArray[i]);

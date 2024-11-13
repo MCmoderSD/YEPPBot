@@ -100,7 +100,7 @@ public class Format {
         // Trim Args
         for (String arg : args) {
             String clean = trimMessage(arg).replaceAll(" ", "").replaceAll("\n", "");
-            if (!(clean.isEmpty() || clean.isBlank())) cleaned.add(clean);
+            if (!(clean.isBlank())) cleaned.add(clean);
         }
 
         // Return
@@ -146,7 +146,7 @@ public class Format {
         for (Integer id : ids) {
             if (id == null || id < 1) continue;
             String string = id.toString();
-            if (string.isEmpty() || string.isBlank() || strings.contains(string)) continue;
+            if (string.isBlank() || strings.contains(string)) continue;
             strings.add(string);
         }
 

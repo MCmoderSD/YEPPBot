@@ -18,6 +18,7 @@ import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 import static de.MCmoderSD.utilities.other.Util.removeNonFollower;
@@ -310,7 +311,7 @@ public class Birthday {
         // Get Usernames
         HashSet<TwitchUser> users = helixHandler.getUsersByID(new HashSet<>(ids));
         LinkedHashMap<Integer, String> usernameMap = new LinkedHashMap<>();
-        for (var id : ids) usernameMap.put(id, users.stream().filter(user -> user.getId() == id).findFirst().orElseThrow().getName());
+        for (var id : ids) usernameMap.put(id, users.stream().filter(user -> Objects.equals(user.getId(), id)).findFirst().orElseThrow().getName());
 
         // Check if empty
         if (usernameMap.isEmpty()) return noSavedBirthdays;

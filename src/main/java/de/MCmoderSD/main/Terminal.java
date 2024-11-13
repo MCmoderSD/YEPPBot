@@ -54,7 +54,7 @@ public class Terminal {
 
         // Check Arguments
         for (String arg : args) {
-            if (arg == null || arg.isEmpty() || arg.isBlank()) continue;
+            if (arg == null || arg.isBlank()) continue;
             while (arg.startsWith("-") || arg.startsWith("/")) arg = arg.substring(1);
             for (Argument argument : Argument.values()) if (argument.hasNameOrAlias(arg)) this.arguments.add(argument);
         }

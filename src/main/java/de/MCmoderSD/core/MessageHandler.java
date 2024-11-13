@@ -8,10 +8,7 @@ import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
 
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.NoSuchElementException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -121,7 +118,7 @@ public class MessageHandler {
                 return;
             }
 
-            if (channelID == lurkChannel.getFirst()) { // Stop lurking
+            if (Objects.equals(channelID, lurkChannel.getFirst())) { // Stop lurking
 
                 // Remove user from lurk list
                 updateLurkList(mySQL.getLurkManager().removeLurker(userID));

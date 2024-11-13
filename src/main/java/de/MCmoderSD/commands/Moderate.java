@@ -131,7 +131,7 @@ public class Moderate {
         channel = channel.toLowerCase();
         command = command.toLowerCase();
 
-        if (channel.isEmpty() || channel.isBlank()) return "Error: Channel is empty!";
+        if (channel.isBlank()) return "Error: Channel is empty!";
 
         // Check command
         command = messageHandler.checkCommand(command) ? command : messageHandler.getAliasMap().getOrDefault(command, null);

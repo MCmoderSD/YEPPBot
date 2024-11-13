@@ -12,11 +12,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.utilities.database.MySQL;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 import static de.MCmoderSD.utilities.other.Util.*;
@@ -149,7 +145,7 @@ public class Match {
                 // Get Compatible Users
                 LinkedHashMap<Integer, String> compatibleUsers = new LinkedHashMap<>();
                 for (Integer id : combinedUsersIds) //noinspection OptionalGetWithoutIsPresent
-                    compatibleUsers.put(id, helixHandler.getUsersByID(new HashSet<>(combinedUsersIds)).stream().filter(user -> user.getId() == id).findFirst().get().getName());
+                    compatibleUsers.put(id, helixHandler.getUsersByID(new HashSet<>(combinedUsersIds)).stream().filter(user -> Objects.equals(user.getId(), id)).findFirst().get().getName());
 
                 // Final Response
                 StringBuilder finalResponse = response;

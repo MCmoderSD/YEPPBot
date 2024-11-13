@@ -127,7 +127,7 @@ public class Weather {
 
         // Query weather data
         String response = query(convertToAscii(finalCityName));
-        if (response == null || response.isEmpty() || response.isBlank()) return errorRetrievingWeatherData;
+        if (response == null || response.isBlank()) return errorRetrievingWeatherData;
         String formattedWeatherData = formatWeatherData(finalCityName, response);
 
         return chat.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);

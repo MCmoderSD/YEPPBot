@@ -7,16 +7,17 @@ import com.github.twitch4j.helix.domain.User;
 import com.github.twitch4j.helix.domain.InboundFollow;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 @SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 public class TwitchUser {
 
     // Attributes
-    private final int id;
+    private final Integer id;
     private final String name;
 
     // Constructor
-    public TwitchUser(int id, String name) {
+    public TwitchUser(Integer id, String name) {
         this.id = id;
         this.name = name.toLowerCase();
     }
@@ -60,7 +61,7 @@ public class TwitchUser {
     // Equals
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof TwitchUser user) return user.getId() == id && user.getName().equals(name);
+        if (obj instanceof TwitchUser user) return Objects.equals(user.getId(), id) && user.getName().equals(name);
         else return false;
     }
 
@@ -75,8 +76,8 @@ public class TwitchUser {
         return true;
     }
 
-    public static boolean containsTwitchUser(HashSet<TwitchUser> list, int id) {
-        for (TwitchUser user : list) if (user.getId() == id) return true;
+    public static boolean containsTwitchUser(HashSet<TwitchUser> list, Integer id) {
+        for (TwitchUser user : list) if (Objects.equals(user.getId(), id)) return true;
         return false;
     }
 
@@ -86,7 +87,7 @@ public class TwitchUser {
     }
 
     // Getter
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 

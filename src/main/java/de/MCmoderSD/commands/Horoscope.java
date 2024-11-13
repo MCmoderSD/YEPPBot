@@ -91,7 +91,7 @@ public class Horoscope {
                     if (arg.startsWith("@")) {
                         targetID = helixHandler.getUser(arg.substring(1).toLowerCase()).getId();
                         hasTarget = true;
-                    } else if (!(arg.isEmpty() || arg.isBlank())) language = arg.toLowerCase();
+                    } else if (!(arg.isBlank())) language = arg.toLowerCase();
                 }
 
                 // Check Target
@@ -112,7 +112,7 @@ public class Horoscope {
 
                 // Get Horoscope
                 String dailyPrediction = getDailyPrediction(birthdate);
-                if (dailyPrediction.isEmpty() || dailyPrediction.isBlank()) {
+                if (dailyPrediction.isBlank()) {
                     botClient.respond(event, getCommand(), errorGettingHoroscope);
                     return;
                 }

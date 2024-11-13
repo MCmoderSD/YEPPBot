@@ -19,7 +19,7 @@ import static de.MCmoderSD.utilities.other.Format.formatScopes;
 public class AuthToken {
 
     // Attributes
-    private final int id;
+    private final Integer id;
     private final String accessToken;
     private final String refreshToken;
     private final Scope[] scopes;
@@ -77,7 +77,7 @@ public class AuthToken {
 
 
     // Getters
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
