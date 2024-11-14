@@ -36,7 +36,7 @@ public class Horoscope {
     private int apiSwaps = 0;
 
     // Constructor
-    public Horoscope(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler, Chat chat, JsonNode apiconfig) {
+    public Horoscope(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL, Chat chat, JsonNode apiconfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "horoscope @<user> <language>";

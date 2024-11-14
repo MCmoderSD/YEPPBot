@@ -95,6 +95,7 @@ public class MySQL extends Driver {
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
                             active BIT NOT NULL DEFAULT 1,
+                            auto_shoutout BIT NOT NULL DEFAULT 0,
                             FOREIGN KEY (id) REFERENCES users(id)
                             )
                             """

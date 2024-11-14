@@ -87,7 +87,7 @@ public class Birthday {
     private LinkedHashMap<Integer, Birthdate> birthdays;
 
     // Constructor
-    public Birthday(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler) {
+    public Birthday(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL) {
 
         // Syntax
         syntax = "Syntax: " + botClient.getPrefix() + "birthday set/get/in/list/next";

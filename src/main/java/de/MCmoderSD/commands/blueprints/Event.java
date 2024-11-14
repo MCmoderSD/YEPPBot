@@ -53,7 +53,7 @@ public abstract class Event {
     private final String syntax;
 
     // Constructor
-    public Event(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler,
+    public Event(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL,
                  EventManager.Event event,
                  String explanation,
                  String itsNotMonth,

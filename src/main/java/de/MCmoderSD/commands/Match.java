@@ -27,7 +27,7 @@ public class Match {
     private final String thereforeYouAreMostCompatibleWith;
 
     // Constructor
-    public Match(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler, Chat chat) {
+    public Match(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL, Chat chat) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "match <amount> <language>";

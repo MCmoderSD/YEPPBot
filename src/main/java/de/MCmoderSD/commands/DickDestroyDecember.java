@@ -10,11 +10,10 @@ import de.MCmoderSD.utilities.database.manager.EventManager;
 public class DickDestroyDecember extends Event {
 
     // Constructor
-    public DickDestroyDecember(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler) {
+    public DickDestroyDecember(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL) {
 
         // Call Event Constructor
-        super(botClient, messageHandler, mySQL, helixHandler,
-                EventManager.Event.DDD,
+        super(botClient, messageHandler, helixHandler, mySQL, EventManager.Event.DDD,
                 "It's Dick-Destroy-December YEPP Type !ddd join in Chat to participate, type !ddd leave if you have sinned. Check the Status of others with !nnn status @user YEPP Happy December YEPP",
                 "It's not December, you don't have to beat your meat. YEPP",
                 "User not found.",

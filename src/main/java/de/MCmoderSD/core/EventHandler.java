@@ -22,6 +22,9 @@ import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
+import de.MCmoderSD.objects.TwitchUser;
+import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 
 import java.util.HashMap;
@@ -32,7 +35,9 @@ public class EventHandler {
     // Associations
     private final Frame frame;
     private final LogManager logManager;
+    private final ChannelManager channelManager;
     private final MessageHandler messageHandler;
+    private final HelixHandler helixHandler;
 
     // Attributes
     private final HashMap<Integer, TwitchMessageEvent> lastMessage;
@@ -61,16 +66,18 @@ public class EventHandler {
     private boolean log;
 
     // Constructor
-    public EventHandler(BotClient botClient, Frame frame, LogManager logManager, EventManager eventManager, MessageHandler messageHandler) {
+    public EventHandler(BotClient botClient, Frame frame, MySQL mySQL, EventManager eventManager, MessageHandler messageHandler, HelixHandler helixHandler) {
 
         // Init Associations
         this.frame = frame;
-        this.logManager = logManager;
+        this.logManager = mySQL.getLogManager();
+        this.channelManager = mySQL.getChannelManager();
         this.messageHandler = messageHandler;
+        this.helixHandler = helixHandler;
 
         // Get Config
         cli = botClient.isCli();
-        log = !botClient.isCli();
+        log = botClient.isLog();
 
         // Init HashMaps
         lastMessage = new HashMap<>();
@@ -207,7 +214,7 @@ public class EventHandler {
         // Create new Thread
         new Thread(() -> {
 
-            lastFollow.replace(Integer.parseInt(event.getBroadcasterUserId()), event);
+            lastFollow.put(Integer.parseInt(event.getBroadcasterUserId()), event);
 
             // Log Message
             if (log) logManager.logLoyalty(event);
@@ -220,7 +227,7 @@ public class EventHandler {
         // Create new Thread
         new Thread(() -> {
 
-            lastSubscribe.replace(Integer.parseInt(event.getBroadcasterUserId()), event);
+            lastSubscribe.put(Integer.parseInt(event.getBroadcasterUserId()), event);
 
             // Log Message
             if (log) logManager.logLoyalty(event);
@@ -233,7 +240,7 @@ public class EventHandler {
         // Create new Thread
         new Thread(() -> {
 
-            lastSubscriptionGift.replace(Integer.parseInt(event.getBroadcasterUserId()), event);
+            lastSubscriptionGift.put(Integer.parseInt(event.getBroadcasterUserId()), event);
 
             // Log Message
             if (log) logManager.logLoyalty(event);
@@ -246,10 +253,14 @@ public class EventHandler {
         // Create new Thread
         new Thread(() -> {
 
-            lastRaid.replace(Integer.parseInt(event.getChannel().getId()), event);
-
+            Integer id = Integer.parseInt(event.getChannel().getId());
+            lastRaid.put(id, event);
+            
             // Log Message
             if (log) logManager.logRaid(event);
+
+            // Perform Auto Shoutout
+            if (channelManager.hasAutoShoutout(id)) helixHandler.sendShoutout(id, new TwitchUser(event.getRaider()));
 
         }).start();
     }
@@ -259,7 +270,7 @@ public class EventHandler {
             // Create new Thread
             new Thread(() -> {
 
-                lastClip.replace(Integer.parseInt(event.getChannel().getId()), event);
+                lastClip.put(Integer.parseInt(event.getChannel().getId()), event);
 
                 // ToDo: Implement Clip Creation Event
 
@@ -271,7 +282,7 @@ public class EventHandler {
         // Create new Thread
         new Thread(() -> {
 
-            lastGoLive.replace(Integer.parseInt(event.getChannel().getId()), event);
+            lastGoLive.put(Integer.parseInt(event.getChannel().getId()), event);
 
             // ToDo: Implement Go Live Event
 
@@ -283,7 +294,7 @@ public class EventHandler {
         // Create new Thread
         new Thread(() -> {
 
-            lastGoOffline.replace(Integer.parseInt(event.getChannel().getId()), event);
+            lastGoOffline.put(Integer.parseInt(event.getChannel().getId()), event);
 
             // ToDo: Implement Go Offline Event
 
@@ -295,7 +306,7 @@ public class EventHandler {
         // Create new Thread
         new Thread(() -> {
 
-            lastChangeGame.replace(Integer.parseInt(event.getChannel().getId()), event);
+            lastChangeGame.put(Integer.parseInt(event.getChannel().getId()), event);
 
             // ToDo: Implement Change Game Event
 
@@ -307,7 +318,7 @@ public class EventHandler {
         // Create new Thread
         new Thread(() -> {
 
-            lastChangeTitle.replace(Integer.parseInt(event.getChannel().getId()), event);
+            lastChangeTitle.put(Integer.parseInt(event.getChannel().getId()), event);
 
             // ToDo: Implement Change Title Event
 

@@ -22,7 +22,7 @@ public class Moderate {
     private final ChannelManager channelManager;
 
     // Constructor
-    public Moderate(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, HelixHandler helixHandler) {
+    public Moderate(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL) {
 
         // Init Associations
         this.botClient = botClient;

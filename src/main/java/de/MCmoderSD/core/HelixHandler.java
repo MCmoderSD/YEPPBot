@@ -200,17 +200,18 @@ public class HelixHandler {
     }
 
     // Send shoutout
-    public boolean sendShoutout(TwitchMessageEvent event, TwitchUser user) {
+    public boolean sendShoutout(Integer channelId, TwitchUser user) {
 
         // Check Parameters
-        if (event == null || user == null) throw new IllegalArgumentException("Event and user cannot be null");
+        if (channelId == null || channelId < 1) throw new IllegalArgumentException("Channel ID cannot be null or less than 1");
+        if (user == null) throw new IllegalArgumentException("User cannot be null");
 
         // Variables
-        String channel = event.getChannelId().toString();
+        String channel = channelId.toString();
         String raider = user.getId().toString();
 
         // Get access token
-        String accessToken = getAccessToken(event.getChannelId(), Scope.MODERATOR_MANAGE_SHOUTOUTS);
+        String accessToken = getAccessToken(channelId, Scope.MODERATOR_MANAGE_SHOUTOUTS);
 
         // Null check
         if (accessToken == null || accessToken.isBlank()) {

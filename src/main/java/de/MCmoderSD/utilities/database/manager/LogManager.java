@@ -495,7 +495,7 @@ public class LogManager {
             var viewer = event.getViewers();
 
             // Log to console
-            System.out.printf("%s %s <%s> by %s with %d viewers%n", getFormattedTimestamp(), RAID, channel, raider, viewer);
+            System.out.printf("%s %s <%s> by %s with %d viewers%n", getFormattedTimestamp(), RAID, channelName, raiderName, viewer);
 
             try {
                 if (!mySQL.isConnected()) mySQL.connect(); // connect

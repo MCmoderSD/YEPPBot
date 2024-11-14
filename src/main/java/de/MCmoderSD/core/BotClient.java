@@ -119,7 +119,7 @@ public class BotClient {
 
         // Init Attributes
         cli = Main.terminal.hasArg(CLI);
-        log = Main.terminal.hasArg(NO_LOG);
+        log = !Main.terminal.hasArg(NO_LOG);
 
         // Init HTTPS Server
         JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
@@ -157,7 +157,7 @@ public class BotClient {
 
         // Init Handlers
         messageHandler = new MessageHandler(this, mySQL);
-        eventHandler = new EventHandler(this, frame, mySQL.getLogManager(), eventManager, messageHandler);
+        eventHandler = new EventHandler(this, frame, mySQL, eventManager, messageHandler, helixHandler);
 
         // Check Modules
         boolean astrology = credentials.hasAstrology();
@@ -187,18 +187,18 @@ public class BotClient {
         new Whitelist(this, messageHandler, mySQL);
 
         // Loading Twitch API Commands
-        new Birthday(this, messageHandler, mySQL, helixHandler);
-        new DickDestroyDecember(this, messageHandler, mySQL, helixHandler);
+        new Birthday(this, messageHandler, helixHandler, mySQL);
+        new DickDestroyDecember(this, messageHandler, helixHandler, mySQL);
         new Info(this, messageHandler, helixHandler);
-        new Moderate(this, messageHandler, mySQL, helixHandler);
-        new NoNutNovember(this, messageHandler, mySQL, helixHandler);
-        new Shoutout(this, messageHandler, eventHandler, helixHandler);
+        new Moderate(this, messageHandler, helixHandler, mySQL);
+        new NoNutNovember(this, messageHandler, helixHandler, mySQL);
+        new Shoutout(this, messageHandler, eventHandler, helixHandler, mySQL);
 
         // Loading OpenAI Chat Commands
         if (openAIChat) {
             Chat chatModule = Objects.requireNonNull(openAI).getChat();
             new Conversation(this, messageHandler, chatModule);
-            new Match(this, messageHandler, mySQL, helixHandler, chatModule);
+            new Match(this, messageHandler, helixHandler, mySQL, chatModule);
             new Translate(this, messageHandler, chatModule);
             new Prompt(this, messageHandler, chatModule);
             new Wiki(this, messageHandler, chatModule);
@@ -211,7 +211,7 @@ public class BotClient {
         if (giphy || astrology || weather) {
             JsonNode apiConfig = credentials.getAPIConfig();
             if (giphy) new Gif(this, messageHandler, apiConfig);
-            if (openAIChat && astrology) new Horoscope(this, messageHandler, mySQL, helixHandler, openAI.getChat(), apiConfig);
+            if (openAIChat && astrology) new Horoscope(this, messageHandler, helixHandler, mySQL, openAI.getChat(), apiConfig);
             if (openAIChat && weather) new Weather(this, messageHandler, openAI.getChat(), apiConfig);
         }
 

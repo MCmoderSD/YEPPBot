@@ -72,6 +72,50 @@ public class ChannelManager {
         return (isActive ? "Joining " : "Leaving ") + channel;
     }
 
+    public String autoShoutout(Integer channelId, boolean isAutoShoutout) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "UPDATE " + "channels" + " SET auto_shoutout = ? WHERE id = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, isAutoShoutout ? 1 : 0); // set auto shoutout
+            preparedStatement.setInt(2, channelId); // set channel
+            preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return "Error: Database error";
+        }
+
+        return "Auto shoutout " + (isAutoShoutout ? "enabled" : "disabled");
+    }
+
+    public boolean hasAutoShoutout(Integer channelId) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT auto_shoutout FROM " + "channels" + " WHERE id = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, channelId); // set channel
+            ResultSet resultSet = preparedStatement.executeQuery(); // execute
+
+            // Close resources
+            boolean hasAutoShoutout = resultSet.next() && resultSet.getInt("auto_shoutout") == 1;
+            resultSet.close();
+            preparedStatement.close();
+            return hasAutoShoutout;
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+
     // Get Black List
     public HashMap<Integer, HashSet<String>> getBlackList() {
 
