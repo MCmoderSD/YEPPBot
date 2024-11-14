@@ -252,7 +252,7 @@ public class BotClient {
         // Update Frame
         if (!cli) {
             if (tooLong) frame.showMessage("The message was too long to send.", "Message Error");
-            else if (valid) frame.log(USER, channel, botName, message);
+            else if (valid) frame.log(channel, botName, message);
         }
 
         // Check
@@ -275,7 +275,7 @@ public class BotClient {
         boolean valid = !(message.isBlank() || tooLong);
 
         // Update Frame
-        if (valid && !cli) frame.log(RESPONSE, channel, botName, message);
+        if (valid && !cli) frame.log(channel, botName, message);
 
         // Log
         if (log) mySQL.getLogManager().logResponse(event, command, message);

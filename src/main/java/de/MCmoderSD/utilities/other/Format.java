@@ -31,8 +31,6 @@ public class Format {
     public final static String COMMAND = "[CMD]";
     public final static String RESPONSE = "[RSP]";
     public final static String EVENT = "[EVT]";
-    public final static String MESSAGE = "[MSG]";
-    public final static String CHEER = "[CHR]";
     public final static String FOLLOW = "[FLW]";
     public final static String SUBSCRIBE = "[SUB]";
     public final static String GIFT = "[GFT]";

@@ -143,7 +143,6 @@ public class MessageHandler {
                         event.getUser(),
                         event.getMessage(),
                         event.getSubMonths(),
-                        event.getSubStreak(),
                         event.getSubTier(),
                         event.getBits()
                 ), "traitor", tagUser(event) + " ist ein verräter, hab den kek gerade im chat von " + tagChannel(event) + " gesehen!");

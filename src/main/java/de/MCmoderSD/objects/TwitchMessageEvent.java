@@ -1,10 +1,12 @@
 package de.MCmoderSD.objects;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
-import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
+import com.github.twitch4j.chat.events.channel.CheerEvent;
+import com.github.twitch4j.common.events.domain.EventChannel;
+import com.github.twitch4j.common.events.domain.EventUser;
 
 import de.MCmoderSD.core.BotClient;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 
@@ -30,7 +32,6 @@ public class TwitchMessageEvent {
 
     // Additional Information
     private final Integer subMonths;
-    private final Integer subStreak;
     private final String subTier;
     private final Integer bits;
 
@@ -42,70 +43,50 @@ public class TwitchMessageEvent {
         userId = Integer.parseInt(trimMessage(event.getUser().getId()));
 
         // Get Names
-        channel = trimMessage(event.getChannel().getName());
-        user = trimMessage(event.getUser().getName());
+        channel = trimMessage(event.getChannel().getName().toLowerCase());
+        user = trimMessage(event.getUser().getName().toLowerCase());
 
         // Get Message
         message = trimMessage(event.getMessage());
 
         // Set Additional Information
         subMonths = event.getSubscriberMonths();
-        subStreak = null;
         subTier = event.getSubscriptionTier() == 0 ? "NONE" : "TIER" + event.getSubscriptionTier();
         bits = null;
     }
 
     // Cheer Event
-    public TwitchMessageEvent(ChannelCheerEvent event) {
+    public TwitchMessageEvent(CheerEvent event) {
+
+        //
+        EventChannel channel = event.getChannel();
+        EventUser user = event.getUser();
 
         // Get ID's
-        channelId = Integer.parseInt(trimMessage(event.getBroadcasterUserId()));
-        userId = Integer.parseInt(trimMessage(event.getUserId()));
+        channelId = Integer.parseInt(trimMessage(channel.getId()));
+        userId = Integer.parseInt(trimMessage(user.getId()));
 
         // Get Names
-        channel = trimMessage(event.getBroadcasterUserName());
-        user = trimMessage(event.getUserName());
+        this.channel = trimMessage(channel.getName());
+        this.user = trimMessage(user.getName());
 
         // Get Message
         message = trimMessage(event.getMessage());
 
         // Get Additional Information
         subMonths = null;
-        subStreak = null;
         subTier = null;
         bits = event.getBits();
     }
 
-    // Sub Event
-    public TwitchMessageEvent(ChannelSubscriptionMessageEvent event) {
-
-        // Get ID's
-        channelId = Integer.parseInt(trimMessage(event.getBroadcasterUserId()));
-        userId = Integer.parseInt(trimMessage(event.getUserId()));
-
-        // Get Names
-        channel = trimMessage(event.getBroadcasterUserName());
-        user = trimMessage(event.getUserName());
-
-        // Get Message
-        message = trimMessage(event.getMessage().getText());
-
-        // Get Additional Information
-        subMonths = event.getCumulativeMonths();
-        subStreak = event.getStreakMonths();
-        subTier = event.getTier().ordinalName().toUpperCase();
-        bits = null;
-    }
-
     // Manual Event
-    public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, Integer subMonths, Integer subStreak, String subTier, Integer bits) {
+    public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable String subTier, @Nullable Integer bits) {
         this.channelId = channelId;
         this.userId = userId;
         this.channel = channel;
         this.user = user;
         this.message = message;
         this.subMonths = subMonths;
-        this.subStreak = subStreak;
         this.subTier = subTier;
         this.bits = bits;
     }
@@ -113,13 +94,6 @@ public class TwitchMessageEvent {
     // Log
     public void logToConsole() {
         System.out.println(getLog());
-    }
-
-    // Getter
-    public String getType() {
-        if (isSub()) return SUBSCRIBE;
-        if (isCheer()) return CHEER;
-        return MESSAGE;
     }
 
     public Integer getChannelId() {
@@ -146,10 +120,6 @@ public class TwitchMessageEvent {
         return subMonths;
     }
 
-    public Integer getSubStreak() {
-        return subStreak;
-    }
-
     public String getSubTier() {
         return subTier;
     }
@@ -159,16 +129,12 @@ public class TwitchMessageEvent {
     }
 
     // Checks
-    public boolean isSub() {
-        return subMonths != null && subStreak != null && subTier != null;
-    }
-
     public boolean isCheer() {
         return bits != null;
     }
 
     public boolean hasMessage() {
-        return !isSub() && !isCheer() && !(message == null || message.isEmpty());
+        return !(message == null || message.isEmpty() || message.isBlank());
     }
 
     public boolean hasYEPP() {
@@ -196,15 +162,11 @@ public class TwitchMessageEvent {
     }
 
     public String getLog() {
-        return getFormattedTimestamp() + " " + getType() + " <" + getChannel() + "> " + getUser() + ": " + getMessage();
+        return getFormattedTimestamp() + " <" + getChannel() + "> " + getUser() + ": " + getMessage();
     }
 
     public Integer getLogSubMonths() {
         return subMonths == null ? 0 : subMonths;
-    }
-
-    public Integer getLogSubStreak() {
-        return subStreak == null ? 0 : subStreak;
     }
 
     public Integer getLogBits() {

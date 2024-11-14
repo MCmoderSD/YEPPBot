@@ -2,6 +2,8 @@ package de.MCmoderSD.core;
 
 import com.github.philippheuer.events4j.core.EventManager;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import com.github.twitch4j.chat.events.channel.CheerEvent;
+import com.github.twitch4j.chat.events.channel.RaidEvent;
 import com.github.twitch4j.events.ChannelClipCreatedEvent;
 import com.github.twitch4j.events.ChannelGoLiveEvent;
 import com.github.twitch4j.events.ChannelGoOfflineEvent;
@@ -9,14 +11,11 @@ import com.github.twitch4j.events.ChannelViewerCountUpdateEvent;
 import com.github.twitch4j.events.ChannelFollowCountUpdateEvent;
 import com.github.twitch4j.events.ChannelChangeGameEvent;
 import com.github.twitch4j.events.ChannelChangeTitleEvent;
-import com.github.twitch4j.eventsub.events.ChannelCheerEvent;
 import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import com.github.twitch4j.eventsub.events.ChannelModeratorAddEvent;
 import com.github.twitch4j.eventsub.events.ChannelModeratorRemoveEvent;
-import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
-import com.github.twitch4j.eventsub.events.ChannelSubscriptionMessageEvent;
 import com.github.twitch4j.eventsub.events.ChannelVipAddEvent;
 import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
 
@@ -38,7 +37,6 @@ public class EventHandler {
     // Attributes
     private final HashMap<Integer, TwitchMessageEvent> lastMessage;
     private final HashMap<Integer, TwitchMessageEvent> lastCheer;
-    private final HashMap<Integer, TwitchMessageEvent> lastSubscription;
 
     private final HashMap<Integer, TwitchRoleEvent> lastVipAdd;
     private final HashMap<Integer, TwitchRoleEvent> lastVipRemove;
@@ -49,7 +47,7 @@ public class EventHandler {
     private final HashMap<Integer, ChannelSubscribeEvent> lastSubscribe;
     private final HashMap<Integer, ChannelSubscriptionGiftEvent> lastSubscriptionGift;
 
-    private final HashMap<Integer, ChannelRaidEvent> lastRaid;
+    private final HashMap<Integer, RaidEvent> lastRaid;
 
     private final HashMap<Integer, ChannelClipCreatedEvent> lastClip;
 
@@ -77,7 +75,6 @@ public class EventHandler {
         // Init HashMaps
         lastMessage = new HashMap<>();
         lastCheer = new HashMap<>();
-        lastSubscription = new HashMap<>();
 
         lastVipAdd = new HashMap<>();
         lastVipRemove = new HashMap<>();
@@ -98,8 +95,7 @@ public class EventHandler {
 
         // Message Events
         eventManager.onEvent(ChannelMessageEvent.class, this::handleMessageEvent);
-        eventManager.onEvent(ChannelCheerEvent.class, this::handleCheerEvent);
-        eventManager.onEvent(ChannelSubscriptionMessageEvent.class, this::handleSubscriptionMessageEvent);
+        eventManager.onEvent(CheerEvent.class, this::handleCheerEvent);
 
         // Role Events
         eventManager.onEvent(ChannelVipAddEvent.class, event -> handleVIPRoleEvent(new TwitchRoleEvent(event)));
@@ -114,7 +110,7 @@ public class EventHandler {
         eventManager.onEvent(ChannelSubscriptionGiftEvent.class, this::handleSubscriptionGiftEvent);
 
         // Raid Events
-        eventManager.onEvent(ChannelRaidEvent.class, this::handleRaidEvent);
+        eventManager.onEvent(RaidEvent.class, this::handleRaidEvent);
 
         // Clip Events
         eventManager.onEvent(ChannelClipCreatedEvent.class, this::handleClipCreationEvent);
@@ -150,7 +146,7 @@ public class EventHandler {
         }).start();
     }
 
-    private void handleCheerEvent(ChannelCheerEvent event) {
+    private void handleCheerEvent(CheerEvent event) {
 
         // Create new Thread
         new Thread(() -> {
@@ -158,28 +154,6 @@ public class EventHandler {
             // TwitchMessageEvent
             TwitchMessageEvent messageEvent = new TwitchMessageEvent(event);
             lastCheer.replace(messageEvent.getChannelId(), messageEvent);
-
-            // Log Message
-            messageEvent.logToConsole();
-            if (log) logManager.logMessage(messageEvent);
-
-            // Update Frame
-            if (!cli) frame.log(messageEvent);
-
-            // Handle Message
-            messageHandler.handleMessage(messageEvent);
-
-        }).start();
-    }
-
-    private void handleSubscriptionMessageEvent(ChannelSubscriptionMessageEvent event) {
-
-        // Create new Thread
-        new Thread(() -> {
-
-            // TwitchMessageEvent
-            TwitchMessageEvent messageEvent = new TwitchMessageEvent(event);
-            lastSubscription.replace(messageEvent.getChannelId(), messageEvent);
 
             // Log Message
             messageEvent.logToConsole();
@@ -267,12 +241,12 @@ public class EventHandler {
         }).start();
     }
 
-    private void handleRaidEvent(ChannelRaidEvent event) {
+    private void handleRaidEvent(RaidEvent event) {
 
         // Create new Thread
         new Thread(() -> {
 
-            lastRaid.replace(Integer.parseInt(event.getToBroadcasterUserId()), event);
+            lastRaid.replace(Integer.parseInt(event.getChannel().getId()), event);
 
             // Log Message
             if (log) logManager.logRaid(event);
@@ -367,10 +341,6 @@ public class EventHandler {
         return lastCheer;
     }
 
-    public HashMap<Integer, TwitchMessageEvent> getLastSubscription() {
-        return lastSubscription;
-    }
-
     public HashMap<Integer, TwitchRoleEvent> getLastVipAdd() {
         return lastVipAdd;
     }
@@ -399,7 +369,7 @@ public class EventHandler {
         return lastSubscriptionGift;
     }
 
-    public HashMap<Integer, ChannelRaidEvent> getLastRaid() {
+    public HashMap<Integer, RaidEvent> getLastRaid() {
         return lastRaid;
     }
 
@@ -431,11 +401,6 @@ public class EventHandler {
     public TwitchMessageEvent getLastCheer(Integer channelId) {
         if (!lastCheer.containsKey(channelId)) return null;
         return lastCheer.get(channelId);
-    }
-
-    public TwitchMessageEvent getLastSubscription(Integer channelId) {
-        if (!lastSubscription.containsKey(channelId)) return null;
-        return lastSubscription.get(channelId);
     }
 
     public TwitchRoleEvent getLastVipAdd(Integer channelId) {
@@ -473,7 +438,7 @@ public class EventHandler {
         return lastSubscriptionGift.get(channelId);
     }
 
-    public ChannelRaidEvent getLastRaid(Integer channelId) {
+    public RaidEvent getLastRaid(Integer channelId) {
         if (!lastRaid.containsKey(channelId)) return null;
         return lastRaid.get(channelId);
     }
@@ -515,7 +480,6 @@ public class EventHandler {
     public void clearAll() {
         clearLastMessage();
         clearLastCheer();
-        clearLastSubscription();
         clearLastVipAdd();
         clearLastVipRemove();
         clearLastModeratorAdd();
@@ -537,10 +501,6 @@ public class EventHandler {
 
     public void clearLastCheer() {
         lastCheer.clear();
-    }
-
-    public void clearLastSubscription() {
-        lastSubscription.clear();
     }
 
     public void clearLastVipAdd() {

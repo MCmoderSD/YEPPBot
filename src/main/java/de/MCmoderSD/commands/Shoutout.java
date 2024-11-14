@@ -1,6 +1,6 @@
 package de.MCmoderSD.commands;
 
-import com.github.twitch4j.eventsub.events.ChannelRaidEvent;
+import com.github.twitch4j.chat.events.channel.RaidEvent;
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.EventHandler;
@@ -40,16 +40,15 @@ public class Shoutout {
                 if (args.isEmpty()) {
 
                     // Get Last Raider
-                    ChannelRaidEvent raidEvent = eventHandler.getLastRaid(event.getChannelId());
+                    RaidEvent raidEvent = eventHandler.getLastRaid(event.getChannelId());
 
                     // Check if raid exists
                     if (raidEvent == null) {
                         botClient.respond(event, getCommand(), error);
                         return;
                     }
-
                     // Send Shoutout
-                    boolean success = helixHandler.sendShoutout(event, helixHandler.getUser(raidEvent.getFromBroadcasterUserId()));
+                    boolean success = helixHandler.sendShoutout(event, new TwitchUser(raidEvent.getRaider()));
 
                     // Send Message
                     if (success) return;

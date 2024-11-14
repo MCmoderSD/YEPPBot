@@ -68,12 +68,12 @@ public class Frame extends JFrame {
     }
 
     // Setter
-    public void log(String type, String channel, String user, String message) {
-        logPanel.appendText(type, channel, user, message);
+    public void log(String channel, String user, String message) {
+        logPanel.appendText(channel, user, message);
     }
 
     public void log(TwitchMessageEvent event) {
-        logPanel.appendText(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
+        logPanel.appendText(event.getChannel(), event.getUser(), event.getMessage());
     }
 
     // Setter

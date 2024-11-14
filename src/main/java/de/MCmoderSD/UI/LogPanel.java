@@ -56,8 +56,8 @@ public class LogPanel extends JPanel {
     }
 
     // Setter
-    public void appendText(String type, String channel, String user, String message) {
+    public void appendText(String channel, String user, String message) {
         if (frame.getChannel().equals(channel) || frame.getChannel().length() < 3)
-            logArea.appendText(type + " <" + channel + "> " + user + ": " + trimMessage(message));
+            logArea.appendText("<" + channel + "> " + user + ": " + trimMessage(message));
     }
 }

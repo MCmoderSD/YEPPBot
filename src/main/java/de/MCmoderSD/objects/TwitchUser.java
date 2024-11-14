@@ -1,5 +1,7 @@
 package de.MCmoderSD.objects;
 
+import com.github.twitch4j.common.events.domain.EventChannel;
+import com.github.twitch4j.common.events.domain.EventUser;
 import com.github.twitch4j.helix.domain.ChannelEditor;
 import com.github.twitch4j.helix.domain.ChannelVip;
 import com.github.twitch4j.helix.domain.Moderator;
@@ -56,6 +58,18 @@ public class TwitchUser {
     public TwitchUser(InboundFollow follow) {
         this.id = Integer.parseInt(follow.getUserId());
         this.name = follow.getUserName().toLowerCase();
+    }
+
+    // EventChannel
+    public TwitchUser(EventChannel channel) {
+        this.id = Integer.parseInt(channel.getId());
+        this.name = channel.getName().toLowerCase();
+    }
+
+    // EventUser
+    public TwitchUser(EventUser user) {
+        this.id = Integer.parseInt(user.getId());
+        this.name = user.getName().toLowerCase();
     }
 
     // Equals
