@@ -1,6 +1,7 @@
 package de.MCmoderSD.core;
 
 import de.MCmoderSD.commands.blueprints.Command;
+import de.MCmoderSD.executor.NanoLoop;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -8,9 +9,11 @@ import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
 
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 import static de.MCmoderSD.utilities.other.Format.*;
@@ -46,8 +49,7 @@ public class MessageHandler {
         congratulated = new HashSet<>();
 
         // Reset Congratulated
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(this::resetCongratulated, 0, 96, TimeUnit.HOURS);
+        new NanoLoop(this::resetCongratulated, 96, TimeUnit.HOURS).start();
 
         // Initialize HashMaps
         commandList = new HashMap<>();

@@ -50,6 +50,7 @@ If you have any ideas or suggestions, feel free to open an issue or a pull reque
 - Moderate
 - Quote
 - Say
+- Shoutout
 
 ### Admin/Debug Commands:
 
