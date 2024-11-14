@@ -34,7 +34,6 @@ import com.sun.net.httpserver.HttpHandler;
 
 import de.MCmoderSD.enums.Scope;
 import de.MCmoderSD.objects.AuthToken;
-import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
