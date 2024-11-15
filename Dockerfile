@@ -1,18 +1,15 @@
-#
-# Build stage
-#
-FROM eclipse-temurin:21-jdk-jammy AS build
-ENV HOME=/usr/app
-RUN mkdir -p $HOME
-WORKDIR $HOME
-ADD . $HOME
-RUN --mount=type=cache,target=/root/.m2 ./mvnw -f $HOME/pom.xml clean package
+# Step 1: Build phase
+FROM eclipse-temurin:21-jdk-jammy as build
+WORKDIR /app
+# Install Maven
+RUN apt update && apt install -y maven
+COPY pom.xml ./
+COPY src ./src
+RUN mvn clean install
 
-#
-# Package stage
-#
-FROM eclipse-temurin:21-jre-jammy
-ARG JAR_FILE=/usr/app/target/*.jar
-COPY --from=build $JAR_FILE /app/runner.jar
+# Step 2: Runtime phase
+FROM eclipse-temurin:21-jdk-jammy
+WORKDIR /app
+COPY --from=build /app/target/*.jar YEPPBot.jar
 EXPOSE 420
-ENTRYPOINT java -jar /app/runner.jar
+ENTRYPOINT ["java", "-jar", "YEPPBot.jar", "-cli"]

@@ -2,13 +2,13 @@ package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import de.MCmoderSD.astrology.ProkeralaAPI;
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.api.ProkeralaAPI;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.OpenAI.modules.Chat;
 
@@ -133,13 +133,26 @@ public class Horoscope {
 
     // Get Daily Prediction
     private String getDailyPrediction(Birthdate birthdate) {
-        String dailyPrediction = prokeralaAPI.dailyPrediction(birthdate);
-        if (dailyPrediction.equals("Failed to connect to the API. Response code: 403")) initAPI();
-        if (apiSwaps >= clientIDs.length) return "Failed to connect to the API. Please try again later.";
-        else if (dailyPrediction.equals("Failed to connect to the API. Response code: 403")) {
-            apiSwaps++;
-            return getDailyPrediction(birthdate);
-        } else return dailyPrediction;
+
+        // Get Daily Prediction
+        String dailyPrediction = prokeralaAPI.dailyPrediction(birthdate.getMonthDay());
+
+        // Check for API Error
+        if (dailyPrediction.startsWith("Error: ")) {
+
+            // Check for API Swap
+            var code = Integer.parseInt(dailyPrediction.substring(7));
+            if (code == 403) initAPI();
+
+            // Retry
+            if (apiSwaps >= clientIDs.length) return "Failed to connect to the API. Please try again later.";
+            else {
+                apiSwaps++;
+                return getDailyPrediction(birthdate);
+            }
+        }
+
+        return dailyPrediction;
     }
 
     // Load Horoscope List

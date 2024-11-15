@@ -17,6 +17,14 @@
 
     <dependencies>
 
+        <!-- Astrology -->
+        <dependency>
+            <groupId>de.MCmoderSD</groupId>
+            <artifactId>astrology</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+
         <!-- Encryption -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
