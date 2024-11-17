@@ -47,23 +47,29 @@ build/
 /out/artifacts/
 
 ### Database ###
-/src/main/resources/database/mySQL.json
-/src/main/resources/database/dev.json
+/storage/database/mySQL.json
+/storage/database/dev.json
 
 ### api keys ###
-/src/main/resources/api/apiKeys.json
-/src/main/resources/api/ChatGPT.json
+/storage/api/apiKeys.json
+/storage/api/ChatGPT.json
 
 ### config ###
-/src/main/resources/config/BotConfig.json
-/src/main/resources/config/DevConfig.json
-/src/main/resources/config/Channel.list
-/src/main/resources/config/Dev.list
-/src/main/resources/config/httpsServer.json
-/src/main/resources/config/DevHttpsServer.json
+/storage/config/BotConfig.json
+/storage/config/DevConfig.json
+/storage/config/Channel.list
+/storage/config/Dev.list
+/storage/config/httpsServer.json
+/storage/config/DevHttpsServer.json
 
 ### meta-inf ###
 /src/main/resources/META-INF/
+
+### storage ###
+storage/api/
+storage/config/
+storage/database/
+storage/keys/
 
 ### gitingore ###
 #.gitignore
