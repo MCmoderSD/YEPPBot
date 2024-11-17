@@ -69,7 +69,7 @@ public class Timer {
                 channel,
                 channel,
                 response,
-                null, null, null), "Timer: " + name, response);
+                null, (Integer) null, null), "Timer: " + name, response);
     }
 
     // Trigger

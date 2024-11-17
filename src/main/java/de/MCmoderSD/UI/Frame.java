@@ -3,10 +3,12 @@ package de.MCmoderSD.UI;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.imageloader.ImageLoader;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 
 import java.io.IOException;
 
@@ -14,7 +16,6 @@ import java.net.URISyntaxException;
 
 import static de.MCmoderSD.main.Main.VERSION;
 import static de.MCmoderSD.utilities.other.Format.*;
-import static java.awt.Toolkit.getDefaultToolkit;
 
 public class Frame extends JFrame {
 
@@ -63,20 +64,24 @@ public class Frame extends JFrame {
 
     public static void centerJFrame(JFrame frame) {
         frame.pack();
-        Dimension dim = getDefaultToolkit().getScreenSize();
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setLocation((dim.width - frame.getWidth()) / 2, (dim.height - frame.getHeight()) / 2);
     }
 
     // Setter
     public void log(String channel, String user, String message) {
         logPanel.appendText(channel, user, message);
+        logPanel.scrollToBottom();
     }
 
     public void log(TwitchMessageEvent event) {
         logPanel.appendText(event.getChannel(), event.getUser(), event.getMessage());
     }
 
-    // Setter
+    public void clearLog() {
+        logPanel.clear();
+    }
+
     public void showMessage(String message, String title) {
         new Thread(() -> JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE)).start();
     }

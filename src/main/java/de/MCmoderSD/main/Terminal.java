@@ -44,12 +44,11 @@ public class Terminal {
 
         // Print Start Message
         System.out.println(ICON);
-
         System.out.printf("%sYEPPBot v%s%s", BOLD, Main.VERSION, BREAK);
 
         // Init
-        scanner = new Scanner(System.in);
         this.args = args;
+        scanner = new Scanner(System.in);
         arguments = new HashSet<>();
 
         // Check Arguments
@@ -67,64 +66,50 @@ public class Terminal {
         new Thread(this::inputLoop).start();
     }
 
-    private void handleInput(String input) {
-        switch (input) {
-            case "help":
-                help();
-                break;
-            case "exit":
-            case "stop":
-                System.out.printf("%sStopping bot...", BOLD);
-                System.exit(0);
-                break;
-            case "version":
-                System.out.println("Version: " + Main.VERSION);
-                break;
-            case "uptime":
-                System.out.println(uptime());
-                break;
-            case "generate":
-            case "gen":
-                System.out.println("Generating config files...");
-                if (generateConfigFiles()) {
-                    System.out.println("Config files generated successfully");
-                    System.out.printf("%sStopping bot...", BOLD);
-                    System.exit(0);
-                } else System.out.println("Error while generating config files");
-                break;
-            case "clear":
-            case "clr":
-            case "cls":
-                System.out.print("\033[H\033[2J");
-                System.out.flush();
-                break;
-            default:
-                System.out.println("Unknown command. Type help for a list of commands.");
-                break;
-        }
-    }
-
     private void inputLoop() {
 
         // Loop
-        while (scanner.hasNext()) {
-
-            // Get Input
-            String input = scanner.nextLine().toLowerCase();
-
-            // Handle Input
-            handleInput(input);
-        }
-
-        // Close Scanner
-        scanner.close();
+        while (scanner.hasNext()) handleInput(scanner.nextLine());
 
         // Exit
+        scanner.close();
         System.out.printf("%sStopping bot...", BOLD);
         System.exit(0);
     }
 
-    // Help
+    private void handleInput(String input) {
+        while (input.startsWith(" ")) input = input.substring(1);
+        while (input.endsWith(" ")) input = input.substring(0, input.length() - 1);
+        switch (input.toLowerCase().trim()) {
+            case "exit", "stop" -> exit();
+            case "clear", "cls", "clr" -> clear();
+            case "gen", "generate" -> gen();
+            case "help", "h", "?" -> help();
+            case "uptime" -> System.out.println(calculateUptime());
+            default -> System.out.println("Unknown Command: " + input);
+        }
+    }
+
+    // Commands
+    private void exit() {
+        System.out.printf("%sStopping bot...", BOLD);
+        System.exit(0);
+    }
+
+    private void clear() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
+    private void gen() {
+        System.out.println("Generating config files...");
+        if (generateConfigFiles()) {
+            System.out.println("Config files generated successfully");
+            System.out.printf("%sStopping bot...", BOLD);
+            System.exit(0);
+        } else System.out.println("Error while generating config files");
+    }
+
     private void help() {
         // Info
         System.out.println(
@@ -173,43 +158,8 @@ public class Terminal {
                 """);
     }
 
-    // Generate Config Files
-    private boolean generateConfigFiles() {
-
-        // Files
-        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "httpsServer.json", "apiKeys.json", "ChatGPT.json"};
-
-        for (String fileName : fileNames) {
-            try {
-
-                // Input Stream
-                InputStream inputStream = Main.class.getResourceAsStream("/examples/" + fileName);
-
-                // Check
-                if (inputStream == null) throw new RuntimeException("File not found: " + fileName);
-
-                // Output Stream
-                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileName));
-
-                // Read and Write
-                byte[] data = inputStream.readAllBytes();
-                bufferedWriter.write(new String(data));
-
-                // Close
-                inputStream.close();
-                bufferedWriter.close();
-
-            } catch (IOException e) {
-                System.err.println("Error generating " + fileName + ": " + e.getMessage());
-                return false;
-            }
-        }
-
-        // Exit
-        return true;
-    }
-
-    private String uptime() {
+    // Methods
+    private String calculateUptime() {
 
         // Get Uptime
         long uptime = System.nanoTime() - startTime;
@@ -250,6 +200,42 @@ public class Terminal {
         return builder.toString();
     }
 
+    private boolean generateConfigFiles() {
+
+        // Files
+        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "httpsServer.json", "apiKeys.json", "ChatGPT.json"};
+
+        for (String fileName : fileNames) {
+            try {
+
+                // Input Stream
+                InputStream inputStream = Main.class.getResourceAsStream("/examples/" + fileName);
+
+                // Check
+                if (inputStream == null) throw new RuntimeException("File not found: " + fileName);
+
+                // Output Stream
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileName));
+
+                // Read and Write
+                byte[] data = inputStream.readAllBytes();
+                bufferedWriter.write(new String(data));
+
+                // Close
+                inputStream.close();
+                bufferedWriter.close();
+
+            } catch (IOException e) {
+                System.err.println("Error generating " + fileName + ": " + e.getMessage());
+                return false;
+            }
+        }
+
+        // Exit
+        return true;
+    }
+
+    // Getters
     public boolean hasArg(Argument arg) {
         return arguments.contains(arg);
     }

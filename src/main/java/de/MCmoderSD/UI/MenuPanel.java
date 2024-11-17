@@ -22,14 +22,20 @@ import static java.awt.event.KeyEvent.*;
 
 public class MenuPanel extends JPanel {
 
+    // Associations
+    private final Frame frame;
+
     // Attributes
     private final RoundedTextField channelField;
     private final RoundedTextField textField;
 
     // Variables
     private final Stack<String> messageHistory;
+    private final Stack<String> channelHistory;
     private String lastMessage;
+    private String lastChannel;
     private int messageIndex;
+    private int channelIndex;
 
     // Constructor
     public MenuPanel(Frame frame, Dimension size) {
@@ -39,6 +45,9 @@ public class MenuPanel extends JPanel {
         setLayout(null);
         setBackground(DARK);
         setForeground(PURPLE);
+
+        // Set Frame
+        this.frame = frame;
 
         // Set Size
         var height = Math.round(size.height * 0.1f);
@@ -51,6 +60,7 @@ public class MenuPanel extends JPanel {
 
         Font font = new Font("Roboto", Font.PLAIN, fontSize);
         messageHistory = new Stack<>();
+        channelHistory = new Stack<>();
 
         // Channel Input
         channelField = new RoundedTextField(1, "Channel");
@@ -69,7 +79,7 @@ public class MenuPanel extends JPanel {
         textField.setBorder(new LineBorder(LIGHT, padding / 2));
         add(textField);
 
-        // Key Listener
+        // Message History
         textField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent evt) {
                 var keyCode = evt.getKeyCode();
@@ -82,9 +92,7 @@ public class MenuPanel extends JPanel {
                     if (!messageHistory.isEmpty() && messageIndex > 0) {
                         messageIndex--;
                         textField.setText(messageHistory.get(messageIndex));
-                    } else if (messageIndex == 0) {
-                        textField.setText(lastMessage);
-                    }
+                    } else if (messageIndex == 0) textField.setText(lastMessage);
                 }
 
                 if (keyCode == VK_DOWN) {
@@ -94,6 +102,34 @@ public class MenuPanel extends JPanel {
                     } else {
                         lastMessage = textField.getText();
                         textField.setText("");
+                    }
+                }
+            }
+        });
+
+        // Channel History
+        channelField.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent evt) {
+                var keyCode = evt.getKeyCode();
+                if (keyCode == VK_ENTER) joinChannel();
+                if (keyCode == VK_ESCAPE) channelField.setText("");
+                if (keyCode == VK_TAB) textField.requestFocus();
+
+                // Channel History
+                if (keyCode == VK_UP) {
+                    if (!channelHistory.isEmpty() && channelIndex > 0) {
+                        channelIndex--;
+                        channelField.setText(channelHistory.get(channelIndex));
+                    } else if (channelIndex == 0) channelField.setText(lastChannel);
+                }
+
+                if (keyCode == VK_DOWN) {
+                    if (!channelHistory.isEmpty() && channelIndex < channelHistory.size() - 1) {
+                        channelIndex++;
+                        channelField.setText(channelHistory.get(channelIndex));
+                    } else {
+                        lastChannel = channelField.getText();
+                        channelField.setText("");
                     }
                 }
             }
@@ -112,6 +148,17 @@ public class MenuPanel extends JPanel {
         frame.pack();
     }
 
+    private void joinChannel() {
+        String channel = getChannel();
+        if (channel.length() < 4) {
+            new JOptionPane("Channel must be at least 4 characters long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
+            return;
+        }
+        Main.botClient.joinChannel(channel);
+        channelHistory.push(channel);
+        channelIndex = channelHistory.size();
+    }
+
     // Send Message
     private void sendMessage() {
 
@@ -119,18 +166,51 @@ public class MenuPanel extends JPanel {
         String channel = getChannel();
         String message = trimMessage(textField.getText());
 
-        if (getChannel().length() < 3) {
-            new JOptionPane("Channel must be at least 3 characters long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
+        // Check Channel
+        if (getChannel().length() < 4) {
+            new JOptionPane("Channel must be at least 4 characters long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
             return;
         }
 
+        // Slash Commands
+        if (message.startsWith("/")) {
+            switch (message.toLowerCase()) {
+                case "/clear" -> frame.clearLog();
+                case "/exit" -> System.exit(0);
+                default -> new JOptionPane("Unknown command: " + message, JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
+            }
+
+            // Clean Up
+            cleanUpTextFields(message);
+            return;
+        }
+
+        // Check Message
         if (message.equalsIgnoreCase("message") || message.isEmpty()) {
             if (message.isEmpty()) new JOptionPane("Message must be at least 1 character long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
             Main.botClient.joinChannel(channel);
+            channelHistory.push(channel);
             return;
         }
 
+        // Channel History
+        if (!channelHistory.contains(channel)) {
+            channelHistory.push(channel);
+            channelIndex = channelHistory.size();
+        }
+
+        // Filter Message
+        message = filterMessage(message);
+
+        // Send Message
         Main.botClient.write(channel, message);
+
+        // Clean Up
+        cleanUpTextFields(message);
+    }
+
+    // Clean Up Text Fields
+    private void cleanUpTextFields(String message) {
         textField.setText("");
         messageHistory.push(message);
         messageIndex = messageHistory.size();

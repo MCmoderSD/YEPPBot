@@ -51,32 +51,44 @@ public class TwitchMessageEvent {
 
         // Set Additional Information
         subMonths = event.getSubscriberMonths();
-        subTier = event.getSubscriptionTier() == 0 ? "NONE" : "TIER" + event.getSubscriptionTier();
-        bits = null;
+        subTier = parseSubTier(event.getSubscriptionTier());
+        bits = 0;
     }
 
     // Cheer Event
     public TwitchMessageEvent(CheerEvent event) {
 
-        //
-        EventChannel channel = event.getChannel();
-        EventUser user = event.getUser();
+        // Get Event Information
+        EventChannel eventChannel = event.getChannel();
+        EventUser eventUser = event.getUser();
 
         // Get ID's
-        channelId = Integer.parseInt(trimMessage(channel.getId()));
-        userId = Integer.parseInt(trimMessage(user.getId()));
+        channelId = Integer.parseInt(trimMessage(eventChannel.getId()));
+        userId = Integer.parseInt(trimMessage(eventUser.getId()));
 
         // Get Names
-        this.channel = trimMessage(channel.getName());
-        this.user = trimMessage(user.getName());
+        channel = trimMessage(eventChannel.getName());
+        user = trimMessage(eventUser.getName());
 
         // Get Message
         message = trimMessage(event.getMessage());
 
         // Get Additional Information
-        subMonths = null;
-        subTier = null;
+        subMonths = event.getSubscriberMonths();
+        subTier = parseSubTier(event.getSubscriptionTier());
         bits = event.getBits();
+    }
+
+    // Manual Event
+    public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable Integer subTier, @Nullable Integer bits) {
+        this.channelId = channelId;
+        this.userId = userId;
+        this.channel = channel;
+        this.user = user;
+        this.message = message;
+        this.subMonths = subMonths == null ? 0 : subMonths;
+        this.subTier = subTier == null ? "NONE" : parseSubTier(subTier);
+        this.bits = bits == null ? 0 : bits;
     }
 
     // Manual Event
@@ -86,16 +98,17 @@ public class TwitchMessageEvent {
         this.channel = channel;
         this.user = user;
         this.message = message;
-        this.subMonths = subMonths;
-        this.subTier = subTier;
-        this.bits = bits;
+        this.subMonths = subMonths == null ? 0 : subMonths;
+        this.subTier = subTier == null ? "NONE" : subTier;
+        this.bits = bits == null ? 0 : bits;
     }
 
-    // Log
-    public void logToConsole() {
-        System.out.println(getLog());
+    // Parse
+    private static String parseSubTier(int tier) {
+        return tier == 0 ? "NONE" : "TIER" + tier;
     }
 
+    // Getters
     public Integer getChannelId() {
         return channelId;
     }
@@ -130,11 +143,7 @@ public class TwitchMessageEvent {
 
     // Checks
     public boolean isCheer() {
-        return bits != null;
-    }
-
-    public boolean hasMessage() {
-        return !(message == null || message.isEmpty() || message.isBlank());
+        return bits > 0;
     }
 
     public boolean hasYEPP() {
@@ -153,6 +162,10 @@ public class TwitchMessageEvent {
     }
 
     // Log
+    public void logToConsole() {
+        System.out.println(getLog());
+    }
+
     public Timestamp getTimestamp() {
         return timestamp;
     }
@@ -163,13 +176,5 @@ public class TwitchMessageEvent {
 
     public String getLog() {
         return getFormattedTimestamp() + " <" + getChannel() + "> " + getUser() + ": " + getMessage();
-    }
-
-    public Integer getLogSubMonths() {
-        return subMonths == null ? 0 : subMonths;
-    }
-
-    public Integer getLogBits() {
-        return bits == null ? 0 : bits;
     }
 }

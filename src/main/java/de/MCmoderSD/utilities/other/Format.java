@@ -120,6 +120,13 @@ public class Format {
         return input.replaceAll("\\b(" + repetition + ")\\s+\\1\\b", "$1");
     }
 
+    // Filter Message
+    public static String filterMessage(String message) {
+        message = message.replaceAll("\t", " ").replaceAll("\n", " ").replaceAll("\r", " ");
+        while (message.contains("  ")) message = message.replaceAll(" {2}", " ");
+        return message;
+    }
+
     // Format OpenAI Response
     public static String formatOpenAIResponse(String response, String emote) {
         return removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + " "), emote), emote);

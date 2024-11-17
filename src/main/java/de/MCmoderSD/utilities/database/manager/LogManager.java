@@ -55,7 +55,7 @@ public class LogManager {
                 message VARCHAR(500),
                 bits INT NOT NULL DEFAULT 0,
                 subMonths INT NOT NULL DEFAULT 0,
-                subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                subTier VARCHAR(5) NOT NULL DEFAULT 'NONE',
                 FOREIGN KEY (channel_id) REFERENCES users(id),
                 FOREIGN KEY (user_id) REFERENCES users(id)
                 )
@@ -73,7 +73,7 @@ public class LogManager {
                     args VARCHAR(500),
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
-                    subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                    subTier VARCHAR(5) NOT NULL DEFAULT 'NONE',
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
@@ -92,7 +92,7 @@ public class LogManager {
                     response VARCHAR(500),
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
-                    subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                    subTier VARCHAR(5) NOT NULL DEFAULT 'NONE',
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
@@ -122,7 +122,7 @@ public class LogManager {
                     channel_id INT NOT NULL,
                     user_id INT NOT NULL,
                     type VARCHAR(5) NOT NULL,
-                    subPlan VARCHAR(5),
+                    subTier VARCHAR(5),
                     giftAmount INT,
                     giftTotal INT,
                     FOREIGN KEY (channel_id) REFERENCES users(id),
@@ -156,7 +156,7 @@ public class LogManager {
                     audioData LONGBLOB NOT NULL,
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
-                    subPlan VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                    subTier VARCHAR(5) NOT NULL DEFAULT 'NONE',
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
                     )
@@ -185,15 +185,15 @@ public class LogManager {
                 mySQL.checkCache(channelId, event.getChannel(), true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message, bits, subMonths, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                String query = "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
                 preparedStatement.setString(4, event.getMessage()); // set message
-                preparedStatement.setInt(5, event.getLogBits()); // set bits
-                preparedStatement.setInt(6, event.getLogSubMonths()); // set subMonths
-                preparedStatement.setString(7, event.getSubTier()); // set subPlan
+                preparedStatement.setInt(5, event.getBits()); // set bits
+                preparedStatement.setInt(6, event.getSubMonths()); // set subMonths
+                preparedStatement.setString(7, event.getSubTier()); // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -223,16 +223,16 @@ public class LogManager {
                 mySQL.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args, bits, subMonths, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                String query = "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
                 preparedStatement.setString(4, trigger); // set command
                 preparedStatement.setString(5, args); // set args
-                preparedStatement.setInt(6, event.getLogBits()); // set bits
-                preparedStatement.setInt(7, event.getLogSubMonths()); // set subMonths
-                preparedStatement.setString(8, event.getSubTier()); // set subPlan
+                preparedStatement.setInt(6, event.getBits()); // set bits
+                preparedStatement.setInt(7, event.getSubMonths()); // set subMonths
+                preparedStatement.setString(8, event.getSubTier()); // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -262,7 +262,7 @@ public class LogManager {
                 mySQL.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
@@ -270,9 +270,9 @@ public class LogManager {
                 preparedStatement.setString(4, command); // set command
                 preparedStatement.setString(5, event.getMessage()); // set args
                 preparedStatement.setString(6, response); // set response
-                preparedStatement.setInt(7, event.getLogBits()); // set bits
-                preparedStatement.setInt(8, event.getLogSubMonths()); // set subMonths
-                preparedStatement.setString(9, event.getSubTier()); // set subPlan
+                preparedStatement.setInt(7, event.getBits()); // set bits
+                preparedStatement.setInt(8, event.getSubMonths()); // set subMonths
+                preparedStatement.setString(9, event.getSubTier()); // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -413,7 +413,7 @@ public class LogManager {
                 mySQL.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subPlan) VALUES (?, ?, ?, ?, ?)";
+                String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subTier) VALUES (?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
@@ -462,7 +462,7 @@ public class LogManager {
                 mySQL.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subPlan, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subTier, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
@@ -539,16 +539,16 @@ public class LogManager {
                 mySQL.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "TTSLog" + " (timestamp, channel_id, user_id, message, audioData, bits, subMonths, subPlan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                String query = "INSERT INTO " + "TTSLog" + " (timestamp, channel_id, user_id, message, audioData, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
                 preparedStatement.setString(4, event.getMessage()); // set message
                 preparedStatement.setBytes(5, audioFile.getAudioData()); // set audioData
-                preparedStatement.setInt(6, event.getLogBits()); // set bits
-                preparedStatement.setInt(7, event.getLogSubMonths()); // set subMonths
-                preparedStatement.setString(8, event.getSubTier()); // set subPlan
+                preparedStatement.setInt(6, event.getBits()); // set bits
+                preparedStatement.setInt(7, event.getSubMonths()); // set subMonths
+                preparedStatement.setString(8, event.getSubTier()); // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources

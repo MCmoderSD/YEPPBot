@@ -236,9 +236,6 @@ public class AssetManager {
                 preparedStatement.executeUpdate();
             }
 
-            // Close resources
-            connection.close();
-
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -291,9 +288,6 @@ public class AssetManager {
                 preparedStatement.executeUpdate();
             }
 
-            // Close resources
-            connection.close();
-
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -345,9 +339,6 @@ public class AssetManager {
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
-
-            // Close resources
-            connection.close();
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());

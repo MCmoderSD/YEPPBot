@@ -60,4 +60,12 @@ public class LogPanel extends JPanel {
         if (frame.getChannel().equals(channel) || frame.getChannel().length() < 3)
             logArea.appendText("<" + channel + "> " + user + ": " + trimMessage(message));
     }
+
+    public void scrollToBottom() {
+        logArea.scrollToBottom();
+    }
+
+    public void clear() {
+        logArea.clear();
+    }
 }
