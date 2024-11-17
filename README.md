@@ -30,7 +30,7 @@ If you're interested in collaborating or need a customized version to suit your 
 Simply send an email to [business@mcmodersd.de](mailto:business@mcmodersd.de). <br> <br>
 
 The bot is currently under active development, and some features may undergo significant changes in the future. <br>
-So please note that the setup process for the bot may also change over time. <br> <br>
+So please note that the setup process for the bot may also change over time. <br>
 
 <hr>
 
@@ -94,7 +94,7 @@ If you have any ideas or suggestions, feel free to open an issue or submit a pul
   - [ ] Rank Command
   - [ ] Key Command
   - [ ] Discord Integration
-  
+
 
 ## Installation and Usage
 For the bot to work, you need to have a few things set up:
