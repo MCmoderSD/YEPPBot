@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Timer;
@@ -10,13 +11,14 @@ import de.MCmoderSD.utilities.database.manager.CustomManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
-public class CustomTimers {
+public class CustomTimer {
 
     // Constructor
-    public CustomTimers(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public CustomTimer(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
 
         // ToDo Make it possible to create timers with hours, minutes and seconds
 
@@ -43,6 +45,11 @@ public class CustomTimers {
 
                 // Check if user is a moderator
                 if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Get Custom Timers
                 HashMap<String, Timer> customTimers = customManager.getCustomTimers(event, botClient);
@@ -122,11 +129,11 @@ public class CustomTimers {
         });
     }
 
-    private String getCustomTimerNames(String channel, HashMap<String, Timer> customTimers, ArrayList<Timer> enabledTimers) {
+    private String getCustomTimerNames(String channel, HashMap<String, Timer> customTimers, HashSet<Timer> enabledTimers) {
         if (customTimers.isEmpty()) return "No Custom Timers available";
 
         StringBuilder stringBuilder = new StringBuilder("Custom Timers: ");
-        ArrayList<String> enabledTimersNames = new ArrayList<>();
+        HashSet<String> enabledTimersNames = new HashSet<>();
 
         for (var timer : enabledTimers) {
             if (timer.getChannel().equals(channel)) stringBuilder.append(timer.getName()).append(" enabled, ");

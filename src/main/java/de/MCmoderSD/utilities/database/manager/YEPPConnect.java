@@ -7,17 +7,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
-
 public class YEPPConnect {
 
-    // Assosiations
+    // Associations
     private final MySQL mySQL;
 
     // Constructor
@@ -44,7 +44,7 @@ public class YEPPConnect {
             connection.prepareStatement(condition +
                     """
                     MinecraftWhitelist (
-                    channel_id INT PRIMARY KEY NOT NULL,
+                    channel_id INT PRIMARY KEY,
                     whitelist TEXT,
                     user_pair TEXT,
                     last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -52,6 +52,7 @@ public class YEPPConnect {
                     )
                     """
             ).execute();
+          
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -119,6 +120,11 @@ public class YEPPConnect {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) return resultSet.getString(type);
+
+            // Close resources
+            resultSet.close();
+            statement.close();
+
         } catch (SQLException e) {
             System.err.printf("Error while getting whitelist: %s\n", e.getMessage());
         }
@@ -148,6 +154,10 @@ public class YEPPConnect {
                 PreparedStatement statement = mySQL.getConnection().prepareStatement("INSERT INTO MinecraftWhitelist (channel_id) VALUES (?)");
                 statement.setInt(1, id);
                 statement.executeUpdate();
+
+                // Close resources
+                statement.close();
+
             } catch (SQLException e) {
                 System.err.printf("Error while creating channel: %s\n", e.getMessage());
             }
@@ -160,12 +170,12 @@ public class YEPPConnect {
 
             // Format whitelist
             StringBuilder whitelistString = new StringBuilder();
-            for (String name : whitelist) if (!(name.isEmpty() && name.isBlank())) whitelistString.append(name).append(" ");
+            for (String name : whitelist) if (!name.isEmpty()) whitelistString.append(name).append(" ");
             if (!whitelistString.isEmpty()) whitelistString.deleteCharAt(whitelistString.length() - 1);
 
             // Format userPair
             StringBuilder userPairString = new StringBuilder();
-            for (String pair : userPair) if (!(pair.isEmpty() && pair.isBlank())) userPairString.append(pair).append(" - ");
+            for (String pair : userPair) if (!pair.isEmpty()) userPairString.append(pair).append(" - ");
             if (!userPairString.isEmpty()) userPairString.delete(userPairString.length() - 3, userPairString.length());
 
             try {
@@ -173,9 +183,13 @@ public class YEPPConnect {
                 PreparedStatement statement = mySQL.getConnection().prepareStatement("UPDATE MinecraftWhitelist SET whitelist = ?, user_pair = ?, last_updated = ? WHERE channel_id = ?");
                 statement.setString(1, whitelistString.toString());
                 statement.setString(2, userPairString.toString());
-                statement.setTimestamp(3, getTimestamp());
+                statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
                 statement.setInt(4, id);
                 statement.executeUpdate();
+
+                // Close resources
+                statement.close();
+
             } catch (SQLException e) {
                 System.err.printf("Error while updating whitelist: %s\n", e.getMessage());
             }

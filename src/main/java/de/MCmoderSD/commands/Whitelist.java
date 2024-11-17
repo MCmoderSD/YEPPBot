@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -7,6 +8,8 @@ import de.MCmoderSD.utilities.database.MySQL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 
 public class Whitelist {
 
@@ -25,6 +28,11 @@ public class Whitelist {
 
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+              
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Check args
                 if (args.isEmpty()) {

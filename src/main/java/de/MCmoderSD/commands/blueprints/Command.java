@@ -1,4 +1,4 @@
-package de.MCmoderSD.commands;
+package de.MCmoderSD.commands.blueprints;
 
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import org.apache.commons.lang.IncompleteArgumentException;
@@ -19,10 +19,16 @@ public abstract class Command {
         if (command.length == 0)
             throw new IncompleteArgumentException("Command name missing!");
 
-        // Set attributes
-        this.command = command[0]; // Name
-        this.alias = command; // Alias
-        this.description = description; // Description
+        // Set Attributes
+        this.command = command[0].toLowerCase();
+
+        // Set Alias
+        String[] aliases = command.length == 1 ? new String[0] : new String[command.length - 1];
+        for (var i = 1; i < command.length; i++) aliases[i - 1] = command[i].toLowerCase();
+        this.alias = aliases;
+
+        // Set Description
+        this.description = description;
     }
 
     // Methods
@@ -30,7 +36,7 @@ public abstract class Command {
 
     // Getter
     public String getCommand() {
-        return command.toLowerCase();
+        return command;
     } // Get the command
 
     public String[] getAlias() {

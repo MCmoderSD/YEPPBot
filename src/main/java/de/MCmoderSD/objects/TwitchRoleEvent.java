@@ -7,7 +7,7 @@ import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
 
 import java.sql.Timestamp;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 @SuppressWarnings("unused")
 public class TwitchRoleEvent {
@@ -138,5 +138,9 @@ public class TwitchRoleEvent {
 
     public String getLog() {
         return getFormattedTimestamp() + " " + EVENT + " <" + getChannel() + "> " + getUser() + ": " + (isAdded() ? "Added" : "Removed") + " " + getRole();
+    }
+
+    public void logToConsole() {
+        System.out.println(getLog());
     }
 }

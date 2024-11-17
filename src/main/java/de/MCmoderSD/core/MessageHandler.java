@@ -1,62 +1,70 @@
 package de.MCmoderSD.core;
 
-import de.MCmoderSD.UI.Frame;
-import de.MCmoderSD.commands.Command;
-import de.MCmoderSD.main.Main;
+import de.MCmoderSD.commands.blueprints.Command;
+import de.MCmoderSD.executor.NanoLoop;
+import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.NoSuchElementException;
-import java.util.Random;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
+
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class MessageHandler {
 
     // Associations
     private final BotClient botClient;
     private final MySQL mySQL;
-    private final Frame frame;
 
     // Attributes
+    private final HashSet<Integer> congratulated;
+
+    // HashMaps
     private final HashMap<String, Command> commandList;
     private final HashMap<String, String> aliasMap;
     private final HashMap<Integer, Integer> lurkList;
-    private final HashMap<Integer, ArrayList<String>> blackList;
+    private final HashMap<Integer, Birthdate> birthdateList;
+    private final HashMap<Integer, HashSet<String>> blackList;
     private final HashMap<Integer, HashMap<String, String>> customCommands;
     private final HashMap<Integer, HashMap<String, String>> customAliases;
     private final HashMap<Integer, HashMap<String, Integer>> counters;
-    private final HashMap<Integer, ArrayList<Timer>> customTimers;
-
-    // Utilities
-    private final Random random;
+    private final HashMap<Integer, HashSet<Timer>> customTimers;
 
     // Constructor
-    public MessageHandler(BotClient botClient, MySQL mySQL, Frame frame) {
+    public MessageHandler(BotClient botClient, MySQL mySQL) {
 
         // Initialize Associations
         this.botClient = botClient;
         this.mySQL = mySQL;
-        this.frame = frame;
 
         // Initialize Attributes
+        congratulated = new HashSet<>();
+
+        // Reset Congratulated
+        new NanoLoop(this::resetCongratulated, 96, TimeUnit.HOURS).start();
+
+        // Initialize HashMaps
         commandList = new HashMap<>();
         aliasMap = new HashMap<>();
         lurkList = new HashMap<>();
+        birthdateList = new HashMap<>();
         blackList = new HashMap<>();
         customCommands = new HashMap<>();
         customAliases = new HashMap<>();
         counters = new HashMap<>();
         customTimers = new HashMap<>();
-        random = new Random();
 
         // Update Lists
         updateLurkList(mySQL.getLurkManager().getLurkList());
+        updateBirthdateList(mySQL.getBirthdays());
         updateBlackList(mySQL.getChannelManager().getBlackList());
         updateCustomCommands(mySQL.getCustomManager().getCustomCommands(), mySQL.getCustomManager().getCustomAliases());
         updateCounters(mySQL.getCustomManager().getCustomCounters());
@@ -65,35 +73,25 @@ public class MessageHandler {
 
     // Handle Twitch Message
     public void handleMessage(TwitchMessageEvent event) {
-        new Thread(() -> {
 
-            // Log Message
-            mySQL.getLogManager().logMessage(event);
-            event.logToConsole();
-            if (!botClient.hasArg(Main.Argument.CLI))
-                frame.log(event.getType(), event.getChannel(), event.getUser(), event.getMessage());
+        // Handle Timers;
+        handleTimers(event);
 
-            // Handle Timers;
-            handleTimers(event);
+        // Check for Lurk
+        if (lurkList.containsKey(event.getUserId())) handleLurk(event);
 
-            // Check for Lurk
-            if (lurkList.containsKey(event.getUserId())) handleLurk(event);
+        // Check for Birthday
+        if (birthdateList.containsKey(event.getUserId())) handleBirthday(event);
 
-            // Check for Command
-            if (event.hasCommand()) {
-                handleCommand(event);
-                return;
-            }
+        // Check for Command
+        if (event.hasCommand()) {
+            handleCommand(event);
+            return;
+        }
 
-            // Reply YEPP
-            if (event.hasBotName()) {
-                botClient.respond(event, "replyYEPP", tagUser(event) + " YEPP");
-                return;
-            }
-
-            // Say YEPP
-            if (event.hasYEPP()) botClient.respond(event, "YEPP", "YEPP");
-        }).start();
+        // YEPP
+        if (event.hasBotName()) botClient.respond(event, "replyYEPP", tagUser(event) + " YEPP"); // Reply YEPP
+        else if (event.hasYEPP()) botClient.respond(event, "YEPP", "YEPP"); // YEPP
     }
 
     private void handleTimers(TwitchMessageEvent event) {
@@ -122,7 +120,7 @@ public class MessageHandler {
                 return;
             }
 
-            if (channelID == lurkChannel.getFirst()) { // Stop lurking
+            if (Objects.equals(channelID, lurkChannel.getFirst())) { // Stop lurking
 
                 // Remove user from lurk list
                 updateLurkList(mySQL.getLurkManager().removeLurker(userID));
@@ -141,18 +139,33 @@ public class MessageHandler {
 
                 // Send message
                 if (lurkChannel.size() < 3) botClient.respond(new TwitchMessageEvent(
-                        event.getTimestamp(),
                         lurkChannel.getFirst(),
                         event.getUserId(),
-                        mySQL.queryName("channels", lurkChannel.getFirst()),
+                        botClient.getHelixHandler().getUser(lurkChannel.getFirst()).getName(),
                         event.getUser(),
                         event.getMessage(),
                         event.getSubMonths(),
-                        event.getSubStreak(),
                         event.getSubTier(),
                         event.getBits()
                 ), "traitor", tagUser(event) + " ist ein verräter, hab den kek gerade im chat von " + tagChannel(event) + " gesehen!");
             }
+        }).start();
+    }
+
+    private void handleBirthday(TwitchMessageEvent event) {
+
+        // Variables
+        var userID = event.getUserId();
+        Birthdate birthday = birthdateList.get(userID);
+
+        // Check for Birthday
+        if (birthday.isBirthday() && !congratulated.contains(userID)) new Thread(() -> {
+
+            // Add user to congratulated list
+            congratulated.add(userID);
+
+            // Send message
+            botClient.respond(event, "birthday", String.format("Alles Gute zu deinem %d. Geburtstag, %s! YEPP", birthday.getAge(), tagUser(event)));
         }).start();
     }
 
@@ -227,93 +240,6 @@ public class MessageHandler {
         }
     }
 
-    // Message Formatting
-    private ArrayList<String> formatCommand(TwitchMessageEvent event) {
-
-        // Variables
-        String message = event.getMessage();
-
-        // Find Start
-        if (message.indexOf(botClient.getPrefix()) == 0) message = message.substring(1);
-        else message = message.substring(message.indexOf(" " + botClient.getPrefix()) + 2);
-
-        // Split Command
-        String[] split = trimMessage(message).split(" ");
-        return new ArrayList<>(Arrays.asList(split));
-    }
-
-    private String formatCommand(TwitchMessageEvent event, ArrayList<String> args, String response) {
-
-        // Replace Variables
-        if (response.contains("%random%")) response = response.replaceAll("%random%", random.nextInt(100) + "%");
-        if (response.contains("%channel%")) response = response.replaceAll("%channel%", tagChannel(event));
-
-        if (response.contains("%user%") || response.contains("%author%")) {
-            response = response.replaceAll("%user%", tagUser(event));
-            response = response.replaceAll("%author%", tagUser(event));
-        }
-
-        if (response.contains("%tagged%")) {
-            String tagged;
-            if (!args.isEmpty()) tagged = args.getFirst().startsWith("@") ? args.getFirst() : "@" + args.getFirst();
-            else tagged = tagUser(event);
-            response = response.replaceAll("%tagged%", tagged);
-        }
-
-        return response;
-    }
-
-    private String formatLurkTime(Timestamp startTime) {
-
-        // Variables
-        StringBuilder response = new StringBuilder();
-        long time = getTimestamp().getTime() - startTime.getTime();
-
-        // Years
-        long years = time / 31536000000L;
-        time %= 31536000000L;
-        if (years > 1) response.append(years).append(" Jahre, ");
-        else if (years > 0) response.append(years).append(" Jahr, ");
-
-        // Months
-        long months = time / 2592000000L;
-        time %= 2592000000L;
-        if (months > 1) response.append(months).append(" Monate, ");
-        else if (months > 0) response.append(months).append(" Monat, ");
-
-        // Weeks
-        long weeks = time / 604800000L;
-        time %= 604800000L;
-        if (weeks > 1) response.append(weeks).append(" Wochen, ");
-        else if (weeks > 0) response.append(weeks).append(" Woche, ");
-
-        // Days
-        long days = time / 86400000L;
-        time %= 86400000L;
-        if (days > 1) response.append(days).append(" Tage, ");
-        else if (days > 0) response.append(days).append(" Tag, ");
-
-        // Hours
-        long hours = time / 3600000L;
-        time %= 3600000L;
-        if (hours > 1) response.append(hours).append(" Stunden, ");
-        else if (hours > 0) response.append(hours).append(" Stunde, ");
-
-        // Minutes
-        long minutes = time / 60000L;
-        time %= 60000L;
-        if (minutes > 1) response.append(minutes).append(" Minuten, ");
-        else if (minutes > 0) response.append(minutes).append(" Minute, ");
-
-        // Seconds
-        long seconds = time / 1000L;
-        if (seconds > 1) response.append(seconds).append(" Sekunden, ");
-        else if (seconds > 0) response.append(seconds).append(" Sekunde, ");
-
-        // Return
-        return response.substring(0, response.length() - 2);
-    }
-
     // Register Command
     public void addCommand(Command command) {
 
@@ -331,8 +257,15 @@ public class MessageHandler {
         this.lurkList.putAll(lurkList);
     }
 
+    // Update Birthdate List
+    public void updateBirthdateList(HashMap<Integer, Birthdate> birthdateList) {
+        if (birthdateList == null || birthdateList.isEmpty()) return;
+        this.birthdateList.clear();
+        this.birthdateList.putAll(birthdateList);
+    }
+
     // Update Black List
-    public void updateBlackList(HashMap<Integer, ArrayList<String>> blackList) {
+    public void updateBlackList(HashMap<Integer, HashSet<String>> blackList) {
         this.blackList.clear();
         this.blackList.putAll(blackList);
     }
@@ -352,13 +285,18 @@ public class MessageHandler {
     }
 
     // Update Custom Timers
-    public void updateCustomTimers(HashMap<Integer, ArrayList<Timer>> customTimers) {
+    public void updateCustomTimers(HashMap<Integer, HashSet<Timer>> customTimers) {
         this.customTimers.clear();
         this.customTimers.putAll(customTimers);
     }
 
-    public void updateCustomTimers(int channelID, ArrayList<Timer> customTimers) {
+    public void updateCustomTimers(int channelID, HashSet<Timer> customTimers) {
         this.customTimers.replace(channelID, customTimers);
+    }
+
+    // Reset Congratulated
+    public void resetCongratulated() {
+        congratulated.clear();
     }
 
     // Getter

@@ -1,34 +1,42 @@
 package de.MCmoderSD.main;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.MCmoderSD.main.Main.Argument;
-import de.MCmoderSD.utilities.json.JsonUtility;
-import de.MCmoderSD.utilities.other.Reader;
+import de.MCmoderSD.enums.Argument;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
+import static de.MCmoderSD.main.Main.jsonUtility;
+import static de.MCmoderSD.main.Main.terminal;
+import static de.MCmoderSD.utilities.other.Util.readAllLines;
+
+
+@SuppressWarnings("unused")
 public class Credentials {
 
     // Bot Credentials
     private JsonNode botConfig;
-    private ArrayList<String> channelList;
+    private HashSet<String> channelList;
     private JsonNode mySQLConfig;
+    private JsonNode httpsServerConfig;
 
-    // API Cials
-    private JsonNode openAiConfig;
-    private JsonNode openWeatherMapConfig;
-    private JsonNode giphyConfig;
+    // API Credentials
+    private JsonNode apiConfig;
+    private JsonNode openAIConfig;
+    private JsonNode openAIChatConfig;
+    private JsonNode openAIImageConfig;
+    private JsonNode openAITTSConfig;
+
+    // APIs Provided
+    private boolean astrology;
+    private boolean openWeatherMap;
+    private boolean giphy;
 
     // Constructor
-    public Credentials(Main main, String botConfig, String channelList, String mySQL, String openAi, String weather, String giphy) {
-
-        // Get Utilities
-        JsonUtility jsonUtility = main.getJsonUtility();
-        Reader reader = main.getReader();
+    public Credentials(String botConfig, String channelList, String mySQL, String httpsServer, String apiKeys, String openAI) {
 
         // Load Bot Config
         try {
-            this.botConfig = jsonUtility.load(botConfig, main.hasArg(Argument.BOT_CONFIG));
+            this.botConfig = jsonUtility.load(botConfig, terminal.hasArg(Argument.BOT_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading Bot Config: " + e.getMessage());
             System.exit(1);
@@ -36,40 +44,55 @@ public class Credentials {
 
         // Load Channel List
         try {
-            this.channelList = reader.lineRead(channelList, main.hasArg(Argument.CHANNEL_LIST));
+            this.channelList = new HashSet<>(readAllLines(channelList, terminal.hasArg(Argument.CHANNEL_LIST)));
         } catch (Exception e) {
             System.err.println("Error loading Channel List: " + e.getMessage());
+            System.err.println("Creating empty Channel List...");
+            this.channelList = new HashSet<>();
         }
 
         // Load MySQL Config
         try {
-            this.mySQLConfig = jsonUtility.load(mySQL, main.hasArg(Argument.MYSQL_CONFIG));
+            this.mySQLConfig = jsonUtility.load(mySQL, terminal.hasArg(Argument.MYSQL_CONFIG));
         } catch (Exception e) {
             System.err.println("Error loading MySQL Config: " + e.getMessage());
-            System.exit(1);
         }
 
-        // Load OpenAi Config
+        // Load HTTPS Server Config
         try {
-            this.openAiConfig = jsonUtility.load(openAi, main.hasArg(Argument.OPENAi_CONFIG));
+            this.httpsServerConfig = jsonUtility.load(httpsServer, terminal.hasArg(Argument.HTTPS_SERVER));
         } catch (Exception e) {
-            System.err.println("Error loading OpenAi Config: " + e.getMessage());
+            System.err.println("Error loading HTTPS Server Config: " + e.getMessage());
         }
 
-        // Load OpenWeatherMap Config
+        // Load API Config
         try {
-            this.openWeatherMapConfig = jsonUtility.load(weather, main.hasArg(Argument.OPENWEATHERMAP_CONFIG));
+
+            // Load JSON
+            apiConfig = jsonUtility.load(apiKeys, terminal.hasArg(Argument.API_CONFIG));
+
+            // Check for APIs
+            astrology = apiConfig.has("astrology");
+            openWeatherMap = apiConfig.has("openWeatherMap");
+            giphy = apiConfig.has("giphy");
+
         } catch (Exception e) {
-            System.err.println("Error loading OpenWeatherMap Config: " + e.getMessage());
+            System.err.println("Error loading API Config: " + e.getMessage());
         }
 
-        // Load Giphy Config
+        // Load OpenAI Config
         try {
-            this.giphyConfig = jsonUtility.load(giphy, main.hasArg(Argument.GIPHY_CONFIG));
-        } catch (Exception e) {
-            System.err.println("Error loading Giphy Config: " + e.getMessage());
-        }
 
+            // Load JSON
+            openAIConfig = jsonUtility.load(openAI, terminal.hasArg(Argument.OPENAI_CONFIG));
+
+            // Load OpenAI Sub Configs
+            if (openAIConfig.has("chat")) openAIChatConfig = openAIConfig.get("chat");
+            if (openAIConfig.has("image")) openAIImageConfig = openAIConfig.get("image");
+            if (openAIConfig.has("speech")) openAITTSConfig = openAIConfig.get("speech");
+        } catch (Exception e) {
+            System.err.println("Error loading OpenAI Config: " + e.getMessage());
+        }
     }
 
     // Getters
@@ -77,7 +100,7 @@ public class Credentials {
         return botConfig;
     }
 
-    public ArrayList<String> getChannelList() {
+    public HashSet<String> getChannelList() {
         return channelList;
     }
 
@@ -85,16 +108,28 @@ public class Credentials {
         return mySQLConfig;
     }
 
-    public JsonNode getOpenAiConfig() {
-        return openAiConfig;
+    public JsonNode getHttpsServerConfig() {
+        return httpsServerConfig;
     }
 
-    public JsonNode getOpenWeatherMapConfig() {
-        return openWeatherMapConfig;
+    public JsonNode getAPIConfig() {
+        return apiConfig;
     }
 
-    public JsonNode getGiphyConfig() {
-        return giphyConfig;
+    public JsonNode getOpenAIConfig() {
+        return openAIConfig;
+    }
+
+    public JsonNode getOpenAIChatConfig() {
+        return openAIChatConfig;
+    }
+
+    public JsonNode getOpenAIImageConfig() {
+        return openAIImageConfig;
+    }
+
+    public JsonNode getOpenAITTSConfig() {
+        return openAITTSConfig;
     }
 
     // Validations
@@ -110,15 +145,52 @@ public class Credentials {
         return mySQLConfig != null;
     }
 
-    public boolean validateOpenAiConfig() {
-        return openAiConfig != null;
+    public boolean validateHttpServerConfig() {
+        return httpsServerConfig != null;
     }
 
-    public boolean validateWeatherConfig() {
-        return openWeatherMapConfig != null;
+    public boolean validateOpenAIConfig() {
+        return openAIConfig != null;
     }
 
-    public boolean validateGiphyConfig() {
-        return giphyConfig != null;
+    public boolean validateOpenAIChatConfig() {
+        return openAIChatConfig != null;
+    }
+
+    public boolean validateOpenAIImageConfig() {
+        return openAIImageConfig != null;
+    }
+
+    public boolean validateOpenAITTSConfig() {
+        return openAITTSConfig != null;
+    }
+
+    // APIs Provided
+    public boolean hasAstrology() {
+        return astrology;
+    }
+
+    public boolean hasOpenWeatherMap() {
+        return openWeatherMap;
+    }
+
+    public boolean hasGiphy() {
+        return giphy;
+    }
+
+    public boolean hasOpenAI() {
+        return openAIConfig != null;
+    }
+
+    public boolean hasOpenAIChat() {
+        return openAIChatConfig != null;
+    }
+
+    public boolean hasOpenAIImage() {
+        return openAIImageConfig != null;
+    }
+
+    public boolean hasOpenAITTS() {
+        return openAITTSConfig != null;
     }
 }

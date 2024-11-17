@@ -1,17 +1,13 @@
 package de.MCmoderSD.objects;
 
 import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.utilities.database.MySQL;
 
-import java.sql.Timestamp;
-
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Timer {
 
     // Associations
     private final BotClient botClient;
-    private final MySQL mySQL;
 
     // Attributes
     private final String channel;
@@ -24,11 +20,10 @@ public class Timer {
     private long counter;
 
     // Constructor
-    public Timer(BotClient botClient, MySQL mySQL, String channel, String name, String time, String response) {
+    public Timer(BotClient botClient, String channel, String name, String time, String response) {
 
         // Set Associations
         this.botClient = botClient;
-        this.mySQL = mySQL;
 
         // Set Attributes
         this.channel = channel;
@@ -65,20 +60,16 @@ public class Timer {
         counter = 1;
 
         // Log
-        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, logTimestamp(), COMMAND, channel, "Timer: " + name + ": " + response, BREAK, UNBOLD);
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, "Timer: " + name + ": " + response, BREAK, UNBOLD);
 
         // Send Message
         botClient.respond(new TwitchMessageEvent(
-                new Timestamp(System.currentTimeMillis()),
-                mySQL.queryID("channels", channel),
-                mySQL.queryID("channels", channel),
+                botClient.getHelixHandler().getUser(channel).getId(),
+                botClient.getHelixHandler().getUser(channel).getId(),
                 channel,
                 channel,
                 response,
-                null,
-                null,
-                "NONE",
-                null), "Timer: " + name, response);
+                null, (Integer) null, null), "Timer: " + name, response);
     }
 
     // Trigger

@@ -2,24 +2,28 @@ package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.other.OpenAi;
+import de.MCmoderSD.OpenAI.modules.Chat;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import org.jsoup.nodes.Document;
-
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Wiki {
+
+    // Constants
+    private final String errorRetrievingWeatherData;
+    private final String noSummaryFoundForThisTopic;
 
     // Attributes
     private final double temperature;
@@ -29,7 +33,7 @@ public class Wiki {
     private final double presencePenalty;
 
     // Constructor
-    public Wiki(BotClient botClient, MessageHandler messageHandler, OpenAi openAi) {
+    public Wiki(BotClient botClient, MessageHandler messageHandler, Chat chat) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "wiki <Thema>";
@@ -38,19 +42,30 @@ public class Wiki {
         String[] name = {"wiki", "wikipedia", "summarize", "zusammenfassung"};
         String description = "Sucht auf Wikipedia nach einem Thema und gibt eine Zusammenfassung zurück. " + syntax;
 
-        // Load Config
-        JsonNode config = openAi.getConfig();
+        // Constants
+        errorRetrievingWeatherData = "Fehler beim Abrufen der Wikipedia-Zusammenfassung:";
+        noSummaryFoundForThisTopic = "Keine Zusammenfassung für dieses Thema gefunden.";
+
+        // Get Chat Config
+        JsonNode config = chat.getConfig();
+
+        // Get Parameters
         temperature = 0;
         maxTokens = config.get("maxTokens").asInt();
-        topP = openAi.getConfig().get("topP").asDouble();
-        frequencyPenalty = openAi.getConfig().get("frequencyPenalty").asDouble();
-        presencePenalty = openAi.getConfig().get("presencePenalty").asDouble();
+        topP = config.get("topP").asDouble();
+        frequencyPenalty = config.get("frequencyPenalty").asDouble();
+        presencePenalty = config.get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
 
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Attributes
                 String response;
@@ -68,10 +83,13 @@ public class Wiki {
 
                         // Check if summary is too long
                         if (summary.length() <= 500) response = summary;
-                        else response = trimMessage(openAi.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
+                        else response = trimMessage(chat.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
+
+                        // Filter Response for argument injection
+                        response = removePrefix(response);
 
                     } catch (IOException e) {
-                        response = trimMessage("Fehler beim Abrufen des Wikipedia-Artikels: " + e.getMessage());
+                        response = trimMessage(String.format("%s %s", errorRetrievingWeatherData, e.getMessage()));
                     }
                 }
 
@@ -83,13 +101,13 @@ public class Wiki {
 
     // Get Wikipedia summary
     private String getWikipediaSummary(String topic) throws IOException {
-        String apiUrl = "https://de.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&redirects=true&titles=" + URLEncoder.encode(topic, StandardCharsets.UTF_8);
+        String apiUrl = String.format("https://de.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&redirects=true&titles=%s", URLEncoder.encode(topic, StandardCharsets.UTF_8));
         Document doc = Jsoup.connect(apiUrl).ignoreContentType(true).get();
         JSONObject json = new JSONObject(doc.text());
         JSONObject pages = json.getJSONObject("query").getJSONObject("pages");
         String firstPageKey = pages.keys().next();
         JSONObject page = pages.getJSONObject(firstPageKey);
         if (page.has("extract")) return page.getString("extract");
-        else throw new IOException("Keine Zusammenfassung für dieses Thema gefunden.");
+        else throw new IOException(noSummaryFoundForThisTopic);
     }
 }

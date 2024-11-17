@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -26,7 +27,7 @@ public class Say {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Check if user is moderator or admin
-                if (!botClient.isPermitted(event)) return;
+                if (!(botClient.isAdmin(event) || botClient.isPermitted(event))) return;
 
                 // Send Message
                 botClient.respond(event, getCommand(), String.join(" ", args));

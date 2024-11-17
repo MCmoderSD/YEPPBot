@@ -1,6 +1,6 @@
 package de.MCmoderSD.UI;
 
-import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.main.Main;
 import de.MCmoderSD.utilities.frontend.RoundedButton;
 import de.MCmoderSD.utilities.frontend.RoundedTextField;
 
@@ -8,14 +8,16 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import javax.swing.border.LineBorder;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
 import java.util.Stack;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 import static java.awt.event.KeyEvent.*;
 
 public class MenuPanel extends JPanel {
@@ -29,8 +31,11 @@ public class MenuPanel extends JPanel {
 
     // Variables
     private final Stack<String> messageHistory;
+    private final Stack<String> channelHistory;
     private String lastMessage;
+    private String lastChannel;
     private int messageIndex;
+    private int channelIndex;
 
     // Constructor
     public MenuPanel(Frame frame, Dimension size) {
@@ -41,17 +46,21 @@ public class MenuPanel extends JPanel {
         setBackground(DARK);
         setForeground(PURPLE);
 
+        // Set Frame
+        this.frame = frame;
+
         // Set Size
-        var height = Math.toIntExact(Math.round(size.height * 0.1));
+        var height = Math.round(size.height * 0.1f);
         Dimension panelSize = new Dimension(size.width, height);
         setPreferredSize(panelSize);
 
         // Variables
-        int fontSize = panelSize.width / 50;
-        int padding = panelSize.width / 100;
+        var fontSize = panelSize.width / 50;
+        var padding = panelSize.width / 100;
 
         Font font = new Font("Roboto", Font.PLAIN, fontSize);
         messageHistory = new Stack<>();
+        channelHistory = new Stack<>();
 
         // Channel Input
         channelField = new RoundedTextField(1, "Channel");
@@ -64,16 +73,16 @@ public class MenuPanel extends JPanel {
 
         // Text Input
         textField = new RoundedTextField(1, "Message");
-        textField.setBounds(panelSize.width / 5, padding, Math.toIntExact(Math.round(panelSize.width / 1.6)) + 2 * padding, panelSize.height - 3 * padding);
+        textField.setBounds(panelSize.width / 5, padding, Math.round(panelSize.width / 1.6f) + 2 * padding, panelSize.height - 3 * padding);
         textField.setFont(font);
         textField.setBackground(LIGHT);
         textField.setBorder(new LineBorder(LIGHT, padding / 2));
         add(textField);
 
-        // Key Listener
+        // Message History
         textField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent evt) {
-                int keyCode = evt.getKeyCode();
+                var keyCode = evt.getKeyCode();
                 if (keyCode == VK_ENTER) sendMessage();
                 if (keyCode == VK_ESCAPE) textField.setText("");
                 if (keyCode == VK_TAB) channelField.requestFocus();
@@ -83,9 +92,7 @@ public class MenuPanel extends JPanel {
                     if (!messageHistory.isEmpty() && messageIndex > 0) {
                         messageIndex--;
                         textField.setText(messageHistory.get(messageIndex));
-                    } else if (messageIndex == 0) {
-                        textField.setText(lastMessage);
-                    }
+                    } else if (messageIndex == 0) textField.setText(lastMessage);
                 }
 
                 if (keyCode == VK_DOWN) {
@@ -100,9 +107,37 @@ public class MenuPanel extends JPanel {
             }
         });
 
+        // Channel History
+        channelField.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent evt) {
+                var keyCode = evt.getKeyCode();
+                if (keyCode == VK_ENTER) joinChannel();
+                if (keyCode == VK_ESCAPE) channelField.setText("");
+                if (keyCode == VK_TAB) textField.requestFocus();
+
+                // Channel History
+                if (keyCode == VK_UP) {
+                    if (!channelHistory.isEmpty() && channelIndex > 0) {
+                        channelIndex--;
+                        channelField.setText(channelHistory.get(channelIndex));
+                    } else if (channelIndex == 0) channelField.setText(lastChannel);
+                }
+
+                if (keyCode == VK_DOWN) {
+                    if (!channelHistory.isEmpty() && channelIndex < channelHistory.size() - 1) {
+                        channelIndex++;
+                        channelField.setText(channelHistory.get(channelIndex));
+                    } else {
+                        lastChannel = channelField.getText();
+                        channelField.setText("");
+                    }
+                }
+            }
+        });
+
         // Send Button
         RoundedButton sendButton = new RoundedButton("Send");
-        sendButton.setBounds(Math.toIntExact(Math.round(panelSize.width - panelSize.width / 6.25 + 2 * padding)), padding, Math.toIntExact(Math.round(panelSize.width / 6.25 - 4 * padding)), panelSize.height - 3 * padding);
+        sendButton.setBounds(Math.round(panelSize.width - panelSize.width / 6.25f + 2f * padding), padding, Math.round(panelSize.width / 6.25f - 4f * padding), panelSize.height - 3 * padding);
         sendButton.setFont(font);
         sendButton.setBackground(PURPLE);
         sendButton.setForeground(WHITE);
@@ -111,28 +146,71 @@ public class MenuPanel extends JPanel {
 
         frame.add(this, BorderLayout.SOUTH);
         frame.pack();
-        this.frame = frame;
+    }
+
+    private void joinChannel() {
+        String channel = getChannel();
+        if (channel.length() < 4) {
+            new JOptionPane("Channel must be at least 4 characters long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
+            return;
+        }
+        Main.botClient.joinChannel(channel);
+        channelHistory.push(channel);
+        channelIndex = channelHistory.size();
     }
 
     // Send Message
     private void sendMessage() {
-        BotClient botClient = frame.getBotClient();
 
+        // Variables
         String channel = getChannel();
         String message = trimMessage(textField.getText());
 
-        if (getChannel().length() < 3) {
-            new JOptionPane("Channel must be at least 3 characters long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
+        // Check Channel
+        if (getChannel().length() < 4) {
+            new JOptionPane("Channel must be at least 4 characters long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
             return;
         }
 
+        // Slash Commands
+        if (message.startsWith("/")) {
+            switch (message.toLowerCase()) {
+                case "/clear" -> frame.clearLog();
+                case "/exit" -> System.exit(0);
+                default -> new JOptionPane("Unknown command: " + message, JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
+            }
+
+            // Clean Up
+            cleanUpTextFields(message);
+            return;
+        }
+
+        // Check Message
         if (message.equalsIgnoreCase("message") || message.isEmpty()) {
             if (message.isEmpty()) new JOptionPane("Message must be at least 1 character long", JOptionPane.ERROR_MESSAGE).createDialog("Error").setVisible(true);
-            botClient.joinChannel(channel);
+            Main.botClient.joinChannel(channel);
+            channelHistory.push(channel);
             return;
         }
 
-        botClient.write(channel, message);
+        // Channel History
+        if (!channelHistory.contains(channel)) {
+            channelHistory.push(channel);
+            channelIndex = channelHistory.size();
+        }
+
+        // Filter Message
+        message = filterMessage(message);
+
+        // Send Message
+        Main.botClient.write(channel, message);
+
+        // Clean Up
+        cleanUpTextFields(message);
+    }
+
+    // Clean Up Text Fields
+    private void cleanUpTextFields(String message) {
         textField.setText("");
         messageHistory.push(message);
         messageIndex = messageHistory.size();
@@ -141,6 +219,6 @@ public class MenuPanel extends JPanel {
     // Get Channel
     public String getChannel() {
         String channel = channelField.getText().replaceAll(" ", "").toLowerCase();
-        return channel.length() < 3 ? "" : channel.equalsIgnoreCase("channel") ? "" : channel;
+        return channel.length() < 4 ? "" : channel.equalsIgnoreCase("channel") ? "" : channel;
     }
 }

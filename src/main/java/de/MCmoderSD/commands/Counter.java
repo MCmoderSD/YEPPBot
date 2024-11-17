@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -9,6 +10,8 @@ import de.MCmoderSD.utilities.database.manager.CustomManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+
+import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 
 public class Counter {
 
@@ -35,6 +38,11 @@ public class Counter {
                 // Variables
                 String response;
                 HashMap<String, Integer> counters = customManager.getCounters(event);
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 if (!args.isEmpty() && args.getFirst().equalsIgnoreCase("list")) {
                     String list = counters.keySet().toString().substring(1, counters.keySet().toString().length() - 1);

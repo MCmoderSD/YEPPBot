@@ -1,5 +1,6 @@
 package de.MCmoderSD.commands;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
@@ -11,7 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class CustomCommand {
 
@@ -36,6 +37,11 @@ public class CustomCommand {
 
                 // Check if user is permitted
                 if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Check for list
                 if (!args.isEmpty() && args.getFirst().equalsIgnoreCase("list") || args.getFirst().equalsIgnoreCase("show")) {

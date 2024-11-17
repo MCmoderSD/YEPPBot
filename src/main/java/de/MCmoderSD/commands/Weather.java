@@ -2,11 +2,11 @@ package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.other.OpenAi;
+import de.MCmoderSD.OpenAI.modules.Chat;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,21 +14,30 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import java.util.ArrayList;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Weather {
 
-    // Attributes
-    private final String url;
+    // Constants
+    private final String errorRetrievingWeatherData;
+
+    // OpenWeatherMap API
     private final String apiKey;
-    private final OpenAi openAi;
+
+    // OpenAI API
+    private final Chat chat;
+
+    // OpenAI Config
     private final String botName;
     private final double temperature;
     private final int maxTokens;
@@ -38,7 +47,7 @@ public class Weather {
 
 
     // Constructor
-    public Weather(BotClient botClient, MessageHandler messageHandler, OpenAi openAi, Credentials credentials) {
+    public Weather(BotClient botClient, MessageHandler messageHandler, Chat chat, JsonNode apiConfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "weather <city>, <language>";
@@ -47,21 +56,23 @@ public class Weather {
         String[] name = {"weather", "wetter"};
         String description = "Zeigt das Wetter in einer Stadt an. " + syntax;
 
+        // Constants
+        errorRetrievingWeatherData = "Fehler beim Abrufen der Wetterdaten.";
+
         // Load API key
-        JsonNode config = credentials.getOpenWeatherMapConfig();
+        apiKey = apiConfig.get("openWeatherMap").asText();
 
-        // Load Config
-        this.openAi = openAi;
-        this.botName = botClient.getBotName();
+        // Initialize OpenAI
+        this.chat = chat;
+        JsonNode openAIConfig = chat.getConfig();
+
+        // Get Parameters
+        botName = botClient.getBotName();
         temperature = 0;
-        maxTokens = openAi.getConfig().get("maxTokens").asInt();
-        topP = openAi.getConfig().get("topP").asDouble();
-        frequencyPenalty = openAi.getConfig().get("frequencyPenalty").asDouble();
-        presencePenalty = openAi.getConfig().get("presencePenalty").asDouble();
-
-        // Init Attributes
-        url = config.get("url").asText();
-        apiKey = config.get("api_key").asText();
+        maxTokens = openAIConfig.get("maxTokens").asInt();
+        topP = openAIConfig.get("topP").asDouble();
+        frequencyPenalty = openAIConfig.get("frequencyPenalty").asDouble();
+        presencePenalty = openAIConfig.get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -69,9 +80,17 @@ public class Weather {
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
+
                 String response;
                 if (args.isEmpty()) response = syntax;
                 else response = trimMessage(generateFormattedResponse(args));
+
+                // Filter Response for argument injection
+                response = removePrefix(response);
 
                 // Send Message
                 botClient.respond(event, getCommand(), response);
@@ -108,10 +127,10 @@ public class Weather {
 
         // Query weather data
         String response = query(convertToAscii(finalCityName));
-        if (response == null || response.isEmpty() || response.isBlank()) return "Fehler beim Abrufen der Wetterdaten.";
+        if (response == null || response.isBlank()) return errorRetrievingWeatherData;
         String formattedWeatherData = formatWeatherData(finalCityName, response);
 
-        return openAi.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
+        return chat.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
     }
 
     private String formatWeatherData(String cityName, String response){
@@ -162,12 +181,15 @@ public class Weather {
 
     // Query weather data
     private String query(String cityName) {
+
+        // Variables
         StringBuilder response = new StringBuilder();
+
+        // Query
         try {
             String encodedCityName = cityName.replace(" ", "+");
-            while (encodedCityName.charAt(encodedCityName.length() - 1) == '+')
-                encodedCityName = encodedCityName.trim();
-            URI uri = new URI(this.url + encodedCityName + this.apiKey);
+            while (encodedCityName.charAt(encodedCityName.length() - 1) == '+') encodedCityName = encodedCityName.trim();
+            URI uri = new URI(String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", encodedCityName, apiKey));
             HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));

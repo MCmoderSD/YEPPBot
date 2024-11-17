@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration scan="true">
+<!-- Logback Configuration -->
+<configuration scan="false">
+
 	<!-- Configure Twitch4J logger level -->
 	<logger name="com.github.twitch4j" level="OFF"/>
 
@@ -15,4 +17,5 @@
 	<root level="OFF">
 		<appender-ref ref="CONSOLE"/>
 	</root>
+
 </configuration>

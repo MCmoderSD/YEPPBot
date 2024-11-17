@@ -1,48 +1,70 @@
 package de.MCmoderSD.utilities.database;
 
-import de.MCmoderSD.main.Main;
-import de.MCmoderSD.utilities.database.manager.*;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import de.MCmoderSD.mysql.Driver;
+import de.MCmoderSD.objects.Birthdate;
+import de.MCmoderSD.objects.TwitchMessageEvent;
+
+import de.MCmoderSD.utilities.database.manager.AssetManager;
+import de.MCmoderSD.utilities.database.manager.ChannelManager;
+import de.MCmoderSD.utilities.database.manager.CustomManager;
+import de.MCmoderSD.utilities.database.manager.EventManager;
+import de.MCmoderSD.utilities.database.manager.LogManager;
+import de.MCmoderSD.utilities.database.manager.LurkManager;
+import de.MCmoderSD.utilities.database.manager.QuoteManager;
+import de.MCmoderSD.utilities.database.manager.TokenManager;
+import de.MCmoderSD.utilities.database.manager.YEPPConnect;
+
+import javax.management.InvalidAttributeValueException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 
-@SuppressWarnings("unused")
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+@SuppressWarnings({"SqlSourceToSinkFlow", "unused"})
 public class MySQL extends Driver {
 
-    // Associations
+    // Managers
     private final AssetManager assetManager;
     private final ChannelManager channelManager;
     private final CustomManager customManager;
+    private final EventManager eventManager;
     private final LogManager logManager;
     private final LurkManager lurkManager;
+    private final QuoteManager quoteManager;
+    private final TokenManager tokenManager;
     private final YEPPConnect yeppConnect;
 
     // Cache Lists
-    private final HashMap<Integer, String> channelCache;
     private final HashMap<Integer, String> userCache;
+    private final HashMap<Integer, String> channelCache;
 
     // Constructor
-    public MySQL(Main main) {
+    public MySQL(JsonNode config) {
 
         // Initialize Driver
-        super(main.getCredentials().getMySQLConfig());
+        super(config);
 
-        // Connect to database
-        new Thread(this::connect).start();
+        // Initialize Tables
         initTables();
 
         // Load Cache
-        channelCache = loadCache("channels");
-        userCache = loadCache("users");
+        userCache = loadCache(Table.USERS);
+        channelCache = loadCache(Table.CHANNELS);
 
         // Initialize Manager
         assetManager = new AssetManager(this);
         channelManager = new ChannelManager(this);
         customManager = new CustomManager(this);
-        logManager = new LogManager(this, !main.hasArg(Main.Argument.LOG));
+        eventManager = new EventManager(this);
+        logManager = new LogManager(this);
         lurkManager = new LurkManager(this);
+        quoteManager = new QuoteManager(this);
+        tokenManager = new TokenManager(this);
         yeppConnect = new YEPPConnect(this);
     }
 
@@ -56,22 +78,24 @@ public class MySQL extends Driver {
 
             // SQL statement for creating the users table
             connection.prepareStatement(condition +
-                    """
+                            """
                             users (
                             id INT PRIMARY KEY,
-                            name VARCHAR(25) NOT NULL
+                            name VARCHAR(25) NOT NULL,
+                            birthdate VARCHAR(10)
                             )
                             """
             ).execute();
 
             // SQL statement for creating the channels table
             connection.prepareStatement(condition +
-                    """
+                            """
                             channels (
-                            id INT NOT NULL,
+                            id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
                             active BIT NOT NULL DEFAULT 1,
+                            auto_shoutout BIT NOT NULL DEFAULT 0,
                             FOREIGN KEY (id) REFERENCES users(id)
                             )
                             """
@@ -82,58 +106,58 @@ public class MySQL extends Driver {
         }
     }
 
-    private void checkUser(int id, String name) throws SQLException {
-        if (!isConnected()) connect(); // connect
+    // Load Cache
+    private HashMap<Integer, String> loadCache(Table table) {
 
-        // Check User
-        String selectQuery = "SELECT * FROM users WHERE id = ?";
-        PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
-        selectPreparedStatement.setInt(1, id);
-        ResultSet resultSet = selectPreparedStatement.executeQuery();
+        // Variables
+        HashMap<Integer, String> cache = new HashMap<>();
 
-        // Add User
-        if (!resultSet.next()) {
-            String insertQuery = "INSERT INTO users (id, name) VALUES (?, ?)";
-            PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
-            insertPreparedStatement.setInt(1, id); // set id
-            insertPreparedStatement.setString(2, name); // set name
-            insertPreparedStatement.executeUpdate(); // execute
-            insertPreparedStatement.close(); // close the insertPreparedStatement
+        // Load Channel Cache
+        try {
+            if (!isConnected()) connect(); // connect
+
+            // Query
+            String query = "SELECT id, name FROM " + table.getName();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to Cache
+            while (resultSet.next()) {
+                var id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                cache.put(id, name);
+            }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close(); // close the preparedStatement
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
         }
 
-        // Add to Cache
-        userCache.put(id, name);
-
-        // Close resources
-        resultSet.close();
-        selectPreparedStatement.close(); // close the selectPreparedStatement
+        // Return
+        return cache;
     }
 
     // Checks Channels
-    private void checkChannel(int id, String name) throws SQLException {
+    private void checkUser(int id, String name, Table table) throws SQLException {
         if (!isConnected()) connect(); // connect
 
-        // Ensure the user exists in the users table
-        checkUser(id, name);
-
-        // Check Channel
-        String selectQuery = "SELECT * FROM channels WHERE id = ?";
-        PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
+        // Query
+        String query = "SELECT id, name FROM " + table.getName() + " WHERE id = ?";
+        PreparedStatement selectPreparedStatement = connection.prepareStatement(query);
         selectPreparedStatement.setInt(1, id);
         ResultSet resultSet = selectPreparedStatement.executeQuery();
 
-        // Add Channel
+        // Check if user exists
         if (!resultSet.next()) {
-            String insertQuery = "INSERT INTO channels (id, name) VALUES (?, ?)";
+            String insertQuery = "INSERT INTO " + table.getName() + " (id, name) VALUES (?, ?)";
             PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
-            insertPreparedStatement.setInt(1, id); // set id
-            insertPreparedStatement.setString(2, name); // set name
+            insertPreparedStatement.setInt(1, id);
+            insertPreparedStatement.setString(2, name);
             insertPreparedStatement.executeUpdate(); // execute
             insertPreparedStatement.close(); // close the insertPreparedStatement
         }
-
-        // Add to Cache
-        channelCache.put(id, name);
 
         // Close resources
         resultSet.close();
@@ -152,80 +176,80 @@ public class MySQL extends Driver {
 
         // Update User Cache
         if (!user) {
-            checkUser(id, name);
+            checkUser(id, name, Table.USERS);
             userCache.put(id, name);
         }
 
         // Update Channel Cache
         if (!channel && isChannel) {
-            checkChannel(id, name);
+            checkUser(id, name, Table.CHANNELS);
             channelCache.put(id, name);
         }
     }
 
-    // Load Cache
-    private HashMap<Integer, String> loadCache(String table) {
-
-        // Variables
-        HashMap<Integer, String> cache = new HashMap<>();
-
-        // Load Channel Cache
+    // Set Birthday
+    public void setBirthday(TwitchMessageEvent event, Birthdate birthdate) {
         try {
             if (!isConnected()) connect(); // connect
 
-            String query = null;
-            if (table.equals("channels")) query = "SELECT * FROM " + "channels";
-            if (table.equals("users")) query = "SELECT * FROM " + "users";
-            if (query == null) return null;
-            PreparedStatement preparedStatement = getConnection().prepareStatement(query);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) cache.put(resultSet.getInt("id"), resultSet.getString("name")); // add to cache
+            // Variables
+            var id = event.getUserId();
+
+            // Check Cache
+            checkCache(id, event.getUser(), false);
+            checkCache(event.getChannelId(), event.getChannel(), true);
+
+            // Update Birthday
+            String updateQuery = "UPDATE users SET birthdate = ? WHERE id = ?";
+            PreparedStatement updatePreparedStatement = connection.prepareStatement(updateQuery);
+            updatePreparedStatement.setString(1, birthdate.getMySQLDate());
+            updatePreparedStatement.setInt(2, id);
+            updatePreparedStatement.executeUpdate(); // execute
+            updatePreparedStatement.close(); // close the updatePreparedStatement
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-
-        return cache;
     }
 
-    // Query ID
-    public int queryID(String table, String name) {
+    // Get Birthdays
+    public LinkedHashMap<Integer, Birthdate> getBirthdays() {
         try {
-            if (!isConnected()) connect();
-            String query = null;
-            if (table.equals("channels")) query = "SELECT id FROM " + "channels" + " WHERE name = ?";
-            if (table.equals("users")) query = "SELECT id FROM " + "users" + " WHERE name = ?";
-            if (query == null) return -1;
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) return resultSet.getInt("id");
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-        return -1;
-    }
+            if (!isConnected()) connect(); // connect
 
-    // Query Name
-    public String queryName(String table, int id) {
-        try {
-            if (!isConnected()) connect();
-            String query = null;
-            if (table.equals("channels")) query = "SELECT name FROM " + "channels" + " WHERE id = ?";
-            if (table.equals("users")) query = "SELECT name FROM " + "users" + " WHERE id = ?";
-            if (query == null) return null;
+            // Variables
+            LinkedHashMap<Integer, Birthdate> birthdays = new LinkedHashMap<>();
+
+            // Query
+            String query = "SELECT id, birthdate FROM users WHERE birthdate IS NOT NULL";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) return resultSet.getString("name");
-        } catch (SQLException e) {
+
+            // Add Birthdays
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String[] date = resultSet.getString("birthdate").split("\\.");
+                String birthday = date[2] + "." + date[1] + "." + date[0];
+                birthdays.put(id, new Birthdate(birthday));
+            }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close(); // close the preparedStatement
+
+            return birthdays;
+        } catch (SQLException | InvalidAttributeValueException | NumberFormatException e) {
             System.err.println(e.getMessage());
+            return null;
         }
-        return null;
     }
 
     // Get Cache
     public HashMap<Integer, String> getChannelCache() {
         return channelCache;
+    }
+
+    public HashMap<Integer, String> getUserCache() {
+        return userCache;
     }
 
     // Get Manager
@@ -241,6 +265,10 @@ public class MySQL extends Driver {
         return customManager;
     }
 
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
     public LogManager getLogManager() {
         return logManager;
     }
@@ -249,7 +277,35 @@ public class MySQL extends Driver {
         return lurkManager;
     }
 
+    public QuoteManager getQuoteManager() {
+        return quoteManager;
+    }
+
+    public TokenManager getTokenManager() {
+        return tokenManager;
+    }
+
     public YEPPConnect getYEPPConnect() {
         return yeppConnect;
+    }
+
+    public enum Table {
+
+        // Tables
+        USERS("users"),
+        CHANNELS("channels");
+
+        // Variables
+        private final String name;
+
+        // Constructor
+        Table(String name) {
+            this.name = name;
+        }
+
+        // Getter
+        public String getName() {
+            return name;
+        }
     }
 }

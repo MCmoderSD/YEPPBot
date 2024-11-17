@@ -3,11 +3,12 @@ package de.MCmoderSD.UI;
 import de.MCmoderSD.utilities.frontend.RoundedTextArea;
 
 import javax.swing.JPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class LogPanel extends JPanel {
 
@@ -30,7 +31,7 @@ public class LogPanel extends JPanel {
         this.frame = frame;
 
         // Set Size
-        var height = Math.toIntExact(Math.round(size.height * 0.9));
+        var height = Math.round(size.height * 0.9f);
         Dimension panelSize = new Dimension(size.width, height);
         setPreferredSize(panelSize);
 
@@ -55,8 +56,16 @@ public class LogPanel extends JPanel {
     }
 
     // Setter
-    public void appendText(String type, String channel, String user, String message) {
+    public void appendText(String channel, String user, String message) {
         if (frame.getChannel().equals(channel) || frame.getChannel().length() < 3)
-            logArea.appendText(type + " <" + channel + "> " + user + ": " + trimMessage(message));
+            logArea.appendText("<" + channel + "> " + user + ": " + trimMessage(message));
+    }
+
+    public void scrollToBottom() {
+        logArea.scrollToBottom();
+    }
+
+    public void clear() {
+        logArea.clear();
     }
 }

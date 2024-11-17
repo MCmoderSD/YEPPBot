@@ -2,31 +2,31 @@ package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.main.Credentials;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
+
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import static de.MCmoderSD.utilities.other.Calculate.*;
+import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Gif {
 
     // Attributes
-    private final String url;
     private final String apiKey;
-    private final String query;
 
     // Constructor
-    public Gif(BotClient botClient, MessageHandler messageHandler, Credentials credentials) {
+    public Gif(BotClient botClient, MessageHandler messageHandler, JsonNode apiConfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "gif <Thema>";
@@ -36,18 +36,18 @@ public class Gif {
         String description = "Sendet ein GIF zu einem bestimmten Thema. " + syntax;
 
         // Load API key
-        JsonNode config = credentials.getGiphyConfig();
-
-        // Init Attributes
-        url = config.get("url").asText();
-        apiKey = config.get("api_key").asText();
-        query = config.get("query").asText();
+        apiKey = apiConfig.get("giphy").asText();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
 
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Clean Args
+                ArrayList<String> cleanArgs = cleanArgs(args);
+                args.clear();
+                args.addAll(cleanArgs);
 
                 // Check arguments
                 String topic = trimMessage(convertToAscii(processArgs(args)));
@@ -61,7 +61,7 @@ public class Gif {
     // Get GIF
     private String gif(String topic) {
         try {
-            URI uri = new URI(this.url + apiKey + query + topic);
+            URI uri = new URI(String.format("https://api.giphy.com/v1/gifs/random?api_key=%s&tag=%s", apiKey, topic));
             HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
