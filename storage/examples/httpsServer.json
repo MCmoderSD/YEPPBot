@@ -1,0 +1,7 @@
+{
+  "hostname": "localhost",
+  "port": 443,
+  "keystore": "/keys/keystore.jks",
+  "fullchain": "/path/to/fullchain.pem",
+  "privkey": "/path/to/privkey.pem"
+}

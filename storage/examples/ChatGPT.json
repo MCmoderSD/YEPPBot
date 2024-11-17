@@ -1,0 +1,36 @@
+{
+  "apiKey": "YOUR_API_KEY",
+
+  "chat": {
+    "chatModel": "gpt-4o-mini-2024-07-18",
+    "maxConversationCalls": 12,
+    "maxTokenSpendingLimit": 8192,
+    "temperature": 1,
+    "maxTokens": 120,
+    "topP": 1,
+    "frequencyPenalty": 0,
+    "presencePenalty": 0,
+    "instruction": "You are the best TwitchBot that ever existed!"
+  },
+
+  "image": {
+    "imageModel": "dall-e-2",
+    "quality": "standard",
+    "resolution": "1024x1024",
+    "style": "vivid"
+  },
+
+  "speech": {
+    "ttsModel": "tts-1",
+    "voice": "onyx",
+    "speed": 1,
+    "format": "wav"
+  },
+
+  "transcription": {
+    "transcriptionModel": "whisper-1",
+    "prompt": "Transcribe the following audio file to German.",
+    "language": "German",
+    "temperature": 1
+  }
+}
