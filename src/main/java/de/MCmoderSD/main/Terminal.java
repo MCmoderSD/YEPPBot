@@ -54,8 +54,9 @@ public class Terminal {
         // Check Arguments
         for (String arg : args) {
             if (arg == null || arg.isBlank()) continue;
-            while (arg.startsWith("-") || arg.startsWith("/")) arg = arg.substring(1);
-            for (Argument argument : Argument.values()) if (argument.hasNameOrAlias(arg)) this.arguments.add(argument);
+            String copy = arg;
+            while (copy.startsWith("-") || copy.startsWith("/")) copy = copy.substring(1);
+            for (Argument argument : Argument.values()) if (argument.hasNameOrAlias(copy)) this.arguments.add(argument);
         }
 
         // Host and Port
@@ -145,7 +146,7 @@ public class Terminal {
                 Bot Config:
                     -botconfig: Path to Bot Config
                     -channellist: Path to Channel List
-                    -mysqlconfig: Path to MySQL Config
+                    -mysql: Path to MySQL Config
                     -httpsserver: Path to Https Server Config
                 """);
 
@@ -153,8 +154,8 @@ public class Terminal {
         System.out.println(
                 """
                 API Config:
-                    -apiconfig: Path to API Config
-                    -openaiconfig: Path to OpenAI Config
+                    -api: Path to API Config
+                    -openai: Path to OpenAI Config
                 """);
     }
 

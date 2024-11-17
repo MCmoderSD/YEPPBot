@@ -45,7 +45,7 @@ public enum ZodiacSign {
 
         // Load Matches
         try {
-            matches = JsonUtility.loadJson("/assets/matchList.json", false).get(getName()).fields();
+            matches = JsonUtility.loadJson("/storage/assets/matchList.json", false).get(getName()).fields();
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException("Failed to load match list for " + getName() + "!", e);
         }

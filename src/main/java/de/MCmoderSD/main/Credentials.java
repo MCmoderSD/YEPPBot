@@ -47,6 +47,8 @@ public class Credentials {
             this.channelList = new HashSet<>(readAllLines(channelList, terminal.hasArg(Argument.CHANNEL_LIST)));
         } catch (Exception e) {
             System.err.println("Error loading Channel List: " + e.getMessage());
+            System.err.println("Creating empty Channel List...");
+            this.channelList = new HashSet<>();
         }
 
         // Load MySQL Config

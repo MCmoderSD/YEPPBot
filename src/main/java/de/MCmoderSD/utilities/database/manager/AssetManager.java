@@ -103,7 +103,7 @@ public class AssetManager {
             countResult.next();
             if (countResult.getInt(1) > 0) return;
 
-            ArrayList<String> facts = readAllLines("/assets/factList.tsv");
+            ArrayList<String> facts = readAllLines("/storage/assets/factList.tsv");
             ArrayList<String> en_percent = new ArrayList<>();
             ArrayList<String> en_people = new ArrayList<>();
             ArrayList<String> en_verb = new ArrayList<>();
@@ -255,7 +255,7 @@ public class AssetManager {
             countResult.next();
             if (countResult.getInt(1) > 0) return;
 
-            ArrayList<String> insults =  readAllLines("/assets/insultList.tsv");
+            ArrayList<String> insults =  readAllLines("/storage/assets/insultList.tsv");
             ArrayList<String> en = new ArrayList<>();
             ArrayList<String> de = new ArrayList<>();
 
@@ -307,7 +307,7 @@ public class AssetManager {
             countResult.next();
             if (countResult.getInt(1) > 0) return;
 
-            ArrayList<String> jokes =  readAllLines("/assets/jokeList.tsv");
+            ArrayList<String> jokes =  readAllLines("/storage/assets/jokeList.tsv");
             ArrayList<String> en = new ArrayList<>();
             ArrayList<String> de = new ArrayList<>();
 

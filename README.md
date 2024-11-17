@@ -1,33 +1,4 @@
-# [YEPPBot](https://www.twitch.tv/YEPPBotV2) - YEPP it's a Twitch-Bot
-
-## Description
-The YEPPBot is a Twitch-Bot that provides a variety of features to entertain and manage your Twitch channel. <br>
-The original idea comes from [FoxxHimself](https://github.com/lennartfu) and was written in Python back in the first half of 2021. <br>
-After the original creator stopped working on and maintaining the bot, I took over its maintenance and decided to rewrite it in Java.
-The bot has since been fully rewritten in Java 21 using the [Twitch4J](https://twitch4j.github.io/) library. <br> <br>
-
-You can try out the bot on [Twitch](https://www.twitch.tv/YEPPBotV2/chat) to see its features in action. <br>
-To use the bot in your own channel, you can add it to your channel using the `!mod join` command. <br>
-If you wish to remove the bot from your channel, use the `!mod leave` command in your channel. <br>
-
-For all features to work as intended, you need to authenticate the bot with your Twitch account using the `!mod auth` command in your channel. <br>
-While it's recommended to assign the bot a moderator role in your channel to unlock all features, this is not strictly necessary. <br>
-
-If you need help or have any questions, feel free to reach out via [Discord](https://www.mcmodersd.de/dc), [mail](mailto:business@mcmodersd.de) or [Twitch](https://www.twitch.tv/mcmodersd). <br>
-I typically respond within 24 hours, often much faster. <br>
-
-If you're interested in collaborating or need a customized version to suit your needs? <br>
-Simply send an email to [business@mcmodersd.de](mailto:business@mcmodersd.de). <br> <br>
-
-The bot is currently under active development, and some features may undergo significant changes in the future. <br>
-So please note that the setup process for the bot may also change over time. <br>
-
-You can use this project as a template to create your own bot or to host your own instance of it. <br>
-Setting up the bot is relatively straightforward: you just need to create the configuration files and input the required API keys. <br>
-However, it is necessary to create a [Twitch application](https://dev.twitch.tv/console) and provide access to a MySQL database. <br>
-For ChatGPT features, as well as certain other features, you need to provide their respective API keys for them to function properly. <br>
-
-If you have any ideas or suggestions, feel free to open an issue or submit a pull request. <br> <br>
+# [YEPPBot - YEPP it's a Twitch-Bot](https://www.twitch.tv/YEPPBotV2)
 
 ## Table of Contents
 - [Description](#description)
@@ -36,6 +7,41 @@ If you have any ideas or suggestions, feel free to open an issue or submit a pul
 - [YEPPConnect](#yeppconnect)
 - [Usage and commands](#usage-and-commands)
 - [Contributing](#contributing)
+
+
+## Description
+The YEPPBot is a Twitch-Bot that provides a variety of features to entertain and manage your Twitch channel. <br>
+
+The original idea comes from [FoxxHimself](https://github.com/lennartfu) and was written in Python back in the first half of 2021. <br>
+After the original creator stopped working on and maintaining the bot, I took over its maintenance and decided to rewrite it in Java.
+The bot has since been fully rewritten in Java 21 using the [Twitch4J](https://twitch4j.github.io/) library. <br>
+
+You can try out the bot on [Twitch](https://www.twitch.tv/YEPPBotV2/chat) to see its features in action. <br>
+To use the bot in your own channel, you can add it to your channel using the `!mod join` command. <br>
+If you wish to remove the bot from your channel, use the `!mod leave` command in your channel. <br> <br>
+
+For all features to work as intended, you need to authenticate the bot with your Twitch account using the `!mod auth` command in your channel. <br>
+While it's recommended to assign the bot a moderator role in your channel to unlock all features, this is not strictly necessary. <br> <br>
+
+If you need help or have any questions, feel free to reach out via [Discord](https://www.mcmodersd.de/dc), [mail](mailto:business@mcmodersd.de) or [Twitch](https://www.twitch.tv/mcmodersd). <br>
+I typically respond within 24 hours, often much faster. <br>
+
+If you're interested in collaborating or need a customized version to suit your needs? <br>
+Simply send an email to [business@mcmodersd.de](mailto:business@mcmodersd.de). <br> <br>
+
+The bot is currently under active development, and some features may undergo significant changes in the future. <br>
+So please note that the setup process for the bot may also change over time. <br> <br>
+
+<hr>
+
+You can use this project as a template to create your own bot or to host your own instance of it. <br>
+Setting up the bot is relatively straightforward: you just need to create the configuration files and input the required API keys. <br>
+
+However, it is necessary to create a [Twitch application](https://dev.twitch.tv/console) and provide access to a MySQL database. <br>
+For ChatGPT features, as well as certain other features, you need to provide their respective API keys for them to function properly. <br>
+
+If you have any ideas or suggestions, feel free to open an issue or submit a pull request. <br> <br>
+
 
 ## Features
 
@@ -119,7 +125,7 @@ You need to fill in the configuration files with the required information. <br>
 Ignore the names or paths if you use the precompiled JAR file. <br>
 
 You must create two JSON files in the `/src/main/resources/config/` folder. <br>
-The first file is BotConfig.json and should have the following structure: <br>
+The first file is `BotConfig.json` and should have the following structure: <br>
 ```json
 {
   "botId": "YOUR_BOT_ID",
@@ -290,6 +296,7 @@ The file should have the following structure: <br>
 ```
 You can obtain your API key from [OpenAI](https://platform.openai.com/signup). <br>
 
+<hr>
 
 ### Chat Configuration
 - The **chatModel** is the model that the bot will use to generate the text. <br>
@@ -345,9 +352,9 @@ You can obtain your API key from [OpenAI](https://platform.openai.com/signup). <
 
 - The **instruction** is the way the bot should behave and how he should reply to the prompt. <br>
 
+<hr>
 
 ### Image Configuration
-
 - The **imageModel** is the model that the bot will use to generate the image. <br>
   The available models are: <br>
 
@@ -375,9 +382,9 @@ You can obtain your API key from [OpenAI](https://platform.openai.com/signup). <
   The style is only available for dall-e-3. <br>
   The default style is vivid. <br>
 
+<hr>
 
 ### Speech Configuration
-
 - The **ttsModel** is the model that the bot will use to generate the speech. <br>
   The available models are: <br>
 
@@ -397,9 +404,9 @@ You can obtain your API key from [OpenAI](https://platform.openai.com/signup). <
 - The **speed** is the speed of the speech. <br>
   The min value is 0.25 and the max value is 4, the default value is 1. <br> <br>
 
+<hr>
 
 ### Transcription Configuration
-
 - The **transcriptionModel** is the model that the bot will use to generate the transcription. <br>
   The available models are: <br>
 
@@ -419,6 +426,7 @@ You can obtain your API key from [OpenAI](https://platform.openai.com/signup). <
   and repetitive. <br>
   Higher temperature results in more random completions. <br>
   The min value is 0 and the max value is 2. <br> <br>
+
 
 ### 7. Compile the bot
 After compiling the bot into a `.jar` file, you can run it using the following command:
@@ -481,22 +489,6 @@ Custom commands can include dynamic variables to make them more interactive:
 - `%random%`: Replaced with a random percentage between 0 and 100. <br> <br>
 
 
-#### YEPPConnect Commands:
-The bot has a variety of commands that you can use. <br>
-You can use the:
-- `!help command` to get a list of all the commands. <br>
-- `!help COMMAND_NAME` to get more information about a specific command. <br>
-- `!moderate join/leave` to make the bot join or leave your channel. <br>
-- `!moderate block/unblock` to blacklist commands. <br>
-- `!counter` command to create and manage counter commands. <br> <br>
-
-You can use the `!CustomCommand` command to create and manage custom commands. <br>
-You can also use variables in the custom commands. <br> 
-- %author% - will be replaced with the username of the person who executes the command <br>
-- %channel% - will be replaced with the channel name where the command was executed <br>
-- %tagged% - will be replaced by the first word after the command <br>
-- %random% - will be replaced by a random percentage between 0 and 100 <br> <br>
-
 ## YEPPConnect
 **YEPPConnect** is a feature that enables your viewers to whitelist their Minecraft usernames directly through the bot.
 
@@ -520,18 +512,12 @@ To integrate YEPPConnect with your Minecraft server, follow these steps:
 
 
 ## Contributing
-
 Have an idea or suggestion? Feel free to:
 - Open an issue or pull request on GitHub.
 - Reach out to me on [Discord](https://www.mcmodersd.de/dc) or [Twitch](https://www.twitch.tv/mcmodersd).
 
 ### Acknowledgments
 Special thanks to:
-- [Twitch4J](https://twitch4j.github.io/): For the incredible library that powers Twitch integration. 
-- [OpenAI](https://platform.openai.com/signup): For the ChatGPT API.
-- [OpenWeatherMap](https://openweathermap.org/api): For the weather API.
-
-A heartfelt thanks to:
 - [FoxxHimself](https://github.com/lennartfu): For creating the original bot and inspiring its rewrite in Java. 
 - [RedSmileTV](https://github.com/redsmiletv): For assistance with the bot, APIs, and libraries. 
 - [Rebix](https://github.com/reebix): For support with the bot and related integrations.

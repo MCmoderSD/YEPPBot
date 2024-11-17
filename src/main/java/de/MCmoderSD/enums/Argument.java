@@ -17,10 +17,10 @@ public enum Argument {
     // Config
     BOT_CONFIG("botconfig"),
     CHANNEL_LIST("channellist"),
-    MYSQL_CONFIG("mysqlconfig"),
-    HTTPS_SERVER("httpserver"),
-    API_CONFIG("apiconfig"),
-    OPENAI_CONFIG("openaiconfig"),
+    MYSQL_CONFIG("mysql"),
+    HTTPS_SERVER("httpsserver"),
+    API_CONFIG("api"),
+    OPENAI_CONFIG("openai"),
     HOST("host"),
     PORT("port");
 
@@ -36,24 +36,21 @@ public enum Argument {
         return name.equals(input.toLowerCase()) || alias.contains(input.toLowerCase());
     }
 
-    public boolean hasNameOrAlias(ArrayList<String> args) {
-        if (args == null || args.isEmpty()) return false;
-        for (String arg : args) if (hasNameOrAlias(arg)) return true;
-        return false;
-    }
-
     public String getConfig(ArrayList<String> args) {
 
         // Check
         if (this == HELP || this == VERSION || this == DEV || this == CLI || this == NO_LOG || this == GENERATE) return null;
         if (args == null || args.isEmpty()) return null;
-        if (!hasNameOrAlias(args)) return null;
 
         // Get Config
-        var index = args.indexOf("-" + name);
-        if (index == -1) index = args.indexOf("/" + name);
-        if (index == -1) index = args.indexOf(name);
-        if (index == -1) return null;
+        var index = 0;
+        for (String arg : args) {
+            if (arg.contains(name)) break;
+            index++;
+        }
+
+        // Check
+        if (index + 1 >= args.size()) return null;
         return args.get(index + 1);
     }
 }
