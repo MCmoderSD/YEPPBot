@@ -82,7 +82,7 @@ public class BotClient {
             Scope.ANALYTICS_READ_GAMES,
             Scope.MODERATOR_MANAGE_SHOUTOUTS
     };
-
+  
     // Associations
     private final MySQL mySQL;
     private final Frame frame;

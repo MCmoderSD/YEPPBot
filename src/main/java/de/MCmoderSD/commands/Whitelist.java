@@ -28,7 +28,7 @@ public class Whitelist {
 
             @Override
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
-
+              
                 // Clean Args
                 ArrayList<String> cleanArgs = cleanArgs(args);
                 args.clear();
