@@ -27,7 +27,7 @@ If you need help or have any questions, feel free to reach out via [Discord](htt
 I typically respond within 24 hours, often much faster. <br>
 
 If you're interested in collaborating or need a customized version to suit your needs? <br>
-Simply send an email to [business@mcmodersd.de](mailto:business@mcmodersd.de). <br> <br>
+Simply email [business@mcmodersd.de](mailto:business@mcmodersd.de). <br> <br>
 
 The bot is currently under active development, and some features may undergo significant changes in the future. <br>
 So please note that the setup process for the bot may also change over time. <br>

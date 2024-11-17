@@ -1,0 +1,50 @@
+### Target ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+### Docs ###
+docs/java/
+
+### artifacts ###
+out/artifacts/
+
+### api keys ###
+src/main/resources/api/apiKeys.json
+src/main/resources/api/ChatGPT.json
+
+### config ###
+src/main/resources/config/BotConfig.json
+src/main/resources/config/DevConfig.json
+src/main/resources/config/Channel.list
+src/main/resources/config/Dev.list
+src/main/resources/config/httpsServer.json
+src/main/resources/config/DevHttpsServer.json
+
+### database ###
+src/main/resources/database/mySQL.json
+src/main/resources/database/dev.json
+
+### keys ###
+src/main/resources/keys/keystore.jks
+src/main/resources/keys/dev.jks
+
+### meta-inf ###
+src/main/resources/META-INF/
+
+### storage ###
+storage/api/
+storage/config/
+storage/database/
+storage/keys/
