@@ -3,9 +3,9 @@
 ## Table of Contents
 - [Description](#description)
 - [Features](#features)
-- [Installation](#installation-and-usage)
-- [YEPPConnect](#yeppconnect)
+- [Installation](#installation-and-setup)
 - [Usage and commands](#usage-and-commands)
+- [YEPPConnect](#yeppconnect)
 - [Contributing](#contributing)
 
 
@@ -35,7 +35,7 @@ So please note that the setup process for the bot may also change over time. <br
 <hr>
 
 You can use this project as a template to create your own bot or to host your own instance of it. <br>
-Setting up the bot is relatively straightforward: you just need to create the configuration files and input the required API keys. <br>
+Setting up the bot is relatively straightforward: you need to create the configuration files and input the required API keys. <br>
 
 However, it is necessary to create a [Twitch application](https://dev.twitch.tv/console) and provide access to a MySQL database. <br>
 For ChatGPT features, as well as certain other features, you need to provide their respective API keys for them to function properly. <br>
@@ -96,7 +96,7 @@ If you have any ideas or suggestions, feel free to open an issue or submit a pul
   - [ ] Discord Integration
 
 
-## Installation and Usage
+## Installation and Setup
 For the bot to work, you need to have a few things set up:
 - You need to have Java 21 installed on your computer a download link can be found [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
 - You need the Twitch account token of the Twitch bot which you can get from [here](https://twitchapps.com/tmi/).
@@ -137,13 +137,13 @@ The first file is `BotConfig.json` and should have the following structure: <br>
   "admins": "ADMIN_NAME; OTHER_ADMIN_NAME"
 }
 ```
-- **botId**: The ID of the bot account, which you can obtain using this  [username to id converter](https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/).
+- **botId**: The ID of the bot account, which you can obtain using this [username to id converter](https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/).
 - **botName**: The name of the bot account. You can use multiple names separated by commas so the bot can recognize when it's mentioned.
 - **botToken**: The token of the bot account, which you can generate [here](https://twitchapps.com/tmi/).
 - **clientId** and **clientSecret**: The credentials for your Twitch application. 
   - You need to create an application in the [Twitch Developer Console](https://dev.twitch.tv/console/apps). 
   - For testing purposes, use `https://localhost:PORT/callback` as the OAuth Redirect URL. <br> For production, ensure the URL points to your server.
-  - Set the application category to **chatbot** and the Client Type to **Confidential**.
+  - Set the application category to **Chatbot** and the Client Type to **Confidential**.
 - **prefix**: The character(s) the bot will use to recognize commands.
 - **admins**: The users who will have access to admin commands. <br>
 
@@ -155,7 +155,7 @@ The second file is optional and is called `Channel.list`. It should have the fol
 CHANNEL_NAME
 OTHER_CHANNEL_NAME
 ``` 
-You can add as many channels as you like.
+You can add as many channels as you like. 
 If no channel list is provided, the bot will default to joining its own channel. <br> <br>
 
 
@@ -203,7 +203,7 @@ The file should have the following structure: <br>
 
 #### Key Configuration Notes:
 - **hostname**: Specify your server's hostname or use `localhost` for local testing. 
-- **port**: Set the port for the HTTPS server. 
+- **port**: Set the port for the HTTPS server.
 - **keystore**: Path to your Java KeyStore (JKS) file. 
 - **fullchain**: Path to the certificate chain file (for non-JKS setups). 
 - **privkey**: Path to the private key file (for non-JKS setups).
@@ -328,9 +328,9 @@ You can obtain your API key from [OpenAI](https://platform.openai.com/signup). <
 
 - The **maxTokens** is the maximum length of the response text. <br>
   One token is roughly 4 characters for standard English text. <br>
-  The limit is 16383 tokens, but it's recommended to use a value that is suitable for the use, on Twitch the message
+  The limit is 16,383 tokens, but it's recommended to use a value that is suitable for the use, on Twitch the message
   limit is 500 characters.
-  If you divide the limit by 4, you an estimate the number of characters. <br>
+  If you divide the limit by 4, you are an estimate the number of characters. <br>
 
 
 - The **topP** is the nucleus sampling. <br>
@@ -428,10 +428,10 @@ You can obtain your API key from [OpenAI](https://platform.openai.com/signup). <
   The min value is 0 and the max value is 2. <br> <br>
 
 
-### 7. Compile the bot
+### 7. Running the bot
 After compiling the bot into a `.jar` file, you can run it using the following command:
 ```bash
-java -jar NAME_OF_THE_JAR_FILE.jar
+java -jar JAR_FILE.jar
 ```
 
 If you are using the precompiled `.jar` file to generate example configuration files, use:
@@ -478,7 +478,7 @@ Below is an overview of some key commands: <br>
 - `!moderate unblock COMMAND_NAME`: Removes a command from the blacklist.
 
 #### Counter Commands:
-- `!counter`: Create and manage counter commands for various purposes.
+- `!counter`: Create and manage counter-commands for various purposes.
 
 #### Custom Commands:
 The bot supports creating and managing custom commands with the !CustomCommand command. <br>
