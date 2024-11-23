@@ -15,44 +15,51 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
 
         <!-- Astrology -->
         <dependency>
-            <groupId>de.MCmoderSD</groupId>
-            <artifactId>astrology</artifactId>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>Astrology</artifactId>
             <version>1.0.0</version>
         </dependency>
 
 
         <!-- Encryption -->
         <dependency>
-            <groupId>de.MCmoderSD</groupId>
-            <artifactId>encryption</artifactId>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>Encryption</artifactId>
             <version>1.0.1</version>
         </dependency>
 
 
         <!-- Executor -->
         <dependency>
-            <groupId>de.MCmoderSD</groupId>
-            <artifactId>executor</artifactId>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>ExecutorUtility</artifactId>
             <version>1.0.2</version>
         </dependency>
 
 
         <!-- ImageLoader -->
         <dependency>
-            <groupId>de.MCmoderSD</groupId>
-            <artifactId>imageloader</artifactId>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>ImageLoader</artifactId>
             <version>1.0.3</version>
         </dependency>
 
 
         <!-- Json -->
         <dependency>
-            <groupId>de.MCmoderSD</groupId>
-            <artifactId>json</artifactId>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>JsonUtility</artifactId>
             <version>1.1.1</version>
         </dependency>
 
@@ -71,8 +78,8 @@
 
         <!-- MySQL -->
         <dependency>
-            <groupId>de.MCmoderSD</groupId>
-            <artifactId>mysql</artifactId>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>MySQL-Driver</artifactId>
             <version>1.0.0</version>
         </dependency>
 
