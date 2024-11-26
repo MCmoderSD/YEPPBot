@@ -1,7 +1,5 @@
 package de.MCmoderSD.commands;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
@@ -32,19 +30,6 @@ public class Conversation {
         // Constants
         conversationSuspended = "Die Unterhaltung wurde beendet YEPP";
 
-        // Get Chat Config
-        JsonNode config = chat.getConfig();
-
-        // Get Parameters
-        int maxConversatitionCalls = config.get("maxConversationCalls").asInt();
-        int maxTokenSpendingLimit = config.get("maxTokenSpendingLimit").asInt();
-        double temperature = config.get("temperature").asDouble();
-        int maxTokens = config.get("maxTokens").asInt();
-        double topP = config.get("topP").asDouble();
-        double frequencyPenalty = config.get("frequencyPenalty").asDouble();
-        double presencePenalty = config.get("presencePenalty").asDouble();
-        String instruction = config.get("instruction").asText();
-
         // Register command
         messageHandler.addCommand(new Command(description, name) {
 
@@ -59,7 +44,7 @@ public class Conversation {
                 }
 
                 // Send Message
-                String response = formatOpenAIResponse(chat.converse(event.getUserId(), maxConversatitionCalls, maxTokenSpendingLimit, botClient.getBotName(), instruction, trimMessage(processArgs(args)), temperature, maxTokens, topP, frequencyPenalty, presencePenalty), "YEPP");
+                String response = formatOpenAIResponse(chat.converse(event.getUserId(), trimMessage(processArgs(args))), "YEPP");
 
                 // Filter Response for argument injection
                 response = removePrefix(response);

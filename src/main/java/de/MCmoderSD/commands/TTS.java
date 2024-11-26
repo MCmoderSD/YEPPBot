@@ -1,7 +1,5 @@
 package de.MCmoderSD.commands;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
@@ -30,14 +28,6 @@ public class TTS {
         // Constants
         ttsWasSent = "TTS wurde gesendet YEPP";
 
-        // Get TTS Config
-        JsonNode config = speech.getConfig();
-
-        // Get Parameters
-        String voice = config.get("voice").asText();
-        String format = config.get("format").asText();
-        double speed = config.get("speed").asDouble();
-
         // Register command
         messageHandler.addCommand(new Command(description, name) {
 
@@ -48,13 +38,13 @@ public class TTS {
                 if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
 
                 // Get Voice if available
-                String currentVoice = voice;
+                String currentVoice = null;
                 for (String arg : args) if (speech.getModel().checkVoice(arg.toLowerCase())) currentVoice = arg;
 
                 String message = event.getMessage();
 
                 AudioFile audioFile = mySQL.getAssetManager().getTTSAudio(message);
-                if (audioFile == null) audioFile = speech.tts(event.getMessage(), currentVoice, format, speed);
+                if (audioFile == null) audioFile = speech.speak(event.getMessage(), currentVoice, null, null);
 
                 // Send Audio
                 botClient.sendAudio(event, audioFile);

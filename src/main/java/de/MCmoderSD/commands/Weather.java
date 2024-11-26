@@ -37,14 +37,6 @@ public class Weather {
     // OpenAI API
     private final Chat chat;
 
-    // OpenAI Config
-    private final String botName;
-    private final double temperature;
-    private final int maxTokens;
-    private final double topP;
-    private final double frequencyPenalty;
-    private final double presencePenalty;
-
 
     // Constructor
     public Weather(BotClient botClient, MessageHandler messageHandler, Chat chat, JsonNode apiConfig) {
@@ -64,15 +56,6 @@ public class Weather {
 
         // Initialize OpenAI
         this.chat = chat;
-        JsonNode openAIConfig = chat.getConfig();
-
-        // Get Parameters
-        botName = botClient.getBotName();
-        temperature = 0;
-        maxTokens = openAIConfig.get("maxTokens").asInt();
-        topP = openAIConfig.get("topP").asDouble();
-        frequencyPenalty = openAIConfig.get("frequencyPenalty").asDouble();
-        presencePenalty = openAIConfig.get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -130,7 +113,7 @@ public class Weather {
         if (response == null || response.isBlank()) return errorRetrievingWeatherData;
         String formattedWeatherData = formatWeatherData(finalCityName, response);
 
-        return chat.prompt(botName, "Please format in short text and translate in: " + language, formattedWeatherData, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
+        return chat.prompt(null, "Please format in short text and translate in: " + language, formattedWeatherData, 0d, null, null, null, null);
     }
 
     private String formatWeatherData(String cityName, String response){

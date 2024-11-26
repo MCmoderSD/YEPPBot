@@ -1,7 +1,5 @@
 package de.MCmoderSD.commands;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
@@ -14,13 +12,6 @@ import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Translate {
 
-    // Attributes
-    private final double temperature;
-    private final int maxTokens;
-    private final double topP;
-    private final double frequencyPenalty;
-    private final double presencePenalty;
-
     // Constructor
     public Translate(BotClient botClient, MessageHandler messageHandler, Chat chat) {
 
@@ -30,16 +21,6 @@ public class Translate {
         // About
         String[] name = {"translator", "translate", "übersetzer", "übersetze"};
         String description = "Kann deine Sätze in jede erdenkliche Sprache übersetzen. " + syntax;
-
-        // Load Config
-        JsonNode config = chat.getConfig();
-
-        // Get Parameters
-        temperature = 0;
-        maxTokens = config.get("maxTokens").asInt();
-        topP = config.get("topP").asDouble();
-        frequencyPenalty = config.get("frequencyPenalty").asDouble();
-        presencePenalty = config.get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -64,7 +45,7 @@ public class Translate {
                     String instruction = trimMessage("Please translate the following text into " + language + ":");
 
                     // Translate
-                    response = chat.prompt(botClient.getBotName(), instruction, text, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
+                    response = chat.prompt(null, instruction, text, 0d, null, null, null, null);
 
                     // Filter Response for argument injection
                     response = removePrefix(response);
