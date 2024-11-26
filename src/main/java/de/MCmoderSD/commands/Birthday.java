@@ -180,14 +180,14 @@ public class Birthday {
                     return;
                 }
 
+                // Check Verb
+                String verb = args.getFirst().toLowerCase();
+
                 // Check if empty
-                if (birthdays.isEmpty()) {
+                if (!verb.equals("set") && birthdays.isEmpty()) {
                     botClient.respond(event, getCommand(), noSavedBirthdays);
                     return;
                 }
-
-                // Check Verb
-                String verb = args.getFirst().toLowerCase();
 
                 // Check for Tagged User
                 if (verb.startsWith("@")) {

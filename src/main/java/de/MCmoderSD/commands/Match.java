@@ -1,7 +1,5 @@
 package de.MCmoderSD.commands;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
@@ -12,7 +10,12 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.utilities.database.MySQL;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Objects;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 import static de.MCmoderSD.utilities.other.Util.*;
@@ -42,17 +45,6 @@ public class Match {
         and = "und";
         noCompatibleUsersFound = "Es gibt keine kompatiblen User.";
         thereforeYouAreMostCompatibleWith = "Demnach bist du am kompatibelsten mit";
-
-        // Get Chat Config
-        JsonNode config = chat.getConfig();
-
-        // Get Parameters
-        double temperature = 0;
-        int maxTokens = config.get("maxTokens").asInt();
-        double topP = config.get("topP").asDouble();
-        double frequencyPenalty = config.get("frequencyPenalty").asDouble();
-        double presencePenalty = config.get("presencePenalty").asDouble();
-
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -128,7 +120,7 @@ public class Match {
                 // Translate Response
                 if (!Arrays.asList("de", "german", "deutsch", "ger").contains(language)) {
                     String instruction = trimMessage("Please translate the following text into " + language + ":");
-                    response = new StringBuilder(chat.prompt(botClient.getBotName(), instruction, response.toString(), temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
+                    response = new StringBuilder(chat.prompt(null, instruction, response.toString(), 0d, null, null, null, null));
                 }
 
                 // Check if no compatible users found

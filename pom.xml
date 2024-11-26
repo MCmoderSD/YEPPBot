@@ -86,9 +86,9 @@
 
         <!-- OpenAI -->
         <dependency>
-            <groupId>de.MCmoderSD</groupId>
-            <artifactId>openai</artifactId>
-            <version>1.0.3</version>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>OpenAI-Utility</artifactId>
+            <version>1.1.0</version>
         </dependency>
 
 
@@ -130,4 +130,39 @@
             <version>1.5.10</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+
+                <!-- Jar -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <mainClass>de.MCmoderSD.main.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Shade -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

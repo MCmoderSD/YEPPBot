@@ -258,14 +258,15 @@ To set up, create a file named `ChatGPT.json` in the `/src/main/resources/api/` 
 The file should have the following structure: <br>
 ```json
 {
+  "user": "YOUR_USERNAME",
   "apiKey": "YOUR_API_KEY",
 
   "chat": {
-    "chatModel": "gpt-4o-mini-2024-07-18",
+    "model": "gpt-4o-mini-2024-07-18",
     "maxConversationCalls": 10,
     "maxTokenSpendingLimit": 8192,
     "temperature": 1,
-    "maxTokens": 120,
+    "maxOutputTokens": 120,
     "topP": 1,
     "frequencyPenalty": 0,
     "presencePenalty": 0,
@@ -273,159 +274,82 @@ The file should have the following structure: <br>
   },
 
   "image": {
-    "imageModel": "dall-e-2",
+    "model": "dall-e-2",
     "quality": "standard",
     "resolution": "1024x1024",
     "style": "vivid"
   },
 
   "speech": {
-    "ttsModel": "tts-1",
+    "model": "tts-1",
     "voice": "alloy",
     "speed": 1,
     "format": "wav"
-  },
-
-  "transcription": {
-    "transcriptionModel": "whisper-1",
-    "prompt": "Transcribe the following audio file to German.",
-    "language": "German",
-    "temperature": 1
   }
 }
 ```
-You can obtain your API key from [OpenAI](https://platform.openai.com/signup). <br>
+Note: <br>
+- Obtain your API key from [OpenAI](https://platform.openai.com/signup). <br>
+- The `user` field is optional and can be used to identify the user for monitoring purposes. <br>
+- Remove any section if you don't intend to use that service.
 
 <hr>
 
-### Chat Configuration
-- The **chatModel** is the model that the bot will use to generate the text. <br>
-  The available models are: <br>
+#### Chat Configuration
+| **Field**             | **Description**                                                                 |
+|:----------------------|:--------------------------------------------------------------------------------|
+| model                 | Model used for generating text. See available models and their pricing below.   |
+| maxConversationCalls  | Maximum number of calls per conversation.                                       |
+| maxTokenSpendingLimit | Maximum tokens allowed per conversation.                                        |
+| temperature           | Controls randomness: `0` (deterministic) to `2` (creative).                     |
+| maxOutputTokens       | Maximum tokens in a response. So 500 characters are approximately 125 tokens).  |
+| topP                  | Nucleus sampling: `0` (plain) to `1` (creative).                                |
+| frequencyPenalty      | Reduces repetition of words. Values range from `0` to `1`.                      |
+| presencePenalty       | Discourages repeating words from the conversation. Values range from `0` to `1` |
+| instruction           | Provides guidance for the bot's behavior.                                       |
 
-| **Model**              | **Pricing**                                               | 
-|:-----------------------|:----------------------------------------------------------|
-| gpt-4o                 | $5.00 / 1M input tokens <br/> \$15.00 / 1M output tokens  |
-| gpt-4o-2024-08-06      | $2.50 / 1M input tokens <br/> \$10.00 / 1M output tokens  |
-| gpt-4o-2024-05-13      | $5.00 / 1M input tokens <br/> \$15.00 / 1M output tokens  |
-| gpt-4o-mini            | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
-| gpt-4o-mini-2024-07-18 | $0.150 / 1M input tokens <br/> \$0.600 / 1M output tokens |
-
-
-- The **maxConversationCalls** is the limit of calls per conversation. <br>
-  After the limit is reached, the conversation will end. <br>
-
-
-- The **maxTokenSpendingLimit** is the limit of tokens spent per conversatition. <br>
-  After the limit is reached, the conversation will end. <br>
-
-
-- The **temperature** is the randomness of the text. <br>
-  Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic
-  and repetitive. <br>
-  Higher temperature results in more random completions. <br>
-  The min value is 0 and the max value is 2. <br>
-
-
-- The **maxTokens** is the maximum length of the response text. <br>
-  One token is roughly 4 characters for standard English text. <br>
-  The limit is 16,383 tokens, but it's recommended to use a value that is suitable for the use, on Twitch the message
-  limit is 500 characters.
-  If you divide the limit by 4, you are an estimate the number of characters. <br>
-
-
-- The **topP** is the nucleus sampling. <br>
-  The lower the value, the more plain the text will be. <br>
-  The higher the value, the more creative the text will be. <br>
-  The min value is 0 and the max value is 1. <br>
-
-
-- The **frequencyPenalty** reduces the likelihood of repeating the same words in a response.
-  The higher the value, the less the bot will repeat itself. <br>
-  The min value is 0 and the max value is 1. <br>
-
-
-- The **presencePenalty** reduces the likelihood of mentioning words that have already appeared in the
-  conversation. <br>
-  The higher the value, the less the bot will repeat itself. <br>
-  The min value is 0 and the max value is 1. <br>
-
-
-- The **instruction** is the way the bot should behave and how he should reply to the prompt. <br>
+##### Chat Models and Pricing
+| **Model**                                            | **Pricing**                                                                                    | **Max Output Tokens** |
+|:-----------------------------------------------------|:-----------------------------------------------------------------------------------------------|:---------------------:|
+| gpt-4o <br> gpt-4o-2024-11-20 <br> gpt-4o-2024-08-06 | $2.50 / 1M input tokens <br> \$1.25 / 1M cached input tokens <br> \$10.00 / 1M output tokens   |     16,384 tokens     |
+| gpt-4o-2024-05-13                                    | $5.00 / 1M input tokens <br> \$15.00 / 1M output tokens                                        |     16,384 tokens     |
+| chatgpt-4o-latest                                    | $5.00 / 1M input tokens <br> \$15.00 / 1M output tokens                                        |     4,096 tokens      |
+| gpt-4o-mini <br> gpt-4o-mini-2024-07-18              | $0.150 / 1M input tokens <br> \$0.075 / 1M cached input tokens <br> \$0.600 / 1M output tokens |     16,384 tokens     |
+| o1-preview <br> o1-preview-2024-09-12                | $15.00 / 1M input tokens <br> \$7.50 / 1M cached input tokens <br> \$60.00 / 1M output tokens  |     32,768 tokens     |
+| o1-mini <br> o1-mini-2024-09-12                      | $3.00 / 1M input tokens <br> \$1.50 / 1M cached input tokens <br> \$12.00 / 1M output tokens   |     65,536 tokens     |
 
 <hr>
 
-### Image Configuration
-- The **imageModel** is the model that the bot will use to generate the image. <br>
-  The available models are: <br>
+#### Image Configuration
+| **Field**  | **Description**                                                          |
+|:-----------|:-------------------------------------------------------------------------|
+| model      | Model used for generating images (`dall-e-2`,` dall-e-3`).               |
+| quality    | Image quality: `standard` or `hd` (only for `dall-e-3`).                 |
+| resolution | Image size: `256x256`, `512x512`, `1024x1024`, `1024x1792`, `1792x1024`. |
+| style      | Image style: `vivid` or `natural`. (only for `dall-e-3`)                 |
 
-| **Model** | **Quality** | **Resolution**                     | **Pricing**                                             |
-|:----------|:-----------:|:-----------------------------------|:--------------------------------------------------------|
-| dall-e-2  |             | 256x256<br/>512x512<br/>1024x1024  | \$0.016 / Image<br/>\$0.018 / Image<br/> $0.020 / Image |
-| dall-e-3  |  standard   | 1024x1024<br/>1024x1792, 1792×1024 | \$0.040 / Image<br/>\$0.080 / Image                     |
-| dall-e-3  |     hd      | 1024x1024<br/>1024x1792, 1792×1024 | \$0.080 / Image<br/>\$0.120 / Image                     |
-
-
-- The **quality** is the quality of the image. <br>
-  The available qualities are standard and hd. <br>
-  The quality is only available for dall-e-3. <br>
-
-
-- The **resolution** is the resolution of the image. <br>
-  The available resolutions are 256x256, 512x512, 1024x1024, 1024x1792, and 1792x1024. <br>
-  The resolution 1024x1024 is available for all models. <br>
-  The resolution 256x256 and 512x512 are only available for dall-e-2. <br>
-  The resolution 1024x1792 and 1792x1024 are only available for dall-e-3. <br>
-
-
-- The **style** is the style of the image. <br>
-  The available styles are vivid and natural. <br>
-  The style is only available for dall-e-3. <br>
-  The default style is vivid. <br>
+##### Image Models and Pricing
+| **Model** | **Quality** | **Resolution**                        | **Pricing**                                                      |
+|:----------|:-----------:|:--------------------------------------|:-----------------------------------------------------------------|
+| dall-e-2  |             | 256x256 <br/> 512x512 <br/> 1024x1024 | \$0.016 per Image <br/> \$0.018 per Image <br/> $0.020 per Image |
+| dall-e-3  |  standard   | 1024x1024 <br/> 1024x1792, 1792×1024  | \$0.040 per Image <br/> \$0.080 per Image                        |
+| dall-e-3  |     hd      | 1024x1024 <br/> 1024x1792, 1792×1024  | \$0.080 per Image <br/> \$0.120 per Image                        |
 
 <hr>
 
-### Speech Configuration
-- The **ttsModel** is the model that the bot will use to generate the speech. <br>
-  The available models are: <br>
+#### Speech Configuration
+| **Field** | **Description**                                                                               |
+|:----------|:----------------------------------------------------------------------------------------------|
+| model     | Speech model: `tts-1` or `tts-1-hd`.                                                          |
+| voice     | Choose from voices: `alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`.                      |
+| format    | Audio file format: `mp3`, `opus`, `aac`, `flac`, `wav`, `pcm`. Currently only `wav` supported |
+| speed     | Speech speed. Ranges from `0.25` (slowest) to `4` (fastest). Default is `1`.                  |
 
+##### Speech Pricing
 | **Model** | **Pricing**            | 
 |:----------|:-----------------------|
 | tts-1     | $15.00 / 1M characters |
 | tts-1-hd  | $30.00 / 1M characters |
-
-- The **voice** is the voice that the bot will use to generate the speech. <br>
-  The available voices are alloy, echo, fable, onyx, nova, and shimmer. <br>
-
-
-- The **format** is the format of the audio file. <br>
-  The available formats are mp3, opus, aac, flac, wav, and pcm. <br>
-
-
-- The **speed** is the speed of the speech. <br>
-  The min value is 0.25 and the max value is 4, the default value is 1. <br> <br>
-
-<hr>
-
-### Transcription Configuration
-- The **transcriptionModel** is the model that the bot will use to generate the transcription. <br>
-  The available models are: <br>
-
-| **Model** | **Pricing**                                     |
-|:---------:|:------------------------------------------------|
-| whisper-1 | $0.006 / minute (rounded to the nearest second) |
-
-
-- The **prompt** is the prompt that the model will use to generate the transcription. <br>
-
-
-- The **language** is the language of the audio. <br>
-
-
-- The **temperature** is the randomness of the transcription. <br>
-  Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic
-  and repetitive. <br>
-  Higher temperature results in more random completions. <br>
-  The min value is 0 and the max value is 2. <br> <br>
 
 
 ### 7. Running the bot

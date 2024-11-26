@@ -57,17 +57,6 @@ public class Horoscope {
         clientSecrets = prokeralaConfig.get("clientSecret").asText().split(", ");
         initAPI();
 
-        // Get Chat Config
-        JsonNode config = chat.getConfig();
-
-        // Get Parameters
-        double temperature = 0;
-        int maxTokens = config.get("maxTokens").asInt();
-        double topP = config.get("topP").asDouble();
-        double frequencyPenalty = config.get("frequencyPenalty").asDouble();
-        double presencePenalty = config.get("presencePenalty").asDouble();
-
-
         // Register command
         messageHandler.addCommand(new Command(description, name) {
 
@@ -124,7 +113,7 @@ public class Horoscope {
                 if (Arrays.asList("en", "english", "englisch", "eng").contains(language)) botClient.respond(event, getCommand(), dailyPrediction);
                 else {
                     String instruction = trimMessage("Please translate the following text into " + language + ":");
-                    String translatedPrediction = chat.prompt(botClient.getBotName(), instruction, dailyPrediction, temperature, maxTokens, topP, frequencyPenalty, presencePenalty);
+                    String translatedPrediction = chat.prompt(null, instruction, dailyPrediction, 0d, null, null, null, null);
                     botClient.respond(event, getCommand(), translatedPrediction);
                 }
             }

@@ -2,7 +2,7 @@
 FROM eclipse-temurin:21-jdk-jammy as build
 WORKDIR /app
 # Install Maven
-RUN apt update && apt install -y maven
+RUN apt update -y && apt upgrade -y && apt install -y maven
 COPY pom.xml ./
 COPY src ./src
 RUN mvn clean install

@@ -1,7 +1,5 @@
 package de.MCmoderSD.commands;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
@@ -25,13 +23,6 @@ public class Wiki {
     private final String errorRetrievingWeatherData;
     private final String noSummaryFoundForThisTopic;
 
-    // Attributes
-    private final double temperature;
-    private final int maxTokens;
-    private final double topP;
-    private final double frequencyPenalty;
-    private final double presencePenalty;
-
     // Constructor
     public Wiki(BotClient botClient, MessageHandler messageHandler, Chat chat) {
 
@@ -45,16 +36,6 @@ public class Wiki {
         // Constants
         errorRetrievingWeatherData = "Fehler beim Abrufen der Wikipedia-Zusammenfassung:";
         noSummaryFoundForThisTopic = "Keine Zusammenfassung für dieses Thema gefunden.";
-
-        // Get Chat Config
-        JsonNode config = chat.getConfig();
-
-        // Get Parameters
-        temperature = 0;
-        maxTokens = config.get("maxTokens").asInt();
-        topP = config.get("topP").asDouble();
-        frequencyPenalty = config.get("frequencyPenalty").asDouble();
-        presencePenalty = config.get("presencePenalty").asDouble();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -83,7 +64,7 @@ public class Wiki {
 
                         // Check if summary is too long
                         if (summary.length() <= 500) response = summary;
-                        else response = trimMessage(chat.prompt(botClient.getBotName(), "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, temperature, maxTokens, topP, frequencyPenalty, presencePenalty));
+                        else response = trimMessage(chat.prompt(null, "Please summarize the following text using the original language used in the text. Answer only in 500 or less chars", summary, 0d, null, null, null, null));
 
                         // Filter Response for argument injection
                         response = removePrefix(response);
