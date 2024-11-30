@@ -49,15 +49,22 @@ import de.MCmoderSD.main.Main;
 import de.MCmoderSD.main.Terminal;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
+import de.MCmoderSD.server.Server;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.server.AudioBroadcast;
-import de.MCmoderSD.utilities.server.Server;
 import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 
+import de.MCmoderSD.utilities.server.AudioBroadcast;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -152,11 +159,23 @@ public class BotClient {
 
         // Init HTTPS Server
         JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
-        if (!Main.terminal.hasArg(DEV) && httpsServerConfig.get("hostname").asText().contains(".")) server = new Server(this, httpsServerConfig); // Default
-        else { // Custom or Dev Mode
-            String hostname = Main.terminal.hasArg(HOST) ? Main.terminal.getArgs()[0] : httpsServerConfig.get("hostname").asText();
-            int port = Main.terminal.hasArg(PORT) ? Integer.parseInt(Main.terminal.getArgs()[1]) : httpsServerConfig.get("port").asInt();
-            server = new Server(this, hostname, port, httpsServerConfig.get("keystore").asText(), botConfig);
+        boolean SSL = httpsServerConfig.has("SSL");
+        String hostname = httpsServerConfig.get("hostname").asText();
+        int port = httpsServerConfig.get("port").asInt();
+
+        try {
+            if (SSL) {  // SSL
+                JsonNode sllConfig = httpsServerConfig.get("SSL");
+                String privkey = sllConfig.get("privkey").asText();
+                String fullchain = sllConfig.get("fullchain").asText();
+                server = new Server(hostname, port, privkey, fullchain);
+            } else {    // JKS
+                hostname = Main.terminal.hasArg(HOST) ? Main.terminal.getArgs()[0] : hostname;
+                port = Main.terminal.hasArg(PORT) ? Integer.parseInt(Main.terminal.getArgs()[1]) : port;
+                server = new Server(hostname, port, httpsServerConfig.get("JKS"));
+            }
+        } catch (IOException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | KeyManagementException | CertificateException | InvalidKeySpecException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         // Init Client
