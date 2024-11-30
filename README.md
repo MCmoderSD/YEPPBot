@@ -186,42 +186,49 @@ If you don't want to use the database logging, you can use the `-nolog` argument
 
 
 ### 4. HTTPS Server
-The YEPPBot includes a simple HTTPS server to handle Helix API authentication. <br> 
-It can also be used to broadcast sound via a browser page. <br>
+The YEPPBot includes a built-in HTTPS server designed for two key purposes:
+1. Handling Helix API authentication.
+2. Broadcasting sound via a browser-based interface. (SSL is required for this feature).
 
-To configure the server, create a file named `httpsServer.json` in the `/src/main/resources/config/` folder. <br> 
-The file should have the following structure: <br>
+#### Configuration
+To set up the HTTPS server, create a configuration file named `httpsServer.json` in the `/src/main/resources/config/` directory. <br>
+The file should follow this structure:
 ```json
 {
   "hostname": "YOUR_HOSTNAME",
   "port": 420,
-  "keystore": "/keys/keystore.jks",
-  "fullchain": "/path/to/fullchain.pem",
-  "privkey": "/path/to/privkey.pem"
+
+  "SSL": {
+    "fullchain": "/path/to/fullchain.pem",
+    "privkey": "/path/to/privkey.pem"
+  },
+
+  "JKS": {
+    "file": "keystore.jks",
+    "password": "secure_password",
+    "validity": 365,
+    "CN": "Your Name",
+    "OU": "Your Organization Unit",
+    "O": "Your Organization",
+    "L": "Your Location",
+    "ST": "Your State",
+    "C": "Your Country"
+  }
 }
 ```
 
-#### Key Configuration Notes:
-- **hostname**: Specify your server's hostname or use `localhost` for local testing. 
-- **port**: Set the port for the HTTPS server.
-- **keystore**: Path to your Java KeyStore (JKS) file. 
-- **fullchain**: Path to the certificate chain file (for non-JKS setups). 
-- **privkey**: Path to the private key file (for non-JKS setups).
-
-#### Localhost and Self-Signed Certificates:
-You can use localhost with a self-signed JKS file for testing. However:
-- The Twitch API will work with self-signed certificates.
-- OBS will not accept self-signed certificates for the browser source.
-
-#### Generating a Self-Signed Certificate:
-To create a self-signed JKS file, use the following command:
-```bash
-keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks -storepass password -validity 360 -keysize 2048
-```
-- Set the **password** to the bot token, hashed with **SHA-256** and encoded in **Base64**.
-- Use this [SHA-256 hash tool](https://emn178.github.io/online-tools/sha256.html) to generate the hash.
- - Ensure **UTF-8** is selected as the input encoding. 
- - Set **Base64** as the output format.
+#### Fields Explained:
+- `hostname`: Specify the hostname or IP address the server will bind to (e.g., `localhost` or a public domain). 
+- `port`: The port number for the server (default: `420`). 
+- `SSL`:
+  - `fullchain`: Path to the SSL/TLS certificate chain file (`.pem` format). 
+  - `privkey`: Path to the corresponding private key file.
+- `JKS` (Java KeyStore): Optional configuration to use a JKS file for SSL instead of `.pem` files. 
+  - `file`: Path to the Java KeyStore file. 
+  - `password`: Password to access the JKS. 
+  - `validity`: Number of days the generated certificate is valid (used when creating a new keystore). 
+  - `CN`: Common Name (e.g., your domain name). 
+  - `OU`, `O`, `L`, `ST`, `C`: Organizational and geographical details for the certificate.
 
 #### Using a Domain and Valid Certificates:
 If you have a domain, you must use a valid certificate. Self-signed certificates are only allowed for `localhost`.
