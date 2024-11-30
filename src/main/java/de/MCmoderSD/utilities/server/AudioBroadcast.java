@@ -3,12 +3,11 @@ package de.MCmoderSD.utilities.server;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
+import de.MCmoderSD.server.Server;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,7 +49,7 @@ public class AudioBroadcast {
 
         // Add Contexts
         contexts.add(server.getHttpsServer().createContext("/" + broadcastId, new FrontendHandler(broadcastId)));
-        contexts.add(server.getHttpsServer().createContext("/audio/" + broadcastId, new AudioHandler(broadcastId)));
+        contexts.add(server.getHttpsServer().createContext("/wav/" + broadcastId, new AudioHandler(broadcastId)));
         contexts.add(server.getHttpsServer().createContext("/version/" + broadcastId, new VersionHandler(broadcastId)));
 
         // Add Contexts to Server
@@ -137,7 +136,7 @@ public class AudioBroadcast {
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            exchange.getResponseHeaders().set("Content-Type", "audio/wav");
+            exchange.getResponseHeaders().set("Content-Type", "wav/wav");
             if (audioFiles.containsKey(broadcastId) && audioFiles.get(broadcastId) != null) {
                 byte[] audioData = audioFiles.get(broadcastId);
                 exchange.sendResponseHeaders(200, audioData.length);

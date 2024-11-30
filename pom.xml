@@ -48,6 +48,14 @@
         </dependency>
 
 
+        <!-- HTTPS-Server -->
+        <dependency>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>HTTPS-Server</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+
         <!-- ImageLoader -->
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
