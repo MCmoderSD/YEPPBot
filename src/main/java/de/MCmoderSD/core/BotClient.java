@@ -50,12 +50,12 @@ import de.MCmoderSD.main.Terminal;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.server.Server;
+import de.MCmoderSD.server.modules.AudioBroadcast;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 
-import de.MCmoderSD.utilities.server.AudioBroadcast;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -177,6 +177,9 @@ public class BotClient {
         } catch (IOException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | KeyManagementException | CertificateException | InvalidKeySpecException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        // Start Server
+        server.start();
 
         // Init Client
         client = TwitchClientBuilder.builder()
@@ -344,7 +347,7 @@ public class BotClient {
         mySQL.getLogManager().logTTS(event, audioFile);
 
         // Play Audio
-        audioBroadcast.play(event.getChannel(), audioFile);
+        audioBroadcast.play(event.getChannel(), audioFile.getAudioData());
 
         // Update Frame
         if (!cli) audioFile.play();
