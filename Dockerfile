@@ -11,6 +11,9 @@ COPY src ./src
 
 RUN mvn clean install -DskipTests
 
+# Clean up
+RUN rm original-*.jar
+
 # Step 2: Runtime phase
 FROM eclipse-temurin:21-jdk-jammy
 WORKDIR /app
