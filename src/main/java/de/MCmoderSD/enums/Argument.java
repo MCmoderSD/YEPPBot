@@ -13,6 +13,7 @@ public enum Argument {
     CLI("cli"),
     NO_LOG("nolog"),
     GENERATE("generate", "gen"),
+    NON_INTERACTIVE("noninteractive", "ni"),
 
     // Config
     BOT_CONFIG("botconfig"),

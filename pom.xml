@@ -140,6 +140,8 @@
     </dependencies>
 
     <build>
+
+        <!-- Maven Jar Plugin -->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -155,6 +157,7 @@
                 </configuration>
             </plugin>
 
+            <!-- Maven Shade Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -166,14 +169,14 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>api/*</exclude>
+                                        <exclude>config/*</exclude>
+                                        <exclude>database/*</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
