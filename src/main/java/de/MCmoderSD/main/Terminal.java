@@ -69,13 +69,16 @@ public class Terminal {
 
     private void inputLoop() {
 
+
+        // Check No Interactive
+        if (hasArg(Argument.NON_INTERACTIVE)) return;
+
         // Loop
         while (scanner.hasNext()) handleInput(scanner.nextLine());
 
         // Exit
         scanner.close();
-        System.out.printf("%sStopping bot...", BOLD);
-        System.exit(0);
+        exit();
     }
 
     private void handleInput(String input) {
@@ -131,6 +134,7 @@ public class Terminal {
                     -dev: Development Mode
                     -cli: CLI Mode (No GUI)
                     -nolog: Disable Logging
+                    -noninteractive: Disable Interactive Mode
                 """);
 
         // Generate Config Files

@@ -383,6 +383,8 @@ You can include additional arguments for other configuration files as needed.
 - `-version`: Outputs the current version of the bot. 
 - `-cli`: Runs the bot in command-line interface mode. 
 - `-nolog`: Disables database logging.
+- `-noninteractive`: Disables interactive mode.
+- `-generate`: Generates example configuration files.
 
 
 #### Configuration File Arguments:

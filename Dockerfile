@@ -11,18 +11,16 @@ COPY src ./src
 
 RUN mvn clean install -DskipTests
 
-# Clean up
-RUN rm original-*.jar
-
 # Step 2: Runtime phase
 FROM eclipse-temurin:21-jdk-jammy
 WORKDIR /app
 
 # Copy the built jar file from the build phase
-COPY --from=build /app/target/*.jar YEPPBot.jar
+COPY --from=build /app/target/YEPPBot-*.jar YEPPBot.jar
 
 # Expose port
 EXPOSE 420
+EXPOSE 8000
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "YEPPBot.jar", "-cli"]
+ENTRYPOINT ["java", "-jar", "YEPPBot.jar", "-cli", "-ni"]
