@@ -16,11 +16,11 @@ FROM eclipse-temurin:21-jdk-jammy
 WORKDIR /app
 
 # Copy the built jar file from the build phase
-COPY --from=build /app/target/YEPPBot-*.jar YEPPBot.jar
+COPY --from=build /app/target/YEPPBot.jar YEPPBot.jar
 
 # Expose port
 EXPOSE 420
 EXPOSE 8000
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "YEPPBot.jar", "-cli", "-ni"]
+ENTRYPOINT ["java", "-jar", "YEPPBot.jar", "-cli", "-ni", "-botconfig", "/config/botconfig.json", "-channellist", "/config/channellist.json", "-mysql", "/config/mysql.json", "-httpsserver", "/config/httpsserver.json", "-api", "/config/api.json", "-openai", "/config/openaiconfig.json"]

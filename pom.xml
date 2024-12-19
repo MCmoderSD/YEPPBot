@@ -7,7 +7,7 @@
 
     <groupId>de.MCmoderSD</groupId>
     <artifactId>YEPPBot</artifactId>
-    <version>1.22.1</version>
+    <version>1.23.0</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>com.github.twitch4j</groupId>
             <artifactId>twitch4j</artifactId>
-            <version>1.22.0</version>
+            <version>1.23.0</version>
         </dependency>
 
 
@@ -127,7 +127,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.4</version>
+            <version>5.4.1</version>
         </dependency>
 
 
@@ -135,51 +135,41 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.10</version>
+            <version>1.5.12</version>
         </dependency>
     </dependencies>
 
     <build>
-
-        <!-- Maven Jar Plugin -->
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <mainClass>de.MCmoderSD.main.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <!-- Maven Shade Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.6.0</version>
                 <executions>
                     <execution>
+                        <id>custom-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <finalName>${project.artifactId}</finalName>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
-                                        <exclude>api/*</exclude>
-                                        <exclude>config/*</exclude>
-                                        <exclude>database/*</exclude>
+                                        <exclude>api/**</exclude>
+                                        <exclude>config/**</exclude>
+                                        <exclude>database/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>de.MCmoderSD.main.Main</mainClass>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

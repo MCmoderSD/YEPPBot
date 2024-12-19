@@ -1,13 +1,13 @@
-name: Publish Master-Branch Docker image
+name: Publish Docker image for Master-Branch
 
 on:
-  push:
-    branches:
-      - master
-  workflow_dispatch:
+  release:
+      types:
+        - published
+  workflow_dispatch: # Allows triggering manually from GitHub UI
 
 jobs:
-  push_to_registry:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
