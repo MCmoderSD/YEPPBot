@@ -56,8 +56,6 @@ jobs:
           echo "token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
           echo "version=${{ needs.build.outputs.version }}" >> $GITHUB_ENV
           echo "release-name=YEPPBot - Release ${{ needs.build.outputs.version }}" >> $GITHUB_ENV
-          echo "asset-name=YEPPBot.jar" >> $GITHUB_ENV
-
       - name: Checkout code
         uses: actions/checkout@v4.2.2
 
@@ -103,11 +101,6 @@ jobs:
           echo "sha256=$SHA256" >> $GITHUB_ENV
           echo "file=$FILE" >> $GITHUB_ENV
 
-      - name: Rename JAR file
-        run: |
-          mv ${{ env.file }} ${{ env.asset-name }}
-          echo "file=${{ env.asset-name }}" >> $GITHUB_ENV
-
       - name: Create new release
         uses: softprops/action-gh-release@v2
         with:
@@ -142,7 +135,8 @@ jobs:
       - name: Download JAR artifacts
         uses: actions/download-artifact@v4.1.8
         with:
-          name: jar-file
+            name: jar-file
+            path: "target/YEPPBot.jar"
 
       - name: Build and push to harbor
         run: |

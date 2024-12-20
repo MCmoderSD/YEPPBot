@@ -61,25 +61,36 @@ public class Main {
         // Convert Args to List
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(args));
 
-        // Bot Config
-        if (terminal.hasArg(Argument.BOT_CONFIG)) botConfigPath = Argument.BOT_CONFIG.getConfig(arguments);
+        if (!terminal.hasArg(Argument.CONTAINER)) {
 
-        // Channel List
-        if (terminal.hasArg(Argument.CHANNEL_LIST)) channelListPath = Argument.CHANNEL_LIST.getConfig(arguments);
+            // Bot Config
+            if (terminal.hasArg(Argument.BOT_CONFIG)) botConfigPath = Argument.BOT_CONFIG.getConfig(arguments);
 
-        // MySQL Config
-        if (terminal.hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = Argument.MYSQL_CONFIG.getConfig(arguments);
+            // Channel List
+            if (terminal.hasArg(Argument.CHANNEL_LIST)) channelListPath = Argument.CHANNEL_LIST.getConfig(arguments);
 
-        // Https Server
-        if (terminal.hasArg(Argument.HTTPS_SERVER)) httpsServerPath = Argument.HTTPS_SERVER.getConfig(arguments);
+            // MySQL Config
+            if (terminal.hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = Argument.MYSQL_CONFIG.getConfig(arguments);
 
-        // API Config
-        if (terminal.hasArg(Argument.API_CONFIG)) apiKeysPath = Argument.API_CONFIG.getConfig(arguments);
-        else apiKeysPath = API_CONFIG;
+            // Https Server
+            if (terminal.hasArg(Argument.HTTPS_SERVER)) httpsServerPath = Argument.HTTPS_SERVER.getConfig(arguments);
 
-        // OpenAI Config
-        if (terminal.hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = Argument.OPENAI_CONFIG.getConfig(arguments);
-        else openAIConfigPath = OPENAI_CONFIG;
+            // API Config
+            if (terminal.hasArg(Argument.API_CONFIG)) apiKeysPath = Argument.API_CONFIG.getConfig(arguments);
+            else apiKeysPath = API_CONFIG;
+
+            // OpenAI Config
+            if (terminal.hasArg(Argument.OPENAI_CONFIG)) openAIConfigPath = Argument.OPENAI_CONFIG.getConfig(arguments);
+            else openAIConfigPath = OPENAI_CONFIG;
+
+        } else {
+            botConfigPath = "/app/config/bot.json";
+            channelListPath = "/app/config/channels.txt";
+            mysqlConfigPath = "/app/config/mysql.json";
+            httpsServerPath = "/app/config/server.json";
+            apiKeysPath = "/app/config/api.json";
+            openAIConfigPath = "/app/config/openai.json";
+        }
 
         // Instances
         MySQL mySQL;
@@ -87,7 +98,7 @@ public class Main {
         OpenAI openAI = null;
 
         // CLI Mode
-        if (!terminal.hasArg(Argument.CLI)) {
+        if (!terminal.hasArg(Argument.CLI) && !terminal.hasArg(Argument.CONTAINER)) {
 
             // Try to create Frame
             try {
