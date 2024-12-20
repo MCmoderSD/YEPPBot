@@ -69,9 +69,8 @@ public class Terminal {
 
     private void inputLoop() {
 
-
         // Check No Interactive
-        if (hasArg(Argument.NON_INTERACTIVE)) return;
+        if (hasArg(Argument.NON_INTERACTIVE) || hasArg(Argument.CONTAINER)) return;
 
         // Loop
         while (scanner.hasNext()) handleInput(scanner.nextLine());
@@ -135,6 +134,7 @@ public class Terminal {
                     -cli: CLI Mode (No GUI)
                     -nolog: Disable Logging
                     -noninteractive: Disable Interactive Mode
+                    -container: Container Mode
                 """);
 
         // Generate Config Files

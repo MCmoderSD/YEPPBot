@@ -154,14 +154,14 @@ public class BotClient {
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
         // Init Attributes
-        cli = Main.terminal.hasArg(CLI);
+        cli = Main.terminal.hasArg(CLI) || Main.terminal.hasArg(CONTAINER);
         log = !Main.terminal.hasArg(NO_LOG);
 
         // Init HTTPS Server
         JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
         boolean SSL = httpsServerConfig.has("SSL");
         String hostname = httpsServerConfig.get("hostname").asText();
-        int port = httpsServerConfig.get("port").asInt();
+        var port = Main.terminal.hasArg(CONTAINER) ? 443 : httpsServerConfig.get("port").asInt();
 
         try {
             if (SSL) {  // SSL
@@ -502,7 +502,7 @@ public class BotClient {
     }
 
     public boolean isCli() {
-        return cli;
+        return cli || Main.terminal.hasArg(CONTAINER);
     }
 
     // Getter

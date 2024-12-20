@@ -14,6 +14,7 @@ public enum Argument {
     NO_LOG("nolog"),
     GENERATE("generate", "gen"),
     NON_INTERACTIVE("noninteractive", "ni"),
+    CONTAINER("container", "docker"),
 
     // Config
     BOT_CONFIG("botconfig"),
@@ -40,7 +41,7 @@ public enum Argument {
     public String getConfig(ArrayList<String> args) {
 
         // Check
-        if (this == HELP || this == VERSION || this == DEV || this == CLI || this == NO_LOG || this == GENERATE) return null;
+        if (this == HELP || this == VERSION || this == DEV || this == CLI || this == NO_LOG || this == GENERATE || this == NON_INTERACTIVE || this == CONTAINER) return null;
         if (args == null || args.isEmpty()) return null;
 
         // Get Config

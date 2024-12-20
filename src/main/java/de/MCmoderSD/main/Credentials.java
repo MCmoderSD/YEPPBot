@@ -36,7 +36,7 @@ public class Credentials {
 
         // Load Bot Config
         try {
-            this.botConfig = jsonUtility.load(botConfig, terminal.hasArg(Argument.BOT_CONFIG));
+            this.botConfig = jsonUtility.load(botConfig, terminal.hasArg(Argument.BOT_CONFIG) || terminal.hasArg(Argument.CONTAINER));
         } catch (Exception e) {
             System.err.println("Error loading Bot Config: " + e.getMessage());
             System.exit(1);
@@ -44,7 +44,7 @@ public class Credentials {
 
         // Load Channel List
         try {
-            this.channelList = new HashSet<>(readAllLines(channelList, terminal.hasArg(Argument.CHANNEL_LIST)));
+            this.channelList = new HashSet<>(readAllLines(channelList, terminal.hasArg(Argument.CHANNEL_LIST) || terminal.hasArg(Argument.CONTAINER)));
         } catch (Exception e) {
             System.err.println("Error loading Channel List: " + e.getMessage());
             System.err.println("Creating empty Channel List...");
@@ -53,14 +53,14 @@ public class Credentials {
 
         // Load MySQL Config
         try {
-            this.mySQLConfig = jsonUtility.load(mySQL, terminal.hasArg(Argument.MYSQL_CONFIG));
+            this.mySQLConfig = jsonUtility.load(mySQL, terminal.hasArg(Argument.MYSQL_CONFIG) || terminal.hasArg(Argument.CONTAINER));
         } catch (Exception e) {
             System.err.println("Error loading MySQL Config: " + e.getMessage());
         }
 
         // Load HTTPS Server Config
         try {
-            this.httpsServerConfig = jsonUtility.load(httpsServer, terminal.hasArg(Argument.HTTPS_SERVER));
+            this.httpsServerConfig = jsonUtility.load(httpsServer, terminal.hasArg(Argument.HTTPS_SERVER) || terminal.hasArg(Argument.CONTAINER));
         } catch (Exception e) {
             System.err.println("Error loading HTTPS Server Config: " + e.getMessage());
         }
@@ -69,7 +69,7 @@ public class Credentials {
         try {
 
             // Load JSON
-            apiConfig = jsonUtility.load(apiKeys, terminal.hasArg(Argument.API_CONFIG));
+            apiConfig = jsonUtility.load(apiKeys, terminal.hasArg(Argument.API_CONFIG) || terminal.hasArg(Argument.CONTAINER));
 
             // Check for APIs
             astrology = apiConfig.has("astrology");
@@ -84,7 +84,7 @@ public class Credentials {
         try {
 
             // Load JSON
-            openAIConfig = jsonUtility.load(openAI, terminal.hasArg(Argument.OPENAI_CONFIG));
+            openAIConfig = jsonUtility.load(openAI, terminal.hasArg(Argument.OPENAI_CONFIG) || terminal.hasArg(Argument.CONTAINER));
 
             // Load OpenAI Sub Configs
             if (openAIConfig.has("chat")) openAIChatConfig = openAIConfig.get("chat");
