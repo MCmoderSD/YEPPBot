@@ -136,7 +136,7 @@ jobs:
         uses: actions/download-artifact@v4.1.8
         with:
           name: jar-file
-          path: "target/YEPPBot.jar"
+          path: "target/"
 
 
       - name: Calculate Hashes
