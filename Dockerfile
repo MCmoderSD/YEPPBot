@@ -3,6 +3,9 @@ FROM eclipse-temurin:21-jre-alpine
 # Set the working directory
 WORKDIR /app
 
+# Install the file utility to check file types
+RUN apk add --no-cache file
+
 # Copy the JAR file
 COPY target/YEPPBot.jar /app/YEPPBot.jar
 
