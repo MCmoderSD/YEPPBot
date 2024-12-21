@@ -171,7 +171,7 @@ public class BotClient {
                 server = new Server(hostname, port, privkey, fullchain);
             } else {    // JKS
                 hostname = Main.terminal.hasArg(HOST) ? Main.terminal.getArgs()[0] : hostname;
-                port = Main.terminal.hasArg(PORT) ? Integer.parseInt(Main.terminal.getArgs()[1]) : port;
+                port = Main.terminal.hasArg(PORT) && !Main.terminal.hasArg(CONTAINER) ? Integer.parseInt(Main.terminal.getArgs()[1]) : port;
                 server = new Server(hostname, port, httpsServerConfig.get("JKS"));
             }
         } catch (IOException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | KeyManagementException | CertificateException | InvalidKeySpecException | InterruptedException e) {
