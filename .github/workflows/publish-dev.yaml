@@ -1,4 +1,4 @@
-name: Dev Branch - Build, Release, Publish
+name: Dev - Build, Release, Publish
 
 on:
   workflow_dispatch:
@@ -137,18 +137,6 @@ jobs:
         with:
           name: jar-file
           path: "target/"
-
-
-      - name: Calculate Hashes
-        run: |
-          FILE="target/YEPPBot.jar"
-          MD5=$(md5sum "$FILE" | cut -d ' ' -f 1)
-          SHA1=$(sha1sum "$FILE" | cut -d ' ' -f 1)
-          SHA256=$(sha256sum "$FILE" | cut -d ' ' -f 1)
-          echo md5=$MD5
-          echo sha1=$SHA1
-          echo sha256=$SHA256
-          echo file=$FILE
 
       - name: Build and push to harbor
         run: |

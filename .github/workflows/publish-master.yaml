@@ -1,4 +1,4 @@
-name: Master Branch - Build, Release, Publish
+name: Master - Build, Release, Publish
 
 on:
   workflow_dispatch:
@@ -136,7 +136,7 @@ jobs:
         uses: actions/download-artifact@v4.1.8
         with:
           name: jar-file
-          path: "target/YEPPBot.jar"
+          path: "target/"
 
       - name: Build and push to harbor
         run: |
