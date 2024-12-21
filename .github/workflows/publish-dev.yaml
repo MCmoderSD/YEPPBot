@@ -140,7 +140,6 @@ jobs:
 
       - name: Check File
         run: |
-          echo (find . -name "YEPPBot.jar")
           echo ls -l
           echo ls -l target
 
