@@ -138,6 +138,12 @@ jobs:
             name: jar-file
             path: "target/YEPPBot.jar"
 
+      - name: Check File
+        run: |
+          echo (find . -name "YEPPBot.jar")
+          echo ls -l
+          echo ls -l target
+
       - name: Build and push to harbor
         run: |
           docker build ./ -t mcmodersd/yeppbot:dev-${{ needs.build.outputs.version }} -t mcmodersd/yeppbot:dev-latest
