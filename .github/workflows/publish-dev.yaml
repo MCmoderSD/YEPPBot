@@ -140,8 +140,10 @@ jobs:
 
       - name: Check File
         run: |
-          echo ls -l
-          echo ls -l target
+          dir=$(ls -l)
+          target=$(ls -l target)
+          echo "dir: $dir"
+          echo "target: $target"
 
       - name: Build and push to harbor
         run: |
