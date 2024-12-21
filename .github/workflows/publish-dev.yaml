@@ -141,7 +141,7 @@ jobs:
 
       - name: Calculate Hashes
         run: |
-          FILE=$(find . -name "YEPPBot.jar")
+          FILE="target/YEPPBot.jar"
           MD5=$(md5sum "$FILE" | cut -d ' ' -f 1)
           SHA1=$(sha1sum "$FILE" | cut -d ' ' -f 1)
           SHA256=$(sha256sum "$FILE" | cut -d ' ' -f 1)
