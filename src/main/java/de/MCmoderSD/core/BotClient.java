@@ -205,6 +205,7 @@ public class BotClient {
 
         // Init Audio Broadcast
         audioBroadcast = new AudioBroadcast(server);
+        audioBroadcast.registerBroadcast(botName);
 
         // Init Handlers
         messageHandler = new MessageHandler(this, mySQL);
