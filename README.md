@@ -4,6 +4,7 @@
 - [Description](#description)
 - [Features](#features)
 - [Installation](#installation-and-setup)
+- [Docker Setup](#docker-setup)
 - [Usage and commands](#usage-and-commands)
 - [YEPPConnect](#yeppconnect)
 - [Contributing](#contributing)
@@ -421,6 +422,37 @@ Custom commands can include dynamic variables to make them more interactive:
 - `%tagged%`: Replaced with the first word following the command (useful for mentions). 
 - `%random%`: Replaced with a random percentage between 0 and 100. <br> <br>
 
+
+## Docker Setup
+Since YEPPBot v1.23.0, you are able to run the bot in a Docker container. <br>
+To do this, you need to have Docker installed on your computer. You can download it from [here](https://www.docker.com/products/docker-desktop). <br>
+
+The setup process is similar to the manual setup, but makes managing the bot easier. <br>
+You can use the `mcmodersd/yeppbot` image from [Docker Hub](https://hub.docker.com/r/mcmodersd/yeppbot). <br>
+
+### 1. Configuration Files
+You need to mount a configuration directory to the container. <br>
+You have to follow the same steps as the [manual setup](#installation-and-setup) to create the configuration files. <br>
+
+Following files are required:
+- The Bot Configuration named `bot.json`.
+- The MySQL Configuration named `mysql.json`.
+- The HTTPS Server Configuration named `server.json`.
+
+The Channel List, API Keys, and ChatGPT Configuration are optional.
+- The Channel List is named `channels.txt`.
+- The API Keys are named `api.json`.
+- The ChatGPT Configuration is named `openai.json`.
+
+### 2. Running the Docker Container
+To run the bot in a Docker container, use the following command:
+```bash
+docker run -d --name YEPPBot -p <port>:443 -v /path/to/config:/app/config mcmodersd/yeppbot
+```
+You need to replace `<port>` with the port you want to use for the HTTPS server. (default 443) <br>
+You need to replace `/path/to/config` with the path to the directory containing the configuration files. <br>
+
+If you're using the SSL Certificate instead of the JKS files, you need to mount the directory containing the certificate files. <br>
 
 ## YEPPConnect
 **YEPPConnect** is a feature that enables your viewers to whitelist their Minecraft usernames directly through the bot.
