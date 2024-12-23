@@ -35,7 +35,7 @@ jobs:
 
       - name: Build JAR
         run: |
-          mvn clean package
+          mvn clean install package
           JAR=$(find target -name "YEPPBot.jar")
           echo "jar=$JAR" >> $GITHUB_ENV
 
