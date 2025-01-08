@@ -23,6 +23,50 @@ public class ChannelManager {
 
         // Get Associations
         this.mySQL = mySQL;
+
+        // Initialize Tables
+        initTables();
+    }
+
+    // Initialize Tables
+    private void initTables() {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect();
+
+            // Variables
+            Connection connection = mySQL.getConnection();
+
+            // Condition for creating tables
+            String condition = "CREATE TABLE IF NOT EXISTS ";
+
+            // SQL statement for creating the Ranks table
+            connection.prepareStatement(condition +
+                    """
+                    Ranks (
+                    id INT PRIMARY KEY,
+                    valorant VARCHAR(255),
+                    league VARCHAR(255),
+                    apex VARCHAR(255),
+                    siege VARCHAR(255)
+                    )
+                    """
+            ).execute();
+
+            // SQL statement for creating the Socials table
+            connection.prepareStatement(condition +
+                    """
+                    Socials (
+                    id INT PRIMARY KEY,
+                    instagram text,
+                    twitter text,
+                    youtube text
+                    )
+                    """
+            ).execute();
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     // Get Active Channels
