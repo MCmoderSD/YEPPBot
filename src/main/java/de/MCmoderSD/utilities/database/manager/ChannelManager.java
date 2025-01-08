@@ -52,7 +52,7 @@ public class ChannelManager {
                     """
             ).execute();
 
-            // SQL statement for creating the Socials table
+            // SQL statement for creating the Social table
             connection.prepareStatement(condition +
                     """
                     Socials (
