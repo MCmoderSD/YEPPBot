@@ -11,17 +11,17 @@ import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Rank {
+public class Social {
 
     // Constructor
-    public Rank(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Social(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
 
         // Syntax
-        String syntax = "Syntax: " + botClient.getPrefix() + "rank <valo|lol|siege|apex> (set) <rank>";
+        String syntax = "Syntax: " + botClient.getPrefix() + "social <instagram|tiktok|twitter|youtube> (set) <link>";
 
         // About
-        String[] name = {"rank", "rang"};
-        String description = "Zeigt den Rank des Streamers an:" + syntax;
+        String[] name = {"social", "socials", "socialmedia"};
+        String description = "Zeigt die Social Media Links des Streamers an:" + syntax;
 
         // Init Associations
         ChannelManager channelManager = mySQL.getChannelManager();
@@ -44,14 +44,14 @@ public class Rank {
                     // Check if user is moderator or admin
                     if (!(botClient.isAdmin(event) || botClient.isPermitted(event))) return;
 
-                    // Update Rank
+                    // Update Social Media Link
                     Account account = Account.getAccount(args.getFirst());
                     if (account == null) botClient.respond(event, getCommand(), syntax);
                     else {
-                        String rank = String.join(" ", args.subList(2, args.size()));
-                        boolean success = channelManager.setAccountValue(event.getChannelId(), account, rank);
-                        if (success) botClient.respond(event, getCommand(), account.getName() + " Rank updated to " + rank);
-                        else botClient.respond(event, getCommand(), account.getName() + " Rank could not be updated!");
+                        String link = String.join(" ", args.subList(2, args.size()));
+                        boolean success = channelManager.setAccountValue(event.getChannelId(), account, link);
+                        if (success) botClient.respond(event, getCommand(), account.getName() + " Link updated to " + link);
+                        else botClient.respond(event, getCommand(), account.getName() + " Link could not be updated!");
                         return;
                     }
                 }
@@ -60,9 +60,9 @@ public class Rank {
                 Account account = Account.getAccount(String.join(" ", args).toLowerCase());
                 if (account == null) botClient.respond(event, getCommand(), syntax);
                 else {
-                    String rank = channelManager.getAccountValue(event.getChannelId(), account);
-                    if (rank == null) botClient.respond(event, getCommand(), "No rank set for " + account.getName());
-                    else botClient.respond(event, getCommand(), account.getName() + " Rank: " + rank);
+                    String link = channelManager.getAccountValue(event.getChannelId(), account);
+                    if (link == null) botClient.respond(event, getCommand(), account.getName() + " Link not set!");
+                    else botClient.respond(event, getCommand(), account.getName() + ": " + link);
                 }
             }
         });
