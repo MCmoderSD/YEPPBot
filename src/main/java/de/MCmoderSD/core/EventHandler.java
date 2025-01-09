@@ -308,7 +308,7 @@ public class EventHandler {
 
             lastChangeGame.put(Integer.parseInt(event.getChannel().getId()), event);
 
-            // ToDo: Implement Change Game Event
+            // ToDo: Implement Change Account Event
 
         }).start();
     }
