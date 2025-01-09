@@ -1,6 +1,7 @@
 package de.MCmoderSD.utilities.database.manager;
 
 import de.MCmoderSD.core.HelixHandler;
+import de.MCmoderSD.enums.Account;
 import de.MCmoderSD.utilities.database.MySQL;
 
 import java.sql.Connection;
@@ -39,27 +40,19 @@ public class ChannelManager {
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
 
-            // SQL statement for creating the Ranks table
+            // SQL statement for creating the Account table
             connection.prepareStatement(condition +
                     """
-                    Ranks (
+                    Accounts (
                     id INT PRIMARY KEY,
-                    valorant VARCHAR(255),
-                    league VARCHAR(255),
-                    apex VARCHAR(255),
-                    siege VARCHAR(255)
-                    )
-                    """
-            ).execute();
-
-            // SQL statement for creating the Social table
-            connection.prepareStatement(condition +
-                    """
-                    Socials (
-                    id INT PRIMARY KEY,
-                    instagram text,
-                    twitter text,
-                    youtube text
+                    apex VARCHAR(500),
+                    league VARCHAR(500),
+                    rainbow VARCHAR(500),
+                    valorant VARCHAR(500),
+                    instagram VARCHAR(500),
+                    tiktok VARCHAR(500),
+                    twitter VARCHAR(500),
+                    youtube VARCHAR(500)
                     )
                     """
             ).execute();
@@ -237,5 +230,65 @@ public class ChannelManager {
         }
 
         return (isBlocked ? "Blocking " : "Unblocking ") + command + " in " + channel;
+    }
+
+    // Set Account Value
+    public boolean setAccountValue(Integer id, Account account, String value) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect(); // connect
+
+            // Prepare statement
+            String query = "SELECT " + id + " FROM " + "Accounts" + " WHERE name = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, id); // set id
+            ResultSet resultSet = preparedStatement.executeQuery(); // execute
+
+            // Check if channel exists
+            if (!resultSet.next()) {
+
+                // Close resources
+                resultSet.close();
+                preparedStatement.close();
+
+                // Prepare statement
+                preparedStatement = mySQL.getConnection().prepareStatement(query);
+                preparedStatement.setInt(1, id); // set id
+                preparedStatement.executeUpdate(); // execute
+            } else {
+                resultSet.close();
+                preparedStatement.close();
+            }
+
+            // Prepare statement
+            query = "UPDATE " + "Accounts" + " SET " + account.getName() + " = ? WHERE id = ?";
+            preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setString(1, value); // set value
+            preparedStatement.setInt(2, id); // set id
+            preparedStatement.executeUpdate(); // execute
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    // Get Account Value
+    public String getAccountValue(Integer id, Account account) {
+        try {
+            if (!mySQL.isConnected()) mySQL.connect();
+
+            // Prepare statement
+            String query = "SELECT " + account.getName() + " FROM " + "Accounts" + " WHERE id = ?";
+            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement.setInt(1, id); // set id
+            ResultSet resultSet = preparedStatement.executeQuery(); // execute
+            return resultSet.next() ? resultSet.getString(account.getName()) : null;
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
     }
 }
