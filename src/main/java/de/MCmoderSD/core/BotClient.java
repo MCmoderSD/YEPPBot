@@ -11,36 +11,7 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
-import de.MCmoderSD.commands.Birthday;
-import de.MCmoderSD.commands.Conversation;
-import de.MCmoderSD.commands.Counter;
-import de.MCmoderSD.commands.CustomCommand;
-import de.MCmoderSD.commands.CustomTimer;
-import de.MCmoderSD.commands.DickDestroyDecember;
-import de.MCmoderSD.commands.Fact;
-import de.MCmoderSD.commands.Gif;
-import de.MCmoderSD.commands.Help;
-import de.MCmoderSD.commands.Horoscope;
-import de.MCmoderSD.commands.Info;
-import de.MCmoderSD.commands.Insult;
-import de.MCmoderSD.commands.Joke;
-import de.MCmoderSD.commands.Join;
-import de.MCmoderSD.commands.Lurk;
-import de.MCmoderSD.commands.Match;
-import de.MCmoderSD.commands.Moderate;
-import de.MCmoderSD.commands.NoNutNovember;
-import de.MCmoderSD.commands.Ping;
-import de.MCmoderSD.commands.Play;
-import de.MCmoderSD.commands.Prompt;
-import de.MCmoderSD.commands.Quote;
-import de.MCmoderSD.commands.Say;
-import de.MCmoderSD.commands.Shoutout;
-import de.MCmoderSD.commands.Status;
-import de.MCmoderSD.commands.TTS;
-import de.MCmoderSD.commands.Translate;
-import de.MCmoderSD.commands.Weather;
-import de.MCmoderSD.commands.Wiki;
-import de.MCmoderSD.commands.Whitelist;
+import de.MCmoderSD.commands.*;
 
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.enums.Scope;
@@ -236,6 +207,8 @@ public class BotClient {
         new Joke(this, messageHandler, mySQL);
         new Lurk(this, messageHandler, mySQL);
         new Quote(this, messageHandler, mySQL);
+        new Rank(this, messageHandler, mySQL);
+        new Social(this, messageHandler, mySQL);
         new Whitelist(this, messageHandler, mySQL);
 
         // Loading Twitch API Commands

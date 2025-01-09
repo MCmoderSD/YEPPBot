@@ -67,7 +67,9 @@ If you have any ideas or suggestions, feel free to open an issue or submit a pul
 - CustomTimer
 - Moderate
 - Quote
+- Rank
 - Say
+- Social
 - Shoutout
 
 ### Admin/Debug Commands:
@@ -92,7 +94,6 @@ If you have any ideas or suggestions, feel free to open an issue or submit a pul
 
 ### Planned Features:
   - [ ] Web UI
-  - [ ] Rank Command
   - [ ] Key Command
   - [ ] Discord Integration
 

@@ -232,25 +232,25 @@ public class ChannelManager {
         return (isBlocked ? "Blocking " : "Unblocking ") + command + " in " + channel;
     }
 
-    // Set Account Value
     public boolean setAccountValue(Integer id, Account account, String value) {
         try {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT " + id + " FROM " + "Accounts" + " WHERE name = ?";
+            String query = "SELECT id FROM Accounts WHERE id = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, id); // set id
             ResultSet resultSet = preparedStatement.executeQuery(); // execute
 
-            // Check if channel exists
+            // Check if account exists
             if (!resultSet.next()) {
 
                 // Close resources
                 resultSet.close();
                 preparedStatement.close();
 
-                // Prepare statement
+                // Insert new account if it does not exist
+                query = "INSERT INTO Accounts (id) VALUES (?)";
                 preparedStatement = mySQL.getConnection().prepareStatement(query);
                 preparedStatement.setInt(1, id); // set id
                 preparedStatement.executeUpdate(); // execute
@@ -260,11 +260,14 @@ public class ChannelManager {
             }
 
             // Prepare statement
-            query = "UPDATE " + "Accounts" + " SET " + account.getName() + " = ? WHERE id = ?";
+            query = "UPDATE Accounts SET " + account.getTable() + " = ? WHERE id = ?";
             preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setString(1, value); // set value
             preparedStatement.setInt(2, id); // set id
             preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -280,11 +283,11 @@ public class ChannelManager {
             if (!mySQL.isConnected()) mySQL.connect();
 
             // Prepare statement
-            String query = "SELECT " + account.getName() + " FROM " + "Accounts" + " WHERE id = ?";
+            String query = "SELECT " + account.getTable() + " FROM " + "Accounts" + " WHERE id = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, id); // set id
             ResultSet resultSet = preparedStatement.executeQuery(); // execute
-            return resultSet.next() ? resultSet.getString(account.getName()) : null;
+            return resultSet.next() ? resultSet.getString(account.getTable()) : null;
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());
