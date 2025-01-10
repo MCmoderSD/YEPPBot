@@ -30,6 +30,7 @@ public class Credentials {
     private boolean astrology;
     private boolean openWeatherMap;
     private boolean giphy;
+    private boolean riot;
 
     // Constructor
     public Credentials(String botConfig, String channelList, String mySQL, String httpsServer, String apiKeys, String openAI) {
@@ -75,6 +76,7 @@ public class Credentials {
             astrology = apiConfig.has("astrology");
             openWeatherMap = apiConfig.has("openWeatherMap");
             giphy = apiConfig.has("giphy");
+            riot = apiConfig.has("riot");
 
         } catch (Exception e) {
             System.err.println("Error loading API Config: " + e.getMessage());
@@ -176,6 +178,10 @@ public class Credentials {
 
     public boolean hasGiphy() {
         return giphy;
+    }
+
+    public boolean hasRiot() {
+        return riot;
     }
 
     public boolean hasOpenAI() {

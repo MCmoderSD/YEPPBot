@@ -43,7 +43,7 @@ public class ChannelManager {
             // SQL statement for creating the Account table
             connection.prepareStatement(condition +
                     """
-                    Accounts (
+                    AccountValues (
                     id INT PRIMARY KEY,
                     apex VARCHAR(500),
                     league VARCHAR(500),
@@ -237,7 +237,7 @@ public class ChannelManager {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT id FROM Accounts WHERE id = ?";
+            String query = "SELECT id FROM AccountValues WHERE id = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, id); // set id
             ResultSet resultSet = preparedStatement.executeQuery(); // execute
@@ -250,7 +250,7 @@ public class ChannelManager {
                 preparedStatement.close();
 
                 // Insert new account if it does not exist
-                query = "INSERT INTO Accounts (id) VALUES (?)";
+                query = "INSERT INTO AccountValues (id) VALUES (?)";
                 preparedStatement = mySQL.getConnection().prepareStatement(query);
                 preparedStatement.setInt(1, id); // set id
                 preparedStatement.executeUpdate(); // execute
@@ -260,7 +260,7 @@ public class ChannelManager {
             }
 
             // Prepare statement
-            query = "UPDATE Accounts SET " + account.getTable() + " = ? WHERE id = ?";
+            query = "UPDATE AccountValues SET " + account.getTable() + " = ? WHERE id = ?";
             preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setString(1, value); // set value
             preparedStatement.setInt(2, id); // set id
@@ -283,7 +283,7 @@ public class ChannelManager {
             if (!mySQL.isConnected()) mySQL.connect();
 
             // Prepare statement
-            String query = "SELECT " + account.getTable() + " FROM " + "Accounts" + " WHERE id = ?";
+            String query = "SELECT " + account.getTable() + " FROM " + "AccountValues" + " WHERE id = ?";
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, id); // set id
             ResultSet resultSet = preparedStatement.executeQuery(); // execute
