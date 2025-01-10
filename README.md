@@ -248,7 +248,8 @@ The file should follow this structure:
   },
 
   "giphy": "YOUR_GIPHY_API_KEY",
-  "openWeatherMap": "YOUR_OPEN_WEATHER_MAP_API_KEY"
+  "openWeatherMap": "YOUR_OPEN_WEATHER_MAP_API_KEY",
+  "riot": "YOUR_RIOT_API_KEY"
 }
 ```
 If you do not wish to use a specific API or do not have the corresponding API key, you can omit that part of the configuration.
@@ -257,6 +258,7 @@ If you do not wish to use a specific API or do not have the corresponding API ke
 - **Astrology API**: Currently only used for the horoscope feature. Obtain your key from [Prokerala](https://api.prokerala.com/).
 - **OpenWeatherMap API**: Used for the weather command. Obtain your key from [OpenWeatherMap](https://openweathermap.org/api).
 - **Giphy API**: Used for GIF integration. Obtain your key from [Giphy](https://developers.giphy.com/). <br> <br>
+- **Riot API**: Used for the League of Legends command. Obtain your key from [Riot Games](https://developer.riotgames.com/). <br> <br>
 
 
 ### 6. Add a ChatGPT API key

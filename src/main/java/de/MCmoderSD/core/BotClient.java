@@ -186,6 +186,7 @@ public class BotClient {
         boolean astrology = credentials.hasAstrology();
         boolean weather = credentials.hasOpenWeatherMap();
         boolean giphy = credentials.hasGiphy();
+        boolean riot = credentials.hasRiot();
         boolean openAIChat = credentials.validateOpenAIChatConfig();
         boolean openAIImage = credentials.validateOpenAIImageConfig();
         boolean openAITTS = credentials.validateOpenAITTSConfig();
@@ -233,11 +234,12 @@ public class BotClient {
         if (openAITTS) new TTS(this, messageHandler, mySQL, Objects.requireNonNull(openAI).getSpeech());
 
         // API & OpenAI Commands
-        if (giphy || astrology || weather) {
+        if (giphy || astrology || weather || riot) {
             JsonNode apiConfig = credentials.getAPIConfig();
             if (giphy) new Gif(this, messageHandler, apiConfig);
             if (openAIChat && astrology) new Horoscope(this, messageHandler, helixHandler, mySQL, openAI.getChat(), apiConfig);
             if (openAIChat && weather) new Weather(this, messageHandler, openAI.getChat(), apiConfig);
+            if (riot) new Riot(this, messageHandler, apiConfig, credentials.getMySQLConfig());
         }
 
         // Show UI
