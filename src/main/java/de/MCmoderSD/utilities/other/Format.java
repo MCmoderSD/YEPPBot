@@ -47,11 +47,6 @@ public class Format {
         return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new Timestamp(System.currentTimeMillis())) + "]";
     }
 
-    // Format Unix Timestamp
-    public static String formatUnixTimestamp(long unixTimestamp) {
-        return new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(unixTimestamp * 1000));
-    }
-
     // Tag the channel
     public static String tagChannel(TwitchMessageEvent event) {
         return "@" + event.getChannel();
