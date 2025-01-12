@@ -8,19 +8,10 @@ import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.OpenAI.modules.Chat;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
+import de.MCmoderSD.openweathermap.core.OpenWeatherMap;
+import de.MCmoderSD.openweathermap.enums.SpeedUnit;
+import de.MCmoderSD.openweathermap.enums.TempUnit;
+import de.MCmoderSD.openweathermap.enums.TimeFormat;
 
 import java.util.ArrayList;
 
@@ -32,7 +23,7 @@ public class Weather {
     private final String errorRetrievingWeatherData;
 
     // OpenWeatherMap API
-    private final String apiKey;
+    private final OpenWeatherMap openWeatherMap;
 
     // OpenAI API
     private final Chat chat;
@@ -51,8 +42,8 @@ public class Weather {
         // Constants
         errorRetrievingWeatherData = "Fehler beim Abrufen der Wetterdaten.";
 
-        // Load API key
-        apiKey = apiConfig.get("openWeatherMap").asText();
+        // Initialize OpenWeatherMap
+        openWeatherMap = new OpenWeatherMap(apiConfig.get("openWeatherMap").asText());
 
         // Initialize OpenAI
         this.chat = chat;
@@ -109,81 +100,33 @@ public class Weather {
         String finalCityName = cityName.toString();
 
         // Query weather data
-        String response = query(convertToAscii(finalCityName));
-        if (response == null || response.isBlank()) return errorRetrievingWeatherData;
-        String formattedWeatherData = formatWeatherData(finalCityName, response);
+        String response;
 
-        return chat.prompt(null, "Please format in short text and translate in: " + language, formattedWeatherData, 0d, null, null, null, null);
-    }
-
-    private String formatWeatherData(String cityName, String response){
-
-        // Weather Description
-        JSONObject data = new JSONObject(response);
-        JSONArray weatherArray = data.getJSONArray("weather");
-        JSONObject weather = weatherArray.getJSONObject(0);
-        String weatherDescription = weather.getString("description");    // English
-
-        // Main weather data
-        JSONObject main = data.getJSONObject("main");
-        var tempKelvin = main.getDouble("temp");                      // Kelvin
-        var tempCelsius = tempKelvin - 273.15;                             // Celsius
-        var tempRounded = Math.toIntExact(Math.round(tempCelsius));           // Rounded
-        var humidity = main.getInt("humidity");                          // %
-        var pressure = main.getInt("pressure");                          // hPa
-
-        // Wind data
-        JSONObject wind = data.getJSONObject("wind");
-        var windSpeed = wind.getDouble("speed");                      // m/s
-
-        // Clouds data
-        JSONObject clouds = data.getJSONObject("clouds");
-        var cloudiness = clouds.getInt("all");                           // %
-
-        // Visibility data
-        String visibilityString;
-        BigDecimal visibility = data.getBigDecimal("visibility");  // Meter
-        if (visibility.intValue() == 10000) visibilityString = "";
-        else if (visibility.intValue() >= 1000 && visibility.intValue() % 100 == 0) {
-            visibility = visibility.divide(new BigDecimal(1000), 2, RoundingMode.HALF_UP);
-            visibilityString = visibility + " km Sichtweite, ";
-        } else {
-            visibilityString = visibility + " m Sichtweite, ";
-        }
-
-        // Sunrise and sunset data
-        JSONObject sys = data.getJSONObject("sys");
-        var sunriseUnixTimestamp = sys.getLong("sunrise");              // Unix Timestamp
-        var sunsetUnixTimestamp = sys.getLong("sunset");                // Unix Timestamp
-        String sunrise = formatUnixTimestamp(sunriseUnixTimestamp); // HH:mm:ss
-        String sunset = formatUnixTimestamp(sunsetUnixTimestamp);   // HH:mm:ss
-
-        // Build response
-        return "Wetter in " + cityName + ": " + weatherDescription + ", bei " + tempRounded + "°C, Luftfeuchtigkeit bei " + humidity + "%, Luftdruck bei " + pressure + " hPa, Windgeschwindigkeit bei " + windSpeed + " m/s , zu " + cloudiness + "% bewölkt, " + visibilityString + "Sonnenaufgang: " + sunrise + ", Sonnenuntergang: " + sunset + " (lokale Zeit)";
-    }
-
-    // Query weather data
-    private String query(String cityName) {
-
-        // Variables
-        StringBuilder response = new StringBuilder();
-
-        // Query
         try {
-            String encodedCityName = cityName.replace(" ", "+");
-            while (encodedCityName.charAt(encodedCityName.length() - 1) == '+') encodedCityName = encodedCityName.trim();
-            URI uri = new URI(String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", encodedCityName, apiKey));
-            HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
-            connection.setRequestMethod("GET");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) response.append(line);
-            reader.close();
-        } catch (IOException | URISyntaxException e) {
+            de.MCmoderSD.openweathermap.data.Weather weather = openWeatherMap.query(finalCityName);
+            response = formatWeatherData(weather);
+        } catch (Exception e) {
             System.err.println(e.getMessage());
-            return null;
+            response = errorRetrievingWeatherData;
         }
 
-        return response.toString();
+        if (response == null || response.isBlank()) return errorRetrievingWeatherData;
+        return chat.prompt(null, "Please format in short text and translate in: " + language, response, 0d, null, null, null, null);
+    }
+
+    // Format weather data
+    private String formatWeatherData(de.MCmoderSD.openweathermap.data.Weather weather) {
+        return String.format(
+                "Wetter in %s: %s, bei %s°C (%s°C gefühlt), Luftfeuchtigkeit bei %s%%, Luftdruck bei %s hPa, Windgeschwindigkeit bei %s km/h , zu %s bewölkt, Sonnenaufgang: %s, Sonnenuntergang: %s (lokale Zeit)",
+                weather.getCity(),
+                weather.getDescription(),
+                weather.getTemperature(TempUnit.CELSIUS),
+                weather.getFeelsLike(TempUnit.CELSIUS),
+                weather.getHumidity(),
+                weather.getPressure(),
+                weather.getWindSpeed(SpeedUnit.KPH),
+                weather.getCloudiness(),
+                weather.getSunrise(TimeFormat.HH_MM_SS),
+                weather.getSunset(TimeFormat.HH_MM_SS));
     }
 }
