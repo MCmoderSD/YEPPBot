@@ -48,6 +48,14 @@
         </dependency>
 
 
+        <!-- Giphy -->
+        <dependency>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>Giphy-API</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+
         <!-- HTTPS-Server -->
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
@@ -104,7 +112,7 @@
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
             <artifactId>OpenWeatherMap</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </dependency>
 
 

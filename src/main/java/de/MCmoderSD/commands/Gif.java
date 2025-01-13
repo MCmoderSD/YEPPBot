@@ -5,25 +5,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
+import de.MCmoderSD.giphy.Giphy;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
-
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Gif {
-
-    // Attributes
-    private final String apiKey;
 
     // Constructor
     public Gif(BotClient botClient, MessageHandler messageHandler, JsonNode apiConfig) {
@@ -35,8 +24,8 @@ public class Gif {
         String[] name = {"gif", "giphy", "gify"};
         String description = "Sendet ein GIF zu einem bestimmten Thema. " + syntax;
 
-        // Load API key
-        apiKey = apiConfig.get("giphy").asText();
+        // Initialize Giphy API
+        Giphy giphy = new Giphy(apiConfig.get("giphy").asText());
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -52,31 +41,13 @@ public class Gif {
                 // Check arguments
                 String topic = trimMessage(convertToAscii(processArgs(args)));
 
-                // Send Message
-                botClient.respond(event, getCommand(), trimMessage(gif(topic)));
+                // Query Giphy and send response
+                try {
+                    botClient.respond(event, getCommand(), trimMessage("Look: " + giphy.queryRandom(topic)[0].getMediaSource()));
+                } catch (Exception e) {
+                    botClient.respond(event, getCommand(), "Es wurde kein GIF gefunden.");
+                }
             }
         });
-    }
-
-    // Get GIF
-    private String gif(String topic) {
-        try {
-            URI uri = new URI(String.format("https://api.giphy.com/v1/gifs/random?api_key=%s&tag=%s", apiKey, topic));
-            HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
-            conn.setRequestMethod("GET");
-            conn.connect();
-            var responseCode = conn.getResponseCode();
-            if (responseCode != 200) return "Error code: " + responseCode;
-            Scanner scannerResponse = new Scanner(conn.getInputStream());
-            StringBuilder responseBody = new StringBuilder();
-            while (scannerResponse.hasNext()) responseBody.append(scannerResponse.nextLine());
-            scannerResponse.close();
-            JSONObject jsonResponse = new JSONObject(responseBody.toString());
-            JSONObject data = jsonResponse.getJSONObject("data");
-            return data.getString("url");
-        } catch (URISyntaxException | IOException e) {
-            System.err.println(e.getMessage());
-            return "An Error occurred. While trying to get a GIF.";
-        }
     }
 }
