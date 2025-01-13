@@ -19,16 +19,6 @@ import static de.MCmoderSD.utilities.other.Format.*;
 
 public class Weather {
 
-    // Constants
-    private final String errorRetrievingWeatherData;
-
-    // OpenWeatherMap API
-    private final OpenWeatherMap openWeatherMap;
-
-    // OpenAI API
-    private final Chat chat;
-
-
     // Constructor
     public Weather(BotClient botClient, MessageHandler messageHandler, Chat chat, JsonNode apiConfig) {
 
@@ -40,13 +30,10 @@ public class Weather {
         String description = "Zeigt das Wetter in einer Stadt an. " + syntax;
 
         // Constants
-        errorRetrievingWeatherData = "Fehler beim Abrufen der Wetterdaten.";
+        String errorRetrievingWeatherData = "Fehler beim Abrufen der Wetterdaten.";
 
         // Initialize OpenWeatherMap
-        openWeatherMap = new OpenWeatherMap(apiConfig.get("openWeatherMap").asText());
-
-        // Initialize OpenAI
-        this.chat = chat;
+        OpenWeatherMap openWeatherMap = new OpenWeatherMap(apiConfig.get("openWeatherMap").asText());
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -61,7 +48,55 @@ public class Weather {
 
                 String response;
                 if (args.isEmpty()) response = syntax;
-                else response = trimMessage(generateFormattedResponse(args));
+                else {
+
+                    // Split Input
+                    String language = "de"; // Default
+                    var parts = 0;
+                    for (String arg : args) {
+                        parts++;
+                        if (arg.contains(",")) {
+                            args.set(parts - 1, arg.replace(",", ""));
+                            break;
+                        }
+                    }
+
+                    // Check language
+                    if (parts < args.size()) {
+                        StringBuilder lang = new StringBuilder();
+                        for (var i = parts; i < args.size(); i++) lang.append(args.get(i)).append(" ");
+                        language = lang.toString();
+                    }
+
+                    // Build city name
+                    StringBuilder cityName = new StringBuilder();
+                    for (var i = 0; i < parts; i++) cityName.append(args.get(i)).append(" ");
+                    while (cityName.charAt(cityName.length() - 1) == ' ') cityName.deleteCharAt(cityName.length() - 1);
+                    String finalCityName = cityName.toString();
+
+                    // Query OpenWeatherMap
+                    try {
+                        de.MCmoderSD.openweathermap.data.Weather weather = openWeatherMap.query(finalCityName);
+                        response = String.format(
+                                "Wetter in %s: %s, bei %s°C (%s°C gefühlt), Luftfeuchtigkeit bei %s%%, Luftdruck bei %s hPa, Windgeschwindigkeit bei %s km/h , zu %s bewölkt, Sonnenaufgang: %s, Sonnenuntergang: %s (lokale Zeit)",
+                                weather.getCity(),
+                                weather.getDescription(),
+                                weather.getTemperature(TempUnit.CELSIUS),
+                                weather.getFeelsLike(TempUnit.CELSIUS),
+                                weather.getHumidity(),
+                                weather.getPressure(),
+                                weather.getWindSpeed(SpeedUnit.KPH),
+                                weather.getCloudiness(),
+                                weather.getSunrise(TimeFormat.HH_MM_SS),
+                                weather.getSunset(TimeFormat.HH_MM_SS));
+                    } catch (Exception e) {
+                        System.err.println(e.getMessage());
+                        response = errorRetrievingWeatherData;
+                    }
+
+                    // Translate
+                    response = chat.prompt(null, "Please format in short text and translate in: " + language, response, 0d, null, null, null, null);
+                }
 
                 // Filter Response for argument injection
                 response = removePrefix(response);
@@ -70,63 +105,5 @@ public class Weather {
                 botClient.respond(event, getCommand(), response);
             }
         });
-    }
-
-    // Generate response
-    private String generateFormattedResponse(ArrayList<String> args) {
-
-        // Split Input
-        String language = "de"; // Default
-        var parts = 0;
-        for (String arg : args) {
-            parts++;
-            if (arg.contains(",")) {
-                args.set(parts - 1, arg.replace(",", ""));
-                break;
-            }
-        }
-
-        // Check language
-        if (parts < args.size()) {
-            StringBuilder lang = new StringBuilder();
-            for (var i = parts; i < args.size(); i++) lang.append(args.get(i)).append(" ");
-            language = lang.toString();
-        }
-
-        // Build city name
-        StringBuilder cityName = new StringBuilder();
-        for (var i = 0; i < parts; i++) cityName.append(args.get(i)).append(" ");
-        while (cityName.charAt(cityName.length() - 1) == ' ') cityName.deleteCharAt(cityName.length() - 1);
-        String finalCityName = cityName.toString();
-
-        // Query weather data
-        String response;
-
-        try {
-            de.MCmoderSD.openweathermap.data.Weather weather = openWeatherMap.query(finalCityName);
-            response = formatWeatherData(weather);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            response = errorRetrievingWeatherData;
-        }
-
-        if (response == null || response.isBlank()) return errorRetrievingWeatherData;
-        return chat.prompt(null, "Please format in short text and translate in: " + language, response, 0d, null, null, null, null);
-    }
-
-    // Format weather data
-    private String formatWeatherData(de.MCmoderSD.openweathermap.data.Weather weather) {
-        return String.format(
-                "Wetter in %s: %s, bei %s°C (%s°C gefühlt), Luftfeuchtigkeit bei %s%%, Luftdruck bei %s hPa, Windgeschwindigkeit bei %s km/h , zu %s bewölkt, Sonnenaufgang: %s, Sonnenuntergang: %s (lokale Zeit)",
-                weather.getCity(),
-                weather.getDescription(),
-                weather.getTemperature(TempUnit.CELSIUS),
-                weather.getFeelsLike(TempUnit.CELSIUS),
-                weather.getHumidity(),
-                weather.getPressure(),
-                weather.getWindSpeed(SpeedUnit.KPH),
-                weather.getCloudiness(),
-                weather.getSunrise(TimeFormat.HH_MM_SS),
-                weather.getSunset(TimeFormat.HH_MM_SS));
     }
 }
