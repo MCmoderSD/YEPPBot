@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
             <artifactId>Astrology</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
 
 
@@ -82,7 +82,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20241224</version>
+            <version>20250107</version>
         </dependency>
 
         <dependency>
