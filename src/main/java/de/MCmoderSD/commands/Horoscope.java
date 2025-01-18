@@ -2,7 +2,7 @@ package de.MCmoderSD.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import de.MCmoderSD.astrology.ProkeralaAPI;
+import de.MCmoderSD.astrology.manager.Astrology;
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
@@ -26,15 +26,6 @@ public class Horoscope {
     private final String errorGettingBirthday;
     private final String errorGettingHoroscope;
 
-    // Credentials
-    private final String[] clientIDs;
-    private final String[] clientSecrets;
-
-    // Attributes
-    private ProkeralaAPI prokeralaAPI;
-    private int apiIndex = 0;
-    private int apiSwaps = 0;
-
     // Constructor
     public Horoscope(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL, Chat chat, JsonNode apiconfig) {
 
@@ -52,10 +43,8 @@ public class Horoscope {
         errorGettingHoroscope = "Fehler beim Abrufen des Horoskops.";
 
         // Load ProkeralaAPI Credentials
-        JsonNode prokeralaConfig = apiconfig.get("astrology");
-        clientIDs = prokeralaConfig.get("clientId").asText().split(", ");
-        clientSecrets = prokeralaConfig.get("clientSecret").asText().split(", ");
-        initAPI();
+        JsonNode astrologyApiConfig = apiconfig.get("astrology");
+        Astrology api = new Astrology(astrologyApiConfig.get("clientId").asText().split(", "), astrologyApiConfig.get("clientSecret").asText().split(", "));
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -100,14 +89,11 @@ public class Horoscope {
                 }
 
                 // Get Horoscope
-                String dailyPrediction = getDailyPrediction(birthdate);
+                String dailyPrediction = api.dailyPrediction(birthdate.getMonthDay()).getPrediction();
                 if (dailyPrediction.isBlank()) {
                     botClient.respond(event, getCommand(), errorGettingHoroscope);
                     return;
                 }
-
-                // Reset API Swaps
-                apiSwaps = 0;
 
                 // Translate Horoscope
                 if (Arrays.asList("en", "english", "englisch", "eng").contains(language)) botClient.respond(event, getCommand(), dailyPrediction);
@@ -118,42 +104,5 @@ public class Horoscope {
                 }
             }
         });
-    }
-
-    // Get Daily Prediction
-    private String getDailyPrediction(Birthdate birthdate) {
-
-        // Get Daily Prediction
-        String dailyPrediction = prokeralaAPI.dailyPrediction(birthdate.getMonthDay());
-
-        // Check for API Error
-        if (dailyPrediction.startsWith("Error: ")) {
-
-            // Check for API Swap
-            var code = Integer.parseInt(dailyPrediction.substring(7));
-            if (code == 403) initAPI();
-
-            // Retry
-            if (apiSwaps >= clientIDs.length) return "Failed to connect to the API. Please try again later.";
-            else {
-                apiSwaps++;
-                return getDailyPrediction(birthdate);
-            }
-        }
-
-        return dailyPrediction;
-    }
-
-    // Load Horoscope List
-    private void initAPI() {
-
-        // Swap API
-        if (prokeralaAPI != null) {
-            apiIndex++;
-            if (apiIndex >= clientIDs.length) apiIndex = 0;
-        }
-
-        // Initialize API
-        prokeralaAPI = new ProkeralaAPI(clientIDs[apiIndex], clientSecrets[apiIndex]);
     }
 }
