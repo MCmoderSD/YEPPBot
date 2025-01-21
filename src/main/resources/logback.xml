@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- Logback Configuration -->
-<configuration scan="false">
+<configuration scan="true">
 
 	<!-- Configure Twitch4J logger level -->
 	<logger name="com.github.twitch4j" level="OFF"/>

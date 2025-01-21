@@ -31,14 +31,12 @@
             <version>1.1.0</version>
         </dependency>
 
-
         <!-- Encryption -->
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
             <artifactId>Encryption</artifactId>
             <version>1.0.1</version>
         </dependency>
-
 
         <!-- Executor -->
         <dependency>
@@ -47,14 +45,12 @@
             <version>1.0.2</version>
         </dependency>
 
-
         <!-- Giphy -->
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
             <artifactId>Giphy-API</artifactId>
             <version>1.0.0</version>
         </dependency>
-
 
         <!-- HTTPS-Server -->
         <dependency>
@@ -63,14 +59,12 @@
             <version>1.0.3</version>
         </dependency>
 
-
         <!-- ImageLoader -->
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
             <artifactId>ImageLoader</artifactId>
             <version>1.0.3</version>
         </dependency>
-
 
         <!-- Json -->
         <dependency>
@@ -79,18 +73,12 @@
             <version>1.1.1</version>
         </dependency>
 
+        <!-- Logback -->
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20250107</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.16</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.18.3</version>
-        </dependency>
-
 
         <!-- MySQL -->
         <dependency>
@@ -99,14 +87,12 @@
             <version>1.0.0</version>
         </dependency>
 
-
         <!-- OpenAI -->
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
             <artifactId>OpenAI-Utility</artifactId>
             <version>1.1.0</version>
         </dependency>
-
 
         <!-- OpenWeatherMap -->
         <dependency>
@@ -115,15 +101,12 @@
             <version>1.0.1</version>
         </dependency>
 
-
         <!-- Riot Games -->
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
             <artifactId>RiotGames-API</artifactId>
             <version>1.0.3</version>
         </dependency>
-
-
 
         <!-- Twitch4J -->
         <dependency>
@@ -133,33 +116,16 @@
         </dependency>
 
 
-        <!-- OAuth -->
+
         <dependency>
-            <groupId>com.github.scribejava</groupId>
-            <artifactId>scribejava-core</artifactId>
-            <version>8.3.3</version>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20250107</version>
         </dependency>
-
         <dependency>
-            <groupId>com.github.scribejava</groupId>
-            <artifactId>scribejava-apis</artifactId>
-            <version>8.3.3</version>
-        </dependency>
-
-
-        <!-- Apache HttpClient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
-            <version>5.4.1</version>
-        </dependency>
-
-
-        <!-- Logback -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.16</version>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.18.3</version>
         </dependency>
     </dependencies>
 

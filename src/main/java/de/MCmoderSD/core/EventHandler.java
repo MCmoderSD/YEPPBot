@@ -121,7 +121,7 @@ public class EventHandler {
 
         // Clip Events
         eventManager.onEvent(ChannelClipCreatedEvent.class, this::handleClipCreationEvent);
-        
+
         // Stream Events
         eventManager.onEvent(ChannelGoLiveEvent.class, this::handleGoLiveEvent);
         eventManager.onEvent(ChannelGoOfflineEvent.class, this::handleGoOfflineEvent);
@@ -135,6 +135,9 @@ public class EventHandler {
 
         // Create new Thread
         new Thread(() -> {
+
+            // Check if Event is Mirrored
+            if (event.isMirrored()) return;
 
             // TwitchMessageEvent
             TwitchMessageEvent messageEvent = new TwitchMessageEvent(event);
@@ -157,6 +160,9 @@ public class EventHandler {
 
         // Create new Thread
         new Thread(() -> {
+
+            // Check if Event is Mirrored
+            if (event.isMirrored()) return;
 
             // TwitchMessageEvent
             TwitchMessageEvent messageEvent = new TwitchMessageEvent(event);
@@ -255,7 +261,7 @@ public class EventHandler {
 
             Integer id = Integer.parseInt(event.getChannel().getId());
             lastRaid.put(id, event);
-            
+
             // Log Message
             if (log) logManager.logRaid(event);
 
