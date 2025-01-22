@@ -305,7 +305,7 @@ public class BotClient {
         if (valid && !cli) frame.log(channel, botName, message);
 
         // Log
-        if (log) mySQL.getLogManager().logResponse(event, command, message);
+        if (valid && log    ) mySQL.getLogManager().logResponse(event, command, message);
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
         if (valid) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
