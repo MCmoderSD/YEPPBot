@@ -65,7 +65,8 @@ public class Format {
 
     // Remove Prefix
     public static String removePrefix(String input) {
-        for (String prefix : prefixes) while (input.startsWith(prefix)) input = input.substring(prefix.length());
+        while (input.substring(0, 1).matches("[^a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]")) input = input.substring(1); // Filter out any special characters
+        for (String prefix : prefixes) while (input.startsWith(prefix)) input = input.substring(prefix.length()); // Filter out any prefixes
         return input;
     }
 
