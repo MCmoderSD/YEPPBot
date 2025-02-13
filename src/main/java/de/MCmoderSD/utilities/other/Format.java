@@ -65,9 +65,14 @@ public class Format {
 
     // Remove Prefix
     public static String removePrefix(String input) {
+        // Recursive check if its santizied now, first char in whitelist and starts not with a prefix
+        // Regex: Whitelist of characters that are allowed as the first character inside the string
+        if (input.substring(0, 1).matches("[a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]") && !Arrays.stream(prefixes).anyMatch(input::startsWith)) return input;
+        
+        // Regex: Negated whitelist of characters that are not allowed as the first character inside the string
         while (input.substring(0, 1).matches("[^a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]")) input = input.substring(1); // Filter out any special characters
         for (String prefix : prefixes) while (input.startsWith(prefix)) input = input.substring(prefix.length()); // Filter out any prefixes
-        return input;
+        return removePrefix(input);
     }
 
     // Trim Message
