@@ -36,6 +36,10 @@ public class Format {
     public final static String GIFT = "[GFT]";
     public final static String RAID = "[RAD]";
 
+    // Regex
+    public final static String VALID_CHARS = "[a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]";
+    public final static String INVALID_CHARS = "[^a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]";
+
     // Colors
     public final static Color DARK = new Color(0x0e0e10);
     public final static Color LIGHT = new Color(0x18181b);
@@ -65,14 +69,10 @@ public class Format {
 
     // Remove Prefix
     public static String removePrefix(String input) {
-        // Recursive check if its santizied now, first char in whitelist and starts not with a prefix
-        // Regex: Whitelist of characters that are allowed as the first character inside the string
-        if (input.substring(0, 1).matches("[a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]") && !Arrays.stream(prefixes).anyMatch(input::startsWith)) return input;
-        
-        // Regex: Negated whitelist of characters that are not allowed as the first character inside the string
-        while (input.substring(0, 1).matches("[^a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]")) input = input.substring(1); // Filter out any special characters
-        for (String prefix : prefixes) while (input.startsWith(prefix)) input = input.substring(prefix.length()); // Filter out any prefixes
-        return removePrefix(input);
+        if (input.substring(0, 1).matches(VALID_CHARS) && Arrays.stream(prefixes).noneMatch(input::startsWith)) return input;   // Check if valid
+        while (input.substring(0, 1).matches(INVALID_CHARS)) input = input.substring(1);                                // Remove invalid characters
+        for (String prefix : prefixes) while (input.startsWith(prefix)) input = input.substring(prefix.length());               // Remove prefix
+        return removePrefix(input);                                                                                             // Recursion until valid
     }
 
     // Trim Message
