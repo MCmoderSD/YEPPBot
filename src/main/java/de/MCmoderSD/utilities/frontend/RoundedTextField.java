@@ -11,6 +11,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.geom.RoundRectangle2D;
 
+import static de.MCmoderSD.utilities.other.Format.EMPTY;
+
 public class RoundedTextField extends JTextField {
 
     public RoundedTextField(int columns, String templateText) {
@@ -24,7 +26,7 @@ public class RoundedTextField extends JTextField {
             @Override
             public void focusGained(FocusEvent e) {
                 if (getText().equals(templateText)) {
-                    setText("");
+                    setText(EMPTY);
                     setForeground(Color.WHITE);
                 }
             }

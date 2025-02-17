@@ -134,7 +134,7 @@ public class MessageHandler {
                 // Add user to traitor list
                 lurkChannel.add(channelID);
                 StringBuilder traitors = new StringBuilder();
-                for (var i = 1; i < lurkChannel.size(); i++) traitors.append(lurkChannel.get(i)).append("\t");
+                for (var i = 1; i < lurkChannel.size(); i++) traitors.append(lurkChannel.get(i)).append(TAB);
                 mySQL.getLurkManager().addTraitor(userID, traitors.toString());
 
                 // Send message
@@ -188,7 +188,7 @@ public class MessageHandler {
             parts.removeFirst();
 
             // Log Command
-            mySQL.getLogManager().logCommand(event, trigger, processArgs(parts));
+            mySQL.getLogManager().logCommand(event, trigger, concatArgs(parts));
 
             // Execute Command
             command.execute(event, parts);
@@ -214,7 +214,7 @@ public class MessageHandler {
                 parts.removeFirst();
 
                 // Log Command
-                mySQL.getLogManager().logCommand(event, trigger, processArgs(parts));
+                mySQL.getLogManager().logCommand(event, trigger, concatArgs(parts));
 
                 // Execute Command
                 botClient.respond(event, "Custom: " + trigger, response);
@@ -232,7 +232,7 @@ public class MessageHandler {
                 parts.removeFirst();
 
                 // Log Command
-                mySQL.getLogManager().logCommand(event, trigger, processArgs(parts));
+                mySQL.getLogManager().logCommand(event, trigger, concatArgs(parts));
 
                 // Execute Command
                 botClient.respond(event, "Counter: " + trigger, response);

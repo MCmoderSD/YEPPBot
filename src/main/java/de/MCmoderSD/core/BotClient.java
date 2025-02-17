@@ -120,7 +120,7 @@ public class BotClient {
         // Init Bot Settings
         botNames = botConfig.get("botName").asText().toLowerCase().split(", ");
         botName = botNames[0];
-        prefixes = botConfig.get("prefix").asText().split(" ");
+        prefixes = botConfig.get("prefix").asText().split(SPACE);
         prefix = prefixes[0];
         admins = new HashSet<>(Arrays.asList(botConfig.get("admins").asText().toLowerCase().split("; ")));
 
@@ -338,7 +338,7 @@ public class BotClient {
         // Check Channel
         if (channel.isBlank()) return;
         if (channel.length() < 3 || channel.length() > 25) return;
-        if (channel.contains(" ") || chat.isChannelJoined(channel) || botName.equals(channel)) return;
+        if (channel.contains(SPACE) || chat.isChannelJoined(channel) || botName.equals(channel)) return;
 
         // Get Channel ID
         var id = helixHandler.getUser(channel).getId();
@@ -381,7 +381,7 @@ public class BotClient {
         // Check Channel
         if (channel.isBlank()) return;
         if (channel.length() < 3 || channel.length() > 25) return;
-        if (channel.contains(" ") || !chat.isChannelJoined(channel) || botName.equals(channel)) return;
+        if (channel.contains(SPACE) || !chat.isChannelJoined(channel) || botName.equals(channel)) return;
 
         // Leave Channel
         if (chat.leaveChannel(channel)) System.out.printf("%s%s %s Left Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);

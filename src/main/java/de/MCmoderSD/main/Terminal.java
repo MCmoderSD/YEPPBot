@@ -81,8 +81,8 @@ public class Terminal {
     }
 
     private void handleInput(String input) {
-        while (input.startsWith(" ")) input = input.substring(1);
-        while (input.endsWith(" ")) input = input.substring(0, input.length() - 1);
+        while (input.startsWith(SPACE)) input = input.substring(1);
+        while (input.endsWith(SPACE)) input = input.substring(0, input.length() - 1);
         switch (input.toLowerCase().trim()) {
             case "exit", "stop" -> exit();
             case "clear", "cls", "clr" -> clear();

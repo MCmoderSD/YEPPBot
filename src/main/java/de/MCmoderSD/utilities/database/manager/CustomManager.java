@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class CustomManager {
 
     // Associations
@@ -177,7 +179,7 @@ public class CustomManager {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT command_name, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? "" : " AND isEnabled = 1");
+            String query = "SELECT command_name, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? EMPTY : " AND isEnabled = 1");
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, event.getChannelId()); // set channel
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -204,7 +206,7 @@ public class CustomManager {
             if (!mySQL.isConnected()) mySQL.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT command_alias, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? "" : " AND isEnabled = 1");
+            String query = "SELECT command_alias, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? EMPTY : " AND isEnabled = 1");
             PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setInt(1, event.getChannelId()); // set channel
             ResultSet resultSet = preparedStatement.executeQuery();

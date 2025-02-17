@@ -41,7 +41,7 @@ public class Translate {
                     String language = args.getFirst();
 
                     // Process text
-                    String text = trimMessage(processArgs(args)).replace(language, "");
+                    String text = trimMessage(concatArgs(args)).replace(language, EMPTY);
                     String instruction = trimMessage("Please translate the following text into " + language + ":");
 
                     // Translate

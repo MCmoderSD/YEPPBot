@@ -7,6 +7,8 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 
 import java.util.ArrayList;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class Say {
 
     // Constructor
@@ -30,7 +32,7 @@ public class Say {
                 if (!(botClient.isAdmin(event) || botClient.isPermitted(event))) return;
 
                 // Send Message
-                botClient.respond(event, getCommand(), String.join(" ", args));
+                botClient.respond(event, getCommand(), String.join(SPACE, args));
             }
         });
     }

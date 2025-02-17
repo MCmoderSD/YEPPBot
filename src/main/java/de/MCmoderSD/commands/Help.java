@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static de.MCmoderSD.utilities.other.Format.EMPTY;
 import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 
 public class Help {
@@ -49,7 +50,7 @@ public class Help {
                 args.addAll(cleanArgs);
 
                 // Variables
-                String arg = !args.isEmpty() ? args.getFirst().toLowerCase() : "";
+                String arg = !args.isEmpty() ? args.getFirst().toLowerCase() : EMPTY;
 
                 // Help Commands
                 String response = null;

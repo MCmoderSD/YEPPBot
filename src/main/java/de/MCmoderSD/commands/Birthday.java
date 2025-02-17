@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
+import static de.MCmoderSD.utilities.other.Format.EMPTY;
 import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 import static de.MCmoderSD.utilities.other.Util.removeNonFollower;
 import static de.MCmoderSD.utilities.other.Util.sortBirthdays;
@@ -353,15 +354,15 @@ public class Birthday {
         // Get Birthday
         Birthdate birthdate = birthdays.get(id);
         return switch (args.get(tagged ? 2 : 1).toLowerCase()) {
-            case "years", "jahre" -> String.format(msgYears, birthdate.getYearsUntilBirthday(), birthdate.getYearsUntilBirthday() > 1 ? "e" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "months", "monate" -> String.format(msgMonths, birthdate.getMonthsUntilBirthday(), birthdate.getMonthsUntilBirthday() > 1 ? "e" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "weeks", "wochen" -> String.format(msgWeeks, birthdate.getWeeksUntilBirthday(), birthdate.getWeeksUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "hours", "stunden", "h" -> String.format(msgDays, birthdate.getHoursUntilBirthday(), birthdate.getHoursUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "days", "tage", "d" -> String.format(msgHours, birthdate.getDaysUntilBirthday(), birthdate.getDaysUntilBirthday() > 1 ? "e" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "seconds", "sekunden", "s" -> String.format(msgSeconds, birthdate.getSecondsUntilBirthday(), birthdate.getSecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "milliseconds", "millisekunden", "ms" -> String.format(msgMilliseconds, birthdate.getMillisecondsUntilBirthday(), birthdate.getMillisecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "microseconds", "mikrosekunden", "µs" -> String.format(msgMicroseconds, birthdate.getMicrosecondsUntilBirthday(), birthdate.getMicrosecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
-            case "nanoseconds", "nanosekunden", "ns" -> String.format(msgNanoseconds, birthdate.getNanosecondsUntilBirthday(), birthdate.getNanosecondsUntilBirthday() > 1 ? "n" : "", tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "years", "jahre" -> String.format(msgYears, birthdate.getYearsUntilBirthday(), birthdate.getYearsUntilBirthday() > 1 ? "e" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "months", "monate" -> String.format(msgMonths, birthdate.getMonthsUntilBirthday(), birthdate.getMonthsUntilBirthday() > 1 ? "e" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "weeks", "wochen" -> String.format(msgWeeks, birthdate.getWeeksUntilBirthday(), birthdate.getWeeksUntilBirthday() > 1 ? "n" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "hours", "stunden", "h" -> String.format(msgDays, birthdate.getHoursUntilBirthday(), birthdate.getHoursUntilBirthday() > 1 ? "n" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "days", "tage", "d" -> String.format(msgHours, birthdate.getDaysUntilBirthday(), birthdate.getDaysUntilBirthday() > 1 ? "e" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "seconds", "sekunden", "s" -> String.format(msgSeconds, birthdate.getSecondsUntilBirthday(), birthdate.getSecondsUntilBirthday() > 1 ? "n" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "milliseconds", "millisekunden", "ms" -> String.format(msgMilliseconds, birthdate.getMillisecondsUntilBirthday(), birthdate.getMillisecondsUntilBirthday() > 1 ? "n" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "microseconds", "mikrosekunden", "µs" -> String.format(msgMicroseconds, birthdate.getMicrosecondsUntilBirthday(), birthdate.getMicrosecondsUntilBirthday() > 1 ? "n" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
+            case "nanoseconds", "nanosekunden", "ns" -> String.format(msgNanoseconds, birthdate.getNanosecondsUntilBirthday(), birthdate.getNanosecondsUntilBirthday() > 1 ? "n" : EMPTY, tagged ? "@" + taggedUser + "'s" : "deinem");
             default -> "Invalid Argument: " + inSyntax;
         };
     }

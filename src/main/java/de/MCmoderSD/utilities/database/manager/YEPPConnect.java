@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class YEPPConnect {
 
     // Associations
@@ -69,25 +71,25 @@ public class YEPPConnect {
         if (add && !channelExists(channelID)) createChannel(channelID);
 
         // Get Whitelist
-        ArrayList<String> whitelist = getData(channelID, "whitelist") != null ? new ArrayList<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "whitelist")).split(" "))) : new ArrayList<>();
+        ArrayList<String> whitelist = getData(channelID, "whitelist") != null ? new ArrayList<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "whitelist")).split(SPACE))) : new ArrayList<>();
         Set<String> temp = getData(channelID, "user_pair") != null ? new HashSet<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "user_pair")).split(" - "))) : null;
         ArrayList<String> userPair = new ArrayList<>(temp != null ? temp : new ArrayList<>());
         ArrayList<String> users = new ArrayList<>();
-        for (String id : userPair) users.add(id.split(" ")[0]);
+        for (String id : userPair) users.add(id.split(SPACE)[0]);
 
         if (add) {
             if (whitelist.contains(mcUsername)) return "User is already whitelisted.";
             if (!users.contains(String.valueOf(userID))) {
                 whitelist.add(mcUsername);
-                userPair.add(userID + " " + mcUsername);
+                userPair.add(userID + SPACE + mcUsername);
                 updateWhitelist(channelID, whitelist, userPair);
                 return "User added to whitelist.";
             } else {
                 var index = users.indexOf(String.valueOf(userID));
-                String oldName = userPair.get(index).split(" ")[1];
+                String oldName = userPair.get(index).split(SPACE)[1];
                 whitelist.remove(oldName);
                 whitelist.add(mcUsername);
-                userPair.set(index, userID + " " + mcUsername);
+                userPair.set(index, userID + SPACE + mcUsername);
                 updateWhitelist(channelID, whitelist, userPair);
                 return "User updated in whitelist.";
             }
@@ -100,7 +102,7 @@ public class YEPPConnect {
             // Remove user from userPair
             var index = 0;
             for (String id : userPair) {
-                if (id.split(" ")[1].contains(mcUsername)) {
+                if (id.split(SPACE)[1].contains(mcUsername)) {
                     userPair.remove(index);
                     break;
                 }
@@ -170,7 +172,7 @@ public class YEPPConnect {
 
             // Format whitelist
             StringBuilder whitelistString = new StringBuilder();
-            for (String name : whitelist) if (!name.isEmpty()) whitelistString.append(name).append(" ");
+            for (String name : whitelist) if (!name.isEmpty()) whitelistString.append(name).append(SPACE);
             if (!whitelistString.isEmpty()) whitelistString.deleteCharAt(whitelistString.length() - 1);
 
             // Format userPair

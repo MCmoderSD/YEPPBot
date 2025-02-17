@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class ChannelManager {
 
     // Associations
@@ -204,11 +206,11 @@ public class ChannelManager {
                 return "Error: Channel not found";
             }
             String blacklist = resultSet.getString("blacklist");
-            if (blacklist == null) blacklist = "";
+            if (blacklist == null) blacklist = EMPTY;
             ArrayList<String> list = new ArrayList<>(List.of(blacklist.split("; ")));
             if (isBlocked && !list.contains(command)) list.add(command);
             else if (!isBlocked) list.remove(command);
-            list.remove("");
+            list.remove(EMPTY);
 
             // Close select resources
             resultSet.close();

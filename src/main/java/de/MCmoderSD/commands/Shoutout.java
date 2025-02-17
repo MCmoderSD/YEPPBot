@@ -14,6 +14,8 @@ import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class Shoutout {
 
     // Associations
@@ -48,7 +50,7 @@ public class Shoutout {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 var test = eventHandler.getLastRaid();
-                test.forEach((key, value) -> System.out.println(key + " " + value));
+                test.forEach((key, value) -> System.out.println(key + SPACE + value));
 
                 // Check if user is moderator or admin
                 if (!(botClient.isAdmin(event) || botClient.isPermitted(event))) return;

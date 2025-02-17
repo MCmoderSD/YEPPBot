@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.MCmoderSD.core.HelixHandler;
+import de.MCmoderSD.encryption.Encryption;
 import de.MCmoderSD.enums.Scope;
-import de.MCmoderSD.utilities.other.Encryption;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 
 import java.util.Arrays;
 
+import static de.MCmoderSD.utilities.other.Format.EMPTY;
 import static de.MCmoderSD.utilities.other.Format.formatScopes;
 
 @SuppressWarnings("unused")
@@ -94,7 +95,7 @@ public class AuthToken {
     }
 
     public String getScopesAsString() {
-        return Arrays.stream(scopes).map(Scope::getScope).reduce((s1, s2) -> s1 + "+" + s2).orElse("");
+        return Arrays.stream(scopes).map(Scope::getScope).reduce((s1, s2) -> s1 + "+" + s2).orElse(EMPTY);
     }
 
     public boolean hasScope(Scope... scopes) {

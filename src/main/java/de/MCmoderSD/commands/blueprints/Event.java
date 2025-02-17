@@ -272,7 +272,7 @@ public abstract class Event {
         alreadyLeft.delete(alreadyLeft.length() - 2, alreadyLeft.length());
 
         // Check for args
-        String arg = args.size() > 1 ? args.get(1) : "";
+        String arg = args.size() > 1 ? args.get(1) : EMPTY;
         String response = switch (arg) {
             case "in", "still", "fighting" -> String.format(usersStillIn, stillIn);
             case "out", "left", "busted" -> String.format(usersAlreadyLeft, alreadyLeft);

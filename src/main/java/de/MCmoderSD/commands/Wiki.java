@@ -57,7 +57,7 @@ public class Wiki {
                         else args.removeFirst(); // Remove Language
 
                         // Query Wikipedia
-                        String topic = processArgs(args);
+                        String topic = concatArgs(args);
 
                         // Wikipedia API
                         Page wikiPage;

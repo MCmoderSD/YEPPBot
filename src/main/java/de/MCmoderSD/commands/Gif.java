@@ -39,7 +39,7 @@ public class Gif {
                 args.addAll(cleanArgs);
 
                 // Check arguments
-                String topic = trimMessage(convertToAscii(processArgs(args)));
+                String topic = trimMessage(convertToAscii(concatArgs(args)));
 
                 // Query Giphy and send response
                 try {

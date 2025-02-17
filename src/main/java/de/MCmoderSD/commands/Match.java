@@ -141,7 +141,7 @@ public class Match {
 
                 // Final Response
                 StringBuilder finalResponse = response;
-                finalResponse.append(" ");
+                finalResponse.append(SPACE);
                 compatibleUsers.forEach((key, value) -> finalResponse.append(value).append(", "));
                 finalResponse.deleteCharAt(finalResponse.length() - 2);
                 finalResponse.append(" YEPP");

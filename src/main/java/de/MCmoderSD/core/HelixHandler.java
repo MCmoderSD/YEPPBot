@@ -32,13 +32,13 @@ import java.util.Collections;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import de.MCmoderSD.encryption.Encryption;
 import de.MCmoderSD.enums.Scope;
 import de.MCmoderSD.objects.AuthToken;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.server.Server;
 import de.MCmoderSD.utilities.database.MySQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
-import de.MCmoderSD.utilities.other.Encryption;
 import de.MCmoderSD.utilities.other.Format;
 
 import org.jetbrains.annotations.Nullable;

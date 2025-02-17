@@ -105,7 +105,7 @@ public class CustomTimer {
 
                                 // Get Custom Timer response
                                 StringBuilder stringBuilder = new StringBuilder();
-                                for (var i = message.get(":") + 1; i < args.size(); i++) stringBuilder.append(args.get(i)).append(" ");
+                                for (var i = message.get(":") + 1; i < args.size(); i++) stringBuilder.append(args.get(i)).append(SPACE);
                                 String timerResponse = trimMessage(stringBuilder.toString());
 
                                 // Create command

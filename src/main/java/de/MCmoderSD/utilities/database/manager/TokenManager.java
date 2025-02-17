@@ -1,9 +1,9 @@
 package de.MCmoderSD.utilities.database.manager;
 
 import de.MCmoderSD.core.HelixHandler;
+import de.MCmoderSD.encryption.Encryption;
 import de.MCmoderSD.objects.AuthToken;
 import de.MCmoderSD.utilities.database.MySQL;
-import de.MCmoderSD.utilities.other.Encryption;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -157,7 +157,7 @@ public class TwitchMessageEvent {
 
     public boolean hasCommand() {
         for (String prefix : prefixes) if (message.startsWith(prefix)) return true;
-        for (String prefix : prefixes) if (message.contains(" " + prefix)) return true;
+        for (String prefix : prefixes) if (message.contains(SPACE + prefix)) return true;
         return false;
     }
 

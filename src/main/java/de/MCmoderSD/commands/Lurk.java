@@ -9,6 +9,8 @@ import de.MCmoderSD.utilities.database.manager.LurkManager;
 
 import java.util.ArrayList;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class Lurk {
 
     // Constructor
@@ -35,7 +37,7 @@ public class Lurk {
                 messageHandler.updateLurkList(mySQL.getLurkManager().saveLurk(event));
 
                 // Send message
-                botClient.respond(event, getCommand(), "");
+                botClient.respond(event, getCommand(), EMPTY);
             }
         });
     }

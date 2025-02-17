@@ -12,6 +12,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class LurkManager {
 
     // Associations
@@ -145,7 +147,7 @@ public class LurkManager {
 
                 // Get TraitorChannel
                 if (resultSet.getString("traitorChannel") == null) return lurkTime;
-                String[] traitorChannel = resultSet.getString("traitorChannel").split("\t");
+                String[] traitorChannel = resultSet.getString("traitorChannel").split(TAB);
                 if (traitorChannel.length == 0 || traitorChannel[0].isEmpty()) return lurkTime;
                 for (String name : traitorChannel) if (!name.isEmpty()) channels.add(Integer.parseInt(name));
             }

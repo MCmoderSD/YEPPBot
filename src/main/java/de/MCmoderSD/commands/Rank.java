@@ -11,6 +11,8 @@ import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class Rank {
 
     // Constructor
@@ -48,7 +50,7 @@ public class Rank {
                     Account account = Account.getAccount(args.getFirst());
                     if (account == null) botClient.respond(event, getCommand(), syntax);
                     else {
-                        String rank = String.join(" ", args.subList(2, args.size()));
+                        String rank = String.join(SPACE, args.subList(2, args.size()));
                         boolean success = channelManager.setAccountValue(event.getChannelId(), account, rank);
                         if (success) botClient.respond(event, getCommand(), account.getName() + " Rank updated to " + rank);
                         else botClient.respond(event, getCommand(), account.getName() + " Rank could not be updated!");
@@ -57,7 +59,7 @@ public class Rank {
                 }
 
                 // Get Account
-                Account account = Account.getAccount(String.join(" ", args).toLowerCase());
+                Account account = Account.getAccount(String.join(SPACE, args).toLowerCase());
                 if (account == null) botClient.respond(event, getCommand(), syntax);
                 else {
                     String rank = channelManager.getAccountValue(event.getChannelId(), account);
