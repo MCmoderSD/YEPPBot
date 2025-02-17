@@ -15,6 +15,8 @@ import de.MCmoderSD.riot.objects.Summoner;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class Riot {
 
     // Constructor
@@ -43,9 +45,9 @@ public class Riot {
                 }
 
                 // Get Username
-                String[] input = String.join(" ", args).split("#");
+                String[] input = String.join(SPACE, args).split("#");
                 String username = input[0].trim();
-                String[] split = input[1].split(" ");
+                String[] split = input[1].split(SPACE);
                 String tag = split[0];
                 Region region = Region.EUW1;
 
@@ -97,7 +99,7 @@ public class Riot {
                 String name = username + " #" + tag;
                 String level = String.valueOf(summoner.getSummonerLevel());
                 Tier tier = Tier.getTier(entry.getTier());
-                String rank = tier.getName() + " " + entry.getRank();
+                String rank = tier.getName() + SPACE + entry.getRank();
                 String lp = String.valueOf(entry.getLeaguePoints());
                 String winRate = String.format("%.2f", (double) entry.getWins() / (entry.getWins() + entry.getLosses()) * 100) + "%";
                 String response = name + ": level " + level + " and is currently " + rank + " with " + lp + " LP and a " + winRate + " win rate.";

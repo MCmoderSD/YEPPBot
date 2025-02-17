@@ -11,6 +11,8 @@ import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static de.MCmoderSD.utilities.other.Format.*;
+
 public class Social {
 
     // Constructor
@@ -48,7 +50,7 @@ public class Social {
                     Account account = Account.getAccount(args.getFirst());
                     if (account == null) botClient.respond(event, getCommand(), syntax);
                     else {
-                        String link = String.join(" ", args.subList(2, args.size()));
+                        String link = String.join(SPACE, args.subList(2, args.size()));
                         boolean success = channelManager.setAccountValue(event.getChannelId(), account, link);
                         if (success) botClient.respond(event, getCommand(), account.getName() + " Link updated to " + link);
                         else botClient.respond(event, getCommand(), account.getName() + " Link could not be updated!");
@@ -57,7 +59,7 @@ public class Social {
                 }
 
                 // Get Account
-                Account account = Account.getAccount(String.join(" ", args).toLowerCase());
+                Account account = Account.getAccount(String.join(SPACE, args).toLowerCase());
                 if (account == null) botClient.respond(event, getCommand(), syntax);
                 else {
                     String link = channelManager.getAccountValue(event.getChannelId(), account);

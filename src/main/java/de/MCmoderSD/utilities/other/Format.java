@@ -14,8 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import java.text.SimpleDateFormat;
+
 import static de.MCmoderSD.core.BotClient.prefixes;
-import static de.MCmoderSD.utilities.other.Util.RANDOM;
+import static de.MCmoderSD.utilities.other.Util.*;
 
 
 public class Format {
@@ -24,6 +26,9 @@ public class Format {
     public final static String BOLD = "\033[0;1m";
     public final static String UNBOLD = "\u001B[0m";
     public final static String BREAK = "\n";
+    public final static String TAB = "\t";
+    public final static String SPACE = " ";
+    public final static String EMPTY = "";
 
     // Tags
     public final static String SYSTEM = "[SYS]";
@@ -39,6 +44,11 @@ public class Format {
     // Regex
     public final static String VALID_CHARS = "[a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]";
     public final static String INVALID_CHARS = "[^a-zA-Z0-9äöüÄÖÜß.,;:!?(){}\\\\<>@#%&*/=+~^_|\"'-]";
+    public final static String INVALID_UNICODE = "\uDB40\uDC00";
+    public final static String EMOJIS = "[\\p{So}\\p{Cn}]";
+
+    //Patterns
+    public final static String TIMESTAMP_FORMAT = "dd-MM-yyyy|HH:mm:ss";
 
     // Colors
     public final static Color DARK = new Color(0x0e0e10);
@@ -48,7 +58,7 @@ public class Format {
 
     // Get Formatted Timestamp
     public static String getFormattedTimestamp() {
-        return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(new Timestamp(System.currentTimeMillis())) + "]";
+        return "[" + new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Timestamp(System.currentTimeMillis())) + "]";
     }
 
     // Tag the channel
@@ -79,12 +89,12 @@ public class Format {
     public static String trimMessage(String message) {
 
         // Replace Invalid Characters
-        message = message.replaceAll("\uDB40\uDC00", "");
+        message = message.replaceAll(INVALID_UNICODE, EMPTY);
 
         // Trim Message
         message = message.trim();
-        while (message.startsWith(" ") || message.startsWith("\n")) message = message.substring(1);
-        while (message.endsWith(" ") || message.endsWith("\n")) message = message.substring(0, message.length() - 1);
+        while (startsWith(message, SPACE, TAB, BREAK)) message = message.substring(1);
+        while (endsWith(message, SPACE, TAB, BREAK)) message = message.substring(0, message.length() - 1);
 
         // Return
         return message;
@@ -96,9 +106,9 @@ public class Format {
         // Clean Args
         ArrayList<String> cleaned = new ArrayList<>();
 
-        // Trim Args
+        // Trim Args and Remove Empty
         for (String arg : args) {
-            String clean = trimMessage(arg).replaceAll(" ", "").replaceAll("\n", "");
+            String clean = trimMessage(arg).replaceAll(SPACE, EMPTY).replaceAll(BREAK, EMPTY).replaceAll(TAB, EMPTY);
             if (!(clean.isBlank())) cleaned.add(clean);
         }
 
@@ -107,13 +117,13 @@ public class Format {
     }
 
     // Trim Args
-    public static String processArgs(ArrayList<String> args) {
-        return trimMessage(String.join(" ", args)).trim();
+    public static String concatArgs(ArrayList<String> args) {
+        return trimMessage(String.join(SPACE, args)).trim();
     }
 
     // Replace Emojis
     public static String replaceEmojis(String input, String replacement) {
-        return input.replaceAll("[\\p{So}\\p{Cn}]", replacement);
+        return input.replaceAll(EMOJIS, replacement);
     }
 
     // Remove repetitions
@@ -121,16 +131,9 @@ public class Format {
         return input.replaceAll("\\b(" + repetition + ")\\s+\\1\\b", "$1");
     }
 
-    // Filter Message
-    public static String filterMessage(String message) {
-        message = message.replaceAll("\t", " ").replaceAll("\n", " ").replaceAll("\r", " ");
-        while (message.contains("  ")) message = message.replaceAll(" {2}", " ");
-        return message;
-    }
-
     // Format OpenAI Response
     public static String formatOpenAIResponse(String response, String emote) {
-        return removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + " "), emote), emote);
+        return removePrefix(removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + SPACE), emote), emote));
     }
 
     // Format Scopes
@@ -149,11 +152,12 @@ public class Format {
         // Variables
         ArrayList<String> strings = new ArrayList<>();
 
+        // Loop through ids
         for (Integer id : ids) {
-            if (id == null || id < 1) continue;
-            String string = id.toString();
-            if (string.isBlank() || strings.contains(string)) continue;
-            strings.add(string);
+            if (id == null || id < 1) continue;                         // Check if valid
+            String string = id.toString();                              // Convert to string
+            if (string.isBlank() || strings.contains(string)) continue; // Check if empty or duplicate
+            strings.add(string);                                        // Add to list
         }
 
         // Return
@@ -164,22 +168,19 @@ public class Format {
     public static String convertToAscii(String input) {
 
         // Replace German Umlauts
-        input = input.replaceAll("Ä", "Ae");
-        input = input.replaceAll("ä", "ae");
-        input = input.replaceAll("Ö", "Oe");
-        input = input.replaceAll("ö", "oe");
-        input = input.replaceAll("Ü", "Ue");
-        input = input.replaceAll("ü", "ue");
-        input = input.replaceAll("ß", "ss");
+        input = input.replaceAll("Ä", "Ae").replaceAll("ä", "ae");
+        input = input.replaceAll("Ö", "Oe").replaceAll("ö", "oe");
+        input = input.replaceAll("Ü", "Ue").replaceAll("ü", "ue");
+        input = input.replaceAll("ẞ", "Ss").replaceAll("ß", "ss");
 
         // Normalize the input string to decompose accented characters
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
 
         // Remove diacritical marks (accents)
-        String ascii = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        String ascii = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", EMPTY);
 
         // Remove any remaining non-ASCII characters
-        ascii = ascii.replaceAll("[^\\p{ASCII}]", "");
+        ascii = ascii.replaceAll("[^\\p{ASCII}]", EMPTY);
 
         // Return the ASCII string
         return ascii;
@@ -196,33 +197,37 @@ public class Format {
         for (String p : prefixes) if (message.contains(p)) prefix = p;
 
         // Find Start
-        if (message.indexOf(prefix) == 0) message = message.substring(1);
-        else message = message.substring(message.indexOf(" " + prefix) + 2);
+        if (message.indexOf(prefix) == 0) message = message.substring(1);       // Remove Prefix
+        else message = message.substring(message.indexOf(SPACE + prefix) + 2);    // Remove Space and Prefix
 
         // Split Command
-        String[] split = trimMessage(message).split(" ");
+        String[] split = trimMessage(message).split(SPACE);
         return new ArrayList<>(Arrays.asList(split));
     }
 
     // Format Command
     public static String formatCommand(TwitchMessageEvent event, ArrayList<String> args, String response) {
 
+        // Constants
+        String RANDOM = "%random%";
+        String CHANNEL = "%channel%";
+        String AUTHOR = "%author%";
+        String USER = "%user%";
+        String TAGGED = "%tagged%";
+
         // Replace Variables
-        if (response.contains("%random%")) response = response.replaceAll("%random%", RANDOM.nextInt(100) + "%");
-        if (response.contains("%channel%")) response = response.replaceAll("%channel%", tagChannel(event));
+        if (response.contains(RANDOM)) response = response.replaceAll(RANDOM, Util.RANDOM.nextInt(100) + "%");
+        if (response.contains(CHANNEL)) response = response.replaceAll(CHANNEL, tagChannel(event));
 
         // Replace Tags
-        if (response.contains("%user%") || response.contains("%author%")) {
-            response = response.replaceAll("%user%", tagUser(event));
-            response = response.replaceAll("%author%", tagUser(event));
-        }
+        if (response.contains(AUTHOR) || response.contains(USER)) response = response.replaceAll(AUTHOR, tagUser(event)).replaceAll(USER, tagUser(event));
 
         // Replace Tagged
-        if (response.contains("%tagged%")) {
+        if (response.contains(TAGGED)) {
             String tagged;
             if (!args.isEmpty()) tagged = args.getFirst().startsWith("@") ? args.getFirst() : "@" + args.getFirst();
             else tagged = tagUser(event);
-            response = response.replaceAll("%tagged%", tagged);
+            response = response.replaceAll(TAGGED, tagged);
         }
 
         // Return
@@ -232,6 +237,23 @@ public class Format {
     // Format Lurk Time
     public static String formatLurkTime(Timestamp startTime) {
 
+        // Constants
+        String PATTERN = " %s, ";
+        String YEARS = "Jahre";
+        String YEAR = "Jahr";
+        String MONTHS = "Monate";
+        String MONTH = "Monat";
+        String WEEKS = "Wochen";
+        String WEEK = "Woche";
+        String DAYS = "Tage";
+        String DAY = "Tag";
+        String HOURS = "Stunden";
+        String HOUR = "Stunde";
+        String MINUTES = "Minuten";
+        String MINUTE = "Minute";
+        String SECONDS = "Sekunden";
+        String SECOND = "Sekunde";
+
         // Variables
         StringBuilder response = new StringBuilder();
         long time = System.currentTimeMillis() - startTime.getTime();
@@ -239,43 +261,43 @@ public class Format {
         // Years
         long years = time / 31536000000L;
         time %= 31536000000L;
-        if (years > 1) response.append(years).append(" Jahre, ");
-        else if (years > 0) response.append(years).append(" Jahr, ");
+        if (years > 1) response.append(years).append(PATTERN.formatted(YEARS));
+        else if (years > 0) response.append(years).append(PATTERN.formatted(YEAR));
 
         // Months
         long months = time / 2592000000L;
         time %= 2592000000L;
-        if (months > 1) response.append(months).append(" Monate, ");
-        else if (months > 0) response.append(months).append(" Monat, ");
+        if (months > 1) response.append(months).append(PATTERN.formatted(MONTHS));
+        else if (months > 0) response.append(months).append(PATTERN.formatted(MONTH));
 
         // Weeks
         long weeks = time / 604800000L;
         time %= 604800000L;
-        if (weeks > 1) response.append(weeks).append(" Wochen, ");
-        else if (weeks > 0) response.append(weeks).append(" Woche, ");
+        if (weeks > 1) response.append(weeks).append(PATTERN.formatted(WEEKS));
+        else if (weeks > 0) response.append(weeks).append(PATTERN.formatted(WEEK));
 
         // Days
         long days = time / 86400000L;
         time %= 86400000L;
-        if (days > 1) response.append(days).append(" Tage, ");
-        else if (days > 0) response.append(days).append(" Tag, ");
+        if (days > 1) response.append(days).append(PATTERN.formatted(DAYS));
+        else if (days > 0) response.append(days).append(PATTERN.formatted(DAY));
 
         // Hours
         long hours = time / 3600000L;
         time %= 3600000L;
-        if (hours > 1) response.append(hours).append(" Stunden, ");
-        else if (hours > 0) response.append(hours).append(" Stunde, ");
+        if (hours > 1) response.append(hours).append(PATTERN.formatted(HOURS));
+        else if (hours > 0) response.append(hours).append(PATTERN.formatted(HOUR));
 
         // Minutes
         long minutes = time / 60000L;
         time %= 60000L;
-        if (minutes > 1) response.append(minutes).append(" Minuten, ");
-        else if (minutes > 0) response.append(minutes).append(" Minute, ");
+        if (minutes > 1) response.append(minutes).append(PATTERN.formatted(MINUTES));
+        else if (minutes > 0) response.append(minutes).append(PATTERN.formatted(MINUTE));
 
         // Seconds
         long seconds = time / 1000L;
-        if (seconds > 1) response.append(seconds).append(" Sekunden, ");
-        else if (seconds > 0) response.append(seconds).append(" Sekunde, ");
+        if (seconds > 1) response.append(seconds).append(PATTERN.formatted(SECONDS));
+        else if (seconds > 0) response.append(seconds).append(PATTERN.formatted(SECOND));
 
         // Return
         return response.substring(0, response.length() - 2);

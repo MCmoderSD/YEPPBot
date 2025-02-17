@@ -84,7 +84,7 @@ public class MenuPanel extends JPanel {
             public void keyPressed(KeyEvent evt) {
                 var keyCode = evt.getKeyCode();
                 if (keyCode == VK_ENTER) sendMessage();
-                if (keyCode == VK_ESCAPE) textField.setText("");
+                if (keyCode == VK_ESCAPE) textField.setText(EMPTY);
                 if (keyCode == VK_TAB) channelField.requestFocus();
 
                 // Message History
@@ -101,7 +101,7 @@ public class MenuPanel extends JPanel {
                         textField.setText(messageHistory.get(messageIndex));
                     } else {
                         lastMessage = textField.getText();
-                        textField.setText("");
+                        textField.setText(EMPTY);
                     }
                 }
             }
@@ -112,7 +112,7 @@ public class MenuPanel extends JPanel {
             public void keyPressed(KeyEvent evt) {
                 var keyCode = evt.getKeyCode();
                 if (keyCode == VK_ENTER) joinChannel();
-                if (keyCode == VK_ESCAPE) channelField.setText("");
+                if (keyCode == VK_ESCAPE) channelField.setText(EMPTY);
                 if (keyCode == VK_TAB) textField.requestFocus();
 
                 // Channel History
@@ -129,7 +129,7 @@ public class MenuPanel extends JPanel {
                         channelField.setText(channelHistory.get(channelIndex));
                     } else {
                         lastChannel = channelField.getText();
-                        channelField.setText("");
+                        channelField.setText(EMPTY);
                     }
                 }
             }
@@ -200,7 +200,8 @@ public class MenuPanel extends JPanel {
         }
 
         // Filter Message
-        message = filterMessage(message);
+        message = message.replaceAll(TAB, SPACE).replaceAll(BREAK, SPACE).replaceAll("\r", SPACE);
+        while (message.contains("  ")) message = message.replaceAll(" {2}", SPACE);
 
         // Send Message
         Main.botClient.write(channel, message);
@@ -211,14 +212,14 @@ public class MenuPanel extends JPanel {
 
     // Clean Up Text Fields
     private void cleanUpTextFields(String message) {
-        textField.setText("");
+        textField.setText(EMPTY);
         messageHistory.push(message);
         messageIndex = messageHistory.size();
     }
 
     // Get Channel
     public String getChannel() {
-        String channel = channelField.getText().replaceAll(" ", "").toLowerCase();
-        return channel.length() < 4 ? "" : channel.equalsIgnoreCase("channel") ? "" : channel;
+        String channel = channelField.getText().replaceAll(SPACE, EMPTY).toLowerCase();
+        return channel.length() < 4 ? EMPTY : channel.equalsIgnoreCase("channel") ? EMPTY : channel;
     }
 }

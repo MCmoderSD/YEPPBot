@@ -118,7 +118,7 @@ public class AssetManager {
             ArrayList<String> de_object = new ArrayList<>();
 
             for (String fact : facts) {
-                String[] factSplit = fact.split("\t");
+                String[] factSplit = fact.split(TAB);
                 if (factSplit.length > 1 && !(factSplit[1].isEmpty() || factSplit[1].isBlank())) en_percent.add(factSplit[1]);
                 if (factSplit.length > 2 && !(factSplit[2].isEmpty() || factSplit[2].isBlank())) en_people.add(factSplit[2]);
                 if (factSplit.length > 3 && !(factSplit[3].isEmpty() || factSplit[3].isBlank())) en_verb.add(factSplit[3]);
@@ -260,7 +260,7 @@ public class AssetManager {
             ArrayList<String> de = new ArrayList<>();
 
             for (String insult : insults) {
-                String[] insultSplit = insult.split("\t");
+                String[] insultSplit = insult.split(TAB);
                 if (insultSplit.length > 1 && !(insultSplit[1].isEmpty() || insultSplit[1].isBlank())) en.add(insultSplit[1]);
                 if (insultSplit.length > 2 && !(insultSplit[2].isEmpty() || insultSplit[2].isBlank())) de.add(insultSplit[2]);
             }
@@ -312,7 +312,7 @@ public class AssetManager {
             ArrayList<String> de = new ArrayList<>();
 
             for (String joke : jokes) {
-                String[] jokeSplit = joke.split("\t");
+                String[] jokeSplit = joke.split(TAB);
                 if (jokeSplit.length > 1 && !(jokeSplit[1].isEmpty() || jokeSplit[1].isBlank())) en.add(jokeSplit[1]);
                 if (jokeSplit.length > 2 && !(jokeSplit[2].isEmpty() || jokeSplit[2].isBlank())) de.add(jokeSplit[2]);
             }
@@ -389,7 +389,7 @@ public class AssetManager {
 
                 // Get the fact part
                 factResult.next();
-                fact.append(factResult.getString(lang + part)).append(" ");
+                fact.append(factResult.getString(lang + part)).append(SPACE);
 
                 // Close resources
                 factResult.close();

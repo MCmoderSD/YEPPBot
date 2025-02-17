@@ -103,7 +103,7 @@ public class CustomCommand {
 
                                 // Get command response
                                 StringBuilder stringBuilder = new StringBuilder();
-                                for (var i = message.get(":") + 1; i < args.size(); i++) stringBuilder.append(args.get(i)).append(" ");
+                                for (var i = message.get(":") + 1; i < args.size(); i++) stringBuilder.append(args.get(i)).append(SPACE);
                                 String commandResponse = trimMessage(stringBuilder.toString());
 
                                 // Create command

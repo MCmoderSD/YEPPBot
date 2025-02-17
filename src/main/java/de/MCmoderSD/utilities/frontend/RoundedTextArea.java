@@ -163,6 +163,6 @@ public class RoundedTextArea extends JScrollPane {
     }
 
     public void clear() {
-        textArea.setText("");
+        textArea.setText(EMPTY);
     }
 }

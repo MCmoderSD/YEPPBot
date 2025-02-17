@@ -56,7 +56,7 @@ public class Weather {
                     for (String arg : args) {
                         parts++;
                         if (arg.contains(",")) {
-                            args.set(parts - 1, arg.replace(",", ""));
+                            args.set(parts - 1, arg.replace(",", EMPTY));
                             break;
                         }
                     }
@@ -64,13 +64,13 @@ public class Weather {
                     // Check language
                     if (parts < args.size()) {
                         StringBuilder lang = new StringBuilder();
-                        for (var i = parts; i < args.size(); i++) lang.append(args.get(i)).append(" ");
+                        for (var i = parts; i < args.size(); i++) lang.append(args.get(i)).append(SPACE);
                         language = lang.toString();
                     }
 
                     // Build city name
                     StringBuilder cityName = new StringBuilder();
-                    for (var i = 0; i < parts; i++) cityName.append(args.get(i)).append(" ");
+                    for (var i = 0; i < parts; i++) cityName.append(args.get(i)).append(SPACE);
                     while (cityName.charAt(cityName.length() - 1) == ' ') cityName.deleteCharAt(cityName.length() - 1);
                     String finalCityName = cityName.toString();
 

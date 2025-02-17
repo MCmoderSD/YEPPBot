@@ -1,15 +1,11 @@
-package de.MCmoderSD.utilities.other;
+import de.MCmoderSD.encryption.Encryption;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class Encryption extends de.MCmoderSD.encryption.Encryption {
-
-    public Encryption(String key) {
-        super(key);
-    }
+public class UpdateToken {
 
     // Change Encryption Token
     public static void main(String[] args) throws SQLException {

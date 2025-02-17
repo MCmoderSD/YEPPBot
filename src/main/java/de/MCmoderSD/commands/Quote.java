@@ -114,7 +114,7 @@ public class Quote {
                 // Response
                 switch (verb) {
                     case "add":
-                        response = quoteManager.addQuote(event.getChannelId(), String.join(" ", args.subList(1, args.size())));
+                        response = quoteManager.addQuote(event.getChannelId(), String.join(SPACE, args.subList(1, args.size())));
                         break;
                     case "rem":
                     case "del":
@@ -127,7 +127,7 @@ public class Quote {
                     case "change":
                     case "update":
                         if (number < 0 || number >= quotes.size()) response = quoteNotExist;
-                        else response = quoteManager.editQuote(event.getChannelId(), number, String.join(" ", args.subList(2, args.size())));
+                        else response = quoteManager.editQuote(event.getChannelId(), number, String.join(SPACE, args.subList(2, args.size())));
                         break;
                 }
 

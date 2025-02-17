@@ -29,10 +29,7 @@ public class Prompt {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                String response = formatOpenAIResponse(chat.prompt(trimMessage(processArgs(args))), "YEPP");
-
-                // Filter Response for argument injection
-                response = removePrefix(response);
+                String response = formatOpenAIResponse(chat.prompt(trimMessage(concatArgs(args))), "YEPP");
 
                 // Send Message
                 botClient.respond(event, getCommand(), response);
