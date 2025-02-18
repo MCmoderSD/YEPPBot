@@ -35,6 +35,13 @@ public class TwitchMessageEvent {
     private final String subTier;
     private final Integer bits;
 
+    // Flags
+    public final boolean isCheer;
+    public final boolean isCommand;
+    public final boolean hasBotName;
+    public final boolean hasYEPP;
+
+
     // Message Event
     public TwitchMessageEvent(ChannelMessageEvent event) {
 
@@ -53,6 +60,12 @@ public class TwitchMessageEvent {
         subMonths = event.getSubscriberMonths();
         subTier = parseSubTier(event.getSubscriptionTier());
         bits = 0;
+
+        // Set Flags
+        isCheer = false;
+        isCommand = isCommand(message);
+        hasBotName = hasBotName(message);
+        hasYEPP = message.contains("YEPP");
     }
 
     // Cheer Event
@@ -67,8 +80,8 @@ public class TwitchMessageEvent {
         userId = Integer.parseInt(trimMessage(eventUser.getId()));
 
         // Get Names
-        channel = trimMessage(eventChannel.getName());
-        user = trimMessage(eventUser.getName());
+        channel = trimMessage(eventChannel.getName().toLowerCase());
+        user = trimMessage(eventUser.getName().toLowerCase());
 
         // Get Message
         message = trimMessage(event.getMessage());
@@ -77,35 +90,70 @@ public class TwitchMessageEvent {
         subMonths = event.getSubscriberMonths();
         subTier = parseSubTier(event.getSubscriptionTier());
         bits = event.getBits();
+
+        // Set Flags
+        isCheer = 0 < bits;
+        isCommand = isCommand(message);
+        hasBotName = hasBotName(message);
+        hasYEPP = message.contains("YEPP");
     }
 
     // Manual Event
     public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable Integer subTier, @Nullable Integer bits) {
+
+        // Set Parameters
         this.channelId = channelId;
         this.userId = userId;
-        this.channel = channel;
-        this.user = user;
-        this.message = message;
+        this.channel = trimMessage(channel).toLowerCase();
+        this.user = trimMessage(user).toLowerCase();
+        this.message = trimMessage(message);
         this.subMonths = subMonths == null ? 0 : subMonths;
         this.subTier = subTier == null ? "NONE" : parseSubTier(subTier);
         this.bits = bits == null ? 0 : bits;
+        assert bits != null;
+
+        // Set Flags
+        isCheer = 0 < bits;
+        isCommand = isCommand(message);
+        hasBotName = hasBotName(message);
+        hasYEPP = message.contains("YEPP");
     }
 
     // Manual Event
     public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable String subTier, @Nullable Integer bits) {
+
+        // Set Parameters
         this.channelId = channelId;
         this.userId = userId;
-        this.channel = channel;
-        this.user = user;
-        this.message = message;
+        this.channel = trimMessage(channel).toLowerCase();
+        this.user = trimMessage(user).toLowerCase();
+        this.message = trimMessage(message);
         this.subMonths = subMonths == null ? 0 : subMonths;
         this.subTier = subTier == null ? "NONE" : subTier;
         this.bits = bits == null ? 0 : bits;
+        assert bits != null;
+
+        // Set Flags
+        isCheer = 0 < bits;
+        isCommand = isCommand(message);
+        hasBotName = hasBotName(message);
+        hasYEPP = message.contains("YEPP");
     }
 
     // Parse
     private static String parseSubTier(int tier) {
         return tier == 0 ? "NONE" : "TIER" + tier;
+    }
+
+    private static boolean isCommand(String message) {
+        for (String prefix : prefixes) if (message.startsWith(prefix)) return true;
+        for (String prefix : prefixes) if (message.contains(SPACE + prefix)) return true;
+        return false;
+    }
+
+    private static boolean hasBotName(String message) {
+        for (String name : BotClient.botNames) if (message.toLowerCase().contains(name)) return true;
+        return false;
     }
 
     // Getters
@@ -143,22 +191,19 @@ public class TwitchMessageEvent {
 
     // Checks
     public boolean isCheer() {
-        return bits > 0;
+        return isCheer;
     }
 
-    public boolean hasYEPP() {
-        return message.contains("YEPP");
+    public boolean isCommand() {
+        return isCommand;
     }
 
     public boolean hasBotName() {
-        for (String name : BotClient.botNames) if (message.toLowerCase().contains(name)) return true;
-        return false;
+        return hasBotName;
     }
 
-    public boolean hasCommand() {
-        for (String prefix : prefixes) if (message.startsWith(prefix)) return true;
-        for (String prefix : prefixes) if (message.contains(SPACE + prefix)) return true;
-        return false;
+    public boolean hasYEPP() {
+        return hasYEPP;
     }
 
     // Log
@@ -171,7 +216,7 @@ public class TwitchMessageEvent {
     }
 
     public String getFormattedTimestamp() {
-        return "[" + new java.text.SimpleDateFormat("dd-MM-yyyy|HH:mm:ss").format(timestamp) + "]";
+        return "[" + new java.text.SimpleDateFormat(TIMESTAMP_FORMAT).format(timestamp) + "]";
     }
 
     public String getLog() {

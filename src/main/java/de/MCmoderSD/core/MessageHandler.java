@@ -84,7 +84,7 @@ public class MessageHandler {
         if (birthdateList.containsKey(event.getUserId())) handleBirthday(event);
 
         // Check for Command
-        if (event.hasCommand()) {
+        if (event.isCommand()) {
             handleCommand(event);
             return;
         }

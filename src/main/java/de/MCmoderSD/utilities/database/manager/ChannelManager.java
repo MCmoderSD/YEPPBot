@@ -265,6 +265,7 @@ public class ChannelManager {
             query = "UPDATE AccountValues SET " + account.getTable() + " = ? WHERE id = ?";
             preparedStatement = mySQL.getConnection().prepareStatement(query);
             preparedStatement.setString(1, value); // set value
+            //noinspection JpaQueryApiInspection
             preparedStatement.setInt(2, id); // set id
             preparedStatement.executeUpdate(); // execute
 
