@@ -6,6 +6,7 @@ import com.github.twitch4j.common.events.domain.EventChannel;
 import com.github.twitch4j.common.events.domain.EventUser;
 
 import de.MCmoderSD.core.BotClient;
+import de.MCmoderSD.enums.SubTier;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
@@ -32,7 +33,7 @@ public class TwitchMessageEvent {
 
     // Additional Information
     private final Integer subMonths;
-    private final String subTier;
+    private final SubTier subTier;
     private final Integer bits;
 
     // Flags
@@ -58,7 +59,7 @@ public class TwitchMessageEvent {
 
         // Set Additional Information
         subMonths = event.getSubscriberMonths();
-        subTier = parseSubTier(event.getSubscriptionTier());
+        subTier = SubTier.getSubTier(event.getSubscriptionTier());
         bits = 0;
 
         // Set Flags
@@ -88,7 +89,7 @@ public class TwitchMessageEvent {
 
         // Get Additional Information
         subMonths = event.getSubscriberMonths();
-        subTier = parseSubTier(event.getSubscriptionTier());
+        subTier = SubTier.getSubTier(event.getSubscriptionTier());
         bits = event.getBits();
 
         // Set Flags
@@ -108,7 +109,7 @@ public class TwitchMessageEvent {
         this.user = trimMessage(user).toLowerCase();
         this.message = trimMessage(message);
         this.subMonths = subMonths == null ? 0 : subMonths;
-        this.subTier = subTier == null ? "NONE" : parseSubTier(subTier);
+        this.subTier = SubTier.getSubTier(subTier == null ? 0 : subTier);
         this.bits = bits == null ? 0 : bits;
         assert bits != null;
 
@@ -120,7 +121,7 @@ public class TwitchMessageEvent {
     }
 
     // Manual Event
-    public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable String subTier, @Nullable Integer bits) {
+    public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable SubTier subTier, @Nullable Integer bits) {
 
         // Set Parameters
         this.channelId = channelId;
@@ -129,7 +130,7 @@ public class TwitchMessageEvent {
         this.user = trimMessage(user).toLowerCase();
         this.message = trimMessage(message);
         this.subMonths = subMonths == null ? 0 : subMonths;
-        this.subTier = subTier == null ? "NONE" : subTier;
+        this.subTier = subTier == null ? SubTier.NONE : subTier;
         this.bits = bits == null ? 0 : bits;
         assert bits != null;
 
@@ -141,10 +142,6 @@ public class TwitchMessageEvent {
     }
 
     // Parse
-    private static String parseSubTier(int tier) {
-        return tier == 0 ? "NONE" : "TIER" + tier;
-    }
-
     private static boolean isCommand(String message) {
         for (String prefix : prefixes) if (message.startsWith(prefix)) return true;
         for (String prefix : prefixes) if (message.contains(SPACE + prefix)) return true;
@@ -181,7 +178,7 @@ public class TwitchMessageEvent {
         return subMonths;
     }
 
-    public String getSubTier() {
+    public SubTier getSubTier() {
         return subTier;
     }
 

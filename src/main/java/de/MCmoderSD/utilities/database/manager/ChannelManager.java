@@ -2,7 +2,7 @@ package de.MCmoderSD.utilities.database.manager;
 
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.enums.Account;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,13 +19,13 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class ChannelManager {
 
     // Associations
-    private final MySQL mySQL;
+    private final SQL sql;
 
     // Constructor
-    public ChannelManager(MySQL mySQL) {
+    public ChannelManager(SQL sql) {
 
         // Get Associations
-        this.mySQL = mySQL;
+        this.sql = sql;
 
         // Initialize Tables
         initTables();
@@ -34,10 +34,10 @@ public class ChannelManager {
     // Initialize Tables
     private void initTables() {
         try {
-            if (!mySQL.isConnected()) mySQL.connect();
+            if (!sql.isConnected()) sql.connect();
 
             // Variables
-            Connection connection = mySQL.getConnection();
+            Connection connection = sql.getConnection();
 
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
@@ -55,7 +55,7 @@ public class ChannelManager {
                     tiktok VARCHAR(500),
                     twitter VARCHAR(500),
                     youtube VARCHAR(500)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -71,10 +71,14 @@ public class ChannelManager {
         ArrayList<String> channels = new ArrayList<>();
 
         try {
-            if (!mySQL.isConnected()) mySQL.connect();
+            if (!sql.isConnected()) sql.connect();
 
-            String query = "SELECT name FROM " + "channels" + " WHERE active = 1";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            // Query
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT name FROM " + "channels" + " WHERE active = TRUE"
+            );
+
+            // Execute
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) channels.add(resultSet.getString("name"));
 
@@ -91,11 +95,14 @@ public class ChannelManager {
     // Edit Channel
     public String editChannel(String channel, boolean isActive) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "UPDATE " + "channels" + " SET active = ? WHERE name = ?";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "UPDATE " + "channels" + " SET active = ? WHERE name = ?"
+            );
+
+            // Set values and execute
             preparedStatement.setInt(1, isActive ? 1 : 0); // set active
             preparedStatement.setString(2, channel); // set channel
             preparedStatement.executeUpdate(); // execute
@@ -113,11 +120,14 @@ public class ChannelManager {
 
     public String autoShoutout(Integer channelId, boolean isAutoShoutout) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "UPDATE " + "channels" + " SET auto_shoutout = ? WHERE id = ?";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "UPDATE " + "channels" + " SET auto_shoutout = ? WHERE id = ?"
+            );
+
+            // Set values and execute
             preparedStatement.setInt(1, isAutoShoutout ? 1 : 0); // set auto shoutout
             preparedStatement.setInt(2, channelId); // set channel
             preparedStatement.executeUpdate(); // execute
@@ -135,11 +145,14 @@ public class ChannelManager {
 
     public boolean hasAutoShoutout(Integer channelId) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT auto_shoutout FROM " + "channels" + " WHERE id = ?";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT auto_shoutout FROM " + "channels" + " WHERE id = ?"
+            );
+
+            // Set values and execute
             preparedStatement.setInt(1, channelId); // set channel
             ResultSet resultSet = preparedStatement.executeQuery(); // execute
 
@@ -162,10 +175,14 @@ public class ChannelManager {
         HashMap<Integer, HashSet<String>> blackList = new HashMap<>();
 
         try {
-            if (!mySQL.isConnected()) mySQL.connect();
+            if (!sql.isConnected()) sql.connect();
 
-            String query = "SELECT id, blacklist FROM " + "channels";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            // Prepare statement
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT id, blacklist FROM " + "channels"
+            );
+
+            // Execute
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 var id = resultSet.getInt("id");
@@ -187,24 +204,31 @@ public class ChannelManager {
     // Edit Blacklist
     public String editBlacklist(String channel, String command, boolean isBlocked, HelixHandler helixHandler) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Check Channel
-            if (!mySQL.getChannelCache().containsValue(channel)) mySQL.checkCache(helixHandler.getUser(channel).getId(), channel, true);
+            if (!sql.getChannelCache().containsValue(channel)) sql.checkCache(helixHandler.getUser(channel).getId(), channel, true);
 
             // Variables
-            Connection connection = mySQL.getConnection();
+            Connection connection = sql.getConnection();
 
             // Prepare select statement
-            String selectQuery = "SELECT blacklist FROM channels WHERE name = ?";
-            PreparedStatement selectPreparedStatement = connection.prepareStatement(selectQuery);
+            PreparedStatement selectPreparedStatement = connection.prepareStatement(
+                    "SELECT blacklist FROM channels WHERE name = ?"
+            );
+
+            // Set values and execute
             selectPreparedStatement.setString(1, channel);
             ResultSet resultSet = selectPreparedStatement.executeQuery();
+
+            // Check if channel exists
             if (!resultSet.next()) {
                 resultSet.close();
                 selectPreparedStatement.close();
                 return "Error: Channel not found";
             }
+
+            // Get blacklist
             String blacklist = resultSet.getString("blacklist");
             if (blacklist == null) blacklist = EMPTY;
             ArrayList<String> list = new ArrayList<>(List.of(blacklist.split("; ")));
@@ -217,8 +241,11 @@ public class ChannelManager {
             selectPreparedStatement.close();
 
             // Prepare update statement
-            String updateQuery = "UPDATE channels SET blacklist = ? WHERE name = ?";
-            PreparedStatement updatePreparedStatement = connection.prepareStatement(updateQuery);
+            PreparedStatement updatePreparedStatement = connection.prepareStatement(
+                    "UPDATE channels SET blacklist = ? WHERE name = ?"
+            );
+
+            // Set values and execute
             updatePreparedStatement.setString(1, String.join("; ", list));
             updatePreparedStatement.setString(2, channel);
             updatePreparedStatement.executeUpdate();
@@ -236,11 +263,14 @@ public class ChannelManager {
 
     public boolean setAccountValue(Integer id, Account account, String value) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT id FROM AccountValues WHERE id = ?";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT id FROM AccountValues WHERE id = ?"
+            );
+
+            // Set values and execute
             preparedStatement.setInt(1, id); // set id
             ResultSet resultSet = preparedStatement.executeQuery(); // execute
 
@@ -252,8 +282,11 @@ public class ChannelManager {
                 preparedStatement.close();
 
                 // Insert new account if it does not exist
-                query = "INSERT INTO AccountValues (id) VALUES (?)";
-                preparedStatement = mySQL.getConnection().prepareStatement(query);
+                preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO AccountValues (id) VALUES (?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setInt(1, id); // set id
                 preparedStatement.executeUpdate(); // execute
             } else {
@@ -262,10 +295,12 @@ public class ChannelManager {
             }
 
             // Prepare statement
-            query = "UPDATE AccountValues SET " + account.getTable() + " = ? WHERE id = ?";
-            preparedStatement = mySQL.getConnection().prepareStatement(query);
+            preparedStatement = sql.getConnection().prepareStatement(
+                    "UPDATE AccountValues SET " + account.getTable() + " = ? WHERE id = ?"
+            );
+
+            // Set values and execute
             preparedStatement.setString(1, value); // set value
-            //noinspection JpaQueryApiInspection
             preparedStatement.setInt(2, id); // set id
             preparedStatement.executeUpdate(); // execute
 
@@ -283,11 +318,14 @@ public class ChannelManager {
     // Get Account Value
     public String getAccountValue(Integer id, Account account) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect();
+            if (!sql.isConnected()) sql.connect();
 
             // Prepare statement
-            String query = "SELECT " + account.getTable() + " FROM " + "AccountValues" + " WHERE id = ?";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT " + account.getTable() + " FROM " + "AccountValues" + " WHERE id = ?"
+            );
+
+            // Set values and execute
             preparedStatement.setInt(1, id); // set id
             ResultSet resultSet = preparedStatement.executeQuery(); // execute
             return resultSet.next() ? resultSet.getString(account.getTable()) : null;

@@ -16,7 +16,7 @@ public class Credentials {
     // Bot Credentials
     private JsonNode botConfig;
     private HashSet<String> channelList;
-    private JsonNode mySQLConfig;
+    private JsonNode sqlConfig;
     private JsonNode httpsServerConfig;
 
     // API Credentials
@@ -33,7 +33,7 @@ public class Credentials {
     private boolean riot;
 
     // Constructor
-    public Credentials(String botConfig, String channelList, String mySQL, String httpsServer, String apiKeys, String openAI) {
+    public Credentials(String botConfig, String channelList, String sql, String httpsServer, String apiKeys, String openAI) {
 
         // Load Bot Config
         try {
@@ -52,11 +52,11 @@ public class Credentials {
             this.channelList = new HashSet<>();
         }
 
-        // Load MySQL Config
+        // Load SQL Config
         try {
-            this.mySQLConfig = jsonUtility.load(mySQL, terminal.hasArg(Argument.MYSQL_CONFIG) || terminal.hasArg(Argument.CONTAINER));
+            this.sqlConfig = jsonUtility.load(sql, terminal.hasArg(Argument.SQL_CONFIG) || terminal.hasArg(Argument.CONTAINER));
         } catch (Exception e) {
-            System.err.println("Error loading MySQL Config: " + e.getMessage());
+            System.err.println("Error loading SQL Config: " + e.getMessage());
         }
 
         // Load HTTPS Server Config
@@ -106,8 +106,8 @@ public class Credentials {
         return channelList;
     }
 
-    public JsonNode getMySQLConfig() {
-        return mySQLConfig;
+    public JsonNode SQLConfig() {
+        return sqlConfig;
     }
 
     public JsonNode getHttpsServerConfig() {
@@ -143,8 +143,8 @@ public class Credentials {
         return channelList != null && !channelList.isEmpty();
     }
 
-    public boolean validateMySQLConfig() {
-        return mySQLConfig != null;
+    public boolean validateSQLConfig() {
+        return sqlConfig != null;
     }
 
     public boolean validateHttpServerConfig() {

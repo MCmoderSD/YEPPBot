@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 import de.MCmoderSD.OpenAI.modules.Speech;
 
@@ -16,7 +16,7 @@ public class TTS {
     private final String ttsWasSent;
 
     // Constructor
-    public TTS(BotClient botClient, MessageHandler messageHandler, MySQL mySQL, Speech speech) {
+    public TTS(BotClient botClient, MessageHandler messageHandler, SQL sql, Speech speech) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "prompt <Frage>";
@@ -43,7 +43,7 @@ public class TTS {
 
                 String message = event.getMessage();
 
-                AudioFile audioFile = mySQL.getAssetManager().getTTSAudio(message);
+                AudioFile audioFile = sql.getAssetManager().getTTSAudio(message);
                 if (audioFile == null) audioFile = speech.speak(event.getMessage(), currentVoice, null, null);
 
                 // Send Audio

@@ -9,7 +9,7 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.OpenAI.modules.Chat;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class Horoscope {
     private final String errorGettingHoroscope;
 
     // Constructor
-    public Horoscope(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL, Chat chat, JsonNode apiconfig) {
+    public Horoscope(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql, Chat chat, JsonNode apiconfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "horoscope @<user> <language>";
@@ -58,7 +58,7 @@ public class Horoscope {
                 args.addAll(cleanArgs);
 
                 // Variables
-                HashMap<Integer, Birthdate> birthdayList = mySQL.getBirthdays();
+                HashMap<Integer, Birthdate> birthdayList = sql.getBirthdays();
                 String language = "german";         // Default: German
                 var targetID = event.getUserId();   // Default: User
                 boolean hasTarget = false;

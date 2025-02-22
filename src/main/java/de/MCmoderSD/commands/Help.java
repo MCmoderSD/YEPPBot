@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.CustomManager;
 
 import java.util.ArrayList;
@@ -22,12 +22,12 @@ public class Help {
     private final CustomManager customManager;
 
     // Constructor
-    public Help(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Help(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // Init Associations
         this.botClient = botClient;
         this.messageHandler = messageHandler;
-        this.customManager = mySQL.getCustomManager();
+        this.customManager = sql.getCustomManager();
 
         // Syntax
         String prefix = botClient.getPrefix();

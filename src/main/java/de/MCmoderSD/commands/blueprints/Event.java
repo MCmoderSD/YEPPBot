@@ -5,7 +5,7 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.EventManager;
 
 import java.sql.Timestamp;
@@ -53,7 +53,7 @@ public abstract class Event {
     private final String syntax;
 
     // Constructor
-    public Event(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL,
+    public Event(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql,
                  EventManager.Event event,
                  String explanation,
                  String itsNotMonth,
@@ -89,7 +89,7 @@ public abstract class Event {
 
         // Init Associations
         this.helixHandler = helixHandler;
-        this.eventManager = mySQL.getEventManager();
+        this.eventManager = sql.getEventManager();
 
         // Init Responses
         this.userNotFound = userNotFound;

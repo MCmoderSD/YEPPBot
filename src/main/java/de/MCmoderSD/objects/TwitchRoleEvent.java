@@ -23,7 +23,7 @@ public class TwitchRoleEvent {
     private final String channel;
     private final String user;
 
-    private final String role;
+    private final Role role;
     private final boolean added;
 
     // VIP Add
@@ -41,7 +41,7 @@ public class TwitchRoleEvent {
         user = trimMessage(event.getUserName());
 
         // Get Role
-        role = "VIP";
+        role = Role.VIP;
         added = true;
     }
 
@@ -60,7 +60,7 @@ public class TwitchRoleEvent {
         user = trimMessage(event.getUserName());
 
         // Get Role
-        role = "VIP";
+        role = Role.VIP;
         added = false;
     }
 
@@ -79,7 +79,7 @@ public class TwitchRoleEvent {
         user = trimMessage(event.getUserName());
 
         // Get Role
-        role = "MOD";
+        role = Role.MOD;
         added = true;
     }
 
@@ -98,7 +98,7 @@ public class TwitchRoleEvent {
         user = trimMessage(event.getUserName());
 
         // Get Role
-        role = "MOD";
+        role = Role.MOD;
         added = false;
     }
 
@@ -119,7 +119,7 @@ public class TwitchRoleEvent {
         return user;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
@@ -142,5 +142,10 @@ public class TwitchRoleEvent {
 
     public void logToConsole() {
         System.out.println(getLog());
+    }
+
+    public enum Role {
+        VIP(),
+        MOD()
     }
 }

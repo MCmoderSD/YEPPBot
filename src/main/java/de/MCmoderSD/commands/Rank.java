@@ -5,7 +5,7 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.enums.Account;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.ChannelManager;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class Rank {
 
     // Constructor
-    public Rank(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Rank(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "rank <valo|lol|siege|apex> (set) <rank>";
@@ -26,7 +26,7 @@ public class Rank {
         String description = "Zeigt den Rank des Streamers an:" + syntax;
 
         // Init Associations
-        ChannelManager channelManager = mySQL.getChannelManager();
+        ChannelManager channelManager = sql.getChannelManager();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {

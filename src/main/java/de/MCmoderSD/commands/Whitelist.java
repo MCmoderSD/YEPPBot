@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +14,7 @@ import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 public class Whitelist {
 
     // Constructor
-    public Whitelist(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Whitelist(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "whitelist join/kick <McUsername>";
@@ -57,8 +57,8 @@ public class Whitelist {
                     return;
                 }
 
-                if (addVerbs.contains(verb)) botClient.respond(event, getCommand(), mySQL.getYEPPConnect().editWhitelist(event, args.get(1).toLowerCase(), true));
-                else if (removeVerbs.contains(verb))botClient.respond(event, getCommand(), mySQL.getYEPPConnect().editWhitelist(event, args.get(1).toLowerCase(), false));
+                if (addVerbs.contains(verb)) botClient.respond(event, getCommand(), sql.getYEPPConnect().editWhitelist(event, args.get(1).toLowerCase(), true));
+                else if (removeVerbs.contains(verb))botClient.respond(event, getCommand(), sql.getYEPPConnect().editWhitelist(event, args.get(1).toLowerCase(), false));
                 else botClient.respond(event, getCommand(), syntax);
             }
         });

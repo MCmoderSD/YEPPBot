@@ -4,16 +4,16 @@ import de.MCmoderSD.commands.blueprints.Event;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.EventManager;
 
 public class NoNutNovember extends Event {
 
     // Constructor
-    public NoNutNovember(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL) {
+    public NoNutNovember(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql) {
 
         // Call Event Constructor
-        super(botClient, messageHandler, helixHandler, mySQL,
+        super(botClient, messageHandler, helixHandler, sql,
                 EventManager.Event.NNN,
                 "It's Not-Nut-November YEPP Type !nnn join in Chat to participate, type !nnn leave if you have sinned. Check the Status of others with !nnn status @user YEPP Happy November YEPP",
                 "It's not November, you can nut all you want! YEPP",

@@ -7,7 +7,7 @@ import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import javax.management.InvalidAttributeValueException;
 
@@ -75,7 +75,7 @@ public class Birthday {
 
     // Association
     private final BotClient botClient;
-    private final MySQL mySQL;
+    private final SQL sql;
     private final HelixHandler helixHandler;
 
     // Attributes
@@ -88,7 +88,7 @@ public class Birthday {
     private LinkedHashMap<Integer, Birthdate> birthdays;
 
     // Constructor
-    public Birthday(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL) {
+    public Birthday(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql) {
 
         // Syntax
         syntax = "Syntax: " + botClient.getPrefix() + "birthday set/get/in/list/next";
@@ -150,7 +150,7 @@ public class Birthday {
 
         // Association
         this.botClient = botClient;
-        this.mySQL = mySQL;
+        this.sql = sql;
         this.helixHandler = helixHandler;
 
 
@@ -173,7 +173,7 @@ public class Birthday {
 
 
                 // Get Birthdays
-                birthdays = sortBirthdays(removeNonFollower(event, mySQL.getBirthdays(), helixHandler));
+                birthdays = sortBirthdays(removeNonFollower(event, sql.getBirthdays(), helixHandler));
 
                 // Null Check
                 if (birthdays == null) {
@@ -250,8 +250,8 @@ public class Birthday {
         if (birthdate.getAge() < 13) return ageRestriction;
 
         // Set Birthday
-        mySQL.setBirthday(event, birthdate);
-        botClient.getMessageHandler().updateBirthdateList(mySQL.getBirthdays());
+        sql.setBirthday(event, birthdate);
+        botClient.getMessageHandler().updateBirthdateList(sql.getBirthdays());
 
         // Response
         return String.format(birthWasSetOn, birthdate.getDate());

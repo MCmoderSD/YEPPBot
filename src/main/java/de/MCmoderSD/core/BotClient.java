@@ -22,7 +22,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.server.Server;
 import de.MCmoderSD.server.modules.AudioBroadcast;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.OpenAI.OpenAI;
 import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
@@ -62,7 +62,7 @@ public class BotClient {
     };
   
     // Associations
-    private final MySQL mySQL;
+    private final SQL sql;
     private final Frame frame;
     private final Server server;
     private final AudioBroadcast audioBroadcast;
@@ -100,10 +100,10 @@ public class BotClient {
     private boolean log;
 
     // Constructor
-    public BotClient(Credentials credentials, MySQL mySQL, @Nullable Frame frame, @Nullable OpenAI openAI) {
+    public BotClient(Credentials credentials, SQL sql, @Nullable Frame frame, @Nullable OpenAI openAI) {
 
         // Init Associations
-        this.mySQL = mySQL;
+        this.sql = sql;
         this.frame = frame;
 
         // Init Bot Credentials
@@ -172,15 +172,15 @@ public class BotClient {
         eventManager = client.getEventManager();
 
         // Init Helix Handler
-        helixHandler = new HelixHandler(this, mySQL, server);
+        helixHandler = new HelixHandler(this, sql, server);
 
         // Init Audio Broadcast
         audioBroadcast = new AudioBroadcast(server);
         audioBroadcast.registerBroadcast(botName);
 
         // Init Handlers
-        messageHandler = new MessageHandler(this, mySQL);
-        eventHandler = new EventHandler(this, frame, mySQL, eventManager, messageHandler, helixHandler);
+        messageHandler = new MessageHandler(this, sql);
+        eventHandler = new EventHandler(this, frame, sql, eventManager, messageHandler, helixHandler);
 
         // Check Modules
         boolean astrology = credentials.hasAstrology();
@@ -199,47 +199,47 @@ public class BotClient {
         new Status(this, messageHandler);
 
         // Loading Database Commands
-        new Counter(this, messageHandler, mySQL);
-        new CustomCommand(this, messageHandler, mySQL);
-        new CustomTimer(this, messageHandler, mySQL);
-        new Fact(this, messageHandler, mySQL);
-        new Help(this, messageHandler, mySQL);
-        new Insult(this, messageHandler, mySQL);
-        new Joke(this, messageHandler, mySQL);
-        new Lurk(this, messageHandler, mySQL);
-        new Quote(this, messageHandler, mySQL);
-        new Rank(this, messageHandler, mySQL);
-        new Social(this, messageHandler, mySQL);
-        new Whitelist(this, messageHandler, mySQL);
+        new Counter(this, messageHandler, sql);
+        new CustomCommand(this, messageHandler, sql);
+        new CustomTimer(this, messageHandler, sql);
+        new Fact(this, messageHandler, sql);
+        new Help(this, messageHandler, sql);
+        new Insult(this, messageHandler, sql);
+        new Joke(this, messageHandler, sql);
+        new Lurk(this, messageHandler, sql);
+        new Quote(this, messageHandler, sql);
+        new Rank(this, messageHandler, sql);
+        new Social(this, messageHandler, sql);
+        new Whitelist(this, messageHandler, sql);
 
         // Loading Twitch API Commands
-        new Birthday(this, messageHandler, helixHandler, mySQL);
-        new DickDestroyDecember(this, messageHandler, helixHandler, mySQL);
+        new Birthday(this, messageHandler, helixHandler, sql);
+        new DickDestroyDecember(this, messageHandler, helixHandler, sql);
         new Info(this, messageHandler, helixHandler);
-        new Moderate(this, messageHandler, helixHandler, mySQL);
-        new NoNutNovember(this, messageHandler, helixHandler, mySQL);
-        new Shoutout(this, messageHandler, eventHandler, helixHandler, mySQL);
+        new Moderate(this, messageHandler, helixHandler, sql);
+        new NoNutNovember(this, messageHandler, helixHandler, sql);
+        new Shoutout(this, messageHandler, eventHandler, helixHandler, sql);
 
         // Loading OpenAI Chat Commands
         if (openAIChat) {
             Chat chatModule = Objects.requireNonNull(openAI).getChat();
             new Conversation(this, messageHandler, chatModule);
-            new Match(this, messageHandler, helixHandler, mySQL, chatModule);
+            new Match(this, messageHandler, helixHandler, sql, chatModule);
             new Translate(this, messageHandler, chatModule);
             new Prompt(this, messageHandler, chatModule);
             new Wiki(this, messageHandler, chatModule);
         }
 
         // Loading OpenAI TTS Commands
-        if (openAITTS) new TTS(this, messageHandler, mySQL, Objects.requireNonNull(openAI).getSpeech());
+        if (openAITTS) new TTS(this, messageHandler, sql, Objects.requireNonNull(openAI).getSpeech());
 
         // API & OpenAI Commands
         if (giphy || astrology || weather || riot) {
             JsonNode apiConfig = credentials.getAPIConfig();
             if (giphy) new Gif(this, messageHandler, apiConfig);
-            if (openAIChat && astrology) new Horoscope(this, messageHandler, helixHandler, mySQL, openAI.getChat(), apiConfig);
+            if (openAIChat && astrology) new Horoscope(this, messageHandler, helixHandler, sql, openAI.getChat(), apiConfig);
             if (openAIChat && weather) new Weather(this, messageHandler, openAI.getChat(), apiConfig);
-            if (riot) new Riot(this, messageHandler, apiConfig, credentials.getMySQLConfig());
+            if (riot) new Riot(this, messageHandler, apiConfig, credentials.SQLConfig());
         }
 
         // Show UI
@@ -251,7 +251,7 @@ public class BotClient {
         // Join Channels
         HashSet<String> channelList = new HashSet<>();
         if (credentials.validateChannelList()) channelList.addAll(credentials.getChannelList());
-        if (!Main.terminal.hasArg(DEV)) channelList.addAll(mySQL.getChannelManager().getActiveChannels());
+        if (!Main.terminal.hasArg(DEV)) channelList.addAll(sql.getChannelManager().getActiveChannels());
         channelList = (HashSet<String>) channelList.stream().map(String::toLowerCase).collect(Collectors.toSet());
         channelList.remove(botName);
         joinChannel(channelList);
@@ -286,7 +286,7 @@ public class BotClient {
         if (!valid) return;
 
         // Log
-        if (log) mySQL.getLogManager().logResponse(channel, botName, message, helixHandler);
+        if (log) sql.getLogManager().logResponse(channel, botName, message, helixHandler);
         System.out.printf("%s %s <%s> %s: %s%s", getFormattedTimestamp(), USER, channel, botName, message, BREAK);
 
         // Send Message
@@ -305,7 +305,7 @@ public class BotClient {
         if (valid && !cli) frame.log(channel, botName, message);
 
         // Log
-        if (valid && log    ) mySQL.getLogManager().logResponse(event, command, message);
+        if (valid && log    ) sql.getLogManager().logResponse(event, command, message);
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
         if (valid) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
@@ -320,7 +320,7 @@ public class BotClient {
     public void sendAudio(TwitchMessageEvent event, AudioFile audioFile) {
 
         // Log
-        mySQL.getLogManager().logTTS(event, audioFile);
+        sql.getLogManager().logTTS(event, audioFile);
 
         // Play Audio
         audioBroadcast.play(event.getChannel(), audioFile.getAudioData());
@@ -583,8 +583,8 @@ public class BotClient {
     }
 
     // Association Getter
-    public MySQL getMySQL() {
-        return mySQL;
+    public SQL getSQL() {
+        return sql;
     }
 
     public Frame getFrame() {

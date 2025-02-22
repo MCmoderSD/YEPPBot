@@ -2,7 +2,7 @@ package de.MCmoderSD.utilities.database;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import de.MCmoderSD.mysql.Driver;
+import de.MCmoderSD.sql.Driver;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
@@ -25,8 +25,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-@SuppressWarnings({"SqlSourceToSinkFlow", "unused"})
-public class MySQL extends Driver {
+@SuppressWarnings("unused")
+public class SQL extends Driver {
 
     // Managers
     private final AssetManager assetManager;
@@ -44,10 +44,10 @@ public class MySQL extends Driver {
     private final HashMap<Integer, String> channelCache;
 
     // Constructor
-    public MySQL(JsonNode config) {
+    public SQL(JsonNode config) {
 
         // Initialize Driver
-        super(config);
+        super(DatabaseType.MARIADB, config);
 
         // Initialize Tables
         initTables();
@@ -83,7 +83,7 @@ public class MySQL extends Driver {
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
                             birthdate VARCHAR(10)
-                            )
+                            ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                             """
             ).execute();
 
@@ -94,10 +94,10 @@ public class MySQL extends Driver {
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
-                            active BIT NOT NULL DEFAULT 1,
-                            auto_shoutout BIT NOT NULL DEFAULT 0,
+                            active BIT NOT NULL DEFAULT TRUE,
+                            auto_shoutout BIT NOT NULL DEFAULT FALSE,
                             FOREIGN KEY (id) REFERENCES users(id)
-                            )
+                            ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                             """
             ).execute();
 
@@ -107,6 +107,7 @@ public class MySQL extends Driver {
     }
 
     // Load Cache
+    @SuppressWarnings("SqlSourceToSinkFlow")
     private HashMap<Integer, String> loadCache(Table table) {
 
         // Variables
@@ -117,8 +118,11 @@ public class MySQL extends Driver {
             if (!isConnected()) connect(); // connect
 
             // Query
-            String query = "SELECT id, name FROM " + table.getName();
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "SELECT id, name FROM " + table.getName()
+            );
+
+            // Execute
             ResultSet resultSet = preparedStatement.executeQuery();
 
             // Add to Cache
@@ -139,29 +143,25 @@ public class MySQL extends Driver {
         return cache;
     }
 
-    // Checks Channels
+    // Check User
+    @SuppressWarnings("SqlSourceToSinkFlow")
     private void checkUser(int id, String name, Table table) throws SQLException {
-        if (!isConnected()) connect(); // connect
+
+        // Connect
+        if (!isConnected()) connect();
 
         // Query
-        String query = "SELECT id, name FROM " + table.getName() + " WHERE id = ?";
-        PreparedStatement selectPreparedStatement = connection.prepareStatement(query);
-        selectPreparedStatement.setInt(1, id);
-        ResultSet resultSet = selectPreparedStatement.executeQuery();
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "INSERT INTO " + table.getName() + " (id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)"
+        );
 
-        // Check if user exists
-        if (!resultSet.next()) {
-            String insertQuery = "INSERT INTO " + table.getName() + " (id, name) VALUES (?, ?)";
-            PreparedStatement insertPreparedStatement = connection.prepareStatement(insertQuery);
-            insertPreparedStatement.setInt(1, id);
-            insertPreparedStatement.setString(2, name);
-            insertPreparedStatement.executeUpdate(); // execute
-            insertPreparedStatement.close(); // close the insertPreparedStatement
-        }
+        // Set Values and Execute
+        preparedStatement.setInt(1, id); // set id
+        preparedStatement.setString(2, name); // set name
+        preparedStatement.executeUpdate(); // execute
 
         // Close resources
-        resultSet.close();
-        selectPreparedStatement.close(); // close the selectPreparedStatement
+        preparedStatement.close();
     }
 
     // Check Cache
@@ -200,12 +200,15 @@ public class MySQL extends Driver {
             checkCache(event.getChannelId(), event.getChannel(), true);
 
             // Update Birthday
-            String updateQuery = "UPDATE users SET birthdate = ? WHERE id = ?";
-            PreparedStatement updatePreparedStatement = connection.prepareStatement(updateQuery);
-            updatePreparedStatement.setString(1, birthdate.getMySQLDate());
-            updatePreparedStatement.setInt(2, id);
-            updatePreparedStatement.executeUpdate(); // execute
-            updatePreparedStatement.close(); // close the updatePreparedStatement
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "UPDATE users SET birthdate = ? WHERE id = ?"
+            );
+
+            // Set Values and Execute
+            preparedStatement.setString(1, birthdate.getSQLDate());
+            preparedStatement.setInt(2, id);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -220,13 +223,16 @@ public class MySQL extends Driver {
             LinkedHashMap<Integer, Birthdate> birthdays = new LinkedHashMap<>();
 
             // Query
-            String query = "SELECT id, birthdate FROM users WHERE birthdate IS NOT NULL";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "SELECT id, birthdate FROM users WHERE birthdate IS NOT NULL"
+            );
+
+            // Execute
             ResultSet resultSet = preparedStatement.executeQuery();
 
             // Add Birthdays
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
+                var id = resultSet.getInt("id");
                 String[] date = resultSet.getString("birthdate").split("\\.");
                 String birthday = date[2] + "." + date[1] + "." + date[0];
                 birthdays.put(id, new Birthdate(birthday));
@@ -234,7 +240,7 @@ public class MySQL extends Driver {
 
             // Close resources
             resultSet.close();
-            preparedStatement.close(); // close the preparedStatement
+            preparedStatement.close();
 
             return birthdays;
         } catch (SQLException | InvalidAttributeValueException | NumberFormatException e) {

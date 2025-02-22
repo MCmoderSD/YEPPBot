@@ -1,5 +1,6 @@
 package de.MCmoderSD.enums;
 
+@SuppressWarnings("unused")
 public enum Social {
 
     // Constants

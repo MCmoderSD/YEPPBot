@@ -38,7 +38,7 @@ So please note that the setup process for the bot may also change over time. <br
 You can use this project as a template to create your own bot or to host your own instance of it. <br>
 Setting up the bot is relatively straightforward: you need to create the configuration files and input the required API keys. <br>
 
-However, it is necessary to create a [Twitch application](https://dev.twitch.tv/console) and provide access to a MySQL database. <br>
+However, it is necessary to create a [Twitch application](https://dev.twitch.tv/console) and provide access to a MariaDB database. <br>
 For ChatGPT features, as well as certain other features, you need to provide their respective API keys for them to function properly. <br>
 
 If you have any ideas or suggestions, feel free to open an issue or submit a pull request. <br> <br>
@@ -161,11 +161,11 @@ You can add as many channels as you like.
 If no channel list is provided, the bot will default to joining its own channel. <br> <br>
 
 
-### 3. MySQL Database
-To run and use the bot, you need to have your own MySQL database. <br> 
+### 3. MariaDB Database
+To run and use the bot, you need to have your own MariaDB database. <br> 
 The bot will automatically create the necessary tables and handle the setup, but you must provide a configuration file. <br>
 
-Create a file named `mySQL.json` in the `/src/main/resources/database/`folder. <br> 
+Create a file named `sql.json` in the `/src/main/resources/database/`folder. <br> 
 The file should follow this structure:
 ```json
 {
@@ -177,11 +177,11 @@ The file should follow this structure:
 }
 ```
 
-- **host**: The hostname or IP address of your MySQL server (e.g., `localhost`). 
-- **port**: The port your MySQL server is listening on (default is `3306`).
+- **host**: The hostname or IP address of your MariaDB server (e.g., `localhost`). 
+- **port**: The port your MariaDB server is listening on (default is `3306`).
 - **database**: The name of the database the bot will use.
-- **username**: The MySQL user with access to the database.
-- **password**: The password for the MySQL user.
+- **username**: The MariaDB user with access to the database.
+- **password**: The password for the MariaDB user.
 
 Ensure that the specified user has full permissions over the entire database. <br>
 If you don't want to use the database logging, you can use the `-nolog` argument. <br> <br>
@@ -376,7 +376,7 @@ java -jar YEPPBot.jar -generate
 
 Once you have edited the configuration files and added the necessary API keys, you can start the bot with:
 ```bash
-java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -mysql "/PATH/TO/mySQL.json" -httpsserver "/PATH/TO/httpsserver.json"
+java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -sql "/PATH/TO/sql.json" -httpsserver "/PATH/TO/httpsserver.json"
 ```
 You can include additional arguments for other configuration files as needed.
 
@@ -394,7 +394,7 @@ You can include additional arguments for other configuration files as needed.
 #### Configuration File Arguments:
 - `-botconfig "/PATH/TO/BotConfig.json"`: Specifies the path to the `BotConfig.json` file. 
 - `-channellist "/PATH/TO/Channel.list"`: Specifies the path to the `Channel.list` file. 
-- `-mysql "/PATH/TO/mySQL.json"`: Specifies the path to the `mySQL.json` file. 
+- `-sql "/PATH/TO/sql.json"`: Specifies the path to the `sql.json` file. 
 - `-httpsserver "/PATH/TO/httpsServer.json"`: Specifies the path to the `httpsServer.json` file. 
 - `-api "/PATH/TO/apiKeys.json"`: Specifies the path to the `apiKeys.json` file.
 - `-openai "/PATH/TO/ChatGPT.json"`: Specifies the path to the `ChatGPT.json` file. <br> <br>
@@ -439,7 +439,7 @@ You have to follow the same steps as the [manual setup](#installation-and-setup)
 
 Following files are required:
 - The Bot Configuration named `bot.json`.
-- The MySQL Configuration named `mysql.json`.
+- The MariaDB Configuration named `mariaDB.json`.
 - The HTTPS Server Configuration named `server.json`.
 
 The Channel List, API Keys, and ChatGPT Configuration are optional.

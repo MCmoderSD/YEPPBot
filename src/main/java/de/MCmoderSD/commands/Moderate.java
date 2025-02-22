@@ -5,7 +5,7 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.ChannelManager;
 
 import java.util.ArrayList;
@@ -22,13 +22,13 @@ public class Moderate {
     private final ChannelManager channelManager;
 
     // Constructor
-    public Moderate(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL) {
+    public Moderate(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql) {
 
         // Init Associations
         this.botClient = botClient;
         this.messageHandler = messageHandler;
         this.helixHandler = helixHandler;
-        this.channelManager = mySQL.getChannelManager();
+        this.channelManager = sql.getChannelManager();
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "moderate join/leave/block/unblock/authenticate command/channel";

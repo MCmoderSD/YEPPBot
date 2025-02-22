@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.CustomManager;
 
 import java.util.ArrayList;
@@ -17,10 +17,10 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class CustomCommand {
 
     // Constructor
-    public CustomCommand(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public CustomCommand(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // Variables
-        CustomManager customManager = mySQL.getCustomManager();
+        CustomManager customManager = sql.getCustomManager();
         String prefix = botClient.getPrefix();
         String syntax = prefix + "CustomCommand create/enable/disable/delete/list name/alias : response";
 

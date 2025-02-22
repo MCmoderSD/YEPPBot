@@ -5,7 +5,7 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.CustomManager;
 
 import java.util.ArrayList;
@@ -18,12 +18,12 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class CustomTimer {
 
     // Constructor
-    public CustomTimer(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public CustomTimer(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // ToDo Make it possible to create timers with hours, minutes and seconds
 
         // Variables
-        CustomManager customManager = mySQL.getCustomManager();
+        CustomManager customManager = sql.getCustomManager();
         String prefix = botClient.getPrefix();
         //String syntax = prefix + "CustomTimer create/enable/disable/delete/list name 1000M/500h/30m/10s : response";
         String syntax = prefix + "CustomTimer create/enable/disable/delete/list name 1000M : response";
