@@ -8,7 +8,7 @@ import de.MCmoderSD.enums.ZodiacSign;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.OpenAI.modules.Chat;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,7 +30,7 @@ public class Match {
     private final String thereforeYouAreMostCompatibleWith;
 
     // Constructor
-    public Match(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL, Chat chat) {
+    public Match(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql, Chat chat) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "match <amount> <language>";
@@ -58,7 +58,7 @@ public class Match {
                 args.addAll(cleanArgs);
 
                 // Variables
-                LinkedHashMap<Integer, Birthdate> birthdays = removeNonFollower(event, mySQL.getBirthdays(), helixHandler);
+                LinkedHashMap<Integer, Birthdate> birthdays = removeNonFollower(event, sql.getBirthdays(), helixHandler);
 
                 // Null Check
                 if (birthdays == null) {

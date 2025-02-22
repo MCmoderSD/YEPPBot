@@ -1,7 +1,7 @@
 package de.MCmoderSD.utilities.database.manager;
 
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,13 +17,13 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class LurkManager {
 
     // Associations
-    private final MySQL mySQL;
+    private final SQL sql;
 
     // Constructor
-    public LurkManager(MySQL mySQL) {
+    public LurkManager(SQL sql) {
 
         // Set associations
-        this.mySQL = mySQL;
+        this.sql = sql;
 
         // Initialize
         initTables();
@@ -34,7 +34,7 @@ public class LurkManager {
         try {
 
             // Variables
-            Connection connection = mySQL.getConnection();
+            Connection connection = sql.getConnection();
 
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
@@ -48,7 +48,7 @@ public class LurkManager {
                     startTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     traitorChannel TEXT,
                     FOREIGN KEY (lurkChannel_ID) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -66,15 +66,18 @@ public class LurkManager {
 
         // Log message
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Check Channel and User
-            mySQL.checkCache(userID, event.getUser(), false);
-            mySQL.checkCache(channelID, event.getChannel(), true);
+            sql.checkCache(userID, event.getUser(), false);
+            sql.checkCache(channelID, event.getChannel(), true);
 
             // Prepare statement
-            String query = "INSERT INTO " + "lurkList" + " (user_id, lurkChannel_ID, startTime) VALUES (?, ?, ?)";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "INSERT INTO " + "lurkList" + " (user_id, lurkChannel_ID, startTime) VALUES (?, ?, ?)"
+            );
+
+            // Set values and execute
             preparedStatement.setInt(1, userID); // set user
             preparedStatement.setInt(2, channelID); // set channel
             preparedStatement.setTimestamp(3, event.getTimestamp()); // set timestamp
@@ -97,11 +100,14 @@ public class LurkManager {
 
         // Get Custom Timers
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT user_id, lurkChannel_ID FROM " + "lurkList";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT user_id, lurkChannel_ID FROM " + "lurkList"
+            );
+
+            // Execute
             ResultSet resultSet = preparedStatement.executeQuery();
 
             // Add to List
@@ -127,16 +133,20 @@ public class LurkManager {
 
         // Get Custom Timers
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT startTime, lurkChannel_ID, traitorChannel FROM " + "lurkList WHERE user_id = ?";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT startTime, lurkChannel_ID, traitorChannel FROM " + "lurkList WHERE user_id = ?"
+            );
+
+            // Set values and execute
             preparedStatement.setInt(1, userID);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             // Add to List
             while (resultSet.next()) {
+
                 // Get Start Time
                 Timestamp startTime = resultSet.getTimestamp("startTime");
 
@@ -168,11 +178,14 @@ public class LurkManager {
 
         // Log message
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "DELETE FROM " + "lurkList" + " WHERE user_id = ?";
-            PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "DELETE FROM " + "lurkList" + " WHERE user_id = ?"
+            );
+
+            // Set values and execute
             preparedStatement.setInt(1, userID); // set user
             preparedStatement.executeUpdate(); // execute
 
@@ -192,11 +205,14 @@ public class LurkManager {
 
             // Log message
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Prepare statement
-                String query = "UPDATE " + "lurkList" + " SET traitorChannel = ? WHERE user_id = ?";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "UPDATE " + "lurkList" + " SET traitorChannel = ? WHERE user_id = ?"
+                );
+
+                // Set values and execute
                 preparedStatement.setString(1, traitors); // set traitor
                 preparedStatement.setInt(2, userID); // set user
                 preparedStatement.executeUpdate(); // execute

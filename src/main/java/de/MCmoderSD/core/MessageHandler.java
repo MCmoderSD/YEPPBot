@@ -5,7 +5,7 @@ import de.MCmoderSD.executor.NanoLoop;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import java.sql.Timestamp;
 
@@ -22,7 +22,7 @@ public class MessageHandler {
 
     // Associations
     private final BotClient botClient;
-    private final MySQL mySQL;
+    private final SQL sql;
 
     // Attributes
     private final HashSet<Integer> congratulated;
@@ -39,11 +39,11 @@ public class MessageHandler {
     private final HashMap<Integer, HashSet<Timer>> customTimers;
 
     // Constructor
-    public MessageHandler(BotClient botClient, MySQL mySQL) {
+    public MessageHandler(BotClient botClient, SQL sql) {
 
         // Initialize Associations
         this.botClient = botClient;
-        this.mySQL = mySQL;
+        this.sql = sql;
 
         // Initialize Attributes
         congratulated = new HashSet<>();
@@ -63,12 +63,12 @@ public class MessageHandler {
         customTimers = new HashMap<>();
 
         // Update Lists
-        updateLurkList(mySQL.getLurkManager().getLurkList());
-        updateBirthdateList(mySQL.getBirthdays());
-        updateBlackList(mySQL.getChannelManager().getBlackList());
-        updateCustomCommands(mySQL.getCustomManager().getCustomCommands(), mySQL.getCustomManager().getCustomAliases());
-        updateCounters(mySQL.getCustomManager().getCustomCounters());
-        updateCustomTimers(mySQL.getCustomManager().getCustomTimers(botClient));
+        updateLurkList(sql.getLurkManager().getLurkList());
+        updateBirthdateList(sql.getBirthdays());
+        updateBlackList(sql.getChannelManager().getBlackList());
+        updateCustomCommands(sql.getCustomManager().getCustomCommands(), sql.getCustomManager().getCustomAliases());
+        updateCounters(sql.getCustomManager().getCustomCounters());
+        updateCustomTimers(sql.getCustomManager().getCustomTimers(botClient));
     }
 
     // Handle Twitch Message
@@ -113,7 +113,7 @@ public class MessageHandler {
             ArrayList<Integer> lurkChannel;
 
             try {
-                lurker = mySQL.getLurkManager().getLurkTime(userID);
+                lurker = sql.getLurkManager().getLurkTime(userID);
                 start = lurker.keySet().iterator().next();
                 lurkChannel = lurker.get(start);
             } catch (NoSuchElementException e) {
@@ -123,7 +123,7 @@ public class MessageHandler {
             if (Objects.equals(channelID, lurkChannel.getFirst())) { // Stop lurking
 
                 // Remove user from lurk list
-                updateLurkList(mySQL.getLurkManager().removeLurker(userID));
+                updateLurkList(sql.getLurkManager().removeLurker(userID));
 
                 // Send message
                 response = tagUser(event) + " war " + formatLurkTime(start) + " im Lurk!";
@@ -135,7 +135,7 @@ public class MessageHandler {
                 lurkChannel.add(channelID);
                 StringBuilder traitors = new StringBuilder();
                 for (var i = 1; i < lurkChannel.size(); i++) traitors.append(lurkChannel.get(i)).append(TAB);
-                mySQL.getLurkManager().addTraitor(userID, traitors.toString());
+                sql.getLurkManager().addTraitor(userID, traitors.toString());
 
                 // Send message
                 if (lurkChannel.size() < 3) botClient.respond(new TwitchMessageEvent(
@@ -188,7 +188,7 @@ public class MessageHandler {
             parts.removeFirst();
 
             // Log Command
-            mySQL.getLogManager().logCommand(event, trigger, concatArgs(parts));
+            sql.getLogManager().logCommand(event, trigger, concatArgs(parts));
 
             // Execute Command
             command.execute(event, parts);
@@ -214,7 +214,7 @@ public class MessageHandler {
                 parts.removeFirst();
 
                 // Log Command
-                mySQL.getLogManager().logCommand(event, trigger, concatArgs(parts));
+                sql.getLogManager().logCommand(event, trigger, concatArgs(parts));
 
                 // Execute Command
                 botClient.respond(event, "Custom: " + trigger, response);
@@ -228,11 +228,11 @@ public class MessageHandler {
             if (counters.get(channelID).containsKey(trigger)) {
 
                 var currentValue = counters.get(channelID).get(trigger);
-                String response = mySQL.getCustomManager().editCounter(event, trigger, currentValue + 1);
+                String response = sql.getCustomManager().editCounter(event, trigger, currentValue + 1);
                 parts.removeFirst();
 
                 // Log Command
-                mySQL.getLogManager().logCommand(event, trigger, concatArgs(parts));
+                sql.getLogManager().logCommand(event, trigger, concatArgs(parts));
 
                 // Execute Command
                 botClient.respond(event, "Counter: " + trigger, response);

@@ -11,6 +11,7 @@ import de.MCmoderSD.riot.enums.Region;
 import de.MCmoderSD.riot.enums.Tier;
 import de.MCmoderSD.riot.objects.Entry;
 import de.MCmoderSD.riot.objects.Summoner;
+import de.MCmoderSD.sql.Driver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,7 @@ public class Riot {
         String description = "Zeigt den Rank des Streamers an:" + syntax;
 
         // Init Riot API
-        RiotAPI riotAPI = new RiotAPI(apiConfig.get("riot").asText(), Cluster.EUROPE, database);
+        RiotAPI riotAPI = new RiotAPI(apiConfig.get("riot").asText(), Cluster.EUROPE, Driver.DatabaseType.MARIADB, database);
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {

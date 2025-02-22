@@ -8,7 +8,7 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.ChannelManager;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class Shoutout {
     private final ChannelManager channelManager;
 
     // Constructor
-    public Shoutout(BotClient botClient, MessageHandler messageHandler, EventHandler eventHandler, HelixHandler helixHandler, MySQL mySQL) {
+    public Shoutout(BotClient botClient, MessageHandler messageHandler, EventHandler eventHandler, HelixHandler helixHandler, SQL sql) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "so <enable | disable | @user> ";
@@ -36,7 +36,7 @@ public class Shoutout {
         // Set Associations
         this.botClient = botClient;
         this.helixHandler = helixHandler;
-        this.channelManager = mySQL.getChannelManager();
+        this.channelManager = sql.getChannelManager();
 
         // Response
         String userNotFound = "User not found.";

@@ -1,6 +1,6 @@
 package de.MCmoderSD.utilities.database.manager;
 
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,13 +12,13 @@ import java.util.ArrayList;
 public class QuoteManager {
 
     // Associations
-    private final MySQL mySQL;
+    private final SQL sql;
 
     // Constructor
-    public QuoteManager(MySQL mySQL) {
+    public QuoteManager(SQL sql) {
 
         // Set associations
-        this.mySQL = mySQL;
+        this.sql = sql;
 
         // Initialize
         initTables();
@@ -29,7 +29,7 @@ public class QuoteManager {
         try {
 
             // Variables
-            Connection connection = mySQL.getConnection();
+            Connection connection = sql.getConnection();
 
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
@@ -40,10 +40,10 @@ public class QuoteManager {
                     Quotes (
                     channel_id INT NOT NULL,
                     quote_id INT NOT NULL,
-                    quote TEXT NOT NULL,
-                    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    quote VARCHAR(500) NOT NULL,
+                    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (channel_id) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -57,10 +57,16 @@ public class QuoteManager {
         try {
 
             // Variables
-            Connection connection = mySQL.getConnection();
-            PreparedStatement statement = connection.prepareStatement("SELECT quote FROM Quotes WHERE channel_id = ?");
-            statement.setInt(1, channel_id);
-            ResultSet resultSet = statement.executeQuery();
+            Connection connection = sql.getConnection();
+
+            // Prepare statement
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "SELECT quote FROM Quotes WHERE channel_id = ?"
+            );
+
+            // Set values and execute
+            preparedStatement.setInt(1, channel_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             // Create List
             ArrayList<String> quotes = new ArrayList<>();
@@ -70,7 +76,7 @@ public class QuoteManager {
 
             // Close resources
             resultSet.close();
-            statement.close();
+            preparedStatement.close();
 
             // Return
             return quotes;
@@ -86,17 +92,21 @@ public class QuoteManager {
 
             // Variables
             var quoteIndex = getQuotes(channel_id).size();
+            Connection connection = sql.getConnection();
 
-            // Add Quote
-            Connection connection = mySQL.getConnection();
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO Quotes (channel_id, quote_id, quote) VALUES (?, ?, ?)");
-            statement.setInt(1, channel_id);
-            statement.setInt(2, quoteIndex);
-            statement.setString(3, quote);
-            statement.execute();
+            // Prepare statement
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "INSERT INTO Quotes (channel_id, quote_id, quote) VALUES (?, ?, ?)"
+            );
+
+            // Set values and execute
+            preparedStatement.setInt(1, channel_id);
+            preparedStatement.setInt(2, quoteIndex);
+            preparedStatement.setString(3, quote);
+            preparedStatement.execute();
 
             // Close resources
-            statement.close();
+            preparedStatement.close();
 
             // Return
             return String.format("Added quote #%d: %s", quoteIndex + 1, quote);
@@ -111,14 +121,20 @@ public class QuoteManager {
         try {
 
             // Variables
-            Connection connection = mySQL.getConnection();
-            PreparedStatement statement = connection.prepareStatement("DELETE FROM Quotes WHERE channel_id = ? AND quote_id = ?");
-            statement.setInt(1, channel_id);
-            statement.setInt(2, quote_id);
-            statement.execute();
+            Connection connection = sql.getConnection();
+
+            // Prepare statement
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "DELETE FROM Quotes WHERE channel_id = ? AND quote_id = ?"
+            );
+
+            // Set values and execute
+            preparedStatement.setInt(1, channel_id);
+            preparedStatement.setInt(2, quote_id);
+            preparedStatement.execute();
 
             // Close resources
-            statement.close();
+            preparedStatement.close();
 
             // Reorder
             reorderQuotes(channel_id);
@@ -136,15 +152,19 @@ public class QuoteManager {
         try {
 
             // Variables
-            Connection connection = mySQL.getConnection();
-            PreparedStatement statement = connection.prepareStatement("UPDATE Quotes SET quote = ? WHERE channel_id = ? AND quote_id = ?");
-            statement.setString(1, quote);
-            statement.setInt(2, channel_id);
-            statement.setInt(3, quote_id);
-            statement.execute();
+            Connection connection = sql.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "UPDATE Quotes SET quote = ? WHERE channel_id = ? AND quote_id = ?"
+            );
+
+            // Set values and execute
+            preparedStatement.setString(1, quote);
+            preparedStatement.setInt(2, channel_id);
+            preparedStatement.setInt(3, quote_id);
+            preparedStatement.execute();
 
             // Close resources
-            statement.close();
+            preparedStatement.close();
 
             // Return
             return String.format("Edited quote #%d to %s", quote_id + 1, quote);
@@ -159,10 +179,16 @@ public class QuoteManager {
         try {
 
             // Variables
-            Connection connection = mySQL.getConnection();
-            PreparedStatement statement = connection.prepareStatement("SELECT quote_id FROM Quotes WHERE channel_id = ?");
-            statement.setInt(1, channel_id);
-            ResultSet resultSet = statement.executeQuery();
+            Connection connection = sql.getConnection();
+
+            // Prepare statement
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "SELECT quote_id FROM Quotes WHERE channel_id = ?"
+            );
+
+            // Set values and execute
+            preparedStatement.setInt(1, channel_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             // Create List
             ArrayList<Integer> quoteIds = new ArrayList<>();
@@ -172,7 +198,13 @@ public class QuoteManager {
 
             // Reorder
             for (var i = 0; i < quoteIds.size(); i++) {
-                PreparedStatement reorderStatement = connection.prepareStatement("UPDATE Quotes SET quote_id = ? WHERE channel_id = ? AND quote_id = ?");
+
+                // Prepare statement
+                PreparedStatement reorderStatement = connection.prepareStatement(
+                        "UPDATE Quotes SET quote_id = ? WHERE channel_id = ? AND quote_id = ?"
+                );
+
+                // Set values and execute
                 reorderStatement.setInt(1, i);
                 reorderStatement.setInt(2, channel_id);
                 reorderStatement.setInt(3, quoteIds.get(i));

@@ -3,7 +3,7 @@ package de.MCmoderSD.utilities.database.manager;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.encryption.Encryption;
 import de.MCmoderSD.objects.AuthToken;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,13 +15,13 @@ import java.util.HashMap;
 public class TokenManager {
 
     // Associations
-    private final MySQL mySQL;
+    private final SQL sql;
 
     // Constructor
-    public TokenManager(MySQL mySQL) {
+    public TokenManager(SQL sql) {
 
         // Set associations
-        this.mySQL = mySQL;
+        this.sql = sql;
 
         // Initialize
         initTables();
@@ -32,7 +32,7 @@ public class TokenManager {
         try {
 
             // Variables
-            Connection connection = mySQL.getConnection();
+            Connection connection = sql.getConnection();
 
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
@@ -46,9 +46,9 @@ public class TokenManager {
                         refreshToken TEXT NOT NULL,
                         scopes TEXT NOT NULL,
                         expires_in INT NOT NULL,
-                        timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (id) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -62,26 +62,30 @@ public class TokenManager {
 
         // Log message
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Variables
             var id = authToken.getId();
 
             // Check Channel and User
-            mySQL.checkCache(id, name, false);
-            mySQL.checkCache(id, name, true);
+            sql.checkCache(id, name, false);
+            sql.checkCache(id, name, true);
 
             // Prepare statement
-            String query = "INSERT INTO AuthTokens (id, accessToken, refreshToken, scopes, expires_in, timestamp) " +
-                    "VALUES (?, ?, ?, ?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE " +
-                    "accessToken = VALUES(accessToken), " +
-                    "refreshToken = VALUES(refreshToken), " +
-                    "scopes = VALUES(scopes), " +
-                    "expires_in = VALUES(expires_in), " +
-                    "timestamp = VALUES(timestamp)";
+            PreparedStatement insertPreparedStatement = sql.getConnection().prepareStatement(
+                    """
+                        INSERT INTO AuthTokens (id, accessToken, refreshToken, scopes, expires_in, timestamp)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE
+                        accessToken = VALUES(accessToken),
+                        refreshToken = VALUES(refreshToken),
+                        scopes = VALUES(scopes),
+                        expires_in = VALUES(expires_in),
+                        timestamp = VALUES(timestamp)
+                        """
+            );
 
-            PreparedStatement insertPreparedStatement = mySQL.getConnection().prepareStatement(query);
+            // Set values and execute
             insertPreparedStatement.setInt(1, id);                                                  // set id
             insertPreparedStatement.setString(2, encryption.encrypt(authToken.getAccessToken()));   // set access token
             insertPreparedStatement.setString(3, encryption.encrypt(authToken.getRefreshToken()));  // set refresh token
@@ -101,11 +105,14 @@ public class TokenManager {
     // Refresh tokens
     public void refreshTokens(String oldRefreshToken, AuthToken authToken, Encryption encryption) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "UPDATE AuthTokens SET accessToken = ?, refreshToken = ?, scopes = ?, expires_in = ?, timestamp = ? WHERE id = ? AND refreshToken = ?";
-            PreparedStatement updatePreparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement updatePreparedStatement = sql.getConnection().prepareStatement(
+                    "UPDATE AuthTokens SET accessToken = ?, refreshToken = ?, scopes = ?, expires_in = ?, timestamp = ? WHERE id = ? AND refreshToken = ?"
+            );
+
+            // Set values and execute
             updatePreparedStatement.setString(1, encryption.encrypt(authToken.getAccessToken()));   // set access token
             updatePreparedStatement.setString(2, encryption.encrypt(authToken.getRefreshToken()));  // set refresh token
             updatePreparedStatement.setString(3, authToken.getScopesAsString());                    // set scopes
@@ -126,17 +133,21 @@ public class TokenManager {
     // Get access token
     public AuthToken getAuthToken(HelixHandler helixHandler, int id, Encryption encryption) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT * FROM AuthTokens WHERE id = ?";
-            PreparedStatement selectPreparedStatement = mySQL.getConnection().prepareStatement(query);
-            selectPreparedStatement.setInt(1, id); // set id
-            ResultSet resultSet = selectPreparedStatement.executeQuery();
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT * FROM AuthTokens WHERE id = ?"
+            );
+
+            // Set values and execute
+            preparedStatement.setInt(1, id); // set id
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             // Get AuthToken
             if (resultSet.next()) return new AuthToken(helixHandler, resultSet, encryption);
             else return null;
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return null;
@@ -146,11 +157,14 @@ public class TokenManager {
     // Get all AuthTokens
     public HashMap<Integer, AuthToken> getAuthTokens(HelixHandler helixHandler, Encryption encryption) {
         try {
-            if (!mySQL.isConnected()) mySQL.connect(); // connect
+            if (!sql.isConnected()) sql.connect(); // connect
 
             // Prepare statement
-            String query = "SELECT * FROM AuthTokens";
-            PreparedStatement selectPreparedStatement = mySQL.getConnection().prepareStatement(query);
+            PreparedStatement selectPreparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT * FROM AuthTokens"
+            );
+
+            // Execute
             ResultSet resultSet = selectPreparedStatement.executeQuery();
 
             // Get AuthTokens

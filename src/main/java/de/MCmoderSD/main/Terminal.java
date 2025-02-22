@@ -150,7 +150,7 @@ public class Terminal {
                 Bot Config:
                     -botconfig: Path to Bot Config
                     -channellist: Path to Channel List
-                    -mysql: Path to MySQL Config
+                    -sql: Path to the SQL Config
                     -httpsserver: Path to Https Server Config
                 """);
 
@@ -208,7 +208,7 @@ public class Terminal {
     private boolean generateConfigFiles() {
 
         // Files
-        String[] fileNames = {"BotConfig.json", "Channel.list", "mySQL.json", "httpsServer.json", "apiKeys.json", "ChatGPT.json"};
+        String[] fileNames = {"BotConfig.json", "Channel.list", "mariaDB.json", "httpsServer.json", "apiKeys.json", "ChatGPT.json"};
 
         for (String fileName : fileNames) {
             try {

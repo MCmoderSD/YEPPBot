@@ -23,7 +23,7 @@ import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.objects.TwitchUser;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import de.MCmoderSD.utilities.database.manager.LogManager;
 
@@ -66,12 +66,12 @@ public class EventHandler {
     private boolean log;
 
     // Constructor
-    public EventHandler(BotClient botClient, Frame frame, MySQL mySQL, EventManager eventManager, MessageHandler messageHandler, HelixHandler helixHandler) {
+    public EventHandler(BotClient botClient, Frame frame, SQL sql, EventManager eventManager, MessageHandler messageHandler, HelixHandler helixHandler) {
 
         // Init Associations
         this.frame = frame;
-        this.logManager = mySQL.getLogManager();
-        this.channelManager = mySQL.getChannelManager();
+        this.logManager = sql.getLogManager();
+        this.channelManager = sql.getChannelManager();
         this.messageHandler = messageHandler;
         this.helixHandler = helixHandler;
 

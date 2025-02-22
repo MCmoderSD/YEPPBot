@@ -4,16 +4,16 @@ import de.MCmoderSD.commands.blueprints.Event;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.EventManager;
 
 public class DickDestroyDecember extends Event {
 
     // Constructor
-    public DickDestroyDecember(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, MySQL mySQL) {
+    public DickDestroyDecember(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql) {
 
         // Call Event Constructor
-        super(botClient, messageHandler, helixHandler, mySQL, EventManager.Event.DDD,
+        super(botClient, messageHandler, helixHandler, sql, EventManager.Event.DDD,
                 "It's Dick-Destroy-December YEPP Type !ddd join in Chat to participate, type !ddd leave if you have sinned. Check the Status of others with !nnn status @user YEPP Happy December YEPP",
                 "It's not December, you don't have to beat your meat. YEPP",
                 "User not found.",

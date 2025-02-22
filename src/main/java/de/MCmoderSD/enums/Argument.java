@@ -19,7 +19,7 @@ public enum Argument {
     // Config
     BOT_CONFIG("botconfig"),
     CHANNEL_LIST("channellist"),
-    MYSQL_CONFIG("mysql"),
+    SQL_CONFIG("sql"),
     HTTPS_SERVER("httpsserver"),
     API_CONFIG("api"),
     OPENAI_CONFIG("openai"),

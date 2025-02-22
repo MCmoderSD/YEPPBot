@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.CustomManager;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 public class Counter {
 
     // Constructor
-    public Counter(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Counter(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "counter create/delete/reset/show/set/list <name> <value>";
@@ -27,7 +27,7 @@ public class Counter {
         String description = "Erstellt einen Zähler, der mit jedem Aufruf um 1 erhöht wird. " + syntax;
 
         // Variables
-        CustomManager customManager = mySQL.getCustomManager();
+        CustomManager customManager = sql.getCustomManager();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {

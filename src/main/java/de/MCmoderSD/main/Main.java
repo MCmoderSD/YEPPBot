@@ -3,7 +3,7 @@ package de.MCmoderSD.main;
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.enums.Argument;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.OpenAI.OpenAI;
@@ -23,7 +23,7 @@ public class Main {
     // Bot Config
     public static final String BOT_CONFIG = "/config/BotConfig.json";
     public static final String CHANNEL_LIST = "/config/Channel.list";
-    public static final String MYSQL_CONFIG = "/database/mySQL.json";
+    public static final String SQL_CONFIG = "/database/mariaDB.json";
     public static final String HTTPS_SERVER = "/config/httpsServer.json";
 
     // API Credentials
@@ -33,7 +33,7 @@ public class Main {
     // Dev Credentials
     public static final String DEV_CONFIG = "/config/DevConfig.json";
     public static final String DEV_LIST = "/config/Dev.list";
-    public static final String DEV_MYSQL = "/database/dev.json";
+    public static final String DEV_SQL = "/database/dev.json";
     public static final String DEV_HTTPS_SERVER = "/config/DevHttpsServer.json";
 
     // Instances
@@ -51,7 +51,7 @@ public class Main {
         // Initialize Config Paths
         String botConfigPath = null;
         String channelListPath = null;
-        String mysqlConfigPath = null;
+        String sqlConfigPath = null;
         String httpsServerPath = null;
 
         // API Paths
@@ -69,8 +69,8 @@ public class Main {
             // Channel List
             if (terminal.hasArg(Argument.CHANNEL_LIST)) channelListPath = Argument.CHANNEL_LIST.getConfig(arguments);
 
-            // MySQL Config
-            if (terminal.hasArg(Argument.MYSQL_CONFIG)) mysqlConfigPath = Argument.MYSQL_CONFIG.getConfig(arguments);
+            // SQL Config
+            if (terminal.hasArg(Argument.SQL_CONFIG)) sqlConfigPath = Argument.SQL_CONFIG.getConfig(arguments);
 
             // Https Server
             if (terminal.hasArg(Argument.HTTPS_SERVER)) httpsServerPath = Argument.HTTPS_SERVER.getConfig(arguments);
@@ -86,14 +86,14 @@ public class Main {
         } else {
             botConfigPath = "/app/config/bot.json";
             channelListPath = "/app/config/channels.txt";
-            mysqlConfigPath = "/app/config/mysql.json";
+            sqlConfigPath = "/app/config/sql.json";
             httpsServerPath = "/app/config/server.json";
             apiKeysPath = "/app/config/api.json";
             openAIConfigPath = "/app/config/openai.json";
         }
 
         // Instances
-        MySQL mySQL;
+        SQL sql;
         Frame frame = null;
         OpenAI openAI = null;
 
@@ -112,28 +112,28 @@ public class Main {
         if (terminal.hasArg(Argument.DEV)) {
             if (botConfigPath == null) botConfigPath = DEV_CONFIG;
             if (channelListPath == null) channelListPath = DEV_LIST;
-            if (mysqlConfigPath == null) mysqlConfigPath = DEV_MYSQL;
+            if (sqlConfigPath == null) sqlConfigPath = DEV_SQL;
             if (httpsServerPath == null) httpsServerPath = DEV_HTTPS_SERVER;
         } else {
             if (botConfigPath == null) botConfigPath = BOT_CONFIG;
             if (channelListPath == null) channelListPath = CHANNEL_LIST;
-            if (mysqlConfigPath == null) mysqlConfigPath = MYSQL_CONFIG;
+            if (sqlConfigPath == null) sqlConfigPath = SQL_CONFIG;
             if (httpsServerPath == null) httpsServerPath = HTTPS_SERVER;
         }
 
         // Initialize Credentials
-        Credentials credentials = new Credentials(botConfigPath, channelListPath, mysqlConfigPath, httpsServerPath, apiKeysPath, openAIConfigPath);
+        Credentials credentials = new Credentials(botConfigPath, channelListPath, sqlConfigPath, httpsServerPath, apiKeysPath, openAIConfigPath);
 
         // Initialize OpenAI
         if (credentials.validateOpenAIConfig()) openAI = new OpenAI(credentials.getOpenAIConfig());
         else System.err.println(BOLD + "OpenAI Config missing: " + UNBOLD + "OpenAI will not be available");
 
-        // Initialize MySQL
-        if (credentials.validateMySQLConfig()) mySQL = new MySQL(credentials.getMySQLConfig());
-        else throw new RuntimeException(BOLD + "MySQL Config missing: Stopping Bot" + UNBOLD);
+        // Initialize SQL
+        if (credentials.validateSQLConfig()) sql = new SQL(credentials.SQLConfig());
+        else throw new RuntimeException(BOLD + "SQL Config missing: Stopping Bot" + UNBOLD);
 
         // Initialize Bot Client
-        if (credentials.validateBotConfig()) botClient = new BotClient(credentials, mySQL, frame, openAI);
+        if (credentials.validateBotConfig()) botClient = new BotClient(credentials, sql, frame, openAI);
         else throw new RuntimeException(BOLD + "Bot Config missing: Stopping Bot" + UNBOLD);
     }
 }

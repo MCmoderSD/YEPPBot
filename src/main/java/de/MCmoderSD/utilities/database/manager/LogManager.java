@@ -9,9 +9,10 @@ import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent;
 
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
+import de.MCmoderSD.enums.LoyaltyType;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,13 +24,13 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class LogManager {
     
     // Associations
-    private final MySQL mySQL;
+    private final SQL sql;
     
     // Constructor
-    public LogManager(MySQL mySQL) {
+    public LogManager(SQL sql) {
 
         // Set associations
-        this.mySQL = mySQL;
+        this.sql = sql;
 
         // Initialize
         initTables();
@@ -40,7 +41,7 @@ public class LogManager {
         try {
 
             // Variables
-            Connection connection = mySQL.getConnection();
+            Connection connection = sql.getConnection();
 
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
@@ -55,10 +56,10 @@ public class LogManager {
                 message VARCHAR(500),
                 bits INT NOT NULL DEFAULT 0,
                 subMonths INT NOT NULL DEFAULT 0,
-                subTier VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
                 FOREIGN KEY (channel_id) REFERENCES users(id),
                 FOREIGN KEY (user_id) REFERENCES users(id)
-                )
+                ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                 """
             ).execute();
 
@@ -73,10 +74,10 @@ public class LogManager {
                     args VARCHAR(500),
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
-                    subTier VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                    subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -92,10 +93,10 @@ public class LogManager {
                     response VARCHAR(500),
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
-                    subTier VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                    subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -106,11 +107,11 @@ public class LogManager {
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     user_id INT NOT NULL,
-                    role varchar(3) NOT NULL,
+                    role ENUM('VIP', 'MOD') NOT NULL,
                     added BIT NOT NULL,
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -121,13 +122,13 @@ public class LogManager {
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     user_id INT NOT NULL,
-                    type VARCHAR(5) NOT NULL,
-                    subTier VARCHAR(5),
+                    type ENUM('FOLLOW', 'SUBSCRIPTION', 'GIFT') NOT NULL,
+                    subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
                     giftAmount INT,
                     giftTotal INT,
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -138,10 +139,10 @@ public class LogManager {
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     channel_id INT NOT NULL,
                     raider_id INT NOT NULL,
-                    viwerAmount INT NOT NULL DEFAULT 0,
+                    viewerAmount INT NOT NULL DEFAULT 0,
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (raider_id) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -156,10 +157,10 @@ public class LogManager {
                     audioData LONGBLOB NOT NULL,
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
-                    subTier VARCHAR(5) NOT NULL DEFAULT 'NONE',
+                    subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
                     FOREIGN KEY (channel_id) REFERENCES users(id),
                     FOREIGN KEY (user_id) REFERENCES users(id)
-                    )
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
 
@@ -174,26 +175,29 @@ public class LogManager {
 
             // Log message
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Variables
                 var channelId = event.getChannelId();
                 var userId = event.getUserId();
 
                 // Check Channel and User
-                mySQL.checkCache(userId, event.getUser(), false);
-                mySQL.checkCache(channelId, event.getChannel(), true);
+                sql.checkCache(userId, event.getUser(), false);
+                sql.checkCache(channelId, event.getChannel(), true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
                 preparedStatement.setString(4, event.getMessage()); // set message
                 preparedStatement.setInt(5, event.getBits()); // set bits
                 preparedStatement.setInt(6, event.getSubMonths()); // set subMonths
-                preparedStatement.setString(7, event.getSubTier()); // set subTier
+                preparedStatement.setString(7, event.getSubTier().name()); // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -216,15 +220,18 @@ public class LogManager {
             var user = event.getUser();
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(userId, user, false);
-                mySQL.checkCache(channelId, channel, true);
+                sql.checkCache(userId, user, false);
+                sql.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
@@ -232,7 +239,7 @@ public class LogManager {
                 preparedStatement.setString(5, args); // set args
                 preparedStatement.setInt(6, event.getBits()); // set bits
                 preparedStatement.setInt(7, event.getSubMonths()); // set subMonths
-                preparedStatement.setString(8, event.getSubTier()); // set subTier
+                preparedStatement.setString(8, event.getSubTier().name()); // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -255,15 +262,18 @@ public class LogManager {
             var user = event.getUser();
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(userId, user, false);
-                mySQL.checkCache(channelId, channel, true);
+                sql.checkCache(userId, user, false);
+                sql.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
@@ -272,7 +282,7 @@ public class LogManager {
                 preparedStatement.setString(6, response); // set response
                 preparedStatement.setInt(7, event.getBits()); // set bits
                 preparedStatement.setInt(8, event.getSubMonths()); // set subMonths
-                preparedStatement.setString(9, event.getSubTier()); // set subTier
+                preparedStatement.setString(9, event.getSubTier().name()); // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -293,15 +303,18 @@ public class LogManager {
             var userId = helixHandler.getUser(user).getId();
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(userId, user, false);
-                mySQL.checkCache(channelId, channel, true);
+                sql.checkCache(userId, user, false);
+                sql.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
@@ -330,19 +343,22 @@ public class LogManager {
             System.out.println(event.getLog());
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(userId, event.getUser(), false);
-                mySQL.checkCache(channelId, event.getChannel(), true);
+                sql.checkCache(userId, event.getUser(), false);
+                sql.checkCache(channelId, event.getChannel(), true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "RoleLog" + " (timestamp, channel_id, user_id, role, added) VALUES (?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "RoleLog" + " (timestamp, channel_id, user_id, role, added) VALUES (?, ?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, event.getRole()); // set role
+                preparedStatement.setString(4, event.getRole().name()); // set role
                 preparedStatement.setInt(5, event.isAdded() ? 1 : 0); // set added
                 preparedStatement.executeUpdate(); // execute
 
@@ -365,22 +381,25 @@ public class LogManager {
             var user = event.getUserName();
 
             // Log to console
-            System.out.printf("%s %s <%s> %s: Followed%n", getFormattedTimestamp(), FOLLOW, channel, user);
+            System.out.printf("%s %s <%s> %s: Followed%n", getFormattedTimestamp(), LoyaltyType.FOLLOW.getTag(), channel, user);
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(userId, user, false);
-                mySQL.checkCache(channelId, channel, true);
+                sql.checkCache(userId, user, false);
+                sql.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type) VALUES (?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type) VALUES (?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, FOLLOW); // set type
+                preparedStatement.setString(4, LoyaltyType.FOLLOW.name()); // set type
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -403,22 +422,25 @@ public class LogManager {
             var tier = event.getTier().ordinalName().toUpperCase();
 
             // Log to console
-            System.out.printf("%s %s <%s> %s: Subscribed with %s%n", getFormattedTimestamp(), SUBSCRIBE, channel, user, tier);
+            System.out.printf("%s %s <%s> %s: Subscribed with %s%n", getFormattedTimestamp(), LoyaltyType.SUBSCRIPTION.getTag(), channel, user, tier);
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(userId, user, false);
-                mySQL.checkCache(channelId, channel, true);
+                sql.checkCache(userId, user, false);
+                sql.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subTier) VALUES (?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subTier) VALUES (?, ?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, SUBSCRIBE); // set type
+                preparedStatement.setString(4, LoyaltyType.SUBSCRIPTION.name()); // set type
                 preparedStatement.setString(5, tier); // set tier
                 preparedStatement.executeUpdate(); // execute
 
@@ -446,7 +468,7 @@ public class LogManager {
             // Log to console
             System.out.printf("%s %s <%s> %s: Gifted %d %s subs and has gifted %d subs in total%n",
                     getFormattedTimestamp(),
-                    GIFT,
+                    LoyaltyType.GIFT.getTag(),
                     channel,
                     user,
                     giftAmount,
@@ -455,19 +477,22 @@ public class LogManager {
             );
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(userId, user, false);
-                mySQL.checkCache(channelId, channel, true);
+                sql.checkCache(userId, user, false);
+                sql.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subTier, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subTier, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, GIFT); // set type
+                preparedStatement.setString(4, LoyaltyType.GIFT.name()); // set type
                 preparedStatement.setString(5, tier); // set tier
                 preparedStatement.setInt(6, giftAmount); // set giftAmount
                 preparedStatement.setInt(7, giftTotal); // set giftTotal
@@ -498,15 +523,18 @@ public class LogManager {
             System.out.printf("%s %s <%s> by %s with %d viewers%n", getFormattedTimestamp(), RAID, channelName, raiderName, viewer);
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(raiderId, raiderName, false);
-                mySQL.checkCache(channelId, channelName, true);
+                sql.checkCache(raiderId, raiderName, false);
+                sql.checkCache(channelId, channelName, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "RaidLog" + " (timestamp, channel_id, raider_id, viwerAmount) VALUES (?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "RaidLog" + " (timestamp, channel_id, raider_id, viewerAmount) VALUES (?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, raiderId); // set raider
@@ -532,15 +560,18 @@ public class LogManager {
             var user = event.getUser();
 
             try {
-                if (!mySQL.isConnected()) mySQL.connect(); // connect
+                if (!sql.isConnected()) sql.connect(); // connect
 
                 // Check Channel and User
-                mySQL.checkCache(userId, user, false);
-                mySQL.checkCache(channelId, channel, true);
+                sql.checkCache(userId, user, false);
+                sql.checkCache(channelId, channel, true);
 
                 // Prepare statement
-                String query = "INSERT INTO " + "TTSLog" + " (timestamp, channel_id, user_id, message, audioData, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement preparedStatement = mySQL.getConnection().prepareStatement(query);
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "TTSLog" + " (timestamp, channel_id, user_id, message, audioData, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                );
+
+                // Set values and execute
                 preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
                 preparedStatement.setInt(3, userId); // set user
@@ -548,7 +579,7 @@ public class LogManager {
                 preparedStatement.setBytes(5, audioFile.getAudioData()); // set audioData
                 preparedStatement.setInt(6, event.getBits()); // set bits
                 preparedStatement.setInt(7, event.getSubMonths()); // set subMonths
-                preparedStatement.setString(8, event.getSubTier()); // set subTier
+                preparedStatement.setString(8, event.getSubTier().name()); // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources

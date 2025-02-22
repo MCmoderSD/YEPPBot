@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.LurkManager;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class Lurk {
 
     // Constructor
-    public Lurk(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Lurk(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // About
         String[] name = {"lurk", "lürk", "afk", "lörk"}; // Command name and aliases
@@ -28,13 +28,13 @@ public class Lurk {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Variables
-                LurkManager lurkManager = mySQL.getLurkManager();
+                LurkManager lurkManager = sql.getLurkManager();
 
                 // Check if user is already in lurk
                 if (messageHandler.checkLurk(event)) messageHandler.updateLurkList(lurkManager.removeLurker(event.getUserId()));
 
                 // Save data
-                messageHandler.updateLurkList(mySQL.getLurkManager().saveLurk(event));
+                messageHandler.updateLurkList(sql.getLurkManager().saveLurk(event));
 
                 // Send message
                 botClient.respond(event, getCommand(), EMPTY);

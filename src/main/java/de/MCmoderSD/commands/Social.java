@@ -5,7 +5,7 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.enums.Account;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.ChannelManager;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class Social {
 
     // Constructor
-    public Social(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Social(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "social <instagram|tiktok|twitter|youtube> (set) <link>";
@@ -26,7 +26,7 @@ public class Social {
         String description = "Zeigt die Social Media Links des Streamers an:" + syntax;
 
         // Init Associations
-        ChannelManager channelManager = mySQL.getChannelManager();
+        ChannelManager channelManager = sql.getChannelManager();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {

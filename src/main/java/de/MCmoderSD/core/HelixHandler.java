@@ -37,7 +37,7 @@ import de.MCmoderSD.enums.Scope;
 import de.MCmoderSD.objects.AuthToken;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.server.Server;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.TokenManager;
 import de.MCmoderSD.utilities.other.Format;
 
@@ -74,12 +74,12 @@ public class HelixHandler {
     private final HashMap<Integer, HashSet<TwitchUser>> followers;
 
     // Constructor
-    public HelixHandler(BotClient botClient, MySQL mySQL, Server server) {
+    public HelixHandler(BotClient botClient, SQL sql, Server server) {
 
         // Set Associations
         this.botClient = botClient;
         helix = botClient.getHelix();
-        tokenManager = mySQL.getTokenManager();
+        tokenManager = sql.getTokenManager();
         this.server = server;
 
         // Set Credentials

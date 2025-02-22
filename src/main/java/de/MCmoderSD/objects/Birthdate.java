@@ -73,7 +73,7 @@ public class Birthdate {
     }
 
     // Get YYYY.MM.DD
-    public String getMySQLDate() {
+    public String getSQLDate() {
         return getYear() + "." + getMonth() + "." + getDay();
     }
 

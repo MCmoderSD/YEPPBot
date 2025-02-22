@@ -73,18 +73,18 @@
             <version>1.1.1</version>
         </dependency>
 
+        <!-- JSQL-Driver -->
+        <dependency>
+            <groupId>com.github.MCmoderSD</groupId>
+            <artifactId>JSQL-Driver</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
         <!-- Logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.5.16</version>
-        </dependency>
-
-        <!-- MySQL -->
-        <dependency>
-            <groupId>com.github.MCmoderSD</groupId>
-            <artifactId>MySQL-Driver</artifactId>
-            <version>1.0.0</version>
         </dependency>
 
         <!-- OpenAI -->
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>com.github.MCmoderSD</groupId>
             <artifactId>RiotGames-API</artifactId>
-            <version>1.0.3</version>
+            <version>1.1.1</version>
         </dependency>
 
         <!-- Twitch4J -->

@@ -1,4 +1,5 @@
 import de.MCmoderSD.encryption.Encryption;
+import de.MCmoderSD.sql.Driver;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,14 +21,13 @@ public class UpdateToken {
 
         // Database connection
         String host = "localhost";
-        int port = 3306; // MySQL Default Port
+        int port = 3306; // SQL Default Port
         String database = "your_database";
         String username = "your_username";
         String password = "your_password";
 
         // Connect to database
-
-        Connection connection = DriverManager.getConnection(String.format("jdbc:mysql://%s:%d/%s", host, port, database), username, password); // connect
+        Connection connection = DriverManager.getConnection(Driver.DatabaseType.MARIADB.getUrl(host, port, database), username, password); // connect
 
         // Replace old token with new token
         ResultSet resultSet = connection.prepareStatement("SELECT * FROM AuthTokens").executeQuery();

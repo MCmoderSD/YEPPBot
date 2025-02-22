@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.MySQL;
+import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.QuoteManager;
 
 import java.util.ArrayList;
@@ -24,10 +24,10 @@ public class Quote {
     private ArrayList<String> quotes;
 
     // Constructor
-    public Quote(BotClient botClient, MessageHandler messageHandler, MySQL mySQL) {
+    public Quote(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
         // Init Associations
-        QuoteManager quoteManager = mySQL.getQuoteManager();
+        QuoteManager quoteManager = sql.getQuoteManager();
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "quote <add|delete|edit|last> <number>";
