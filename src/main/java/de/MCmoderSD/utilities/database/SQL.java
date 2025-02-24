@@ -82,7 +82,7 @@ public class SQL extends Driver {
                             users (
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
-                            birthdate VARCHAR(10)
+                            birthdate VARCHAR(10) CHAR SET ascii
                             ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                             """
             ).execute();
@@ -156,8 +156,8 @@ public class SQL extends Driver {
         );
 
         // Set Values and Execute
-        preparedStatement.setInt(1, id); // set id
-        preparedStatement.setString(2, name); // set name
+        preparedStatement.setInt(1, id);        // set id
+        preparedStatement.setString(2, name);   // set name
         preparedStatement.executeUpdate(); // execute
 
         // Close resources

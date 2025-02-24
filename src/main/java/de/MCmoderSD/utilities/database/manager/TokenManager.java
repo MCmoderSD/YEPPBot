@@ -48,7 +48,7 @@ public class TokenManager {
                         expires_in INT NOT NULL,
                         timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (id) REFERENCES users(id)
-                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=ascii
                     """
             ).execute();
 

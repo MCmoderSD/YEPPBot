@@ -182,7 +182,7 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT command_name, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? EMPTY : " AND isEnabled = TRUE")
+                    "SELECT command_name, command_name FROM CustomCommands WHERE channel_id = ?" + (all ? EMPTY : " AND isEnabled = TRUE")
             );
 
             // Set Values and Execute
@@ -212,7 +212,7 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT command_alias, command_name FROM " + "CustomCommands" + " WHERE channel_id = ?" + (all ? EMPTY : " AND isEnabled = TRUE")
+                    "SELECT command_alias, command_name FROM CustomCommands WHERE channel_id = ?" + (all ? EMPTY : " AND isEnabled = TRUE")
             );
 
             // Set Values and Execute
@@ -258,15 +258,15 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "INSERT INTO " + "CustomCommands" + " (channel_id, command_name, command_alias, command_response, isEnabled) VALUES (?, ?, ?, ?, ?)"
+                    "INSERT INTO CustomCommands (channel_id, command_name, command_alias, command_response, isEnabled) VALUES (?, ?, ?, ?, ?)"
             );
 
             // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId()); // set channel
-            preparedStatement.setString(2, command); // set command
-            preparedStatement.setString(3, aliasesString); // set aliases
-            preparedStatement.setString(4, commandResponse); // set response
-            preparedStatement.setBoolean(5, true); // set isEnabled
+            preparedStatement.setInt(1, event.getChannelId());  // set channel
+            preparedStatement.setString(2, command);            // set command
+            preparedStatement.setString(3, aliasesString);      // set aliases
+            preparedStatement.setString(4, commandResponse);    // set response
+            preparedStatement.setBoolean(5, true);          // set isEnabled
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -291,13 +291,13 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE " + "CustomCommands" + " SET isEnabled = ? WHERE channel_id = ? AND command_name = ?"
+                    "UPDATE CustomCommands SET isEnabled = ? WHERE channel_id = ? AND command_name = ?"
             );
 
             // Set Values and Execute
-            preparedStatement.setInt(1, enable ? 1 : 0); // set isEnabled
-            preparedStatement.setInt(2, event.getChannelId()); // set channel
-            preparedStatement.setString(3, command); // set command
+            preparedStatement.setInt(1, enable ? 1 : 0);        // set isEnabled
+            preparedStatement.setInt(2, event.getChannelId());  // set channel
+            preparedStatement.setString(3, command);            // set command
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -323,12 +323,12 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "DELETE FROM " + "CustomCommands" + " WHERE channel_id = ? AND command_name = ?"
+                    "DELETE FROM CustomCommands WHERE channel_id = ? AND command_name = ?"
             );
 
             // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId()); // set channel
-            preparedStatement.setString(2, command); // set command
+            preparedStatement.setInt(1, event.getChannelId());  // set channel
+            preparedStatement.setString(2, command);            // set command
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -395,12 +395,12 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT name, value FROM " + "Counters" + " WHERE channel_id = ?"
+                    "SELECT name, value FROM Counters WHERE channel_id = ?"
             );
 
             // Set Values and Execute
             preparedStatement.setInt(1, event.getChannelId()); // set channel
-            ResultSet resultSet = preparedStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery(); // execute
 
             // Add to List
             while (resultSet.next()) counters.put(resultSet.getString("name"), resultSet.getInt("value"));
@@ -422,13 +422,13 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "INSERT INTO " + "Counters" + " (channel_id, name, value) VALUES (?, ?, ?)"
+                    "INSERT INTO Counters (channel_id, name, value) VALUES (?, ?, ?)"
             );
 
             // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId()); // set channel
-            preparedStatement.setString(2, counter); // set counter
-            preparedStatement.setInt(3, 0); // set value
+            preparedStatement.setInt(1, event.getChannelId());  // set channel
+            preparedStatement.setString(2, counter);            // set counter
+            preparedStatement.setInt(3, 0);                 // set value
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -448,13 +448,13 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE " + "Counters" + " SET value = ? WHERE channel_id = ? AND name = ?"
+                    "UPDATE Counters SET value = ? WHERE channel_id = ? AND name = ?"
             );
 
             // Set Values and Execute
-            preparedStatement.setInt(1, value); // set value
-            preparedStatement.setInt(2, event.getChannelId()); // set channel
-            preparedStatement.setString(3, counter); // set counter
+            preparedStatement.setInt(1, value);                 // set value
+            preparedStatement.setInt(2, event.getChannelId());  // set channel
+            preparedStatement.setString(3, counter);            // set counter
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -475,12 +475,12 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "DELETE FROM " + "Counters" + " WHERE channel_id = ? AND name = ?"
+                    "DELETE FROM Counters WHERE channel_id = ? AND name = ?"
             );
 
             // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId()); // set channel
-            preparedStatement.setString(2, counter); // set counter
+            preparedStatement.setInt(1, event.getChannelId());  // set channel
+            preparedStatement.setString(2, counter);            // set counter
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -549,7 +549,7 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT name, time, response FROM " + "CustomTimers" + " WHERE channel_id = ?"
+                    "SELECT name, time, response FROM CustomTimers WHERE channel_id = ?"
             );
 
             // Set Values and Execute
@@ -586,7 +586,7 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT channel_id, name, time, response FROM " + "CustomTimers WHERE isEnabled = TRUE"
+                    "SELECT channel_id, name, time, response FROM CustomTimers WHERE isEnabled = TRUE"
             );
 
             // Execute
@@ -618,14 +618,14 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "INSERT INTO " + "CustomTimers" + " (channel_id, name, time, response) VALUES (?, ?, ?, ?)"
+                    "INSERT INTO CustomTimers (channel_id, name, time, response) VALUES (?, ?, ?, ?)"
             );
 
             // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId()); // set channel
-            preparedStatement.setString(2, name); // set name
-            preparedStatement.setString(3, time); // set time
-            preparedStatement.setString(4, response); // set response
+            preparedStatement.setInt(1, event.getChannelId());  // set channel
+            preparedStatement.setString(2, name);               // set name
+            preparedStatement.setString(3, time);               // set time
+            preparedStatement.setString(4, response);           // set response
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -645,15 +645,15 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE " + "CustomTimers" + " SET time = ?, response = ?, isEnabled = ? WHERE channel_id = ? AND name = ?"
+                    "UPDATE CustomTimers SET time = ?, response = ?, isEnabled = ? WHERE channel_id = ? AND name = ?"
             );
 
             // Set Values and Execute
-            preparedStatement.setString(1, time); // set time
-            preparedStatement.setString(2, response); // set response
-            preparedStatement.setInt(3, enable ? 1 : 0); // set isEnabled
-            preparedStatement.setInt(4, event.getChannelId()); // set channel
-            preparedStatement.setString(5, name); // set name
+            preparedStatement.setString(1, time);               // set time
+            preparedStatement.setString(2, response);           // set response
+            preparedStatement.setInt(3, enable ? 1 : 0);        // set isEnabled
+            preparedStatement.setInt(4, event.getChannelId());  // set channel
+            preparedStatement.setString(5, name);               // set name
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -674,12 +674,12 @@ public class CustomManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "DELETE FROM " + "CustomTimers" + " WHERE channel_id = ? AND name = ?"
+                    "DELETE FROM CustomTimers WHERE channel_id = ? AND name = ?"
             );
 
             // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId()); // set channel
-            preparedStatement.setString(2, name); // set name
+            preparedStatement.setInt(1, event.getChannelId());  // set channel
+            preparedStatement.setString(2, name);               // set name
             preparedStatement.executeUpdate(); // execute
 
             // Close resources

@@ -74,13 +74,13 @@ public class LurkManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "INSERT INTO " + "lurkList" + " (user_id, lurkChannel_ID, startTime) VALUES (?, ?, ?)"
+                    "INSERT INTO lurkList (user_id, lurkChannel_ID, startTime) VALUES (?, ?, ?)"
             );
 
             // Set values and execute
-            preparedStatement.setInt(1, userID); // set user
-            preparedStatement.setInt(2, channelID); // set channel
-            preparedStatement.setTimestamp(3, event.getTimestamp()); // set timestamp
+            preparedStatement.setInt(1, userID);                        // set user
+            preparedStatement.setInt(2, channelID);                     // set channel
+            preparedStatement.setTimestamp(3, event.getTimestamp());    // set timestamp
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -104,7 +104,7 @@ public class LurkManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT user_id, lurkChannel_ID FROM " + "lurkList"
+                    "SELECT user_id, lurkChannel_ID FROM lurkList"
             );
 
             // Execute
@@ -137,7 +137,7 @@ public class LurkManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT startTime, lurkChannel_ID, traitorChannel FROM " + "lurkList WHERE user_id = ?"
+                    "SELECT startTime, lurkChannel_ID, traitorChannel FROM lurkList WHERE user_id = ?"
             );
 
             // Set values and execute
@@ -182,7 +182,7 @@ public class LurkManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "DELETE FROM " + "lurkList" + " WHERE user_id = ?"
+                    "DELETE FROM lurkList WHERE user_id = ?"
             );
 
             // Set values and execute
@@ -209,12 +209,12 @@ public class LurkManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "UPDATE " + "lurkList" + " SET traitorChannel = ? WHERE user_id = ?"
+                        "UPDATE lurkList SET traitorChannel = ? WHERE user_id = ?"
                 );
 
                 // Set values and execute
-                preparedStatement.setString(1, traitors); // set traitor
-                preparedStatement.setInt(2, userID); // set user
+                preparedStatement.setString(1, traitors);   // set traitor
+                preparedStatement.setInt(2, userID);        // set user
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources

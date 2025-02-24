@@ -208,7 +208,7 @@ public class Terminal {
     private boolean generateConfigFiles() {
 
         // Files
-        String[] fileNames = {"BotConfig.json", "Channel.list", "mariaDB.json", "httpsServer.json", "apiKeys.json", "ChatGPT.json"};
+        String[] fileNames = {"BotConfig.json", "Channel.list", "sql.json", "httpsServer.json", "apiKeys.json", "ChatGPT.json"};
 
         for (String fileName : fileNames) {
             try {
