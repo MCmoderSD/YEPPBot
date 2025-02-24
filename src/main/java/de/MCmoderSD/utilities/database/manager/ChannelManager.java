@@ -75,7 +75,7 @@ public class ChannelManager {
 
             // Query
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT name FROM " + "channels" + " WHERE active = TRUE"
+                    "SELECT name FROM channels WHERE active = TRUE"
             );
 
             // Execute
@@ -99,12 +99,12 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE " + "channels" + " SET active = ? WHERE name = ?"
+                    "UPDATE channels SET active = ? WHERE name = ?"
             );
 
             // Set values and execute
-            preparedStatement.setInt(1, isActive ? 1 : 0); // set active
-            preparedStatement.setString(2, channel); // set channel
+            preparedStatement.setInt(1, isActive ? 1 : 0);  // set active
+            preparedStatement.setString(2, channel);        // set channel
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -124,12 +124,12 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE " + "channels" + " SET auto_shoutout = ? WHERE id = ?"
+                    "UPDATE channels SET auto_shoutout = ? WHERE id = ?"
             );
 
             // Set values and execute
-            preparedStatement.setInt(1, isAutoShoutout ? 1 : 0); // set auto shoutout
-            preparedStatement.setInt(2, channelId); // set channel
+            preparedStatement.setInt(1, isAutoShoutout ? 1 : 0);    // set auto shoutout
+            preparedStatement.setInt(2, channelId);                 // set channel
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -149,7 +149,7 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT auto_shoutout FROM " + "channels" + " WHERE id = ?"
+                    "SELECT auto_shoutout FROM channels WHERE id = ?"
             );
 
             // Set values and execute
@@ -179,7 +179,7 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT id, blacklist FROM " + "channels"
+                    "SELECT id, blacklist FROM channels"
             );
 
             // Execute
@@ -300,8 +300,8 @@ public class ChannelManager {
             );
 
             // Set values and execute
-            preparedStatement.setString(1, value); // set value
-            preparedStatement.setInt(2, id); // set id
+            preparedStatement.setString(1, value);  // set value
+            preparedStatement.setInt(2, id);        // set id
             preparedStatement.executeUpdate(); // execute
 
             // Close resources
@@ -322,7 +322,7 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT " + account.getTable() + " FROM " + "AccountValues" + " WHERE id = ?"
+                    "SELECT " + account.getTable() + " FROM AccountValues WHERE id = ?"
             );
 
             // Set values and execute

@@ -33,7 +33,7 @@ src/main/resources/config/httpsServer.json
 src/main/resources/config/DevHttpsServer.json
 
 ### database ###
-src/main/resources/database/mariaDB.json
+src/main/resources/database/sql.json
 src/main/resources/database/dev.json
 
 ### keys ###

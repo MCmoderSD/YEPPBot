@@ -439,7 +439,7 @@ You have to follow the same steps as the [manual setup](#installation-and-setup)
 
 Following files are required:
 - The Bot Configuration named `bot.json`.
-- The MariaDB Configuration named `mariaDB.json`.
+- The MariaDB Configuration named `sql.json`.
 - The HTTPS Server Configuration named `server.json`.
 
 The Channel List, API Keys, and ChatGPT Configuration are optional.

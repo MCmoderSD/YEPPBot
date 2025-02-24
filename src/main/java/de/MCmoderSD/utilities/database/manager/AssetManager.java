@@ -26,9 +26,9 @@ public class AssetManager {
 
         // Initialize
         initTables();
-        initFacts();
-        initInsults();
-        initJokes();
+        new Thread(this::initFacts).start();
+        new Thread(this::initInsults).start();
+        new Thread(this::initJokes).start();
     }
 
     // Initialize Tables
@@ -80,6 +80,16 @@ public class AssetManager {
                     joke_id SERIAL PRIMARY KEY,
                     en VARCHAR(500),
                     de VARCHAR(500)
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
+                    """
+            ).execute();
+
+            // SQL statement for creating the audio data table
+            connection.prepareStatement(condition +
+                    """
+                    audioData(
+                    id SERIAL PRIMARY KEY,
+                    data LONGBLOB NOT NULL
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -492,23 +502,28 @@ public class AssetManager {
 
             Connection connection = sql.getConnection();
 
-            // Query
+            // Query to fetch audio data by joining TTSLog with audioData
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT audioData FROM TTSLog WHERE message = ?"
+                    "SELECT audioData.data FROM TTSLog JOIN audioData ON TTSLog.audioData = audioData.id WHERE TTSLog.message = ?"
             );
 
             // Set Values and Execute
             preparedStatement.setString(1, input);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) return new AudioFile(resultSet.getBytes("audioData"));
+            if (resultSet.next()) {
+                byte[] audioBytes = resultSet.getBytes("data");
+                resultSet.close();
+                preparedStatement.close();
+                return new AudioFile(audioBytes);
+            }
 
             // Close resources
             resultSet.close();
             preparedStatement.close();
 
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            System.err.println("Database error: " + e.getMessage());
         }
         return null;
     }

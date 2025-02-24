@@ -14,10 +14,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.utilities.database.SQL;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
@@ -187,17 +184,17 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "MessageLog" + " (timestamp, channel_id, user_id, message, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO MessageLog (timestamp, channel_id, user_id, message, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
-                preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, event.getMessage()); // set message
-                preparedStatement.setInt(5, event.getBits()); // set bits
-                preparedStatement.setInt(6, event.getSubMonths()); // set subMonths
-                preparedStatement.setString(7, event.getSubTier().name()); // set subTier
+                preparedStatement.setTimestamp(1, event.getTimestamp());    // set timestamp
+                preparedStatement.setInt(2, channelId);                     // set channel
+                preparedStatement.setInt(3, userId);                        // set user
+                preparedStatement.setString(4, event.getMessage());         // set message
+                preparedStatement.setInt(5, event.getBits());               // set bits
+                preparedStatement.setInt(6, event.getSubMonths());          // set subMonths
+                preparedStatement.setString(7, event.getSubTier().name());  // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -228,18 +225,18 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "CommandLog" + " (timestamp, channel_id, user_id, command, args, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO CommandLog (timestamp, channel_id, user_id, command, args, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
-                preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, trigger); // set command
-                preparedStatement.setString(5, args); // set args
-                preparedStatement.setInt(6, event.getBits()); // set bits
-                preparedStatement.setInt(7, event.getSubMonths()); // set subMonths
-                preparedStatement.setString(8, event.getSubTier().name()); // set subTier
+                preparedStatement.setTimestamp(1, event.getTimestamp());    // set timestamp
+                preparedStatement.setInt(2, channelId);                     // set channel
+                preparedStatement.setInt(3, userId);                        // set user
+                preparedStatement.setString(4, trigger);                    // set command
+                preparedStatement.setString(5, args);                       // set args
+                preparedStatement.setInt(6, event.getBits());               // set bits
+                preparedStatement.setInt(7, event.getSubMonths());          // set subMonths
+                preparedStatement.setString(8, event.getSubTier().name());  // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -270,19 +267,19 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO ResponseLog (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
-                preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, command); // set command
-                preparedStatement.setString(5, event.getMessage()); // set args
-                preparedStatement.setString(6, response); // set response
-                preparedStatement.setInt(7, event.getBits()); // set bits
-                preparedStatement.setInt(8, event.getSubMonths()); // set subMonths
-                preparedStatement.setString(9, event.getSubTier().name()); // set subTier
+                preparedStatement.setTimestamp(1, event.getTimestamp());    // set timestamp
+                preparedStatement.setInt(2, channelId);                     // set channel
+                preparedStatement.setInt(3, userId);                        // set user
+                preparedStatement.setString(4, command);                    // set command
+                preparedStatement.setString(5, event.getMessage());         // set args
+                preparedStatement.setString(6, response);                   // set response
+                preparedStatement.setInt(7, event.getBits());               // set bits
+                preparedStatement.setInt(8, event.getSubMonths());          // set subMonths
+                preparedStatement.setString(9, event.getSubTier().name());  // set subTier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -311,16 +308,16 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "ResponseLog" + " (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO ResponseLog (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, USER); // set command
-                preparedStatement.setString(5, USER); // set args
-                preparedStatement.setString(6, message); // set response
+                preparedStatement.setInt(2, channelId);     // set channel
+                preparedStatement.setInt(3, userId);        // set user
+                preparedStatement.setString(4, USER);       // set command
+                preparedStatement.setString(5, USER);       // set args
+                preparedStatement.setString(6, message);    // set response
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -351,15 +348,15 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "RoleLog" + " (timestamp, channel_id, user_id, role, added) VALUES (?, ?, ?, ?, ?)"
+                        "INSERT INTO RoleLog (timestamp, channel_id, user_id, role, added) VALUES (?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
+                preparedStatement.setInt(2, channelId);                 // set channel
+                preparedStatement.setInt(3, userId);                    // set user
                 preparedStatement.setString(4, event.getRole().name()); // set role
-                preparedStatement.setInt(5, event.isAdded() ? 1 : 0); // set added
+                preparedStatement.setInt(5, event.isAdded() ? 1 : 0);   // set added
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -392,14 +389,14 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type) VALUES (?, ?, ?, ?)"
+                        "INSERT INTO LoyaltyLog (timestamp, channel_id, user_id, type) VALUES (?, ?, ?, ?)"
                 );
 
                 // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, LoyaltyType.FOLLOW.name()); // set type
+                preparedStatement.setInt(2, channelId);                     // set channel
+                preparedStatement.setInt(3, userId);                        // set user
+                preparedStatement.setString(4, LoyaltyType.FOLLOW.name());  // set type
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -433,15 +430,15 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subTier) VALUES (?, ?, ?, ?, ?)"
+                        "INSERT INTO LoyaltyLog (timestamp, channel_id, user_id, type, subTier) VALUES (?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, LoyaltyType.SUBSCRIPTION.name()); // set type
-                preparedStatement.setString(5, tier); // set tier
+                preparedStatement.setInt(2, channelId);                             // set channel
+                preparedStatement.setInt(3, userId);                                // set user
+                preparedStatement.setString(4, LoyaltyType.SUBSCRIPTION.name());    // set type
+                preparedStatement.setString(5, tier);                               // set tier
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -485,17 +482,17 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "LoyaltyLog" + " (timestamp, channel_id, user_id, type, subTier, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO LoyaltyLog (timestamp, channel_id, user_id, type, subTier, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, LoyaltyType.GIFT.name()); // set type
-                preparedStatement.setString(5, tier); // set tier
-                preparedStatement.setInt(6, giftAmount); // set giftAmount
-                preparedStatement.setInt(7, giftTotal); // set giftTotal
+                preparedStatement.setInt(2, channelId);                     // set channel
+                preparedStatement.setInt(3, userId);                        // set user
+                preparedStatement.setString(4, LoyaltyType.GIFT.name());    // set type
+                preparedStatement.setString(5, tier);                       // set tier
+                preparedStatement.setInt(6, giftAmount);                    // set giftAmount
+                preparedStatement.setInt(7, giftTotal);                     // set giftTotal
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -531,14 +528,14 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "RaidLog" + " (timestamp, channel_id, raider_id, viewerAmount) VALUES (?, ?, ?, ?)"
+                        "INSERT INTO RaidLog (timestamp, channel_id, raider_id, viewerAmount) VALUES (?, ?, ?, ?)"
                 );
 
                 // Set values and execute
                 preparedStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis())); // set timestamp
                 preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, raiderId); // set raider
-                preparedStatement.setInt(4, viewer); // set viewerAmount
+                preparedStatement.setInt(3, raiderId);  // set raider
+                preparedStatement.setInt(4, viewer);    // set viewerAmount
                 preparedStatement.executeUpdate(); // execute
 
                 // Close resources
@@ -566,27 +563,47 @@ public class LogManager {
                 sql.checkCache(userId, user, false);
                 sql.checkCache(channelId, channel, true);
 
-                // Prepare statement
-                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO " + "TTSLog" + " (timestamp, channel_id, user_id, message, audioData, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                Connection connection = sql.getConnection();
+
+                // Insert into audioData
+                PreparedStatement audioPreparedStatement = connection.prepareStatement(
+                        "INSERT INTO audioData (data) VALUES (?)", Statement.RETURN_GENERATED_KEYS
+                );
+
+                // Set audioData and execute
+                audioPreparedStatement.setBytes(1, audioFile.getAudioData());
+                audioPreparedStatement.executeUpdate();
+
+                // Get generated audioData ID
+                ResultSet generatedKeys = audioPreparedStatement.getGeneratedKeys();
+                var audioDataId = -1;
+                if (generatedKeys.next()) audioDataId = generatedKeys.getInt(1);
+
+                // Close resources
+                generatedKeys.close();
+                audioPreparedStatement.close();
+
+                // Insert into TTSLog
+                PreparedStatement logPreparedStatement = connection.prepareStatement(
+                        "INSERT INTO TTSLog (timestamp, channel_id, user_id, message, audioData, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
-                preparedStatement.setTimestamp(1, event.getTimestamp()); // set timestamp
-                preparedStatement.setInt(2, channelId); // set channel
-                preparedStatement.setInt(3, userId); // set user
-                preparedStatement.setString(4, event.getMessage()); // set message
-                preparedStatement.setBytes(5, audioFile.getAudioData()); // set audioData
-                preparedStatement.setInt(6, event.getBits()); // set bits
-                preparedStatement.setInt(7, event.getSubMonths()); // set subMonths
-                preparedStatement.setString(8, event.getSubTier().name()); // set subTier
-                preparedStatement.executeUpdate(); // execute
+                logPreparedStatement.setTimestamp(1, event.getTimestamp());     // set timestamp
+                logPreparedStatement.setInt(2, channelId);                      // set channel
+                logPreparedStatement.setInt(3, userId);                         // set user
+                logPreparedStatement.setString(4, event.getMessage());          // set message
+                logPreparedStatement.setInt(5, audioDataId);                    // set audioData
+                logPreparedStatement.setInt(6, event.getBits());                // set bits
+                logPreparedStatement.setInt(7, event.getSubMonths());           // set subMonths
+                logPreparedStatement.setString(8, event.getSubTier().name());   // set subTier
+                logPreparedStatement.executeUpdate(); // execute
 
                 // Close resources
-                preparedStatement.close();
+                logPreparedStatement.close();
 
             } catch (SQLException e) {
-                System.err.println(e.getMessage());
+                System.err.println("Database error: " + e.getMessage());
             }
         }).start();
     }

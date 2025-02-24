@@ -23,7 +23,7 @@ public class Main {
     // Bot Config
     public static final String BOT_CONFIG = "/config/BotConfig.json";
     public static final String CHANNEL_LIST = "/config/Channel.list";
-    public static final String SQL_CONFIG = "/database/mariaDB.json";
+    public static final String SQL_CONFIG = "/database/sql.json";
     public static final String HTTPS_SERVER = "/config/httpsServer.json";
 
     // API Credentials
