@@ -47,6 +47,10 @@ public class Riot {
 
                 // Get Username
                 String[] input = String.join(SPACE, args).split("#");
+                if (input.length < 2) {
+                    botClient.respond(event, getCommand(), syntax);
+                    return;
+                }
                 String username = input[0].trim();
                 String[] split = input[1].split(SPACE);
                 String tag = split[0];
