@@ -42,7 +42,7 @@ public class LurkManager {
             // SQL statement for creating the lurk list table
             connection.prepareStatement(condition +
                     """
-                    lurkList (
+                    LurkList (
                     userId INT PRIMARY KEY NOT NULL,
                     lurkChannelId INT NOT NULL,
                     startTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -74,7 +74,7 @@ public class LurkManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "INSERT INTO lurkList (userId, lurkChannelId, startTime) VALUES (?, ?, ?)"
+                    "INSERT INTO LurkList (userId, lurkChannelId, startTime) VALUES (?, ?, ?)"
             );
 
             // Set values and execute
@@ -96,7 +96,7 @@ public class LurkManager {
     public HashMap<Integer, Integer> getLurkList() {
 
         // Variables
-        HashMap<Integer, Integer> lurkList = new HashMap<>();
+        HashMap<Integer, Integer> LurkList = new HashMap<>();
 
         // Get Custom Timers
         try {
@@ -104,14 +104,14 @@ public class LurkManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT userId, lurkChannelId FROM lurkList"
+                    "SELECT userId, lurkChannelId FROM LurkList"
             );
 
             // Execute
             ResultSet resultSet = preparedStatement.executeQuery();
 
             // Add to List
-            while (resultSet.next()) lurkList.put(resultSet.getInt("userId"), resultSet.getInt("lurkChannelId"));
+            while (resultSet.next()) LurkList.put(resultSet.getInt("userId"), resultSet.getInt("lurkChannelId"));
 
             // Close resources
             resultSet.close();
@@ -121,7 +121,7 @@ public class LurkManager {
             System.err.println(e.getMessage());
         }
 
-        return lurkList;
+        return LurkList;
     }
 
     // Get Lurk Time
@@ -137,7 +137,7 @@ public class LurkManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT startTime, lurkChannelId, traitorChannel FROM lurkList WHERE userId = ?"
+                    "SELECT startTime, lurkChannelId, traitorChannel FROM LurkList WHERE userId = ?"
             );
 
             // Set values and execute
@@ -182,7 +182,7 @@ public class LurkManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "DELETE FROM lurkList WHERE userId = ?"
+                    "DELETE FROM LurkList WHERE userId = ?"
             );
 
             // Set values and execute
@@ -209,7 +209,7 @@ public class LurkManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "UPDATE lurkList SET traitorChannel = ? WHERE userId = ?"
+                        "UPDATE LurkList SET traitorChannel = ? WHERE userId = ?"
                 );
 
                 // Set values and execute

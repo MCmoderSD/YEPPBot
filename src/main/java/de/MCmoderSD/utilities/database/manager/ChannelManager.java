@@ -245,8 +245,11 @@ public class ChannelManager {
                     "UPDATE Channels SET blacklist = ? WHERE name = ?"
             );
 
+            // Convert list to string
+            String blackListString = String.join("; ", list);
+
             // Set values and execute
-            updatePreparedStatement.setString(1, String.join("; ", list));
+            updatePreparedStatement.setString(1, blackListString.isBlank() ? null : blackListString);
             updatePreparedStatement.setString(2, channel);
             updatePreparedStatement.executeUpdate();
 
