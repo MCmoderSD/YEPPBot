@@ -55,7 +55,7 @@ public class AuthToken {
         accessToken = encryption.decrypt(resultSet.getString("accessToken"));
         refreshToken = encryption.decrypt(resultSet.getString("refreshToken"));
         scopes = Scope.getScopes(resultSet.getString("scopes"));
-        expiresIn = resultSet.getInt("expires_in");
+        expiresIn = resultSet.getInt("expiresIn");
         timestamp = resultSet.getTimestamp("timestamp");
 
         // Set next refresh
