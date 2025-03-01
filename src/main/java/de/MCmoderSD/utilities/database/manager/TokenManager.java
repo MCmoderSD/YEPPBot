@@ -45,9 +45,9 @@ public class TokenManager {
                         accessToken TEXT NOT NULL,
                         refreshToken TEXT NOT NULL,
                         scopes TEXT NOT NULL,
-                        expires_in INT NOT NULL,
+                        expiresIn INT NOT NULL,
                         timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (id) REFERENCES users(id)
+                        FOREIGN KEY (id) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=ascii
                     """
             ).execute();
@@ -74,13 +74,13 @@ public class TokenManager {
             // Prepare statement
             PreparedStatement insertPreparedStatement = sql.getConnection().prepareStatement(
                     """
-                        INSERT INTO AuthTokens (id, accessToken, refreshToken, scopes, expires_in, timestamp)
+                        INSERT INTO AuthTokens (id, accessToken, refreshToken, scopes, expiresIn, timestamp)
                         VALUES (?, ?, ?, ?, ?, ?)
                         ON DUPLICATE KEY UPDATE
                         accessToken = VALUES(accessToken),
                         refreshToken = VALUES(refreshToken),
                         scopes = VALUES(scopes),
-                        expires_in = VALUES(expires_in),
+                        expiresIn = VALUES(expiresIn),
                         timestamp = VALUES(timestamp)
                         """
             );
@@ -109,7 +109,7 @@ public class TokenManager {
 
             // Prepare statement
             PreparedStatement updatePreparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE AuthTokens SET accessToken = ?, refreshToken = ?, scopes = ?, expires_in = ?, timestamp = ? WHERE id = ? AND refreshToken = ?"
+                    "UPDATE AuthTokens SET accessToken = ?, refreshToken = ?, scopes = ?, expiresIn = ?, timestamp = ? WHERE id = ? AND refreshToken = ?"
             );
 
             // Set values and execute

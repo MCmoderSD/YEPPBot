@@ -44,8 +44,8 @@ public class AssetManager {
             // SQL statement for creating the fact list table
             connection.prepareStatement(condition +
                     """
-                    factList (
-                    fact_id SERIAL PRIMARY KEY,
+                    FactList (
+                    id SERIAL PRIMARY KEY,
                     en_percent VARCHAR(500),
                     en_people VARCHAR(500),
                     en_verb VARCHAR(500),
@@ -65,8 +65,8 @@ public class AssetManager {
             // SQL statement for creating the insult list table
             connection.prepareStatement(condition +
                     """
-                    insultList (
-                    insult_id SERIAL PRIMARY KEY,
+                    InsultList (
+                    id SERIAL PRIMARY KEY,
                     en VARCHAR(500),
                     de VARCHAR(500)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
@@ -76,20 +76,10 @@ public class AssetManager {
             // SQL statement for creating the joke list table
             connection.prepareStatement(condition +
                     """
-                    jokeList (
-                    joke_id SERIAL PRIMARY KEY,
+                    JokeList (
+                    id SERIAL PRIMARY KEY,
                     en VARCHAR(500),
                     de VARCHAR(500)
-                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
-                    """
-            ).execute();
-
-            // SQL statement for creating the audio data table
-            connection.prepareStatement(condition +
-                    """
-                    audioData(
-                    id SERIAL PRIMARY KEY,
-                    data LONGBLOB NOT NULL
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -108,7 +98,7 @@ public class AssetManager {
 
             // Check if jokes are already in the database
             PreparedStatement countStatement = connection.prepareStatement(
-                    "SELECT COUNT(fact_id) FROM factList"
+                    "SELECT COUNT(id) FROM FactList"
             );
 
             // Execute
@@ -116,7 +106,7 @@ public class AssetManager {
             if (countResult.next() && countResult.getInt(1) > 0) return;
 
             // Load facts
-            ArrayList<String> facts = readAllLines("/assets/factList.tsv");
+            ArrayList<String> facts = readAllLines("/assets/FactList.tsv");
             ArrayList<String> en_percent = new ArrayList<>();
             ArrayList<String> en_people = new ArrayList<>();
             ArrayList<String> en_verb = new ArrayList<>();
@@ -149,90 +139,90 @@ public class AssetManager {
 
             // Insert facts
             for (var i = 0; i < facts.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO factList (fact_id) VALUES (?)");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO FactList (id) VALUES (?)");
                 preparedStatement.setInt(1, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < en_percent.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET en_percent = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET en_percent = ? WHERE id = ?");
                 preparedStatement.setString(1, en_percent.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < en_people.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET en_people = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET en_people = ? WHERE id = ?");
                 preparedStatement.setString(1, en_people.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < en_verb.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET en_verb = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET en_verb = ? WHERE id = ?");
                 preparedStatement.setString(1, en_verb.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < en_frequency.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET en_frequency = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET en_frequency = ? WHERE id = ?");
                 preparedStatement.setString(1, en_frequency.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < en_adjective.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET en_adjective = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET en_adjective = ? WHERE id = ?");
                 preparedStatement.setString(1, en_adjective.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < en_object.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET en_object = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET en_object = ? WHERE id = ?");
                 preparedStatement.setString(1, en_object.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < de_percent.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET de_percent = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET de_percent = ? WHERE id = ?");
                 preparedStatement.setString(1, de_percent.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < de_people.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET de_people = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET de_people = ? WHERE id = ?");
                 preparedStatement.setString(1, de_people.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < de_verb.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET de_verb = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET de_verb = ? WHERE id = ?");
                 preparedStatement.setString(1, de_verb.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < de_frequency.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET de_frequency = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET de_frequency = ? WHERE id = ?");
                 preparedStatement.setString(1, de_frequency.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < de_adjective.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET de_adjective = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET de_adjective = ? WHERE id = ?");
                 preparedStatement.setString(1, de_adjective.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < de_object.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE factList SET de_object = ? WHERE fact_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE FactList SET de_object = ? WHERE id = ?");
                 preparedStatement.setString(1, de_object.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
@@ -252,7 +242,7 @@ public class AssetManager {
 
             // Check if jokes are already in the database
             PreparedStatement countStatement = connection.prepareStatement(
-                    "SELECT COUNT(insult_id) FROM insultList"
+                    "SELECT COUNT(id) FROM InsultList"
             );
 
             // Execute
@@ -260,7 +250,7 @@ public class AssetManager {
             if (countResult.next() && countResult.getInt(1) > 0) return;
 
             // Load insults
-            ArrayList<String> insults =  readAllLines("/assets/insultList.tsv");
+            ArrayList<String> insults =  readAllLines("/assets/InsultList.tsv");
             ArrayList<String> en = new ArrayList<>();
             ArrayList<String> de = new ArrayList<>();
 
@@ -273,20 +263,20 @@ public class AssetManager {
 
             // Insert insults
             for (var i = 0; i < insults.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO insultList (insult_id) VALUES (?)");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO InsultList (id) VALUES (?)");
                 preparedStatement.setInt(1, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < en.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE insultList SET en = ? WHERE insult_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE InsultList SET en = ? WHERE id = ?");
                 preparedStatement.setString(1, en.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < de.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE insultList SET de = ? WHERE insult_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE InsultList SET de = ? WHERE id = ?");
                 preparedStatement.setString(1, de.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
@@ -305,14 +295,14 @@ public class AssetManager {
             Connection connection = sql.getConnection();
 
             // Check if jokes are already in the database
-            PreparedStatement countStatement = connection.prepareStatement("SELECT COUNT(joke_id) FROM jokeList");
+            PreparedStatement countStatement = connection.prepareStatement("SELECT COUNT(id) FROM JokeList");
 
             // Execute
             ResultSet countResult = countStatement.executeQuery();
             if (countResult.next() && countResult.getInt(1) > 0) return;
 
             // Load jokes
-            ArrayList<String> jokes =  readAllLines("/assets/jokeList.tsv");
+            ArrayList<String> jokes =  readAllLines("/assets/JokeList.tsv");
             ArrayList<String> en = new ArrayList<>();
             ArrayList<String> de = new ArrayList<>();
 
@@ -325,20 +315,20 @@ public class AssetManager {
 
             // Insert jokes
             for (var i = 0; i < jokes.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO jokeList (joke_id) VALUES (?)");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO JokeList (id) VALUES (?)");
                 preparedStatement.setInt(1, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < en.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE jokeList SET en = ? WHERE joke_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE JokeList SET en = ? WHERE id = ?");
                 preparedStatement.setString(1, en.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
             }
 
             for (var i = 0; i < de.size(); i++) {
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE jokeList SET de = ? WHERE joke_id = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE JokeList SET de = ? WHERE id = ?");
                 preparedStatement.setString(1, de.get(i));
                 preparedStatement.setInt(2, i + 1);
                 preparedStatement.executeUpdate();
@@ -372,7 +362,7 @@ public class AssetManager {
 
                 // Get the total number of fact parts
                 PreparedStatement countStatement = connection.prepareStatement(
-                        "SELECT COUNT(fact_id) FROM factList WHERE " + lang + part + " IS NOT NULL"
+                        "SELECT COUNT(id) FROM FactList WHERE " + lang + part + " IS NOT NULL"
                 );
                 ResultSet countResult = countStatement.executeQuery();
 
@@ -382,7 +372,7 @@ public class AssetManager {
 
                 // Get the fact part at the random index
                 PreparedStatement factStatement = connection.prepareStatement(
-                        "SELECT " + lang + part + " FROM factList WHERE fact_id = ?"
+                        "SELECT " + lang + part + " FROM FactList WHERE id = ?"
                 );
 
                 // Set
@@ -421,7 +411,7 @@ public class AssetManager {
 
             // Get the total number of insults
             PreparedStatement countStatement = connection.prepareStatement(
-                    "SELECT COUNT(insult_id) FROM insultList WHERE " + lang + " IS NOT NULL"
+                    "SELECT COUNT(id) FROM InsultList WHERE " + lang + " IS NOT NULL"
             );
 
             // Execute
@@ -433,7 +423,7 @@ public class AssetManager {
 
             // Get the insult at the random index
             PreparedStatement insultStatement = connection.prepareStatement(
-                    "SELECT " + lang + " FROM insultList WHERE insult_id = ?"
+                    "SELECT " + lang + " FROM InsultList WHERE id = ?"
             );
 
             // Set Values and Execute
@@ -467,7 +457,7 @@ public class AssetManager {
 
             // Get the total number of jokes
             PreparedStatement countStatement = connection.prepareStatement(
-                    "SELECT COUNT(joke_id) FROM jokeList WHERE " + lang + " IS NOT NULL"
+                    "SELECT COUNT(id) FROM JokeList WHERE " + lang + " IS NOT NULL"
             );
 
             // Execute
@@ -479,7 +469,7 @@ public class AssetManager {
 
             // Get the joke at the random index
             PreparedStatement jokeStatement = connection.prepareStatement(
-                    "SELECT " + lang + " FROM jokeList WHERE joke_id = ?"
+                    "SELECT " + lang + " FROM JokeList WHERE id = ?"
             );
 
             // Set Values and Execute
@@ -502,28 +492,24 @@ public class AssetManager {
 
             Connection connection = sql.getConnection();
 
-            // Query to fetch audio data by joining TTSLog with audioData
+            // Get the audio data
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT audioData.data FROM TTSLog JOIN audioData ON TTSLog.audioData = audioData.id WHERE TTSLog.message = ?"
+                    "SELECT audioData FROM TTSLog WHERE message = ?"
             );
 
-            // Set Values and Execute
+            // Set values and execute
             preparedStatement.setString(1, input);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                byte[] audioBytes = resultSet.getBytes("data");
-                resultSet.close();
-                preparedStatement.close();
-                return new AudioFile(audioBytes);
-            }
+            // Get the audio data
+            if (resultSet.next()) return new AudioFile(resultSet.getBytes("audioData"));
 
             // Close resources
             resultSet.close();
             preparedStatement.close();
 
         } catch (SQLException e) {
-            System.err.println("Database error: " + e.getMessage());
+            System.err.println(e.getMessage());
         }
         return null;
     }

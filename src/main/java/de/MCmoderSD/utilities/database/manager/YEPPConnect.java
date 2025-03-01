@@ -46,11 +46,11 @@ public class YEPPConnect {
             connection.prepareStatement(condition +
                     """
                     MinecraftWhitelist (
-                    channel_id INT PRIMARY KEY,
+                    channelId INT PRIMARY KEY,
                     whitelist TEXT,
-                    user_pair TEXT,
-                    last_updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (channel_id) REFERENCES users(id)
+                    userPair TEXT,
+                    lastUpdate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (channelId) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -72,7 +72,7 @@ public class YEPPConnect {
 
         // Get Whitelist
         ArrayList<String> whitelist = getData(channelID, "whitelist") != null ? new ArrayList<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "whitelist")).split(SPACE))) : new ArrayList<>();
-        Set<String> temp = getData(channelID, "user_pair") != null ? new HashSet<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "user_pair")).split(" - "))) : null;
+        Set<String> temp = getData(channelID, "userPair") != null ? new HashSet<>(Arrays.asList(Objects.requireNonNull(getData(channelID, "userPair")).split(" - "))) : null;
         ArrayList<String> userPair = new ArrayList<>(temp != null ? temp : new ArrayList<>());
         ArrayList<String> users = new ArrayList<>();
         for (String id : userPair) users.add(id.split(SPACE)[0]);
@@ -121,7 +121,7 @@ public class YEPPConnect {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT * FROM MinecraftWhitelist WHERE channel_id = ?"
+                    "SELECT * FROM MinecraftWhitelist WHERE channelId = ?"
             );
 
             // Set values and execute
@@ -147,7 +147,7 @@ public class YEPPConnect {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT 1 FROM MinecraftWhitelist WHERE channel_id = ?"
+                    "SELECT 1 FROM MinecraftWhitelist WHERE channelId = ?"
             );
 
             // Set values and execute
@@ -169,7 +169,7 @@ public class YEPPConnect {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO MinecraftWhitelist (channel_id) VALUES (?)"
+                        "INSERT INTO MinecraftWhitelist (channelId) VALUES (?)"
                 );
 
                 // Set values and execute
@@ -204,7 +204,7 @@ public class YEPPConnect {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "UPDATE MinecraftWhitelist SET whitelist = ?, user_pair = ?, last_updated = ? WHERE channel_id = ?"
+                        "UPDATE MinecraftWhitelist SET whitelist = ?, userPair = ?, lastUpdate = ? WHERE channelId = ?"
                 );
 
                 // Set values and execute
