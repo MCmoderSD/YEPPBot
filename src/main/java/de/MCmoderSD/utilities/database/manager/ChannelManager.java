@@ -75,7 +75,7 @@ public class ChannelManager {
 
             // Query
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT name FROM channels WHERE active = TRUE"
+                    "SELECT name FROM Channels WHERE active = TRUE"
             );
 
             // Execute
@@ -99,7 +99,7 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE channels SET active = ? WHERE name = ?"
+                    "UPDATE Channels SET active = ? WHERE name = ?"
             );
 
             // Set values and execute
@@ -124,7 +124,7 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE channels SET auto_shoutout = ? WHERE id = ?"
+                    "UPDATE Channels SET autoShoutout = ? WHERE id = ?"
             );
 
             // Set values and execute
@@ -149,7 +149,7 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT auto_shoutout FROM channels WHERE id = ?"
+                    "SELECT autoShoutout FROM Channels WHERE id = ?"
             );
 
             // Set values and execute
@@ -157,7 +157,7 @@ public class ChannelManager {
             ResultSet resultSet = preparedStatement.executeQuery(); // execute
 
             // Close resources
-            boolean hasAutoShoutout = resultSet.next() && resultSet.getInt("auto_shoutout") == 1;
+            boolean hasAutoShoutout = resultSet.next() && resultSet.getInt("autoShoutout") == 1;
             resultSet.close();
             preparedStatement.close();
             return hasAutoShoutout;
@@ -179,7 +179,7 @@ public class ChannelManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT id, blacklist FROM channels"
+                    "SELECT id, blacklist FROM Channels"
             );
 
             // Execute
@@ -214,7 +214,7 @@ public class ChannelManager {
 
             // Prepare select statement
             PreparedStatement selectPreparedStatement = connection.prepareStatement(
-                    "SELECT blacklist FROM channels WHERE name = ?"
+                    "SELECT blacklist FROM Channels WHERE name = ?"
             );
 
             // Set values and execute
@@ -242,7 +242,7 @@ public class ChannelManager {
 
             // Prepare update statement
             PreparedStatement updatePreparedStatement = connection.prepareStatement(
-                    "UPDATE channels SET blacklist = ? WHERE name = ?"
+                    "UPDATE Channels SET blacklist = ? WHERE name = ?"
             );
 
             // Set values and execute

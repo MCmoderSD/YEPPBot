@@ -76,10 +76,10 @@ public class SQL extends Driver {
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
 
-            // SQL statement for creating the users table
+            // SQL statement for creating the Users table
             connection.prepareStatement(condition +
                             """
-                            users (
+                            Users (
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
                             birthdate VARCHAR(10) CHAR SET ascii
@@ -87,16 +87,16 @@ public class SQL extends Driver {
                             """
             ).execute();
 
-            // SQL statement for creating the channels table
+            // SQL statement for creating the Channels table
             connection.prepareStatement(condition +
                             """
-                            channels (
+                            Channels (
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
                             blacklist TEXT,
                             active BIT NOT NULL DEFAULT TRUE,
-                            auto_shoutout BIT NOT NULL DEFAULT FALSE,
-                            FOREIGN KEY (id) REFERENCES users(id)
+                            autoShoutout BIT NOT NULL DEFAULT FALSE,
+                            FOREIGN KEY (id) REFERENCES Users(id)
                             ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                             """
             ).execute();
@@ -201,7 +201,7 @@ public class SQL extends Driver {
 
             // Update Birthday
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "UPDATE users SET birthdate = ? WHERE id = ?"
+                    "UPDATE Users SET birthdate = ? WHERE id = ?"
             );
 
             // Set Values and Execute
@@ -224,7 +224,7 @@ public class SQL extends Driver {
 
             // Query
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT id, birthdate FROM users WHERE birthdate IS NOT NULL"
+                    "SELECT id, birthdate FROM Users WHERE birthdate IS NOT NULL"
             );
 
             // Execute
@@ -298,8 +298,8 @@ public class SQL extends Driver {
     public enum Table {
 
         // Tables
-        USERS("users"),
-        CHANNELS("channels");
+        USERS("Users"),
+        CHANNELS("Channels");
 
         // Variables
         private final String name;

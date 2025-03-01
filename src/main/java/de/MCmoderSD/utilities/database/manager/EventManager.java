@@ -43,7 +43,7 @@ public class EventManager {
                         year SMALLINT NOT NULL,
                         id INT NOT NULL,
                         joined DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        gave_up DATETIME DEFAULT NULL
+                        gaveUp DATETIME DEFAULT NULL
                         ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                         """, table)).execute();
             }
@@ -94,7 +94,7 @@ public class EventManager {
 
             // Add user to event
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    String.format("UPDATE %s SET gave_up = CURRENT_TIMESTAMP WHERE year = ? AND id = ?", event.getTable())
+                    String.format("UPDATE %s SET gaveUp = CURRENT_TIMESTAMP WHERE year = ? AND id = ?", event.getTable())
             );
 
             // Set values and execute
@@ -140,7 +140,7 @@ public class EventManager {
 
             // Prepare statement
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    String.format("SELECT * FROM %s WHERE year = ? AND id = ? AND gave_up IS NOT NULL", event.getTable())
+                    String.format("SELECT * FROM %s WHERE year = ? AND id = ? AND gaveUp IS NOT NULL", event.getTable())
             );
 
             // Set values and execute
@@ -163,13 +163,13 @@ public class EventManager {
 
             // Get participants
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    String.format("SELECT id, gave_up FROM %s WHERE year = ?", event.getTable())
+                    String.format("SELECT id, gaveUp FROM %s WHERE year = ?", event.getTable())
             );
 
             // Set values and execute
             preparedStatement.setInt(1, Calendar.getInstance().get(Calendar.YEAR));
             ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) participants.put(resultSet.getInt("id"), resultSet.getObject("gave_up") == null);
+            while (resultSet.next()) participants.put(resultSet.getInt("id"), resultSet.getObject("gaveUp") == null);
 
             // Close resources
             preparedStatement.close();
@@ -187,14 +187,14 @@ public class EventManager {
 
             // Get participants
             PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    String.format("SELECT joined, gave_up FROM %s WHERE year = ? AND id = ?", event.getTable())
+                    String.format("SELECT joined, gaveUp FROM %s WHERE year = ? AND id = ?", event.getTable())
             );
 
             // Set values and execute
             preparedStatement.setInt(1, Calendar.getInstance().get(Calendar.YEAR));
             preparedStatement.setInt(2, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) return new Timestamp[]{resultSet.getTimestamp("joined"), resultSet.getTimestamp("gave_up")};
+            if (resultSet.next()) return new Timestamp[]{resultSet.getTimestamp("joined"), resultSet.getTimestamp("gaveUp")};
 
         } catch (SQLException e) {
             System.err.println(e.getMessage());

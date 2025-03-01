@@ -48,14 +48,14 @@ public class LogManager {
                 """
                 MessageLog (
                 timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                channel_id INT NOT NULL,
-                user_id INT NOT NULL,
+                channelId INT NOT NULL,
+                userId INT NOT NULL,
                 message VARCHAR(500),
                 bits INT NOT NULL DEFAULT 0,
                 subMonths INT NOT NULL DEFAULT 0,
                 subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
-                FOREIGN KEY (channel_id) REFERENCES users(id),
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                FOREIGN KEY (channelId) REFERENCES Users(id),
+                FOREIGN KEY (userId) REFERENCES Users(id)
                 ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                 """
             ).execute();
@@ -65,15 +65,15 @@ public class LogManager {
                     """
                     CommandLog (
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    channel_id INT NOT NULL,
-                    user_id INT NOT NULL,
+                    channelId INT NOT NULL,
+                    userId INT NOT NULL,
                     command TEXT NOT NULL,
                     args VARCHAR(500),
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
                     subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
-                    FOREIGN KEY (channel_id) REFERENCES users(id),
-                    FOREIGN KEY (user_id) REFERENCES users(id)
+                    FOREIGN KEY (channelId) REFERENCES Users(id),
+                    FOREIGN KEY (userId) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -83,16 +83,16 @@ public class LogManager {
                     """
                     ResponseLog (
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    channel_id INT NOT NULL,
-                    user_id INT NOT NULL,
+                    channelId INT NOT NULL,
+                    userId INT NOT NULL,
                     command TEXT NOT NULL,
                     args VARCHAR(500),
                     response VARCHAR(500),
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
                     subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
-                    FOREIGN KEY (channel_id) REFERENCES users(id),
-                    FOREIGN KEY (user_id) REFERENCES users(id)
+                    FOREIGN KEY (channelId) REFERENCES Users(id),
+                    FOREIGN KEY (userId) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -102,12 +102,12 @@ public class LogManager {
                     """
                     RoleLog (
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    channel_id INT NOT NULL,
-                    user_id INT NOT NULL,
+                    channelId INT NOT NULL,
+                    userId INT NOT NULL,
                     role ENUM('VIP', 'MOD') NOT NULL,
                     added BIT NOT NULL,
-                    FOREIGN KEY (channel_id) REFERENCES users(id),
-                    FOREIGN KEY (user_id) REFERENCES users(id)
+                    FOREIGN KEY (channelId) REFERENCES Users(id),
+                    FOREIGN KEY (userId) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -117,14 +117,14 @@ public class LogManager {
                     """
                     LoyaltyLog (
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    channel_id INT NOT NULL,
-                    user_id INT NOT NULL,
+                    channelId INT NOT NULL,
+                    userId INT NOT NULL,
                     type ENUM('FOLLOW', 'SUBSCRIPTION', 'GIFT') NOT NULL,
                     subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
                     giftAmount INT,
                     giftTotal INT,
-                    FOREIGN KEY (channel_id) REFERENCES users(id),
-                    FOREIGN KEY (user_id) REFERENCES users(id)
+                    FOREIGN KEY (channelId) REFERENCES Users(id),
+                    FOREIGN KEY (userId) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -134,11 +134,11 @@ public class LogManager {
                     """
                     RaidLog (
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    channel_id INT NOT NULL,
-                    raider_id INT NOT NULL,
+                    channelId INT NOT NULL,
+                    raiderId INT NOT NULL,
                     viewerAmount INT NOT NULL DEFAULT 0,
-                    FOREIGN KEY (channel_id) REFERENCES users(id),
-                    FOREIGN KEY (raider_id) REFERENCES users(id)
+                    FOREIGN KEY (channelId) REFERENCES Users(id),
+                    FOREIGN KEY (raiderId) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -148,15 +148,15 @@ public class LogManager {
                     """
                     TTSLog (
                     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    channel_id INT NOT NULL,
-                    user_id INT NOT NULL,
+                    channelId INT NOT NULL,
+                    userId INT NOT NULL,
                     message VARCHAR(500),
                     audioData LONGBLOB NOT NULL,
                     bits INT NOT NULL DEFAULT 0,
                     subMonths INT NOT NULL DEFAULT 0,
                     subTier ENUM('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME') NOT NULL DEFAULT 'NONE',
-                    FOREIGN KEY (channel_id) REFERENCES users(id),
-                    FOREIGN KEY (user_id) REFERENCES users(id)
+                    FOREIGN KEY (channelId) REFERENCES Users(id),
+                    FOREIGN KEY (userId) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -184,7 +184,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO MessageLog (timestamp, channel_id, user_id, message, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO MessageLog (timestamp, channelId, userId, message, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -225,7 +225,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO CommandLog (timestamp, channel_id, user_id, command, args, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO CommandLog (timestamp, channelId, userId, command, args, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -267,7 +267,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO ResponseLog (timestamp, channel_id, user_id, command, args, response, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO ResponseLog (timestamp, channelId, userId, command, args, response, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -308,7 +308,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO ResponseLog (timestamp, channel_id, user_id, command, args, response) VALUES (?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO ResponseLog (timestamp, channelId, userId, command, args, response) VALUES (?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -348,7 +348,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO RoleLog (timestamp, channel_id, user_id, role, added) VALUES (?, ?, ?, ?, ?)"
+                        "INSERT INTO RoleLog (timestamp, channelId, userId, role, added) VALUES (?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -389,7 +389,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO LoyaltyLog (timestamp, channel_id, user_id, type) VALUES (?, ?, ?, ?)"
+                        "INSERT INTO LoyaltyLog (timestamp, channelId, userId, type) VALUES (?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -430,7 +430,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO LoyaltyLog (timestamp, channel_id, user_id, type, subTier) VALUES (?, ?, ?, ?, ?)"
+                        "INSERT INTO LoyaltyLog (timestamp, channelId, userId, type, subTier) VALUES (?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -482,7 +482,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO LoyaltyLog (timestamp, channel_id, user_id, type, subTier, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO LoyaltyLog (timestamp, channelId, userId, type, subTier, giftAmount, giftTotal) VALUES (?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -528,7 +528,7 @@ public class LogManager {
 
                 // Prepare statement
                 PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                        "INSERT INTO RaidLog (timestamp, channel_id, raider_id, viewerAmount) VALUES (?, ?, ?, ?)"
+                        "INSERT INTO RaidLog (timestamp, channelId, raiderId, viewerAmount) VALUES (?, ?, ?, ?)"
                 );
 
                 // Set values and execute
@@ -563,47 +563,27 @@ public class LogManager {
                 sql.checkCache(userId, user, false);
                 sql.checkCache(channelId, channel, true);
 
-                Connection connection = sql.getConnection();
-
-                // Insert into audioData
-                PreparedStatement audioPreparedStatement = connection.prepareStatement(
-                        "INSERT INTO audioData (data) VALUES (?)", Statement.RETURN_GENERATED_KEYS
-                );
-
-                // Set audioData and execute
-                audioPreparedStatement.setBytes(1, audioFile.getAudioData());
-                audioPreparedStatement.executeUpdate();
-
-                // Get generated audioData ID
-                ResultSet generatedKeys = audioPreparedStatement.getGeneratedKeys();
-                var audioDataId = -1;
-                if (generatedKeys.next()) audioDataId = generatedKeys.getInt(1);
-
-                // Close resources
-                generatedKeys.close();
-                audioPreparedStatement.close();
-
-                // Insert into TTSLog
-                PreparedStatement logPreparedStatement = connection.prepareStatement(
-                        "INSERT INTO TTSLog (timestamp, channel_id, user_id, message, audioData, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                // Prepare statement
+                PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                        "INSERT INTO " + "TTSLog" + " (timestamp, channelId, userId, message, audioData, bits, subMonths, subTier) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 // Set values and execute
-                logPreparedStatement.setTimestamp(1, event.getTimestamp());     // set timestamp
-                logPreparedStatement.setInt(2, channelId);                      // set channel
-                logPreparedStatement.setInt(3, userId);                         // set user
-                logPreparedStatement.setString(4, event.getMessage());          // set message
-                logPreparedStatement.setInt(5, audioDataId);                    // set audioData
-                logPreparedStatement.setInt(6, event.getBits());                // set bits
-                logPreparedStatement.setInt(7, event.getSubMonths());           // set subMonths
-                logPreparedStatement.setString(8, event.getSubTier().name());   // set subTier
-                logPreparedStatement.executeUpdate(); // execute
+                preparedStatement.setTimestamp(1, event.getTimestamp());    // set timestamp
+                preparedStatement.setInt(2, channelId);                     // set channel
+                preparedStatement.setInt(3, userId);                        // set user
+                preparedStatement.setString(4, event.getMessage());         // set message
+                preparedStatement.setBytes(5, audioFile.getAudioData());    // set audioData
+                preparedStatement.setInt(6, event.getBits());               // set bits
+                preparedStatement.setInt(7, event.getSubMonths());          // set subMonths
+                preparedStatement.setString(8, event.getSubTier().name());  // set subTier
+                preparedStatement.executeUpdate(); // execute
 
                 // Close resources
-                logPreparedStatement.close();
+                preparedStatement.close();
 
             } catch (SQLException e) {
-                System.err.println("Database error: " + e.getMessage());
+                System.err.println(e.getMessage());
             }
         }).start();
     }
