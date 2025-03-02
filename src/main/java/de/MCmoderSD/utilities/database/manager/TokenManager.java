@@ -182,4 +182,43 @@ public class TokenManager {
             return null;
         }
     }
+
+    // Delete AuthToken
+    public int deleteAuthToken(String refreshToken, Encryption encryption) {
+        try {
+            if (!sql.isConnected()) sql.connect(); // connect
+
+            // Get ID
+            PreparedStatement selectPreparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT id FROM AuthTokens WHERE refreshToken = ?"
+            );
+
+            // Set values and execute
+            selectPreparedStatement.setString(1, encryption.encrypt(refreshToken)); // set refresh token
+            ResultSet resultSet = selectPreparedStatement.executeQuery(); // execute
+
+            // Get ID
+            if (!resultSet.next()) return -1;
+            var id = resultSet.getInt("id");
+
+            // Delete AuthToken
+            PreparedStatement deletePreparedStatement = sql.getConnection().prepareStatement(
+                    "DELETE FROM AuthTokens WHERE id = ?"
+            );
+
+            // Set values and execute
+            deletePreparedStatement.setInt(1, id); // set id
+            deletePreparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            deletePreparedStatement.close();
+            selectPreparedStatement.close();
+            resultSet.close();
+            return id;
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return -1;
+        }
+    }
 }

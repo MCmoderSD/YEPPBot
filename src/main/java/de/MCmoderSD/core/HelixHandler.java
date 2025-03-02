@@ -128,6 +128,15 @@ public class HelixHandler {
             return false;
         }
 
+        // Check for invalid refresh token
+        if (response.body().contains("{\"status\":400,\"message\":\"Invalid refresh token\"}")) {
+            System.err.println("Invalid refresh token, please reauthorize the bot");
+            System.err.println("Deleting auth token");
+            assert oldRefreshToken != null;
+            authTokens.remove(tokenManager.deleteAuthToken(oldRefreshToken, encryption));
+            return true;
+        }
+
         // Create new token
         AuthToken token = new AuthToken(this, response.body());
 
