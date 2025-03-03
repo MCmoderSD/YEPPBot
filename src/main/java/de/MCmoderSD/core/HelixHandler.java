@@ -239,11 +239,10 @@ public class HelixHandler {
         StringBuilder scopeBuilder = new StringBuilder();
         for (Scope scope : Set.of(scopes)) scopeBuilder.append(scope.getScope()).append("+");
         return String.format(
-                "%s?client_id=%s&redirect_uri=https://%s:%d/callback&response_type=code&scope=%s",
+                "%s?client_id=%s&redirect_uri=%s/callback&response_type=code&scope=%s",
                 AUTH_URL,
                 clientId,
-                server.getHostname(),
-                server.getPort(),
+                server.getURL(),
                 scopeBuilder.substring(0, scopeBuilder.length() - 1)
         );
     }
