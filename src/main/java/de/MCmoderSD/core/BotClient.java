@@ -139,11 +139,11 @@ public class BotClient {
                 JsonNode sllConfig = httpsServerConfig.get("SSL");
                 String privkey = sllConfig.get("privkey").asText();
                 String fullchain = sllConfig.get("fullchain").asText();
-                server = new Server(hostname, port, privkey, fullchain);
+                server = new Server(hostname, port, privkey, fullchain, httpsServerConfig.get("host").asBoolean());
             } else {    // JKS
                 hostname = Main.terminal.hasArg(HOST) ? Main.terminal.getArgs()[0] : hostname;
                 port = Main.terminal.hasArg(PORT) && !Main.terminal.hasArg(CONTAINER) ? Integer.parseInt(Main.terminal.getArgs()[1]) : port;
-                server = new Server(hostname, port, httpsServerConfig.get("JKS"));
+                server = new Server(hostname, port, httpsServerConfig.get("JKS"), httpsServerConfig.get("host").asBoolean());
             }
         } catch (IOException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | KeyManagementException | CertificateException | InvalidKeySpecException | InterruptedException e) {
             throw new RuntimeException(e);
