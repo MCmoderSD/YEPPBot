@@ -60,7 +60,7 @@ public class BotClient {
             Scope.ANALYTICS_READ_GAMES,
             Scope.MODERATOR_MANAGE_SHOUTOUTS
     };
-  
+
     // Associations
     private final SQL sql;
     private final Frame frame;
@@ -233,7 +233,7 @@ public class BotClient {
         }
 
         // Loading OpenAI TTS Commands
-        if (openAITTS) new TTS(this, messageHandler, sql, Objects.requireNonNull(openAI).getSpeech());
+        //if (openAITTS) new TTS(this, messageHandler, sql, Objects.requireNonNull(openAI).getSpeech()); TODO: Fix TTS
 
         // API & OpenAI Commands
         if (giphy || astrology || weather || riot) {
@@ -307,7 +307,7 @@ public class BotClient {
         if (valid && !cli) frame.log(channel, botName, message);
 
         // Log
-        if (valid && log    ) sql.getLogManager().logResponse(event, command, message);
+        if (valid && log) sql.getLogManager().logResponse(event, command, message);
         System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
         if (valid) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
