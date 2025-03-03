@@ -1,4 +1,4 @@
-name: Release and Publish - Dev
+name: Release and Publish
 
 on:
   workflow_dispatch:
