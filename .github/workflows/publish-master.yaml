@@ -1,4 +1,4 @@
-name: Master - Build, Release, Publish
+name: Release and Publish
 
 on:
   workflow_dispatch:
@@ -12,62 +12,77 @@ permissions:
 jobs:
 
   build:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, 'Release') || contains(github.event.head_commit.message, 'release')
     runs-on: ubuntu-24.04
     outputs:
-      version: ${{ steps.extract-version.outputs.version }}
+      version: ${{ steps.extract.outputs.version }}
+      artifact: ${{ steps.extract.outputs.artifact }}
+      filename: ${{ steps.extract.outputs.filename }}
 
     steps:
-
       - name: Set up JDK 21
-        uses: actions/setup-java@v4.6.0
+        id: setup-java
+        uses: actions/setup-java@v4.7.0
         with:
           java-version: '21'
           distribution: 'zulu'
 
       - name: Checkout code
+        id: checkout
         uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
 
-      - name: Extract version
-        id: extract-version
+      - name: Extract version, artifact name and determine JAR filename
+        id: extract
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          ARTIFACT=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "artifact=$ARTIFACT" >> $GITHUB_OUTPUT
+          echo "filename=${ARTIFACT}-${VERSION}.jar" >> $GITHUB_OUTPUT
 
       - name: Build JAR
+        id: build
         run: |
-          mvn clean install package
-          JAR=$(find target -name "YEPPBot.jar")
+          mvn -U clean package
+          JAR=$(find . -name ${{ steps.extract.outputs.filename }})
           echo "jar=$JAR" >> $GITHUB_ENV
 
       - name: Upload JAR as artifact
-        uses: actions/upload-artifact@v4.5.0
+        id: upload
+        uses: actions/upload-artifact@v4.6.1
         with:
-          name: jar-file
+          name: ${{ steps.extract.outputs.filename }}
           path: ${{ env.jar }}
 
   release:
     runs-on: ubuntu-24.04
     needs: build
+    env:
+      version: ${{ needs.build.outputs.version }}
+      artifact: ${{ needs.build.outputs.artifact }}
+      filename: ${{ needs.build.outputs.filename }}
+      release-name: YEPPBot - Release ${{ needs.build.outputs.version }}
+      asset-name: YEPPBot.jar
 
     steps:
-
-      - name: Set Parameters
-        run: |
-          echo "token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
-          echo "version=${{ needs.build.outputs.version }}" >> $GITHUB_ENV
-          echo "release-name=YEPPBot - Release ${{ needs.build.outputs.version }}" >> $GITHUB_ENV
-
       - name: Checkout code
+        id: checkout
         uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Install GitHub CLI and authenticate
+        id: gh-auth
         run: |
-          curl -sSL https://github.com/cli/cli/releases/download/v2.63.2/gh_2.63.2_linux_amd64.deb -o gh-cli.deb
+          curl -sSL https://github.com/cli/cli/releases/download/v2.67.0/gh_2.67.0_linux_amd64.deb -o gh-cli.deb
           sudo dpkg -i gh-cli.deb
           sudo apt install -f
-          echo ${{ env.token }} | gh auth login --with-token
+          echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
 
       - name: Check for existing release
+        id: check-release
         run: |
           VERSION="${{ env.version }}"
           TAG_EXISTS=$(gh release view "$VERSION" --json tagName --jq ".tagName" 2>&1 || true)
@@ -86,14 +101,30 @@ jobs:
             fi
           fi
 
+      - name: Get latest existing release tag
+        id: get-latest-tag
+        run: |
+          TAG=$(git tag --sort=-creatordate | grep -v "${{ env.version }}" | head -n 1 || true)
+          if [ -z "$TAG" ]; then
+            echo "No previous tag found."
+            CHANGELOG_URL="https://github.com/${{ github.repository }}/commits/${{ env.version }}"
+          else
+            echo "Previous tag: $TAG"
+            CHANGELOG_URL="https://github.com/${{ github.repository }}/compare/$TAG...${{ env.version }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_ENV
+          echo "changelog_url=$CHANGELOG_URL" >> $GITHUB_ENV
+
       - name: Download JAR artifact
-        uses: actions/download-artifact@v4.1.8
+        id: download-artifact
+        uses: actions/download-artifact@v4.1.9
         with:
-          name: jar-file
+          name: ${{ env.filename }}
 
       - name: Calculate Hashes
+        id: calculate-hashes
         run: |
-          FILE=$(find . -name "YEPPBot.jar")
+          FILE=$(find . -name ${{ env.filename }})
           MD5=$(md5sum "$FILE" | cut -d ' ' -f 1)
           SHA1=$(sha1sum "$FILE" | cut -d ' ' -f 1)
           SHA256=$(sha256sum "$FILE" | cut -d ' ' -f 1)
@@ -102,15 +133,21 @@ jobs:
           echo "sha256=$SHA256" >> $GITHUB_ENV
           echo "file=$FILE" >> $GITHUB_ENV
 
+      - name: Rename JAR file
+        id: rename-file
+        run: |
+          mv "${{ env.file }}" "${{ env.asset-name }}"
+          echo "file=${{ env.asset-name }}" >> $GITHUB_ENV
+
       - name: Create new release
-        uses: softprops/action-gh-release@v2
+        id: create-release
+        uses: softprops/action-gh-release@v2.2.1
         with:
           files: ${{ env.file }}
           tag_name: ${{ env.version }}
           name: ${{ env.release-name }}
           body: |
-            **Full Changelog**: https://github.com/MCmoderSD/YEPPBot/commits/${{ env.version }}
-
+            **Full Changelog**: ${{ env.changelog_url }}
 
             ## Checksums:
 
@@ -121,24 +158,33 @@ jobs:
   publish:
     runs-on: ubuntu-24.04
     needs: build
+    env:
+      version: ${{ needs.build.outputs.version }}
+      filename: ${{ needs.build.outputs.filename }}
+      repo: mcmodersd/yeppbot
 
     steps:
       - name: Checkout code
+        id: checkout
         uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        id: docker-login
+        uses: docker/login-action@v3.3.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Download JAR artifacts
-        uses: actions/download-artifact@v4.1.8
+        id: download-artifact
+        uses: actions/download-artifact@v4.1.9
         with:
-          name: jar-file
-          path: "target/"
+          name: ${{ env.filename }}
 
       - name: Build and push to harbor
+        id: build-push
         run: |
-          docker build ./ -t mcmodersd/yeppbot:${{ needs.build.outputs.version }} -t mcmodersd/yeppbot:latest
-          docker push mcmodersd/yeppbot --all-tags
+          docker build ./ -t ${{ env.repo }}:${{ env.version }} -t ${{ env.repo }}:latest
+          docker push ${{ env.repo }} --all-tags

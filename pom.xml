@@ -140,7 +140,7 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <finalName>${project.artifactId}</finalName>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
