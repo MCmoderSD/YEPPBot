@@ -36,10 +36,6 @@ src/main/resources/config/DevHttpsServer.json
 src/main/resources/database/sql.json
 src/main/resources/database/dev.json
 
-### keys ###
-src/main/resources/keys/keystore.jks
-src/main/resources/keys/dev.jks
-
 ### meta-inf ###
 src/main/resources/META-INF/
 
@@ -47,4 +43,3 @@ src/main/resources/META-INF/
 storage/api/
 storage/config/
 storage/database/
-storage/keys/
