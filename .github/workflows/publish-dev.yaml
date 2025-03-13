@@ -184,8 +184,17 @@ jobs:
         with:
           name: ${{ env.filename }}
 
-      - name: Build and push to harbor
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3.10.0
+
+      - name: Build and push to Docker Hub
         id: build-push
-        run: |
-          docker build ./ -t ${{ env.repo }}:dev-${{ env.version }} -t ${{ env.repo }}:dev-latest
-          docker push ${{ env.repo }} --all-tags
+        uses: docker/build-push-action@v6.15.0
+        with:
+          context: ./
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ env.repo }}:dev-${{ env.version }}
+            ${{ env.repo }}:dev-latest
