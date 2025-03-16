@@ -17,14 +17,11 @@ public class Credentials {
     private JsonNode botConfig;
     private HashSet<String> channelList;
     private JsonNode sqlConfig;
-    private JsonNode httpsServerConfig;
+    private JsonNode serverConfig;
 
     // API Credentials
     private JsonNode apiConfig;
     private JsonNode openAIConfig;
-    private JsonNode openAIChatConfig;
-    private JsonNode openAIImageConfig;
-    private JsonNode openAITTSConfig;
 
     // APIs Provided
     private boolean astrology;
@@ -59,11 +56,11 @@ public class Credentials {
             System.err.println("Error loading SQL Config: " + e.getMessage());
         }
 
-        // Load HTTPS Server Config
+        // Load Server Config
         try {
-            this.httpsServerConfig = jsonUtility.load(httpsServer, terminal.hasArg(Argument.HTTPS_SERVER) || terminal.hasArg(Argument.CONTAINER));
+            this.serverConfig = jsonUtility.load(httpsServer, terminal.hasArg(Argument.SERVER_CONFIG) || terminal.hasArg(Argument.CONTAINER));
         } catch (Exception e) {
-            System.err.println("Error loading HTTPS Server Config: " + e.getMessage());
+            System.err.println("Error loading Server Config: " + e.getMessage());
         }
 
         // Load API Config
@@ -87,11 +84,6 @@ public class Credentials {
 
             // Load JSON
             openAIConfig = jsonUtility.load(openAI, terminal.hasArg(Argument.OPENAI_CONFIG) || terminal.hasArg(Argument.CONTAINER));
-
-            // Load OpenAI Sub Configs
-            if (openAIConfig.has("chat")) openAIChatConfig = openAIConfig.get("chat");
-            if (openAIConfig.has("image")) openAIImageConfig = openAIConfig.get("image");
-            if (openAIConfig.has("speech")) openAITTSConfig = openAIConfig.get("speech");
         } catch (Exception e) {
             System.err.println("Error loading OpenAI Config: " + e.getMessage());
         }
@@ -110,8 +102,8 @@ public class Credentials {
         return sqlConfig;
     }
 
-    public JsonNode getHttpsServerConfig() {
-        return httpsServerConfig;
+    public JsonNode getServerConfig() {
+        return serverConfig;
     }
 
     public JsonNode getAPIConfig() {
@@ -120,18 +112,6 @@ public class Credentials {
 
     public JsonNode getOpenAIConfig() {
         return openAIConfig;
-    }
-
-    public JsonNode getOpenAIChatConfig() {
-        return openAIChatConfig;
-    }
-
-    public JsonNode getOpenAIImageConfig() {
-        return openAIImageConfig;
-    }
-
-    public JsonNode getOpenAITTSConfig() {
-        return openAITTSConfig;
     }
 
     // Validations
@@ -147,24 +127,12 @@ public class Credentials {
         return sqlConfig != null;
     }
 
-    public boolean validateHttpServerConfig() {
-        return httpsServerConfig != null;
+    public boolean validateServerConfig() {
+        return serverConfig != null;
     }
 
     public boolean validateOpenAIConfig() {
         return openAIConfig != null;
-    }
-
-    public boolean validateOpenAIChatConfig() {
-        return openAIChatConfig != null;
-    }
-
-    public boolean validateOpenAIImageConfig() {
-        return openAIImageConfig != null;
-    }
-
-    public boolean validateOpenAITTSConfig() {
-        return openAITTSConfig != null;
     }
 
     // APIs Provided
@@ -186,17 +154,5 @@ public class Credentials {
 
     public boolean hasOpenAI() {
         return openAIConfig != null;
-    }
-
-    public boolean hasOpenAIChat() {
-        return openAIChatConfig != null;
-    }
-
-    public boolean hasOpenAIImage() {
-        return openAIImageConfig != null;
-    }
-
-    public boolean hasOpenAITTS() {
-        return openAITTSConfig != null;
     }
 }

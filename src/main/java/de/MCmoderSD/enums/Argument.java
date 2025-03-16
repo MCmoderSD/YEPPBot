@@ -17,10 +17,10 @@ public enum Argument {
     CONTAINER("container", "docker"),
 
     // Config
-    BOT_CONFIG("botconfig"),
-    CHANNEL_LIST("channellist"),
+    BOT_CONFIG("bot"),
+    CHANNEL_LIST("channels"),
     SQL_CONFIG("sql"),
-    HTTPS_SERVER("httpsserver"),
+    SERVER_CONFIG("server"),
     API_CONFIG("api"),
     OPENAI_CONFIG("openai"),
     HOST("host"),

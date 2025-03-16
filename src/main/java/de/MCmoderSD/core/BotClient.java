@@ -20,11 +20,10 @@ import de.MCmoderSD.main.Main;
 import de.MCmoderSD.main.Terminal;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
+import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.server.Server;
 import de.MCmoderSD.server.modules.AudioBroadcast;
 import de.MCmoderSD.utilities.database.SQL;
-import de.MCmoderSD.OpenAI.OpenAI;
-import de.MCmoderSD.OpenAI.modules.Chat;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 
 import org.jetbrains.annotations.Nullable;
@@ -128,24 +127,24 @@ public class BotClient {
         cli = Main.terminal.hasArg(CLI) || Main.terminal.hasArg(CONTAINER);
         log = !Main.terminal.hasArg(NO_LOG);
 
-        // Init HTTPS Server
-        JsonNode httpsServerConfig = credentials.getHttpsServerConfig();
-        boolean SSL = httpsServerConfig.has("SSL");
-        String hostname = httpsServerConfig.get("hostname").asText();
-        var port = Main.terminal.hasArg(CONTAINER) ? 443 : httpsServerConfig.get("port").asInt();
+        // Init Server
+        JsonNode serverConfig = credentials.getServerConfig();
+        boolean ssl = serverConfig.has("SSL");
+        String hostname = serverConfig.get("hostname").asText();
+        var port = Main.terminal.hasArg(CONTAINER) ? 443 : serverConfig.get("port").asInt();
 
         try {
-            if (SSL) {  // SSL
-                JsonNode sllConfig = httpsServerConfig.get("SSL");
-                String privkey = sllConfig.get("privkey").asText();
-                String fullchain = sllConfig.get("fullchain").asText();
-                String proxy = httpsServerConfig.has("proxy") ? httpsServerConfig.get("proxy").asText() : null;
-                server = new Server(hostname, port, proxy, privkey, fullchain, httpsServerConfig.get("host").asBoolean());
+            if (ssl) {  // SSL
+                JsonNode sslConfig = serverConfig.get("SSL");
+                String privkey = sslConfig.get("privkey").asText();
+                String fullchain = sslConfig.get("fullchain").asText();
+                String proxy = serverConfig.has("proxy") ? serverConfig.get("proxy").asText() : null;
+                server = new Server(hostname, port, proxy, privkey, fullchain, serverConfig.get("host").asBoolean());
             } else {    // JKS
                 hostname = Main.terminal.hasArg(HOST) ? Main.terminal.getArgs()[0] : hostname;
                 port = Main.terminal.hasArg(PORT) && !Main.terminal.hasArg(CONTAINER) ? Integer.parseInt(Main.terminal.getArgs()[1]) : port;
-                String proxy = httpsServerConfig.has("proxy") ? httpsServerConfig.get("proxy").asText() : null;
-                server = new Server(hostname, port, proxy, httpsServerConfig.get("JKS"), httpsServerConfig.get("host").asBoolean());
+                String proxy = serverConfig.has("proxy") ? serverConfig.get("proxy").asText() : null;
+                server = new Server(hostname, port, proxy, serverConfig.get("JKS"), serverConfig.get("host").asBoolean());
             }
         } catch (IOException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | KeyManagementException | CertificateException | InvalidKeySpecException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -189,9 +188,7 @@ public class BotClient {
         boolean weather = credentials.hasOpenWeatherMap();
         boolean giphy = credentials.hasGiphy();
         boolean riot = credentials.hasRiot();
-        boolean openAIChat = credentials.validateOpenAIChatConfig();
-        boolean openAIImage = credentials.validateOpenAIImageConfig();
-        boolean openAITTS = credentials.validateOpenAITTSConfig();
+        boolean openAIChat = credentials.validateOpenAIConfig();
 
         // Loading Standard Commands
         new Join(this, messageHandler);
@@ -224,23 +221,19 @@ public class BotClient {
 
         // Loading OpenAI Chat Commands
         if (openAIChat) {
-            Chat chatModule = Objects.requireNonNull(openAI).getChat();
-            new Conversation(this, messageHandler, chatModule);
-            new Match(this, messageHandler, helixHandler, sql, chatModule);
-            new Translate(this, messageHandler, chatModule);
-            new Prompt(this, messageHandler, chatModule);
-            new Wiki(this, messageHandler, chatModule);
+            new Conversation(this, messageHandler, openAI, credentials.getOpenAIConfig());
+            new Match(this, messageHandler, helixHandler, sql, openAI);
+            new Translate(this, messageHandler, openAI);
+            new Prompt(this, messageHandler, openAI);
+            new Wiki(this, messageHandler, openAI);
         }
-
-        // Loading OpenAI TTS Commands
-        //if (openAITTS) new TTS(this, messageHandler, sql, Objects.requireNonNull(openAI).getSpeech()); TODO: Fix TTS
 
         // API & OpenAI Commands
         if (giphy || astrology || weather || riot) {
             JsonNode apiConfig = credentials.getAPIConfig();
             if (giphy) new Gif(this, messageHandler, apiConfig);
-            if (openAIChat && astrology) new Horoscope(this, messageHandler, helixHandler, sql, openAI.getChat(), apiConfig);
-            if (openAIChat && weather) new Weather(this, messageHandler, openAI.getChat(), apiConfig);
+            if (openAIChat && astrology) new Horoscope(this, messageHandler, helixHandler, sql, openAI, apiConfig);
+            if (openAIChat && weather) new Weather(this, messageHandler, openAI, apiConfig);
             if (riot) new Riot(this, messageHandler, apiConfig, credentials.SQLConfig());
         }
 
@@ -248,7 +241,7 @@ public class BotClient {
         setUI(!cli);
 
         // Print Startup Complete
-        System.out.printf("Start-Up Complete! Took: %dms%s%s%s", (System.nanoTime() - Terminal.startTime) / 1_000_000, UNBOLD, BREAK, BREAK);
+        System.out.printf("%sStart-Up Complete! Took: %dms%s%s%s", BOLD, (System.nanoTime() - Terminal.startTime) / 1_000_000, UNBOLD, BREAK, BREAK);
 
         // Join Channels
         HashSet<String> channelList = new HashSet<>();
@@ -274,6 +267,9 @@ public class BotClient {
     // Write
     public void write(String channel, String message) {
 
+        // Normalize Message
+        message = normalizeMessage(message);
+
         // Variables
         boolean tooLong = message.length() > 500;
         boolean valid = !(message.isBlank() || tooLong);
@@ -298,6 +294,9 @@ public class BotClient {
     // Respond
     public void respond(TwitchMessageEvent event, String command, String message) {
 
+        // Normalize Message
+        message = normalizeMessage(message);
+
         // Variables
         var channel = event.getChannel();
         boolean tooLong = message.length() > 500;
@@ -308,7 +307,7 @@ public class BotClient {
 
         // Log
         if (valid && log) sql.getLogManager().logResponse(event, command, message);
-        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), BREAK, UNBOLD);
+        System.out.printf("%s%s %s <%s> Executed: %s%s%s", BOLD, getFormattedTimestamp(), COMMAND, channel, command + ": " + event.getMessage(), UNBOLD, BREAK);
         if (valid) System.out.printf("%s%s %s <%s> %s: %s%s%s", BOLD, getFormattedTimestamp(), RESPONSE, channel, botName, message, UNBOLD, BREAK);
 
         // Send Message
@@ -346,7 +345,7 @@ public class BotClient {
         var id = helixHandler.getUser(channel).getId();
 
         // Log
-        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        System.out.printf("%s%s %s Joined Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), UNBOLD, BREAK);
 
         // Join Channel
         chat.joinChannel(channel);
@@ -386,12 +385,12 @@ public class BotClient {
         if (channel.contains(SPACE) || !chat.isChannelJoined(channel) || botName.equals(channel)) return;
 
         // Leave Channel
-        if (chat.leaveChannel(channel)) System.out.printf("%s%s %s Left Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
-        else System.out.printf("%s%s %s Failed to Leave Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        if (chat.leaveChannel(channel)) System.out.printf("%s%s %s Left Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), UNBOLD, BREAK);
+        else System.out.printf("%s%s %s Failed to Leave Channel: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), UNBOLD, BREAK);
 
         // Unregister Broadcast
-        if (audioBroadcast.unregisterBroadcast(channel)) System.out.printf("%s%s %s Unregistered Broadcast: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
-        else System.out.printf("%s%s %s Failed to Unregister Broadcast: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), BREAK, UNBOLD);
+        if (audioBroadcast.unregisterBroadcast(channel)) System.out.printf("%s%s %s Unregistered Broadcast: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), UNBOLD, BREAK);
+        else System.out.printf("%s%s %s Failed to Unregister Broadcast: %s%s%s", BOLD, getFormattedTimestamp(), SYSTEM, channel.toLowerCase(), UNBOLD, BREAK);
     }
 
     // Bulk Leave

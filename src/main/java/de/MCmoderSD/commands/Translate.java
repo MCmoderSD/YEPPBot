@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.OpenAI.modules.Chat;
+import de.MCmoderSD.openai.core.OpenAI;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class Translate {
 
     // Constructor
-    public Translate(BotClient botClient, MessageHandler messageHandler, Chat chat) {
+    public Translate(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "translate <Sprache> <Text>";
@@ -42,10 +42,22 @@ public class Translate {
 
                     // Process text
                     String text = trimMessage(concatArgs(args)).replace(language, EMPTY);
-                    String instruction = trimMessage("Please translate the following text into " + language + ":");
+                    String devMessage = trimMessage("Please translate the following text into " + language + ":");
 
                     // Translate
-                    response = chat.prompt(null, instruction, text, 0d, null, null, null, null);
+                    response = openAI.prompt(
+                            null,
+                            event.getUser(),
+                            null,
+                            0d,
+                            null,
+                            null,
+                            null,
+                            null,
+                            devMessage,
+                            text,
+                            null
+                    );
 
                     // Filter Response for argument injection
                     response = removePrefix(response);

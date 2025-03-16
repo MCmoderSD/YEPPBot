@@ -6,8 +6,8 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.OpenAI.modules.Chat;
 
+import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.openweathermap.core.OpenWeatherMap;
 import de.MCmoderSD.openweathermap.enums.SpeedUnit;
 import de.MCmoderSD.openweathermap.enums.TempUnit;
@@ -20,7 +20,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class Weather {
 
     // Constructor
-    public Weather(BotClient botClient, MessageHandler messageHandler, Chat chat, JsonNode apiConfig) {
+    public Weather(BotClient botClient, MessageHandler messageHandler, OpenAI openAI, JsonNode apiConfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "weather <city>, <language>";
@@ -95,7 +95,19 @@ public class Weather {
                     }
 
                     // Translate
-                    response = chat.prompt(null, "Please format in short text and translate in: " + language, response, 0d, null, null, null, null);
+                    response = openAI.prompt(
+                            null, 
+                            event.getUser(),
+                            null,
+                            0d,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "Please format in short text and translate in: " + language,
+                            response,
+                            null
+                    );
                 }
 
                 // Filter Response for argument injection

@@ -9,8 +9,8 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
+import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.utilities.database.SQL;
-import de.MCmoderSD.OpenAI.modules.Chat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +27,7 @@ public class Horoscope {
     private final String errorGettingHoroscope;
 
     // Constructor
-    public Horoscope(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql, Chat chat, JsonNode apiconfig) {
+    public Horoscope(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql, OpenAI openAI, JsonNode apiconfig) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "horoscope @<user> <language>";
@@ -98,8 +98,21 @@ public class Horoscope {
                 // Translate Horoscope
                 if (Arrays.asList("en", "english", "englisch", "eng").contains(language)) botClient.respond(event, getCommand(), dailyPrediction);
                 else {
-                    String instruction = trimMessage("Please translate the following text into " + language + ":");
-                    String translatedPrediction = chat.prompt(null, instruction, dailyPrediction, 0d, null, null, null, null);
+                    String devMessage = trimMessage("Please translate the following text into " + language + ":");
+                    String translatedPrediction = openAI.prompt(
+                            null, 
+                            event.getUser(),
+                            null,
+                            0d,
+                            null,
+                            null,
+                            null,
+                            null,
+                            devMessage,
+                            dailyPrediction,
+                            null
+                    );
+
                     botClient.respond(event, getCommand(), translatedPrediction);
                 }
             }

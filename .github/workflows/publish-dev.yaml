@@ -184,6 +184,10 @@ jobs:
         with:
           name: ${{ env.filename }}
 
+      - name: Rename JAR file
+        id: rename-file
+        run: mv "${{ env.filename }}" "YEPPBot.jar"
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3.10.0
@@ -194,7 +198,7 @@ jobs:
         with:
           context: ./
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64/v8
           tags: |
             ${{ env.repo }}:dev-${{ env.version }}
             ${{ env.repo }}:dev-latest
