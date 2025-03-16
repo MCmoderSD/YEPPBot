@@ -10,12 +10,6 @@ docs/java/
 ### artifacts ###
 out/artifacts/
 
-### Target ###
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
 ### api keys ###
 src/main/resources/api/api.json
 src/main/resources/api/openai.json

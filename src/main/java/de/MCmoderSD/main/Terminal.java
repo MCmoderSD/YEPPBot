@@ -17,22 +17,6 @@ public class Terminal {
 
     // Constants
     public final static long startTime = System.nanoTime();
-    public final static String ICON =
-            """
-            ⠄⠄⠄⠄⠄⠄⠄⣠⣴⣶⣿⣿⡿⠶⠄⠄⠄⠄⠐⠒⠒⠲⠶⢄⠄⠄⠄⠄⠄⠄
-            ⠄⠄⠄⠄⠄⣠⣾⡿⠟⠋⠁⠄⢀⣀⡀⠤⣦⢰⣤⣶⢶⣤⣤⣈⣆⠄⠄⠄⠄⠄
-            ⠄⠄⠄⠄⢰⠟⠁⠄⢀⣤⣶⣿⡿⠿⣿⣿⣊⡘⠲⣶⣷⣶⠶⠶⠶⠦⠤⡀⠄⠄
-            ⠄⠔⠊⠁⠁⠄⠄⢾⡿⣟⡯⣖⠯⠽⠿⠛⠛⠭⠽⠊⣲⣬⠽⠟⠛⠛⠭⢵⣂⠄
-            ⡎⠄⠄⠄⠄⠄⠄⠄⢙⡷⠋⣴⡆⠄⠐⠂⢸⣿⣿⡶⢱⣶⡇⠄⠐⠂⢹⣷⣶⠆
-            ⡇⠄⠄⠄⠄⣀⣀⡀⠄⣿⡓⠮⣅⣀⣀⣐⣈⣭⠤⢖⣮⣭⣥⣀⣤⣤⣭⡵⠂⠄
-            ⣤⡀⢠⣾⣿⣿⣿⣿⣷⢻⣿⣿⣶⣶⡶⢖⣢⣴⣿⣿⣟⣛⠿⠿⠟⣛⠉⠄⠄⠄
-            ⣿⡗⣼⣿⣿⣿⣿⡿⢋⡘⠿⣿⣿⣷⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠄⠄
-            ⣿⠱⢿⣿⣿⠿⢛⠰⣞⡛⠷⣬⣙⡛⠻⠿⠿⠿⣿⣿⣿⣿⣿⣿⣿⠿⠛⣓⡀⠄
-            ⢡⣾⣷⢠⣶⣿⣿⣷⣌⡛⠷⣦⣍⣛⠻⠿⢿⣶⣶⣶⣦⣤⣴⣶⡶⠾⠿⠟⠁⠄
-            ⣿⡟⣡⣿⣿⣿⣿⣿⣿⣿⣷⣦⣭⣙⡛⠓⠒⠶⠶⠶⠶⠶⠶⠶⠶⠿⠟⠄⠄⠄
-            ⠿⡐⢬⣛⡻⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡶⠟⠃⠄⠄⠄⠄⠄⠄
-            ⣾⣿⣷⣶⣭⣝⣒⣒⠶⠬⠭⠭⠭⠭⠭⠭⠭⣐⣒⣤⣄⡀⠄⠄⠄⠄⠄⠄⠄⠄
-            ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠄⠄⠄⠄⠄⠄⠄""";
 
     // Attributes
     private final Scanner scanner;
@@ -44,7 +28,7 @@ public class Terminal {
 
         // Print Start Message
         System.out.println(ICON);
-        System.out.printf("%sYEPPBot v%s%s", BOLD, Main.VERSION, BREAK);
+        System.out.printf("%sYEPPBot v%s%s%s", BOLD, Main.VERSION, BREAK, UNBOLD);
 
         // Init
         this.args = args;
@@ -55,8 +39,8 @@ public class Terminal {
         for (String arg : args) {
             if (arg == null || arg.isBlank()) continue;
             String copy = arg;
-            while (copy.startsWith("-") || copy.startsWith("/")) copy = copy.substring(1);
-            for (Argument argument : Argument.values()) if (argument.hasNameOrAlias(copy)) this.arguments.add(argument);
+            while (copy.startsWith("-") || copy.startsWith("/")) copy = copy.substring(1); // Remove leading - or /
+            for (Argument argument : Argument.values()) if (argument.hasNameOrAlias(copy)) this.arguments.add(argument); // Add to arguments
         }
 
         // Host and Port
@@ -100,15 +84,15 @@ public class Terminal {
     }
 
     private void clear() {
-        System.out.print("\033[H\033[2J");
+        System.out.print(CLEAR);
         System.out.flush();
     }
 
     private void gen() {
-        System.out.println("Generating config files...");
+        System.out.printf("%sGenerating config files...", BOLD);
         if (generateConfigFiles()) {
             System.out.println("Config files generated successfully");
-            System.out.printf("%sStopping bot...", BOLD);
+            System.out.println("%sStopping bot...");
             System.exit(0);
         } else System.out.println("Error while generating config files");
     }
@@ -148,10 +132,10 @@ public class Terminal {
         System.out.println(
                 """
                 Bot Config:
-                    -botconfig: Path to Bot Config
-                    -channellist: Path to Channel List
+                    -bot: Path to Bot Config
+                    -channels: Path to Channel List
                     -sql: Path to the SQL Config
-                    -httpsserver: Path to Https Server Config
+                    -server: Path to Server Config
                 """);
 
         // API Config
@@ -208,7 +192,7 @@ public class Terminal {
     private boolean generateConfigFiles() {
 
         // Files
-        String[] fileNames = {"BotConfig.json", "Channel.list", "sql.json", "httpsServer.json", "apiKeys.json", "ChatGPT.json"};
+        String[] fileNames = {"bot.json", "channels.txt", "sql.json", "server.json", "api.json", "openai.json"};
 
         for (String fileName : fileNames) {
             try {

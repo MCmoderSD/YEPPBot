@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.OpenAI.modules.Chat;
+import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.wikipedia.core.WikipediaAPI;
 import de.MCmoderSD.wikipedia.data.Page;
 import de.MCmoderSD.wikipedia.enums.Language;
@@ -17,7 +17,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class Wiki {
 
     // Constructor
-    public Wiki(BotClient botClient, MessageHandler messageHandler, Chat chat) {
+    public Wiki(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "wiki <Thema>";
@@ -71,8 +71,19 @@ public class Wiki {
                         // Extract Summary and Check Length
                         String summary = wikiPage.getExtract();
                         if (summary.length() <= 500) response = summary;
-                        else
-                            response = trimMessage(chat.prompt(null, "Please summarize the following text into " + language.getName() + " used in the text. Answer only in 500 or less chars", summary, 0d, null, null, null, null));
+                        else response = trimMessage(openAI.prompt(
+                                null,
+                                event.getUser(),
+                                null,
+                                0d,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "Please summarize the following text into " + language.getName() + " used in the text. Answer only in 500 or less chars",
+                                summary,
+                                null
+                        ));
 
                         // Filter Response for argument injection
                         response = removePrefix(response);

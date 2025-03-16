@@ -7,7 +7,7 @@ import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.enums.ZodiacSign;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.OpenAI.modules.Chat;
+import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.utilities.database.SQL;
 
 import java.util.Arrays;
@@ -30,7 +30,7 @@ public class Match {
     private final String thereforeYouAreMostCompatibleWith;
 
     // Constructor
-    public Match(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql, Chat chat) {
+    public Match(BotClient botClient, MessageHandler messageHandler, HelixHandler helixHandler, SQL sql, OpenAI openAI) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "match <amount> <language>";
@@ -119,8 +119,20 @@ public class Match {
 
                 // Translate Response
                 if (!Arrays.asList("de", "german", "deutsch", "ger").contains(language)) {
-                    String instruction = trimMessage("Please translate the following text into " + language + ":");
-                    response = new StringBuilder(chat.prompt(null, instruction, response.toString(), 0d, null, null, null, null));
+                    String devMessage = trimMessage("Please translate the following text into " + language + ":");
+                    response = new StringBuilder(openAI.prompt(
+                            null,
+                            event.getUser(),
+                            null,
+                            0d,
+                            null,
+                            null,
+                            null,
+                            null,
+                            devMessage,
+                            response.toString(),
+                            null
+                    ));
                 }
 
                 // Check if no compatible users found

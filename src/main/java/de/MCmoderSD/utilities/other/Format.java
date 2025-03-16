@@ -29,6 +29,7 @@ public class Format {
     public final static String TAB = "\t";
     public final static String SPACE = " ";
     public final static String EMPTY = "";
+    public final static String CLEAR = "\033[H\033\\[2J";
 
     // Tags
     public final static String SYSTEM = "[SYS]";
@@ -55,6 +56,25 @@ public class Format {
     public final static Color LIGHT = new Color(0x18181b);
     public final static Color PURPLE = new Color(0x771fe2);
     public final static Color WHITE = new Color(0xffffff);
+
+    // Icon
+    public final static String ICON =
+            """
+            ⠄⠄⠄⠄⠄⠄⠄⣠⣴⣶⣿⣿⡿⠶⠄⠄⠄⠄⠐⠒⠒⠲⠶⢄⠄⠄⠄⠄⠄⠄
+            ⠄⠄⠄⠄⠄⣠⣾⡿⠟⠋⠁⠄⢀⣀⡀⠤⣦⢰⣤⣶⢶⣤⣤⣈⣆⠄⠄⠄⠄⠄
+            ⠄⠄⠄⠄⢰⠟⠁⠄⢀⣤⣶⣿⡿⠿⣿⣿⣊⡘⠲⣶⣷⣶⠶⠶⠶⠦⠤⡀⠄⠄
+            ⠄⠔⠊⠁⠁⠄⠄⢾⡿⣟⡯⣖⠯⠽⠿⠛⠛⠭⠽⠊⣲⣬⠽⠟⠛⠛⠭⢵⣂⠄
+            ⡎⠄⠄⠄⠄⠄⠄⠄⢙⡷⠋⣴⡆⠄⠐⠂⢸⣿⣿⡶⢱⣶⡇⠄⠐⠂⢹⣷⣶⠆
+            ⡇⠄⠄⠄⠄⣀⣀⡀⠄⣿⡓⠮⣅⣀⣀⣐⣈⣭⠤⢖⣮⣭⣥⣀⣤⣤⣭⡵⠂⠄
+            ⣤⡀⢠⣾⣿⣿⣿⣿⣷⢻⣿⣿⣶⣶⡶⢖⣢⣴⣿⣿⣟⣛⠿⠿⠟⣛⠉⠄⠄⠄
+            ⣿⡗⣼⣿⣿⣿⣿⡿⢋⡘⠿⣿⣿⣷⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠄⠄
+            ⣿⠱⢿⣿⣿⠿⢛⠰⣞⡛⠷⣬⣙⡛⠻⠿⠿⠿⣿⣿⣿⣿⣿⣿⣿⠿⠛⣓⡀⠄
+            ⢡⣾⣷⢠⣶⣿⣿⣷⣌⡛⠷⣦⣍⣛⠻⠿⢿⣶⣶⣶⣦⣤⣴⣶⡶⠾⠿⠟⠁⠄
+            ⣿⡟⣡⣿⣿⣿⣿⣿⣿⣿⣷⣦⣭⣙⡛⠓⠒⠶⠶⠶⠶⠶⠶⠶⠶⠿⠟⠄⠄⠄
+            ⠿⡐⢬⣛⡻⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡶⠟⠃⠄⠄⠄⠄⠄⠄
+            ⣾⣿⣷⣶⣭⣝⣒⣒⠶⠬⠭⠭⠭⠭⠭⠭⠭⣐⣒⣤⣄⡀⠄⠄⠄⠄⠄⠄⠄⠄
+            ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠄⠄⠄⠄⠄⠄⠄
+            """;
 
     // Get Formatted Timestamp
     public static String getFormattedTimestamp() {
@@ -85,8 +105,24 @@ public class Format {
         return removePrefix(input);                                                                                             // Recursion until valid
     }
 
+    // Normalize Message
+    public static String normalizeMessage(String message) {
+
+        // Replace Invalid Characters
+        while (message.contains(INVALID_CHARS)) message = message.replaceAll(INVALID_CHARS, SPACE);
+        while (message.contains(BREAK)) message = message.replaceAll(BREAK, SPACE);
+        while (message.contains(TAB)) message = message.replaceAll(TAB, SPACE);
+        while (message.contains(SPACE + SPACE)) message = message.replaceAll(SPACE + SPACE, SPACE);
+
+        // Return
+        return message;
+    }
+
     // Trim Message
     public static String trimMessage(String message) {
+
+        // Normalize Message
+        message = normalizeMessage(message);
 
         // Replace Invalid Characters
         message = message.replaceAll(INVALID_UNICODE, EMPTY);
@@ -131,9 +167,29 @@ public class Format {
         return input.replaceAll("\\b(" + repetition + ")\\s+\\1\\b", "$1");
     }
 
+    // Remove Markdown Formatting
+    public static String removeMarkdown(String input) {
+        return input
+                .replaceAll("(?i)(\\*\\*|__)(.*?)\\1", "$2")
+                .replaceAll("(?i)([*_])(.*?)\\1", "$2")
+                .replaceAll("(?i)~~(.*?)~~", "$1")
+                .replaceAll("(?i)__(.*?)__", "$1")
+                .replaceAll("(?i)`{3}(.*?)`{3}", "$1")
+                .replaceAll("(?i)`(.*?)`", "$1")
+                .replaceAll("!\\[.*?]\\(.*?\\)", EMPTY)
+                .replaceAll("\\[(.*?)]\\(.*?\\)", "$1")
+                .replaceAll("(\\*\\*|__)(.*?)\\1", "$2")
+                .replaceAll("([*_])(.*?)\\1", "$2")
+                .replaceAll("`([^`]+)`", "$1")
+                .replaceAll("(?m)^#{1,6}\\s*", EMPTY)
+                .replaceAll("(?m)^>\\s*", EMPTY)
+                .replaceAll("(?m)^[-*_]{3,}\\s*$", EMPTY)
+                .replaceAll("\\(\\)", EMPTY);
+    }
+
     // Format OpenAI Response
     public static String formatOpenAIResponse(String response, String emote) {
-        return removePrefix(removeRepetitions(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + SPACE), emote), emote));
+        return removePrefix(removeRepetitions(removeMarkdown(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + SPACE), emote)), emote));
     }
 
     // Format Scopes

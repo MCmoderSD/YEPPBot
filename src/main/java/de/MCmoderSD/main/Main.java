@@ -3,11 +3,10 @@ package de.MCmoderSD.main;
 import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.enums.Argument;
+import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.utilities.database.SQL;
 
 import de.MCmoderSD.json.JsonUtility;
-import de.MCmoderSD.OpenAI.OpenAI;
-
 import java.awt.HeadlessException;
 
 import java.util.ArrayList;
@@ -18,23 +17,23 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class Main {
 
     // Constants
-    public static final String VERSION = "1.23.0";
+    public static final String VERSION = "1.24.0";
 
     // Bot Config
-    public static final String BOT_CONFIG = "/config/BotConfig.json";
-    public static final String CHANNEL_LIST = "/config/Channel.list";
+    public static final String BOT_CONFIG = "/config/bot.json";
+    public static final String CHANNEL_LIST = "/config/channels.txt";
     public static final String SQL_CONFIG = "/database/sql.json";
-    public static final String HTTPS_SERVER = "/config/httpsServer.json";
+    public static final String SERVER_CONFIG = "/config/server.json";
 
     // API Credentials
-    public static final String API_CONFIG = "/api/apiKeys.json";
-    public static final String OPENAI_CONFIG = "/api/ChatGPT.json";
+    public static final String API_CONFIG = "/api/api.json";
+    public static final String OPENAI_CONFIG = "/api/openai.json";
 
     // Dev Credentials
-    public static final String DEV_CONFIG = "/config/DevConfig.json";
-    public static final String DEV_LIST = "/config/Dev.list";
+    public static final String DEV_CONFIG = "/config/devConfig.json";
+    public static final String DEV_LIST = "/config/devList.txt";
     public static final String DEV_SQL = "/database/dev.json";
-    public static final String DEV_HTTPS_SERVER = "/config/DevHttpsServer.json";
+    public static final String DEV_SERVER = "/config/devServer.json";
 
     // Instances
     public static Terminal terminal;
@@ -52,7 +51,7 @@ public class Main {
         String botConfigPath = null;
         String channelListPath = null;
         String sqlConfigPath = null;
-        String httpsServerPath = null;
+        String serverPath = null;
 
         // API Paths
         String apiKeysPath;
@@ -72,8 +71,8 @@ public class Main {
             // SQL Config
             if (terminal.hasArg(Argument.SQL_CONFIG)) sqlConfigPath = Argument.SQL_CONFIG.getConfig(arguments);
 
-            // Https Server
-            if (terminal.hasArg(Argument.HTTPS_SERVER)) httpsServerPath = Argument.HTTPS_SERVER.getConfig(arguments);
+            // Server Config
+            if (terminal.hasArg(Argument.SERVER_CONFIG)) serverPath = Argument.SERVER_CONFIG.getConfig(arguments);
 
             // API Config
             if (terminal.hasArg(Argument.API_CONFIG)) apiKeysPath = Argument.API_CONFIG.getConfig(arguments);
@@ -84,12 +83,13 @@ public class Main {
             else openAIConfigPath = OPENAI_CONFIG;
 
         } else {
-            botConfigPath = "/app/config/bot.json";
-            channelListPath = "/app/config/channels.txt";
-            sqlConfigPath = "/app/config/sql.json";
-            httpsServerPath = "/app/config/server.json";
-            apiKeysPath = "/app/config/api.json";
-            openAIConfigPath = "/app/config/openai.json";
+            String workdir = "/app";
+            botConfigPath = workdir + "/config/bot.json";
+            channelListPath = workdir + "/config/channels.txt";
+            sqlConfigPath = workdir + "/config/sql.json";
+            serverPath = workdir + "/config/server.json";
+            apiKeysPath = workdir + "/config/api.json";
+            openAIConfigPath = workdir + "/config/openai.json";
         }
 
         // Instances
@@ -113,16 +113,16 @@ public class Main {
             if (botConfigPath == null) botConfigPath = DEV_CONFIG;
             if (channelListPath == null) channelListPath = DEV_LIST;
             if (sqlConfigPath == null) sqlConfigPath = DEV_SQL;
-            if (httpsServerPath == null) httpsServerPath = DEV_HTTPS_SERVER;
+            if (serverPath == null) serverPath = DEV_SERVER;
         } else {
             if (botConfigPath == null) botConfigPath = BOT_CONFIG;
             if (channelListPath == null) channelListPath = CHANNEL_LIST;
             if (sqlConfigPath == null) sqlConfigPath = SQL_CONFIG;
-            if (httpsServerPath == null) httpsServerPath = HTTPS_SERVER;
+            if (serverPath == null) serverPath = SERVER_CONFIG;
         }
 
         // Initialize Credentials
-        Credentials credentials = new Credentials(botConfigPath, channelListPath, sqlConfigPath, httpsServerPath, apiKeysPath, openAIConfigPath);
+        Credentials credentials = new Credentials(botConfigPath, channelListPath, sqlConfigPath, serverPath, apiKeysPath, openAIConfigPath);
 
         // Initialize OpenAI
         if (credentials.validateOpenAIConfig()) openAI = new OpenAI(credentials.getOpenAIConfig());

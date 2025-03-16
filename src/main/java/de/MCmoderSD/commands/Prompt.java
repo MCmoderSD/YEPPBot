@@ -4,7 +4,7 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.OpenAI.modules.Chat;
+import de.MCmoderSD.openai.core.OpenAI;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 public class Prompt {
 
     // Constructor
-    public Prompt(BotClient botClient, MessageHandler messageHandler, Chat chat) {
+    public Prompt(BotClient botClient, MessageHandler messageHandler, OpenAI openAI) {
 
         // Syntax
         String syntax = "Syntax: " + botClient.getPrefix() + "prompt <Frage>";
@@ -29,7 +29,7 @@ public class Prompt {
             public void execute(TwitchMessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                String response = formatOpenAIResponse(chat.prompt(trimMessage(concatArgs(args))), "YEPP");
+                String response = formatOpenAIResponse(openAI.prompt(event.getUser(), trimMessage(concatArgs(args))), "YEPP");
 
                 // Send Message
                 botClient.respond(event, getCommand(), response);
