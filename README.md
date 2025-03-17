@@ -1,4 +1,4 @@
-# [YEPPBot - YEPP it's a Twitch-Bot](https://www.twitch.tv/YEPPBotV2)
+# [YEPPBot - YEPP it's a Twitch-Bot](https://www.Twitch.tv/YEPPBotV2)
 
 ## Table of Contents
 - [Description](#description)
@@ -13,18 +13,18 @@
 ## Description
 The YEPPBot is a Twitch-Bot that provides a variety of features to entertain and manage your Twitch channel. <br>
 
-The original idea comes from [FoxxHimself](https://github.com/lennartfu) and was written in Python back in the first half of 2021. <br>
+The original idea comes from [FoxxHimself](https://GitHub.com/lennartfu) and was written in Python back in the first half of 2021. <br>
 After the original creator stopped working on and maintaining the bot, I took over its maintenance and decided to rewrite it in Java.
-The bot has since been fully rewritten in Java 21 using the [Twitch4J](https://twitch4j.github.io/) library. <br>
+The bot has since been fully rewritten in Java 21 using the [Twitch4J](https://Twitch4J.GitHub.io/) library. <br>
 
-You can try out the bot on [Twitch](https://www.twitch.tv/YEPPBotV2/chat) to see its features in action. <br>
+You can try out the bot on [Twitch](https://www.Twitch.tv/YEPPBotV2/chat) to see its features in action. <br>
 To use the bot in your own channel, you can add it to your channel using the `!mod join` command. <br>
 If you wish to remove the bot from your channel, use the `!mod leave` command in your channel. <br> <br>
 
 For all features to work as intended, you need to authenticate the bot with your Twitch account using the `!mod auth` command in your channel. <br>
 While it's recommended to assign the bot a moderator role in your channel to unlock all features, this is not strictly necessary. <br> <br>
 
-If you need help or have any questions, feel free to reach out via [Discord](https://www.mcmodersd.de/dc), [mail](mailto:business@mcmodersd.de) or [Twitch](https://www.twitch.tv/mcmodersd). <br>
+If you need help or have any questions, feel free to reach out via [Discord](https://www.mcmodersd.de/dc), [mail](mailto:business@mcmodersd.de) or [Twitch](https://www.Twitch.tv/mcmodersd). <br>
 I typically respond within 24 hours, often much faster. <br>
 
 If you're interested in collaborating or need a customized version to suit your needs? <br>
@@ -117,7 +117,7 @@ To do this, ensure you have Git installed on your computer. You can download it 
 
 Clone the repository using the following command: <br>
 ```bash
-git clone https://www.github.com/MCmoderSD/YEPPBot.git 
+git clone https://www.GitHub.com/MCmoderSD/YEPPBot.git 
 ``` 
 <br>
 
@@ -127,7 +127,7 @@ You need to fill in the configuration files with the required information. <br>
 Ignore the names or paths if you use the precompiled JAR file. <br>
 
 You must create two JSON files in the `/src/main/resources/config/` folder. <br>
-The first file is `BotConfig.json` and should have the following structure: <br>
+The first file is `bot.json` and should have the following structure: <br>
 ```json
 {
   "botId": "YOUR_BOT_ID",
@@ -152,7 +152,7 @@ The first file is `BotConfig.json` and should have the following structure: <br>
 The prefix is the character that the bot will use to recognize commands. <br>
 The admins are the users that have access to the admin commands. <br>
 
-The second file is optional and is called `Channel.list`. It should have the following structure: <br>
+The second file is optional and is called `channels.txt`. It should have the following structure: <br>
 ```
 CHANNEL_NAME
 OTHER_CHANNEL_NAME
@@ -193,12 +193,14 @@ The YEPPBot includes a built-in HTTPS server designed for two key purposes:
 2. Broadcasting sound via a browser-based interface. (SSL is required for this feature).
 
 #### Configuration
-To set up the HTTPS server, create a configuration file named `httpsServer.json` in the `/src/main/resources/config/` directory. <br>
+To set up the HTTPS server, create a configuration file named `server.json` in the `/src/main/resources/config/` directory. <br>
 The file should follow this structure:
 ```json
 {
   "hostname": "YOUR_HOSTNAME",
-  "port": 420,
+  "port": 443,
+  "host": true,
+  "proxy": "YOUR_PROXY",
 
   "SSL": {
     "fullchain": "/path/to/fullchain.pem",
@@ -238,7 +240,7 @@ You can obtain a free certificate from [Let's Encrypt](https://letsencrypt.org/)
 
 
 ### 5. Add API Keys
-To configure the bot with API keys, create a file named `apiKeys.json` in the `/src/main/resources/api/` folder. <br> 
+To configure the bot with API keys, create a file named `api.json` in the `/src/main/resources/api/` folder. <br> 
 The file should follow this structure:
 ```json
 {
@@ -265,103 +267,47 @@ If you do not wish to use a specific API or do not have the corresponding API ke
 You only need to configure this module if you plan to use it. 
 For example, if you don’t want to use the image module, you can omit the image part of the configuration. <br>
 
-To set up, create a file named `ChatGPT.json` in the `/src/main/resources/api/` folder. <br> 
+To set up, create a file named `openai.json` in the `/src/main/resources/api/` folder. <br> 
 The file should have the following structure: <br>
 ```json
 {
-  "user": "YOUR_USERNAME",
   "apiKey": "YOUR_API_KEY",
+  "user": "YOUR_USERNAME",
+  "organizationId": "YOUR_ORGANIZATION_ID",
+  "projectId": "YOUR_PROJECT_ID",
 
   "chat": {
     "model": "gpt-4o-mini-2024-07-18",
-    "maxConversationCalls": 10,
-    "maxTokenSpendingLimit": 8192,
     "temperature": 1,
-    "maxOutputTokens": 120,
     "topP": 1,
     "frequencyPenalty": 0,
     "presencePenalty": 0,
-    "instruction": "You are the best TwitchBot that ever existed!"
-  },
-
-  "image": {
-    "model": "dall-e-2",
-    "quality": "standard",
-    "resolution": "1024x1024",
-    "style": "vivid"
-  },
-
-  "speech": {
-    "model": "tts-1",
-    "voice": "alloy",
-    "speed": 1,
-    "format": "wav"
+    "n" : 1,
+    "maxTokens": 120,
+    "instruction": "You are the best TwitchBot that ever existed!",
+    "spendingLimit": 32768
   }
 }
 ```
 Note: <br>
 - Obtain your API key from [OpenAI](https://platform.openai.com/signup). <br>
-- The `user` field is optional and can be used to identify the user for monitoring purposes. <br>
-- Remove any section if you don't intend to use that service.
+- The `user` field such as the` organizationId` and `projectId` are optional. Leaving them empty or removing them will not affect the functionality of the wrapper. <br>
+- The IDs are used for tracking purposes and can be obtained from the [OpenAI dashboard](https://platform.openai.com/settings/organization/general). <br>
 
 <hr>
 
-#### Chat Configuration
-| **Field**             | **Description**                                                                 |
-|:----------------------|:--------------------------------------------------------------------------------|
-| model                 | Model used for generating text. See available models and their pricing below.   |
-| maxConversationCalls  | Maximum number of calls per conversation.                                       |
-| maxTokenSpendingLimit | Maximum tokens allowed per conversation.                                        |
-| temperature           | Controls randomness: `0` (deterministic) to `2` (creative).                     |
-| maxOutputTokens       | Maximum tokens in a response. So 500 characters are approximately 125 tokens).  |
-| topP                  | Nucleus sampling: `0` (plain) to `1` (creative).                                |
-| frequencyPenalty      | Reduces repetition of words. Values range from `0` to `1`.                      |
-| presencePenalty       | Discourages repeating words from the conversation. Values range from `0` to `1` |
-| instruction           | Provides guidance for the bot's behavior.                                       |
+### Chat Configuration
 
-##### Chat Models and Pricing
-| **Model**                                            | **Pricing**                                                                                    | **Max Output Tokens** |
-|:-----------------------------------------------------|:-----------------------------------------------------------------------------------------------|:---------------------:|
-| gpt-4o <br> gpt-4o-2024-11-20 <br> gpt-4o-2024-08-06 | $2.50 / 1M input tokens <br> \$1.25 / 1M cached input tokens <br> \$10.00 / 1M output tokens   |     16,384 tokens     |
-| gpt-4o-2024-05-13                                    | $5.00 / 1M input tokens <br> \$15.00 / 1M output tokens                                        |     16,384 tokens     |
-| chatgpt-4o-latest                                    | $5.00 / 1M input tokens <br> \$15.00 / 1M output tokens                                        |     4,096 tokens      |
-| gpt-4o-mini <br> gpt-4o-mini-2024-07-18              | $0.150 / 1M input tokens <br> \$0.075 / 1M cached input tokens <br> \$0.600 / 1M output tokens |     16,384 tokens     |
-| o1-preview <br> o1-preview-2024-09-12                | $15.00 / 1M input tokens <br> \$7.50 / 1M cached input tokens <br> \$60.00 / 1M output tokens  |     32,768 tokens     |
-| o1-mini <br> o1-mini-2024-09-12                      | $3.00 / 1M input tokens <br> \$1.50 / 1M cached input tokens <br> \$12.00 / 1M output tokens   |     65,536 tokens     |
-
-<hr>
-
-#### Image Configuration
-| **Field**  | **Description**                                                          |
-|:-----------|:-------------------------------------------------------------------------|
-| model      | Model used for generating images (`dall-e-2`,` dall-e-3`).               |
-| quality    | Image quality: `standard` or `hd` (only for `dall-e-3`).                 |
-| resolution | Image size: `256x256`, `512x512`, `1024x1024`, `1024x1792`, `1792x1024`. |
-| style      | Image style: `vivid` or `natural`. (only for `dall-e-3`)                 |
-
-##### Image Models and Pricing
-| **Model** | **Quality** | **Resolution**                        | **Pricing**                                                      |
-|:----------|:-----------:|:--------------------------------------|:-----------------------------------------------------------------|
-| dall-e-2  |             | 256x256 <br/> 512x512 <br/> 1024x1024 | \$0.016 per Image <br/> \$0.018 per Image <br/> $0.020 per Image |
-| dall-e-3  |  standard   | 1024x1024 <br/> 1024x1792, 1792×1024  | \$0.040 per Image <br/> \$0.080 per Image                        |
-| dall-e-3  |     hd      | 1024x1024 <br/> 1024x1792, 1792×1024  | \$0.080 per Image <br/> \$0.120 per Image                        |
-
-<hr>
-
-#### Speech Configuration
-| **Field** | **Description**                                                                               |
-|:----------|:----------------------------------------------------------------------------------------------|
-| model     | Speech model: `tts-1` or `tts-1-hd`.                                                          |
-| voice     | Choose from voices: `alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`.                      |
-| format    | Audio file format: `mp3`, `opus`, `aac`, `flac`, `wav`, `pcm`. Currently only `wav` supported |
-| speed     | Speech speed. Ranges from `0.25` (slowest) to `4` (fastest). Default is `1`.                  |
-
-##### Speech Pricing
-| **Model** | **Pricing**            | 
-|:----------|:-----------------------|
-| tts-1     | $15.00 / 1M characters |
-| tts-1-hd  | $30.00 / 1M characters |
-
+| **Field**        | **Description**                                                                                |
+|:-----------------|:-----------------------------------------------------------------------------------------------|
+| model            | Model used for generating text. (Default: `chatgpt-4o-latest`)                                 |
+| temperature      | Controls randomness: `0` (deterministic) to `2` (creative). (Default: `1`)                     |
+| maxOutputTokens  | Maximum tokens in a response. So 500 characters are approximately 125 tokens). (Default `120`) |
+| topP             | Nucleus sampling: `0` (plain) to `1` (creative). (Default: `1`)                                |
+| frequencyPenalty | Reduces repetition of words. Values range from `0` to `1`. (Default: `0`)                      |
+| presencePenalty  | Discourages repeating words from the conversation. Values range from `0` to `1` (Default: `0`) |
+| devMessage       | Provides guidance for the bot's behavior.                                                      |
+| spendingLimit    | Effective token spending limit, before chat gets resettet (Recommended: `32768`)               |
 
 ### 7. Running the bot
 After compiling the bot into a `.jar` file, you can run it using the following command:
@@ -376,7 +322,7 @@ java -jar YEPPBot.jar -generate
 
 Once you have edited the configuration files and added the necessary API keys, you can start the bot with:
 ```bash
-java -jar YEPPBot.jar -botconfig "/PATH/TO/BotConfig.json" -sql "/PATH/TO/sql.json" -httpsserver "/PATH/TO/httpsserver.json"
+java -jar YEPPBot.jar -botconfig "/path/to/bot.json" -sql "/path/to/sql.json" -httpsserver "/path/to/server.json"
 ```
 You can include additional arguments for other configuration files as needed.
 
@@ -392,12 +338,12 @@ You can include additional arguments for other configuration files as needed.
 
 
 #### Configuration File Arguments:
-- `-botconfig "/PATH/TO/BotConfig.json"`: Specifies the path to the `BotConfig.json` file. 
-- `-channellist "/PATH/TO/Channel.list"`: Specifies the path to the `Channel.list` file. 
-- `-sql "/PATH/TO/sql.json"`: Specifies the path to the `sql.json` file. 
-- `-httpsserver "/PATH/TO/httpsServer.json"`: Specifies the path to the `httpsServer.json` file. 
-- `-api "/PATH/TO/apiKeys.json"`: Specifies the path to the `apiKeys.json` file.
-- `-openai "/PATH/TO/ChatGPT.json"`: Specifies the path to the `ChatGPT.json` file. <br> <br>
+- `-botconfig "/path/to/bot.json"`: Specifies the path to the `bot.json` file. 
+- `-channellist "/path/to/channels.txt"`: Specifies the path to the `channels.txt` file. 
+- `-sql "/path/to/sql.json"`: Specifies the path to the `sql.json` file. 
+- `-server "/path/to/server.json"`: Specifies the path to the `server.json` file. 
+- `-api "/path/to/api.json"`: Specifies the path to the `api.json` file.
+- `-openai "/path/to/openai.json"`: Specifies the path to the `openai.json` file. <br> <br>
 
 
 ## Usage and commands
