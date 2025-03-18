@@ -3,7 +3,7 @@
 ## Table of Contents
 - [Description](#description)
 - [Usage](#usage)
-- [Troubleshooting](#troubleshooting)
+- [Troubleshooting](#troubleshooting-and-contribution)
 - [Host your own instance](#host-your-own-instance)
   - [Docker](#docker)
   - [Precompiled JAR](#precompiled-jar)
