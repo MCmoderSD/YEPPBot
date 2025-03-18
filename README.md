@@ -3,7 +3,7 @@
 ## Table of Contents
 - [Description](#description)
 - [Usage](#usage)
-- [Troubleshooting](#troubleshooting-and-contribution)
+- [Contact and Support](#contact-and-support)
 - [Host your own instance](#host-your-own-instance)
   - [Docker](#docker)
   - [Precompiled JAR](#precompiled-jar)
@@ -13,8 +13,10 @@
     - [Channel List](#channel-list-optional)
     - [MariaDB Database](#mariadb-database)
     - [HTTPS Server](#https-server)
-    - [API Keys](#api-keys)
-    - [OpenAI API](#openai-api)
+    - [API Keys](#api-keys-optional)
+    - [OpenAI API](#openai-api-optional)
+- [Contributing](#contributing)
+- [Acknowledgments](#acknowledgments)
 
 
 <br> <br>
@@ -37,7 +39,7 @@ For all features to work as intended, you need to authenticate the bot with your
 While it's recommended to assign the bot a moderator role in your channel to unlock all features, this is not strictly necessary. <br> <br>
 
 
-## Troubleshooting and Contribution
+## Contact and Support
 If you need help or have any questions, feel free to reach out via [Discord](https://www.mcmodersd.de/dc), [mail](mailto:business@mcmodersd.de) or [Twitch](https://www.Twitch.tv/mcmodersd). <br>
 I typically respond within 24 hours, often much faster. <br>
 
@@ -71,19 +73,19 @@ Simply put all configuration files in a directory and mount it to the container 
 ### Precompiled JAR
 First of all, you need to have Java 21 installed on your computer. <br>
 You can download it from [here](https://www.oracle.com/uk/java/technologies/downloads/#java21). <br>
-You can download the latest version of the bot from the [releases](https://github.com/MCmoderSD/YEPPBot/releases/latest) page. <br>
+You can download the latest version of the bot from the [releases](https://GitHub.com/MCmoderSD/YEPPBot/releases/latest) page. <br>
 You can run the bot using the precompiled JAR file. <br>
 You have to specify the absolute path to the configuration files when starting the bot. <br>
 ```bash
 java -jar YEPPBot.jar -bot "/path/to/bot.json" -sql "/path/to/sql.json" -server "/path/to/server.json" and so on...
 ```
 The run arguments for configuration files are:
-- `-bot "/path/to/bot.json"`: Specifies the path to the bot configuration file. (required)
-- `-channels "/path/to/channels.txt"`: Specifies the path to the channel list file. (optional)
-- `-sql "/path/to/sql.json"`: Specifies the path to the MariaDB configuration file. (required)
-- `-server "/path/to/server.json"`: Specifies the path to the HTTPS server configuration file. (required)
-- `-api "/path/to/api.json"`: Specifies the path to the API keys configuration file. (optional)
-- `-openai "/path/to/openai.json"`: Specifies the path to the ChatGPT configuration file. (optional)
+- `-bot "/path/to/bot.json"`: Specifies the path to the bot configuration file. **(required)**
+- `-channels "/path/to/channels.txt"`: Specifies the path to the channel list file. **(optional)**
+- `-sql "/path/to/sql.json"`: Specifies the path to the MariaDB configuration file. **(required)**
+- `-server "/path/to/server.json"`: Specifies the path to the HTTPS server configuration file. **(required)**
+- `-api "/path/to/api.json"`: Specifies the path to the API keys configuration file. **(optional)**
+- `-openai "/path/to/openai.json"`: Specifies the path to the ChatGPT configuration file. **(optional)**
 
 There are also some other arguments you can use:
 - `-help`: Displays a list of all available arguments.
@@ -139,7 +141,8 @@ The first file is `bot.json` and should have the following structure: <br>
   - Set `https://localhost:PORT/callback` as the OAuth redirect URL or use a domain that points to your server.
   - Set the application category to **Chatbot** and the Client Type to **Confidential**.
 - **prefix**: The character(s) the bot will use to recognize commands.
-- **admins**: The users who will have access to admin commands. <br>
+- **admins**: The users who will have access to admin commands.
+
 The prefix is the character that the bot will use to recognize commands. <br>
 The admins are the users that have access to the admin commands. <br> <br>
 
@@ -170,7 +173,7 @@ Create a file named `sql.json` with the following structure: <br>
 ```json
 {
   "host": "localhost",
-  "port": "3306",
+  "port": "3      306",
   "database": "DATABASE_NAME",
   "username": "USER_NAME",
   "password": "USER_PASSWORD"
@@ -180,7 +183,8 @@ Create a file named `sql.json` with the following structure: <br>
 - **port**: The port your MariaDB server is listening on (default is `3306`).
 - **database**: The name of the database the bot will use.
 - **username**: The MariaDB user with access to the database.
-- **password**: The password for the MariaDB user. <br>
+- **password**: The password for the MariaDB user.
+
 Ensure that the specified user has full permissions over the entire database. <br>
 If you don't want to use the database logging, you can use the `-nolog` argument. <br> <br>
 
@@ -227,13 +231,12 @@ You need to create a file named `server.json` with the following structure: <br>
   - `CN`: Common Name (e.g., your domain name).
   - `OU`, `O`, `L`, `ST`, `C`: Organizational and geographical details for the certificate.
 
-If you have a domain, you must use a valid certificate. Self-signed certificates are only allowed for `localhost`.
-You can obtain a free certificate from [Let's Encrypt](https://letsencrypt.org/). <br> <br>
+If you have a domain, you **must** use a valid certificate. Self-signed certificates are **only allowed for** `localhost`. <br>
+You can obtain a free certificate from [Let's Encrypt](https://LetsEncrypt.org/). <br> <br>
 
 
-### API Keys
-To configure the bot with API keys, create a file named `api.json` in the `/src/main/resources/api/` folder. <br>
-The file should follow this structure:
+### API Keys (optional)
+To configure the bot with API keys, Create a file named `api.json` with the following structure:
 ```json
 {
   "astrology": {
@@ -246,20 +249,17 @@ The file should follow this structure:
   "riot": "YOUR_RIOT_API_KEY"
 }
 ```
-If you do not wish to use a specific API or do not have the corresponding API key, you can omit that part of the configuration.
+If you don't want to use a specific API or do not have the corresponding API key, you can omit that part of the configuration.
 #### API Key Sources:
 - **Astrology API**: Currently only used for the horoscope feature. Obtain your key from [Prokerala](https://api.prokerala.com/).
-- **OpenWeatherMap API**: Used for the weather command. Obtain your key from [OpenWeatherMap](https://openweathermap.org/api).
-- **Giphy API**: Used for GIF integration. Obtain your key from [Giphy](https://developers.giphy.com/). <br> <br>
+- **OpenWeatherMap API**: Used for the weather command. Obtain your key from [OpenWeatherMap](https://OpenWeatherMap.org/api).
+- **Giphy API**: Used for GIF integration. Obtain your key from [Giphy](https://developers.giphy.com/). <br>
 - **Riot API**: Used for the League of Legends command. Obtain your key from [Riot Games](https://developer.riotgames.com/). <br> <br>
 
 
-### OpenAI API
-You only need to configure this module if you plan to use it. <br>
-For example, if you don’t want to use the image module, you can omit the image part of the configuration. <br>
-
-To set up, create a file named `openai.json` in the `/src/main/resources/api/` folder. <br>
-The file should have the following structure: <br>
+### OpenAI API (optional)
+Same as with the API keys, this is optional, but some commands require the OpenAI API to work. <br>
+To set up, you have to create a file named `openai.json` with the following structure:
 ```json
 {
   "apiKey": "YOUR_API_KEY",
@@ -281,101 +281,70 @@ The file should have the following structure: <br>
   }
 }
 ```
-Note: <br>
-- Obtain your API key from [OpenAI](https://platform.openai.com/signup). <br>
-- The `user` field such as the `organizationId` and `projectId` are optional. Leaving them empty or removing them will not affect the functionality of the wrapper. <br>
-- The IDs are used for tracking purposes and can be obtained from the [OpenAI dashboard](https://platform.openai.com/settings/organization/general). <br>
+- Obtain your API key from [OpenAI](https://platform.openai.com/signup).
+- The `user` field such as the `organizationId` and `projectId` are optional. <br> Leaving them empty or removing them will not affect the functionality of the wrapper.
+- The IDs are used for tracking purposes and can be obtained from the [OpenAI dashboard](https://platform.openai.com/settings/organization/general).
 
-<hr>
+<br> <hr>
 
 ### Chat Configuration
 
-| **Field**        | **Description**                                                                                |
-|:-----------------|:-----------------------------------------------------------------------------------------------|
-| model            | Model used for generating text. (Default: `chatgpt-4o-latest`)                                 |
-| temperature      | Controls randomness: `0` (deterministic) to `2` (creative). (Default: `1`)                     |
-| maxOutputTokens  | Maximum tokens in a response. So 500 characters are approximately 125 tokens). (Default `120`) |
-| topP             | Nucleus sampling: `0` (plain) to `1` (creative). (Default: `1`)                                |
-| frequencyPenalty | Reduces repetition of words. Values range from `0` to `2`. (Default: `0`)                      |
-| presencePenalty  | Discourages repeating words from the conversation. Values range from `0` to `2` (Default: `0`) |
-| devMessage       | Provides guidance for the bot's behavior.                                                      |
-| spendingLimit    | Effective token spending limit, before chat gets resettet (Recommended: `32768`)               |
-| priceFactor      | Price factor between input and output token price (Depends on the model)                       |
+| **Field**        | **Description**                                                                                    |
+|:-----------------|:---------------------------------------------------------------------------------------------------|
+| model            | Model used for generating text. (Default: `chatgpt-4o-latest`)                                     |
+| temperature      | Controls randomness: `0` (deterministic) to `2` (creative). (Default: `1`)                         |
+| maxOutputTokens  | Maximum tokens in a response. So 500 characters are approximately 125 tokens). (Recommended `120`) |
+| topP             | Nucleus sampling: `0` (plain) to `1` (creative). (Default: `1`)                                    |
+| frequencyPenalty | Reduces repetition of words. Values range from `0` to `2`. (Default: `0`)                          |
+| presencePenalty  | Discourages repeating words from the conversation. Values range from `0` to `2`. (Default: `0`)    |
+| devMessage       | Provides guidance and instructions for the bot's behavior.                                         |
+| spendingLimit    | Effective token spending limit, before chat gets resettet. (Recommended: `32768`)                  |
+| priceFactor      | Price factor between input and output token price. (Depends on the model)                          |
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-However, it is necessary to create a [Twitch application](https://dev.twitch.tv/console) and provide access to a MariaDB database. <br>
-For ChatGPT features, as well as certain other features, you need to provide their respective API keys for them to function properly. <br>
-
-If you have any ideas or suggestions, feel free to open an issue or submit a pull request. <br> <br>
-
-
-### 1. Download the bot jar file
-You can download the latest version of the bot from the [releases](https://github.com/MCmoderSD/YEPPBot/releases/latest) page. <br>
-Create the configuration files yourself, or use the `-generate` argument to create example files. <br>
-
-YAlternatively, you can clone the repository and compile the bot yourself.
-To do this, ensure you have Git installed on your computer. You can download it from [here](https://git-scm.com/downloads). <br>
-
-Clone the repository using the following command: <br>
-```bash
-git clone https://www.GitHub.com/MCmoderSD/YEPPBot.git 
-``` 
 <br>
 
-
-### 7. Running the bot
-After compiling the bot into a `.jar` file, you can run it using the following command:
-```bash
-java -jar JAR_FILE.jar
-```
-
-If you are using the precompiled `.jar` file to generate example configuration files, use:
-```bash
-java -jar YEPPBot.jar -generate
-```
-
-Once you have edited the configuration files and added the necessary API keys, you can start the bot with:
-```bash
-java -jar YEPPBot.jar -botconfig "/path/to/bot.json" -sql "/path/to/sql.json" -httpsserver "/path/to/server.json"
-```
-You can include additional arguments for other configuration files as needed.
-
-<hr>
-
-#### General Arguments:
-- `-help`: Displays a list of all available arguments. 
-- `-version`: Outputs the current version of the bot. 
-- `-cli`: Runs the bot in command-line interface mode. 
-- `-nolog`: Disables database logging.
-- `-noninteractive`: Disables interactive mode.
-- `-generate`: Generates example configuration files.
+<!--
 
 
-#### Configuration File Arguments:
-- `-botconfig "/path/to/bot.json"`: Specifies the path to the `bot.json` file. 
-- `-channellist "/path/to/channels.txt"`: Specifies the path to the `channels.txt` file. 
-- `-sql "/path/to/sql.json"`: Specifies the path to the `sql.json` file. 
-- `-server "/path/to/server.json"`: Specifies the path to the `server.json` file. 
-- `-api "/path/to/api.json"`: Specifies the path to the `api.json` file.
-- `-openai "/path/to/openai.json"`: Specifies the path to the `openai.json` file. <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Usage and commands
@@ -403,34 +372,6 @@ Custom commands can include dynamic variables to make them more interactive:
 - `%tagged%`: Replaced with the first word following the command (useful for mentions). 
 - `%random%`: Replaced with a random percentage between 0 and 100. <br> <br>
 
-
-## Docker Setup
-Since YEPPBot v1.23.0, you are able to run the bot in a Docker container. <br>
-To do this, you need to have Docker installed on your computer. You can download it from [here](https://www.docker.com/products/docker-desktop). <br>
-
-The setup process is similar to the manual setup, but makes managing the bot easier. <br>
-You can use the `mcmodersd/yeppbot` image from [Docker Hub](https://hub.docker.com/r/mcmodersd/yeppbot). <br>
-
-Following files are required:
-- The Bot Configuration named `bot.json`.
-- The MariaDB Configuration named `sql.json`.
-- The HTTPS Server Configuration named `server.json`.
-
-The Channel List, API Keys, and ChatGPT Configuration are optional.
-- The Channel List is named `channels.txt`.
-- The API Keys are named `api.json`.
-- The ChatGPT Configuration is named `openai.json`.
-
-### 2. Running the Docker Container
-To run the bot in a Docker container, use the following command:
-```bash
-docker run -d --name YEPPBot -p <port>:443 -v /path/to/config:/app/config mcmodersd/yeppbot
-```
-You need to replace `<port>` with the port you want to use for the HTTPS server. (default 443) <br>
-You need to replace `/path/to/config` with the path to the directory containing the configuration files. <br>
-
-If you're using the SSL Certificate instead of the JKS files, you need to mount the directory containing the certificate files. <br>
-
 ## YEPPConnect
 **YEPPConnect** is a feature that enables your viewers to whitelist their Minecraft usernames directly through the bot.
 
@@ -446,28 +387,11 @@ To integrate YEPPConnect with your Minecraft server, follow these steps:
 - It also lets you check the online status of the bot.
 
 #### 2. Compatibility:
-- The plugin supports Minecraft version 1.13 and above. 
+- The plugin supports Minecraft version 1.13 and above.
 - Make sure you are using YEPPConnect v1.21.0 or later for full functionality.
 
 #### 3. Documentation:
 - Refer to the [plugin documentation](https://github.com/MCmoderSD/YEPPConnect?tab=readme-ov-file#commands-and-permissions) for installation instructions, commands, and permissions. <br> <br>
-
-
-## Contributing
-Have an idea or suggestion? Feel free to:
-- Open an issue or pull request on GitHub.
-- Reach out to me on [Discord](https://www.mcmodersd.de/dc) or [Twitch](https://www.twitch.tv/mcmodersd).
-
-### Acknowledgments
-Special thanks to:
-- [FoxxHimself](https://github.com/lennartfu): For creating the original bot and inspiring its rewrite in Java. 
-- [RedSmileTV](https://github.com/redsmiletv): For assistance with the bot, APIs, and libraries. 
-- [Rebix](https://github.com/reebix): For support with the bot and related integrations.
-- [r4kunnn](https://www.twitch.tv/r4kunnn): For testing and feedback on the bot's features.
-
-Your contributions and support are greatly appreciated. Together, we can make the bot even better! <br> <br>
-
-
 
 
 ## Features
@@ -522,3 +446,70 @@ Your contributions and support are greatly appreciated. Together, we can make th
 - [ ] Web UI
 - [ ] Key Command
 - [ ] Discord Integration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-->
+
+## Contributing
+Have an idea or suggestion? Feel free to:
+- Open an issue or pull request on GitHub.
+- Reach out to me on [Discord](https://www.mcmodersd.de/dc) or [Twitch](https://www.twitch.tv/mcmodersd).
+
+## Acknowledgments
+Special thanks to:
+- [FoxxHimself](https://github.com/lennartfu): For creating the original bot and inspiring its rewrite in Java.
+- [RedSmileTV](https://github.com/redsmiletv): For assistance with the bot, APIs, and libraries.
+- [Rebix](https://github.com/reebix): For support with the bot and related integrations.
+- [Xander](https://github.com/Xander1233): For assisting with docker, CD/CI and pen-testing.
+- [r4kunnn](https://www.twitch.tv/r4kunnn): For testing and feedback on the bot's features.
+
+Your contributions and support are greatly appreciated. Together, we can make the bot even better! <br> <br>
