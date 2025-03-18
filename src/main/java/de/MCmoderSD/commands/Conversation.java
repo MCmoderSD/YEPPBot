@@ -29,7 +29,9 @@ public class Conversation {
         // Constants
         String conversationSuspended = "Die Unterhaltung wurde beendet YEPP";
         String tokenLimitExceeded = "Das Token-Limit wurde überschritten. Die Unterhaltung wurde beendet YEPP";
-        var tokenSpendingLimit = config.get("chat").get("spendingLimit").asLong();
+        JsonNode chat = config.get("chat");
+        var priceFactor = (float) chat.get("priceFactor").asDouble();
+        var tokenSpendingLimit = chat.get("spendingLimit").asLong();
 
         // Register command
         messageHandler.addCommand(new Command(description, name) {
@@ -53,7 +55,7 @@ public class Conversation {
                     ChatHistory chatHistory = openAI.getChatHistory(userId);
                     var inputTokens = chatHistory.getInputTokens();
                     var outputTokens = chatHistory.getOutputTokens();
-                    var effectiveSpending = inputTokens / 4 + outputTokens;
+                    var effectiveSpending = inputTokens * priceFactor + outputTokens;
                     if (effectiveSpending > tokenSpendingLimit) {
                         openAI.clearChatHistory(userId);
                         botClient.respond(event, getCommand(), tokenLimitExceeded);
