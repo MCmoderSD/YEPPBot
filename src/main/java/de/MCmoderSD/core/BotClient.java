@@ -200,16 +200,12 @@ public class BotClient {
         // Loading Database Commands
         new Counter(this, messageHandler, sql);
         new CustomCommand(this, messageHandler, sql);
-        //new CustomTimer(this, messageHandler, sql);
         new Fact(this, messageHandler, sql);
         new Help(this, messageHandler, sql);
         new Insult(this, messageHandler, sql);
         new Joke(this, messageHandler, sql);
         new Lurk(this, messageHandler, sql);
         new Quote(this, messageHandler, sql);
-        //new Rank(this, messageHandler, sql);
-        //new Social(this, messageHandler, sql);
-        //new Whitelist(this, messageHandler, sql);
 
         // Loading Twitch API Commands
         new Birthday(this, messageHandler, helixHandler, sql);
