@@ -93,7 +93,7 @@ public class Birthday {
         // Syntax
         syntax = "Syntax: " + botClient.getPrefix() + "birthday set/get/in/list/next";
         setSyntax = "Syntax: " + botClient.getPrefix() + "birthday set DD.MM.CCYY";
-        getSyntax = "Syntax: " + botClient.getPrefix() + "birthday get [DD.MM | @user | Year | Month ]";
+        getSyntax = "Syntax: " + botClient.getPrefix() + "birthday get [DD.MM | @user | Month | Year ]";
         inSyntax = "Syntax: " + botClient.getPrefix() + "birthday in <user> [ Months | Days | Hours ]";
 
         // About
