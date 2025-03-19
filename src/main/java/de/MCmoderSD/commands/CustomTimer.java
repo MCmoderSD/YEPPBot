@@ -15,8 +15,10 @@ import java.util.HashSet;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
+@SuppressWarnings("ALL")
 public class CustomTimer {
-
+    // ToDo: Currently Disabled, rework needed
+/*
     // Constructor
     public CustomTimer(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
@@ -165,12 +167,12 @@ public class CustomTimer {
             //noinspection DataFlowIssue ToDo Fix
             case 'M', 's':
                 return timeValue > 9223372036854775806L;
-            /*case 'h':
+            case 'h':
                 return timeValue <= 2562047788015215L;
             case 'm':
-                return timeValue <= 153722867280912930L;*/
+                return timeValue <= 153722867280912930L;
             default:
                 return false;
         }
-    }
+    }*/
 }

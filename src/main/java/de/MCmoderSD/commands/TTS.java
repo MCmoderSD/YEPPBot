@@ -9,8 +9,10 @@ import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("ALL")
 public class TTS {
-
+    // ToDo: Currently Disabled, waiting for OpenAI and Server update
+/*
     // Constants
     private final String ttsWasSent;
 
@@ -50,5 +52,5 @@ public class TTS {
                 botClient.respond(event, getCommand(), ttsWasSent);
             }
         });
-    }
+    }*/
 }

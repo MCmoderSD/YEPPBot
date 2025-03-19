@@ -11,8 +11,10 @@ import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.other.Format.cleanArgs;
 
+@SuppressWarnings("ALL")
 public class Whitelist {
-
+    // ToDo: Currently Disabled, rework of YEPPConnect
+/*
     // Constructor
     public Whitelist(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
@@ -62,5 +64,5 @@ public class Whitelist {
                 else botClient.respond(event, getCommand(), syntax);
             }
         });
-    }
+    }*/
 }

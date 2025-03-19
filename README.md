@@ -1,25 +1,5 @@
 # [YEPPBot - A Twitch Bot](https://www.Twitch.tv/YEPPBotV2)
 
-## Table of Contents
-- [Description](#description)
-- [Usage](#usage)
-- [Contact and Support](#contact-and-support)
-- [Host Your Own Instance](#host-your-own-instance)
-  - [Docker](#docker)
-  - [Precompiled JAR](#precompiled-jar)
-  - [Manual Setup](#manual-setup)
-  - [Configuration](#configuration)
-    - [Bot Configuration](#bot-configuration)
-    - [Channel List](#channel-list-optional)
-    - [MariaDB Database](#mariadb-database)
-    - [HTTPS Server](#https-server)
-    - [API Keys](#api-keys-optional)
-    - [OpenAI API](#openai-api-optional)
-- [Contributing](#contributing)
-- [Acknowledgments](#acknowledgments)
-
-<br>
-
 ## Description
 YEPPBot is a Twitch bot equipped with multiple features to entertain and manage your Twitch channel.
 
@@ -287,202 +267,115 @@ Configure `openai.json` like:
 | spendingLimit    | Effective token spending limit before chat resets. (Recommended: `32768`)            |
 | priceFactor      | Price factor between input and output token price (model-dependent).                 |
 
-<br> <br>
+<br>
 
-<!--
+## Commands and Features
+This bot includes various commands to enhance functionality and interaction. <br>
+Below is an overview of key commands:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Usage and commands
-The bot offers a variety of commands to enhance functionality and interactivity. <br>
-Below is an overview of some key commands: <br>
-
-#### General Commands:
+### Help Commands
 - `!help commands`: Displays a list of all available commands.
 - `!help COMMAND_NAME`: Provides detailed information about a specific command.
 
-#### Moderation Commands:
-- `!moderate join`: Makes the bot join your channel.
-- `!moderate leave`: Makes the bot leave your channel.
-- `!moderate block COMMAND_NAME`: Blacklists a command, preventing it from being used.
-- `!moderate unblock COMMAND_NAME`: Removes a command from the blacklist.
-
-#### Counter Commands:
-- `!counter`: Create and manage counter-commands for various purposes.
-
-#### Custom Commands:
-The bot supports creating and managing custom commands with the !CustomCommand command. <br>
-Custom commands can include dynamic variables to make them more interactive:
-- `%author%`: Replaced with the username of the person executing the command. 
-- `%channel%`: Replaced with the name of the channel where the command is executed. 
-- `%tagged%`: Replaced with the first word following the command (useful for mentions). 
-- `%random%`: Replaced with a random percentage between 0 and 100. <br> <br>
-
-## YEPPConnect
-**YEPPConnect** is a feature that enables your viewers to whitelist their Minecraft usernames directly through the bot.
-
-### Whitelist Commands:
-- `!whitelist add McName`: Adds the specified Minecraft username (`McName`) to the whitelist.
-- `!whitelist remove McName`: Removes the specified Minecraft username (`McName`) from the whitelist.
-
-### Minecraft Server Setup:
-To integrate YEPPConnect with your Minecraft server, follow these steps:
-
-#### 1. Install the [YEPPConnect](https://github.com/MCmoderSD/YEPPConnect):
-- This plugin connects your Minecraft server to the bot, allowing whitelist management directly from chat.
-- It also lets you check the online status of the bot.
-
-#### 2. Compatibility:
-- The plugin supports Minecraft version 1.13 and above.
-- Make sure you are using YEPPConnect v1.21.0 or later for full functionality.
-
-#### 3. Documentation:
-- Refer to the [plugin documentation](https://github.com/MCmoderSD/YEPPConnect?tab=readme-ov-file#commands-and-permissions) for installation instructions, commands, and permissions. <br> <br>
-
-
-## Features
-
-### Commands for everyone:
-- Conversation
-- Fact
-- Gift
-- Help
-- Horoscope
-- Insult
-- Joke
-- Lurk
-- Match
-- Prompt
-- Translate
-- Weather
-- Wiki
-
-### Commands for Broadcaster and Moderators:
-- Counter
-- CustomCommand
-- CustomTimer
-- Moderate
-- Quote
-- Rank
-- Say
-- Social
-- Shoutout
-
-### Admin/Debug Commands:
-- Info
-- Ping
-- Status
-
-### Command Features:
-- Birthday
-  - The bot will congratulate the user on his birthday.
-  - You can set the birthday of the user with the `!birthday set` command.
-  - You can list all the birthdays with the `!birthday list` command.
-  - You can look up the next birthday with the `!birthday next` command.
-
-- Seasonal Event Commands
-  - DickDestroyDecember
-  - NoNutNovember
-
-- Whitelist
-  - The bot can whitelist users for a Minecraft server.
-  - Viewers can whitelist themselves using the `!whitelist add` command.
-
-### Planned Features:
-- [ ] Web UI
-- [ ] Key Command
-- [ ] Discord Integration
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--->
+### Moderation Commands
+- `!moderate join`: Adds the bot to your channel.
+- `!moderate leave`: Removes the bot from your channel.
+- `!moderate block COMMAND_NAME`: Blocks a specific command from being used.
+- `!moderate unblock COMMAND_NAME`: Unblocks a previously blocked command.
+
+### Counter Commands
+- `!counter`: Manage counters for various purposes.
+- `!counter add COUNTER_NAME`: Adds a new counter.
+- `!counter remove COUNTER_NAME`: Deletes an existing counter.
+- `!counter show COUNTER_NAME`: Displays the current value of a counter.
+- `!counter set COUNTER_NAME VALUE`: Sets the counter's value.
+- `!counter reset COUNTER_NAME`: Resets the counter to its initial value.
+
+### Custom Commands
+Create and manage custom commands using `!cc`:
+- `!cc add COMMAND_NAME ALIAS: RESPONSE`: Adds a new custom command.
+- `!cc remove COMMAND_NAME`: Deletes a custom command.
+- `!cc enable COMMAND_NAME`: Enables a disabled custom command.
+- `!cc disable COMMAND_NAME`: Disables an enabled custom command.
+- `!cc list`: Lists all custom commands.
+
+Dynamic variables can be used within custom commands for interactivity:
+- `%author%`: Replaced with the username of the command executor.
+- `%channel%`: Replaced with the name of the channel.
+- `%tagged%`: Replaced with the first word following the command (useful for mentions).
+- `%random%`: Replaced with a random percentage between 0 and 100.
+
+### Info Commands
+- `!info moderator`: Lists all moderators in the channel.
+- `!info editor`: Lists all editors in the channel.
+- `!info vip`: Lists all VIPs in the channel.
+
+### Birthday Commands
+- `!birthday set DD.MM.CCYY`: Sets your birthday.
+- `!birthday get USERNAME`: Retrieves a user's birthday.
+- `!birthday next AMOUNT`: Shows upcoming birthdays.
+- `!birthday in USERNAME TIME_FORMAT`:
+- `!birthday list`: Lists all birthdays.
+
+### ChatGPT Commands
+- `!prompt MESSAGE`: Generates a response from the prompt.
+- `!chat MESSAGE`: Starts or continues a conversation with the bot.
+- `!chat reset`: Resets the current conversation.
+
+### Seasonal Event Commands
+Same for the NoNutNovember as the DickDestroyDecember event:
+- `!NoNutNovember join`: Joins the No Nut November event.
+- `!NoNutNovember leave`: Leaves the No Nut November event.
+- `!NoNutNovember list`: Lists participant statuses.
+- `!NoNutNovember status USERNAME`: Checks a user's status.
+
+### Quote Commands
+- `!quote QUOTE_ID`: Retrieves a specific or random quote (QUOTE_ID optional).
+- `!quote add QUOTE`: Adds a new quote.
+- `!quote remove QUOTE_ID`: Deletes a quote.
+- `!quote edit NEW_QUOTE QUOTE_ID`: Edits an existing quote.
+- `!quote last`: Retrieves the last quote added.
+
+### Shoutout Commands
+- `!so USERNAME`: Performs a shoutout for a specified user.
+- `!so enable`: Enables automatic shoutouts during raids.
+- `!so disable`: Disables automatic shoutouts during raids.
+
+### General Commands
+- `!fact en/de`: Provides a random fact in English or German (language optional).
+- `!gif theme`: Searches for a GIF based on the theme provided (theme optional).
+- `!horoscope USERNAME LANGUAGE`: Provides a user's daily horoscope (language optional).
+- `!insult USERNAME`: Insults the specified user.
+- `!joke en/de`: Tells a random joke (language optional).
+- `!lurk`: Tracks and informs how long a user has been lurking.
+- `!match AMOUNT LANGUAGE`: Shows compatible users based on zodiac sign (amount & language optional).
+- `!ping`: Checks the bot's latency.
+- `!riot USERNAME#TAG REGION`: Provides info about a League of Legends player (region optional).
+- `!say MESSAGE`: Makes the bot say the specified message (admin only).
+- `!status`: Displays the bot's status.
+- `!translate LANGUAGE, TEXT`: Translates text to the specified language.
+- `!weather LOCATION, LANGUAGE`: Provides current weather information for a location (language optional).
+- `!wiki en/de SEARCH_TERM`: Searches Wikipedia for the term (language optional).
+
+### CLI Commands
+- `uptime`: Displays the bot's uptime.
+- `version`: Shows the bot's current version.
+- `exit`: Shuts down the bot.
+- `help`: Lists all available CLI commands.
+
+<br>
+
+## Planned Features
+
+- YEPPConnect: A Minecraft plugin for whitelist management and twitch integration.
+- Key Command: A command to find the cheapest key for a game.
+- Custom Timer: A command to set a custom timer for timed messages.
+- Rank: A command to fetch the rank of a user in a game.
+- Social: A command to fetch the social media of a streamer/user.
+- Web UI: A web interface for bot management.
+- Discord Integration: Integration with Discord for cross-platform functionality.
+
+<br>
 
 ## Contributing
 Have an idea or suggestion? Feel free to:

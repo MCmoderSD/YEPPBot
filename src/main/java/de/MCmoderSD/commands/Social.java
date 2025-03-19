@@ -13,8 +13,10 @@ import java.util.Arrays;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
+@SuppressWarnings("ALL")
 public class Social {
-
+    // ToDo: Currently Disabled, rework needed
+/*
     // Constructor
     public Social(BotClient botClient, MessageHandler messageHandler, SQL sql) {
 
@@ -68,5 +70,5 @@ public class Social {
                 }
             }
         });
-    }
+    }*/
 }
