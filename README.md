@@ -1,18 +1,24 @@
-# [YEPPBot - A Twitch Bot](https://www.Twitch.tv/YEPPBotV2)
+# [YEPPBot -  YEPP it's a Twitch Bot](https://www.Twitch.tv/YEPPBotV2)
+
+<br>
 
 ## Description
 YEPPBot is a Twitch bot equipped with multiple features to entertain and manage your Twitch channel.
 
 Originally conceived by [FoxxHimself](https://GitHub.com/lennartfu) and written in Python in early 2021. <br>
-I took over the project after the original creator ceased development and rewrote it using Java 21 with the [Twitch4J](https://Twitch4J.GitHub.io/) library. <br> <br>
+I took over the project after the original creator ceased development and rewrote it using Java 21 with the [Twitch4J](https://Twitch4J.GitHub.io/) library. <br> 
+
+<br>
 
 ## Usage
-Experience the bot by visiting its [Twitch](https://www.Twitch.tv/YEPPBotV2/chat) chat page to see its features in action. <br>
+Experience the bot by visiting its [Twitch chat](https://www.Twitch.tv/YEPPBotV2/chat) to see its features in action. <br>
 Add the bot to your channel with the command `!mod join`. <br>
 Should you wish to remove it, use `!mod leave` in your channel.
 
 For all features to work as intended, you need to authenticate the bot with your Twitch account using `!mod auth` in your channel. <br>
-It's recommended to assign the bot a moderator role, although it isn't strictly necessary. <br> <br>
+It's recommended to assign the bot a moderator role, although it isn't strictly necessary. <br> 
+
+<br>
 
 ## Contact and Support
 For support or inquiries, reach out via [Discord](https://www.mcmodersd.de/dc), [mail](mailto:business@mcmodersd.de), or [Twitch](https://www.Twitch.tv/mcmodersd). <br>
@@ -21,7 +27,9 @@ I typically respond within 24 hours, oftentimes sooner.
 Interested in collaboration or a custom version tailored to your needs? Simply email [business@mcmodersd.de](mailto:business@mcmodersd.de). 
 
 Note that the bot is under active development, and some features may change considerably in the future. <br>
-Consequently, the setup process may also evolve. <br> <br>
+Consequently, the setup process may also evolve. <br> 
+
+<br>
 
 ## Host Your Own Instance
 Utilize this project as a template to create your own bot or to host an instance. <br>
@@ -75,7 +83,9 @@ Clone the project into your IDE and place the following configuration files in `
 - Put `sql.json` in `/src/main/resources/database/`.
 - Put `api.json` and `openai.json` in `/src/main/resources/api/`.
 
-Build and run the project thereafter. <br> <br>
+Build and run the project thereafter. <br> 
+
+<br>
 
 ## Configuration
 Before starting configuration:
@@ -84,7 +94,9 @@ Before starting configuration:
 3. Generate a MariaDB database and user for the bot.
 
 Account tokens may become invalid over time or if the password changes. <br> 
-Remember **never share or post the token**. <br> <br>
+Remember **never share or post the token**. <br> 
+
+<br>
 
 ### Bot Configuration
 Create `bot.json` with this structure:
@@ -110,7 +122,9 @@ Create `bot.json` with this structure:
 - **admins**: Users with access to admin commands.
 
 The prefix identifies commands. <br>
-Admins can execute all commands in any channel. <br> <br>
+Admins can execute all commands in any channel. <br> 
+
+<br>
 
 ### Channel List (optional)
 The optional `channels.txt` file should feature this format:
@@ -119,7 +133,9 @@ CHANNEL_NAME
 OTHER_CHANNEL_NAME
 ```
 List as many channels as desired. <br>
-Without this list, the bot is active in its own channel only. <br> <br>
+Without this list, the bot is active in its own channel only. <br> 
+
+<br>
 
 ### MariaDB Database
 A MariaDB database is required for data storage. <br>
@@ -151,7 +167,9 @@ Create `sql.json` structured like:
 - **password**: Password for the MariaDB user.
 
 Ensure the user has complete database permissions. <br>
-Use `-nolog` to disable database logging. <br> <br>
+Use `-nolog` to disable database logging. <br> 
+
+<br>
 
 ### HTTPS Server
 The bot features a built-in HTTPS server for Twitch Helix API authentication and forthcoming features.
@@ -197,7 +215,9 @@ Create `server.json` structured like:
   - `OU`, `O`, `L`, `ST`, `C`: Certificate organizational and geographic details.
 
 A valid certificate is required for domains. Self-signed certificates are for `localhost` only. <br>
-Obtain a free certificate from [Let's Encrypt](https://LetsEncrypt.org/). <br> <br>
+Obtain a free certificate from [Let's Encrypt](https://LetsEncrypt.org/). <br> 
+
+<br>
 
 ### API Keys (optional)
 Configure `api.json` for API keys:
@@ -265,7 +285,7 @@ Configure `openai.json` like:
 | presencePenalty  | Discourages repeating words from the conversation. Range: `0` to `2`. (Default: `0`) |
 | devMessage       | Provides guidance and instructions for the bot's behavior.                           |
 | spendingLimit    | Effective token spending limit before chat resets. (Recommended: `32768`)            |
-| priceFactor      | Price factor between input and output token price (model-dependent).                 |
+| priceFactor      | Price factor between input and output token price. (model-dependent)                 |
 
 <br>
 
@@ -284,7 +304,7 @@ Below is an overview of key commands:
 - `!moderate unblock COMMAND_NAME`: Unblocks a previously blocked command.
 
 ### Counter Commands
-- `!counter`: Manage counters for various purposes.
+- `!counter`: Manages counters for various purposes.
 - `!counter add COUNTER_NAME`: Adds a new counter.
 - `!counter remove COUNTER_NAME`: Deletes an existing counter.
 - `!counter show COUNTER_NAME`: Displays the current value of a counter.
@@ -314,7 +334,7 @@ Dynamic variables can be used within custom commands for interactivity:
 - `!birthday set DD.MM.CCYY`: Sets your birthday.
 - `!birthday get USERNAME`: Retrieves a user's birthday.
 - `!birthday next AMOUNT`: Shows upcoming birthdays.
-- `!birthday in USERNAME TIME_FORMAT`:
+- `!birthday in USERNAME TIME_FORMAT`: Retrieves information on a user's birthday using a specific time format.
 - `!birthday list`: Lists all birthdays.
 
 ### ChatGPT Commands
@@ -323,7 +343,7 @@ Dynamic variables can be used within custom commands for interactivity:
 - `!chat reset`: Resets the current conversation.
 
 ### Seasonal Event Commands
-Same for the NoNutNovember as the DickDestroyDecember event:
+Similar commands apply for both the No Nut November and Dick Destroy December events:
 - `!NoNutNovember join`: Joins the No Nut November event.
 - `!NoNutNovember leave`: Leaves the No Nut November event.
 - `!NoNutNovember list`: Lists participant statuses.
@@ -343,10 +363,10 @@ Same for the NoNutNovember as the DickDestroyDecember event:
 
 ### General Commands
 - `!fact en/de`: Provides a random fact in English or German (language optional).
-- `!gif theme`: Searches for a GIF based on the theme provided (theme optional).
+- `!gif theme`: Searches for a GIF based on the provided theme (theme optional).
 - `!horoscope USERNAME LANGUAGE`: Provides a user's daily horoscope (language optional).
 - `!insult USERNAME`: Insults the specified user.
-- `!joke en/de`: Tells a random joke (language optional).
+- `!joke en/de`: Tells a random joke in English or German (language optional).
 - `!lurk`: Tracks and informs how long a user has been lurking.
 - `!match AMOUNT LANGUAGE`: Shows compatible users based on zodiac sign (amount & language optional).
 - `!ping`: Checks the bot's latency.
@@ -358,23 +378,21 @@ Same for the NoNutNovember as the DickDestroyDecember event:
 - `!wiki en/de SEARCH_TERM`: Searches Wikipedia for the term (language optional).
 
 ### CLI Commands
-- `uptime`: Displays the bot's uptime.
-- `version`: Shows the bot's current version.
 - `exit`: Shuts down the bot.
+- `clear`: Clears the console.
 - `help`: Lists all available CLI commands.
-
-<br>
+- `uptime`: Displays the bot's uptime.
+- `generate`: Generates example configuration files.
 
 ## Planned Features
-
-- YEPPConnect: A Minecraft plugin for whitelist management and twitch integration.
+- YEPPConnect: A Minecraft plugin for whitelist management and Twitch integration.
 - Key Command: A command to find the cheapest key for a game.
 - Custom Timer: A command to set a custom timer for timed messages.
 - Rank: A command to fetch the rank of a user in a game.
-- Social: A command to fetch the social media of a streamer/user.
+- Social: A command to fetch the social media of a streamer or user.
 - Web UI: A web interface for bot management.
 - Discord Integration: Integration with Discord for cross-platform functionality.
-
+- 
 <br>
 
 ## Contributing
