@@ -3,7 +3,7 @@
 <br>
 
 ## Description
-YEPPBot is a comprehensive Twitch bot featuring numerous tools to entertain and manage your Twitch channel.
+The YEPPBot is a comprehensive Twitch bot featuring numerous tools to entertain and manage your Twitch channel.
 
 Originally conceived by [FoxxHimself](https://GitHub.com/lennartfu) and written in Python in early 2021. <br>
 I took over the project after the original creator ceased development and rewrote it using Java 21 with the [Twitch4J](https://Twitch4J.GitHub.io/) library. <br>
