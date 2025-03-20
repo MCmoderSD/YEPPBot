@@ -1,0 +1,47 @@
+package de.MCmoderSD.commands;
+
+@SuppressWarnings("ALL")
+public class TTS {
+    // ToDo: Currently Disabled, waiting for OpenAI and Server update
+/*
+    // Constants
+    private final String ttsWasSent;
+
+    // Constructor
+    public TTS(BotClient botClient, MessageHandler messageHandler, SQL sql) {
+
+        // Syntax
+        String syntax = "Syntax: " + botClient.getPrefix() + "prompt <Frage>";
+
+        // About
+        String[] name = {"tts", "texttospeech"}; // Command name and aliases
+        String description = "Lässt den YEPPBot Sprechen. " + syntax;
+
+        // Constants
+        ttsWasSent = "TTS wurde gesendet YEPP";
+
+        // Register command
+        messageHandler.addCommand(new Command(description, name) {
+
+            @Override
+            public void execute(TwitchMessageEvent event, ArrayList<String> args) {
+
+                // Check Admin
+                if (!(botClient.isPermitted(event) || botClient.isAdmin(event))) return;
+
+                // Get Voice if available
+                String currentVoice = null;
+                //for (String arg : args) if (speech.getModel().checkVoice(arg.toLowerCase())) currentVoice = arg;
+
+                String message = event.getMessage();
+
+                AudioFile audioFile = sql.getAssetManager().getTTSAudio(message);
+                //if (audioFile == null) audioFile = speech.speak(event.getMessage(), currentVoice, null, null);
+
+                // Send Audio
+                botClient.sendAudio(event, audioFile);
+                botClient.respond(event, getCommand(), ttsWasSent);
+            }
+        });
+    }*/
+}
