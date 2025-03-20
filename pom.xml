@@ -67,6 +67,13 @@
             <version>1.1.1</version>
         </dependency>
 
+        <!-- JavaAudioLibrary -->
+        <dependency>
+            <groupId>de.MCmoderSD</groupId>
+            <artifactId>JavaAudioLibrary</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+
         <!-- Json -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>

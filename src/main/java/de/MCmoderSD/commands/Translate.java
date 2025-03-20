@@ -55,8 +55,8 @@ public class Translate {
                             null,
                             null,
                             devMessage,
-                            text,
-                            null
+                            null,
+                            text
                     );
 
                     // Filter Response for argument injection

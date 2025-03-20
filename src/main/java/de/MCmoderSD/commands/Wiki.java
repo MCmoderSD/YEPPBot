@@ -81,8 +81,8 @@ public class Wiki {
                                 null,
                                 null,
                                 "Please summarize the following text into " + language.getName() + " used in the text. Answer only in 500 or less chars",
-                                summary,
-                                null
+                                null,
+                                summary
                         ));
 
                         // Filter Response for argument injection
