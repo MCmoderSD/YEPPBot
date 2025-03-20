@@ -105,8 +105,8 @@ public class Weather {
                             null,
                             null,
                             "Please format in short text and translate in: " + language,
-                            response,
-                            null
+                            null,
+                            response
                     );
                 }
 

@@ -260,7 +260,7 @@ Configure `openai.json` as follows:
     "presencePenalty": 0,
     "n": 1,
     "maxTokens": 120,
-    "instruction": "You are the best TwitchBot that ever existed!",
+    "devMessage": "You are the best TwitchBot that ever existed!",
     "spendingLimit": 32768,
     "priceFactor": 0.25
   }
@@ -276,8 +276,8 @@ Fields regarding user, organization, and project IDs are non-mandatory and can b
 | temperature      | Controls randomness: `0` (deterministic) to `2` (creative). (Default: `1`)           |
 | maxOutputTokens  | Maximum tokens in a response. 500 characters ≈ 125 tokens). (Recommended: `120`)     |
 | topP             | Nucleus sampling: `0` (plain) to `1` (creative). (Default: `1`)                      |
-| frequencyPenalty | Reduces word repetition. Range: `0` to `2`. (Default: `0`)                           |
-| presencePenalty  | Discourages repeating words from the conversation. Range: `0` to `2`. (Default: `0`) |
+| frequencyPenalty | Reduces word repetition. Range: `0` to `1`. (Default: `0`)                           |
+| presencePenalty  | Discourages repeating words from the conversation. Range: `0` to `1`. (Default: `0`) |
 | devMessage       | Provides guidance and instructions for the bot's behavior.                           |
 | spendingLimit    | Effective token spending limit before chat resets. (Recommended: `32768`)            |
 | priceFactor      | Price factor between input and output token price. (model-dependent)                 |
