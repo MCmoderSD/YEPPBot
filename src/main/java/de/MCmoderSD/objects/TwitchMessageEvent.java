@@ -9,16 +9,19 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.enums.SubTier;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.*;
 import java.sql.Timestamp;
 
 import static de.MCmoderSD.core.BotClient.prefixes;
 import static de.MCmoderSD.utilities.other.Format.*;
 
-@SuppressWarnings("unused")
-public class TwitchMessageEvent {
+public class TwitchMessageEvent implements Serializable{
 
     // Constants
-    private final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+    // Event Information
+    private final String eventId;
+    private final Timestamp timestamp;
 
     // ID
     private final Integer channelId;
@@ -46,6 +49,10 @@ public class TwitchMessageEvent {
     // Message Event
     public TwitchMessageEvent(ChannelMessageEvent event) {
 
+        // Get Event Information
+        eventId = event.getEventId();
+        timestamp = new Timestamp(event.getFiredAt().getTimeInMillis());
+
         // Get ID's
         channelId = Integer.parseInt(trimMessage(event.getChannel().getId()));
         userId = Integer.parseInt(trimMessage(event.getUser().getId()));
@@ -72,9 +79,13 @@ public class TwitchMessageEvent {
     // Cheer Event
     public TwitchMessageEvent(CheerEvent event) {
 
-        // Get Event Information
+        // Variables
         EventChannel eventChannel = event.getChannel();
         EventUser eventUser = event.getUser();
+
+        // Get Event Information
+        eventId = event.getEventId();
+        timestamp = new Timestamp(event.getFiredAt().getTimeInMillis());
 
         // Get ID's
         channelId = Integer.parseInt(trimMessage(eventChannel.getId()));
@@ -100,30 +111,11 @@ public class TwitchMessageEvent {
     }
 
     // Manual Event
-    public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable Integer subTier, @Nullable Integer bits) {
+    public TwitchMessageEvent(String eventId, Timestamp timestamp, Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable SubTier subTier, @Nullable Integer bits) {
 
         // Set Parameters
-        this.channelId = channelId;
-        this.userId = userId;
-        this.channel = trimMessage(channel).toLowerCase();
-        this.user = trimMessage(user).toLowerCase();
-        this.message = trimMessage(message);
-        this.subMonths = subMonths == null ? 0 : subMonths;
-        this.subTier = SubTier.getSubTier(subTier == null ? 0 : subTier);
-        this.bits = bits == null ? 0 : bits;
-        assert bits != null;
-
-        // Set Flags
-        isCheer = 0 < bits;
-        isCommand = isCommand(message);
-        hasBotName = hasBotName(message);
-        hasYEPP = message.contains("YEPP");
-    }
-
-    // Manual Event
-    public TwitchMessageEvent(Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable SubTier subTier, @Nullable Integer bits) {
-
-        // Set Parameters
+        this.eventId = eventId;
+        this.timestamp = timestamp;
         this.channelId = channelId;
         this.userId = userId;
         this.channel = trimMessage(channel).toLowerCase();
@@ -154,6 +146,14 @@ public class TwitchMessageEvent {
     }
 
     // Getters
+    public String getEventId() {
+        return eventId;
+    }
+
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
     public Integer getChannelId() {
         return channelId;
     }
@@ -208,15 +208,23 @@ public class TwitchMessageEvent {
         System.out.println(getLog());
     }
 
-    public Timestamp getTimestamp() {
-        return timestamp;
-    }
-
     public String getFormattedTimestamp() {
         return "[" + new java.text.SimpleDateFormat(TIMESTAMP_FORMAT).format(timestamp) + "]";
     }
 
     public String getLog() {
         return getFormattedTimestamp() + " <" + getChannel() + "> " + getUser() + ": " + getMessage();
+    }
+
+    public byte[] getBytes() throws IOException {
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
+        ObjectOutputStream stream = new ObjectOutputStream(data);
+        stream.writeObject(this);
+        stream.flush();
+        return data.toByteArray();
+    }
+
+    public static TwitchMessageEvent fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+        return (TwitchMessageEvent) new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
     }
 }

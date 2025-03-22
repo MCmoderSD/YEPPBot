@@ -1,7 +1,5 @@
 package de.MCmoderSD.utilities.database.manager;
 
-import de.MCmoderSD.core.BotClient;
-import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.SQL;
 
@@ -12,8 +10,6 @@ import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
@@ -41,20 +37,6 @@ public class CustomManager {
 
             // Condition for creating tables
             String condition = "CREATE TABLE IF NOT EXISTS ";
-
-            // SQL statement for creating the custom timers table
-            connection.prepareStatement(condition +
-                    """
-                    CustomTimers (
-                    channelId INT NOT NULL,
-                    name TEXT NOT NULL,
-                    time TEXT NOT NULL,
-                    response VARCHAR(500) NOT NULL,
-                    isEnabled BIT NOT NULL DEFAULT TRUE,
-                    FOREIGN KEY (channelId) REFERENCES Users(id)
-                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
-                    """
-            ).execute();
 
             // SQL statement for creating the custom commands table
             connection.prepareStatement(condition +
@@ -492,204 +474,5 @@ public class CustomManager {
         }
 
         return counter + " counter removed";
-    }
-
-    // Get All Custom Timers
-    public HashMap<Integer, HashSet<Timer>> getCustomTimers(BotClient botClient) {
-
-        // Variables
-        HashMap<Integer, HashSet<Timer>> customTimers = new HashMap<>();
-
-        // Get CustomTimer
-        try {
-            if (!sql.isConnected()) sql.connect(); // connect
-
-            // Prepare statement
-            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT channelId, name, time, response FROM CustomTimers WHERE isEnabled = TRUE"
-            );
-
-            // Execute
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            // Process results
-            while (resultSet.next()) {
-                var channelId = resultSet.getInt("channelId");
-                String name = resultSet.getString("name");
-                String time = resultSet.getString("time");
-                String response = resultSet.getString("response");
-
-                // Create Timer object
-                Timer timer = new Timer(botClient, botClient.getHelixHandler().getUser(channelId).getName(), name, time, response);
-
-                // Add to customTimers
-                customTimers.computeIfAbsent(channelId, k -> new HashSet<>(Set.of(timer)));
-            }
-
-            // Close resources
-            resultSet.close();
-            preparedStatement.close();
-
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-
-        return customTimers;
-    }
-
-    // Get Custom Timers
-    public HashMap<String, Timer> getCustomTimers(TwitchMessageEvent event, BotClient botClient) {
-
-        // Set Variables
-        HashMap<String, Timer> customTimers = new HashMap<>();
-
-        // Get Custom Timers
-        try {
-            if (!sql.isConnected()) sql.connect(); // connect
-
-            // Prepare statement
-            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT name, time, response FROM CustomTimers WHERE channelId = ?"
-            );
-
-            // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId()); // set channel
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            // Add to List
-            while (resultSet.next()) {
-                String name = resultSet.getString("name");
-                String time = resultSet.getString("time");
-                String response = resultSet.getString("response");
-                customTimers.put(name, new Timer(botClient, event.getChannel(), name, time, response));
-            }
-
-            // Close resources
-            resultSet.close();
-            preparedStatement.close();
-
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-        return customTimers;
-    }
-
-    // Get Active Custom Commands
-    public HashSet<Timer> getActiveCustomTimers(TwitchMessageEvent event, BotClient botClient) {
-
-        // Variables
-        HashSet<Timer> customTimers = new HashSet<>();
-
-        // Get Custom Timers
-        try {
-            if (!sql.isConnected()) sql.connect(); // connect
-
-            // Prepare statement
-            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "SELECT channelId, name, time, response FROM CustomTimers WHERE isEnabled = TRUE"
-            );
-
-            // Execute
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            // Add to List
-            while (resultSet.next()) {
-                String name = resultSet.getString("name");
-                String time = resultSet.getString("time");
-                String response = resultSet.getString("response");
-                customTimers.add(new Timer(botClient, event.getChannel(), name, time, response));
-            }
-
-            // Close resources
-            resultSet.close();
-            preparedStatement.close();
-
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-
-        return customTimers;
-    }
-
-    // Create Custom Timer
-    public String createCustomTimer(TwitchMessageEvent event, String name, String time, String response) {
-        try {
-            if (!sql.isConnected()) sql.connect(); // connect
-
-            // Prepare statement
-            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "INSERT INTO CustomTimers (channelId, name, time, response) VALUES (?, ?, ?, ?)"
-            );
-
-            // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId());  // set channel
-            preparedStatement.setString(2, name);               // set name
-            preparedStatement.setString(3, time);               // set time
-            preparedStatement.setString(4, response);           // set response
-            preparedStatement.executeUpdate(); // execute
-
-            // Close resources
-            preparedStatement.close();
-
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-            return "Error: Database error";
-        }
-        return name + " custom timer created";
-    }
-
-    // Edit Custom Timer
-    public String editCustomTimer(TwitchMessageEvent event, String name, String time, String response, boolean enable) {
-        try {
-            if (!sql.isConnected()) sql.connect(); // connect
-
-            // Prepare statement
-            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "UPDATE CustomTimers SET time = ?, response = ?, isEnabled = ? WHERE channelId = ? AND name = ?"
-            );
-
-            // Set Values and Execute
-            preparedStatement.setString(1, time);               // set time
-            preparedStatement.setString(2, response);           // set response
-            preparedStatement.setInt(3, enable ? 1 : 0);        // set isEnabled
-            preparedStatement.setInt(4, event.getChannelId());  // set channel
-            preparedStatement.setString(5, name);               // set name
-            preparedStatement.executeUpdate(); // execute
-
-            // Close resources
-            preparedStatement.close();
-
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-            return "Error: Database error";
-        }
-
-        return name + " custom timer " + (enable ? "enabled" : "disabled");
-    }
-
-    // Delete Custom Timer
-    public String deleteCustomTimer(TwitchMessageEvent event, String name) {
-        try {
-            if (!sql.isConnected()) sql.connect(); // connect
-
-            // Prepare statement
-            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
-                    "DELETE FROM CustomTimers WHERE channelId = ? AND name = ?"
-            );
-
-            // Set Values and Execute
-            preparedStatement.setInt(1, event.getChannelId());  // set channel
-            preparedStatement.setString(2, name);               // set name
-            preparedStatement.executeUpdate(); // execute
-
-            // Close resources
-            preparedStatement.close();
-
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-            return "Error: Database error";
-        }
-
-        return name + " custom timer removed";
     }
 }

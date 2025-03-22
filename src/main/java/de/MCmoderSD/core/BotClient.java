@@ -46,6 +46,7 @@ import static de.MCmoderSD.utilities.other.Format.*;
 @SuppressWarnings({"unused", "SameReturnValue"})
 public class BotClient {
 
+    // Constants
     public static final String PROVIDER = "twitch";
     public static final long RATE_LIMIT = 600L;
     public static final Scope[] REQUIRED_SCOPES = {
@@ -181,7 +182,7 @@ public class BotClient {
 
         // Init Handlers
         messageHandler = new MessageHandler(this, sql);
-        eventHandler = new EventHandler(this, frame, sql, eventManager, messageHandler, helixHandler);
+        eventHandler = new EventHandler(this, frame, sql, eventManager, messageHandler, helixHandler, openAI);
 
         // Check Modules
         boolean astrology = credentials.hasAstrology();
@@ -217,7 +218,7 @@ public class BotClient {
 
         // Loading OpenAI Chat Commands
         if (openAIChat) {
-            new Conversation(this, messageHandler, openAI, credentials.getOpenAIConfig());
+            new Conversation(this, messageHandler, sql, openAI, credentials.getOpenAIConfig());
             new Match(this, messageHandler, helixHandler, sql, openAI);
             new Translate(this, messageHandler, openAI);
             new Prompt(this, messageHandler, openAI);

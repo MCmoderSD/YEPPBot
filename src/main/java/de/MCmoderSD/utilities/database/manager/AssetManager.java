@@ -1,14 +1,18 @@
 package de.MCmoderSD.utilities.database.manager;
 
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
+import de.MCmoderSD.openai.objects.ChatHistory;
 import de.MCmoderSD.utilities.database.SQL;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 import static de.MCmoderSD.utilities.other.Util.readAllLines;
@@ -486,6 +490,7 @@ public class AssetManager {
         return "Error: Database error";
     }
 
+    // Get TTS Audio
     public AudioFile getTTSAudio(String input) {
         try {
             if (!sql.isConnected()) sql.connect();
@@ -512,5 +517,63 @@ public class AssetManager {
             System.err.println(e.getMessage());
         }
         return null;
+    }
+
+    // Get Chat History
+    public HashMap<Integer, ChatHistory> getChatHistory() {
+        try {
+            if (!sql.isConnected()) sql.connect();
+
+            // Variables
+            HashMap<Integer, ChatHistory> chatHistory = new HashMap<>();
+
+            // Prepare statement
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "SELECT id, chatHistory FROM Users WHERE chatHistory IS NOT NULL"
+            );
+
+            // Execute
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // Add to List
+            while (resultSet.next()) chatHistory.put(resultSet.getInt("id"), ChatHistory.fromBytes(resultSet.getBytes("chatHistory")));
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
+            // Return
+            return chatHistory;
+
+        } catch (SQLException | IOException | ClassNotFoundException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    // Add Chat History
+    public void setChatHistory(int userId, @Nullable ChatHistory chatHistory) {
+        try {
+            if (!sql.isConnected()) sql.connect();
+
+            // Variables
+            Connection connection = sql.getConnection();
+
+            // Prepare statement
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "UPDATE Users SET chatHistory = ? WHERE id = ?"
+            );
+
+            // Set values and execute
+            preparedStatement.setBytes(1, chatHistory == null ? null : chatHistory.getBytes());
+            preparedStatement.setInt(2, userId);
+            preparedStatement.executeUpdate();
+
+            // Close resources
+            preparedStatement.close();
+
+        } catch (SQLException | IOException e) {
+            System.err.println(e.getMessage());
+        }
     }
 }

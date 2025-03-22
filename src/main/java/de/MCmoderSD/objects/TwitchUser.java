@@ -8,11 +8,12 @@ import com.github.twitch4j.helix.domain.Moderator;
 import com.github.twitch4j.helix.domain.User;
 import com.github.twitch4j.helix.domain.InboundFollow;
 
+import java.io.*;
 import java.util.HashSet;
 import java.util.Objects;
 
 @SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
-public class TwitchUser {
+public class TwitchUser implements Serializable {
 
     // Attributes
     private final Integer id;
@@ -107,5 +108,17 @@ public class TwitchUser {
 
     public String getName() {
         return name;
+    }
+
+    public byte[] getBytes() throws IOException {
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
+        ObjectOutputStream stream = new ObjectOutputStream(data);
+        stream.writeObject(this);
+        stream.flush();
+        return data.toByteArray();
+    }
+
+    public static TwitchUser fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+        return (TwitchUser) new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
     }
 }

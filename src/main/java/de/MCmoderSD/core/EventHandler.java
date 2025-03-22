@@ -23,9 +23,13 @@ import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.objects.TwitchUser;
+import de.MCmoderSD.openai.core.OpenAI;
+import de.MCmoderSD.openai.objects.ModerationPrompt;
+import de.MCmoderSD.openai.objects.Rating;
 import de.MCmoderSD.utilities.database.SQL;
 import de.MCmoderSD.utilities.database.manager.ChannelManager;
 import de.MCmoderSD.utilities.database.manager.LogManager;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
@@ -38,6 +42,7 @@ public class EventHandler {
     private final ChannelManager channelManager;
     private final MessageHandler messageHandler;
     private final HelixHandler helixHandler;
+    private final OpenAI openAI;
 
     // Attributes
     private final HashMap<Integer, TwitchMessageEvent> lastMessage;
@@ -66,7 +71,7 @@ public class EventHandler {
     private boolean log;
 
     // Constructor
-    public EventHandler(BotClient botClient, Frame frame, SQL sql, EventManager eventManager, MessageHandler messageHandler, HelixHandler helixHandler) {
+    public EventHandler(BotClient botClient, Frame frame, SQL sql, EventManager eventManager, MessageHandler messageHandler, HelixHandler helixHandler, @Nullable OpenAI openAI) {
 
         // Init Associations
         this.frame = frame;
@@ -74,6 +79,7 @@ public class EventHandler {
         this.channelManager = sql.getChannelManager();
         this.messageHandler = messageHandler;
         this.helixHandler = helixHandler;
+        this.openAI = openAI;
 
         // Get Config
         cli = botClient.isCli();
@@ -145,7 +151,26 @@ public class EventHandler {
 
             // Log Message
             messageEvent.logToConsole();
-            if (log) logManager.logMessage(messageEvent);
+            if (log) new Thread(() -> {
+
+                // Log Message
+                logManager.logMessage(messageEvent);
+
+                // Check if OpenAI is enabled
+                if (openAI == null) return;
+
+                // Moderation Check
+                ModerationPrompt prompt = openAI.moderate(messageEvent.getMessage());
+
+                // Extract Data
+                Rating rating = prompt.getRatings().getFirst();
+                String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
+
+                // Add Rating to Database
+                logManager.addRating(id, rating);
+                logManager.linkRating(event.getEventId(), id);
+
+            }).start();
 
             // Update Frame
             if (!cli) frame.log(messageEvent);
@@ -168,9 +193,27 @@ public class EventHandler {
             TwitchMessageEvent messageEvent = new TwitchMessageEvent(event);
             lastCheer.replace(messageEvent.getChannelId(), messageEvent);
 
-            // Log Message
             messageEvent.logToConsole();
-            if (log) logManager.logMessage(messageEvent);
+            if (log) new Thread(() -> {
+
+                // Log Message
+                logManager.logMessage(messageEvent);
+
+                // Check if OpenAI is enabled
+                if (openAI == null) return;
+
+                // Moderation Check
+                ModerationPrompt prompt = openAI.moderate(messageEvent.getMessage());
+
+                // Extract Data
+                Rating rating = prompt.getRatings().getFirst();
+                String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
+
+                // Add Rating to Database
+                logManager.addRating(id, rating);
+                logManager.linkRating(event.getEventId(), id);
+
+            }).start();
 
             // Update Frame
             if (!cli) frame.log(messageEvent);

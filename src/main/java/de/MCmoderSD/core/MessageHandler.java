@@ -3,7 +3,6 @@ package de.MCmoderSD.core;
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.executor.NanoLoop;
 import de.MCmoderSD.objects.Birthdate;
-import de.MCmoderSD.objects.Timer;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.utilities.database.SQL;
 
@@ -36,7 +35,6 @@ public class MessageHandler {
     private final HashMap<Integer, HashMap<String, String>> customCommands;
     private final HashMap<Integer, HashMap<String, String>> customAliases;
     private final HashMap<Integer, HashMap<String, Integer>> counters;
-    private final HashMap<Integer, HashSet<Timer>> customTimers;
 
     // Constructor
     public MessageHandler(BotClient botClient, SQL sql) {
@@ -60,7 +58,6 @@ public class MessageHandler {
         customCommands = new HashMap<>();
         customAliases = new HashMap<>();
         counters = new HashMap<>();
-        customTimers = new HashMap<>();
 
         // Update Lists
         updateLurkList(sql.getLurkManager().getLurkList());
@@ -68,14 +65,10 @@ public class MessageHandler {
         updateBlackList(sql.getChannelManager().getBlackList());
         updateCustomCommands(sql.getCustomManager().getCustomCommands(), sql.getCustomManager().getCustomAliases());
         updateCounters(sql.getCustomManager().getCustomCounters());
-        updateCustomTimers(sql.getCustomManager().getCustomTimers(botClient));
     }
 
     // Handle Twitch Message
     public void handleMessage(TwitchMessageEvent event) {
-
-        // Handle Timers;
-        handleTimers(event);
 
         // Check for Lurk
         if (lurkList.containsKey(event.getUserId())) handleLurk(event);
@@ -92,12 +85,6 @@ public class MessageHandler {
         // YEPP
         if (event.hasBotName()) botClient.respond(event, "replyYEPP", tagUser(event) + " YEPP"); // Reply YEPP
         else if (event.hasYEPP()) botClient.respond(event, "YEPP", "YEPP"); // YEPP
-    }
-
-    private void handleTimers(TwitchMessageEvent event) {
-        new Thread(() -> {
-            if (customTimers.containsKey(event.getChannelId())) customTimers.get(event.getChannelId()).forEach(Timer::trigger);
-        }).start();
     }
 
     private void handleLurk(TwitchMessageEvent event) {
@@ -139,6 +126,8 @@ public class MessageHandler {
 
                 // Send message
                 if (lurkChannel.size() < 3) botClient.respond(new TwitchMessageEvent(
+                        event.getEventId(),
+                        event.getTimestamp(),
                         lurkChannel.getFirst(),
                         event.getUserId(),
                         botClient.getHelixHandler().getUser(lurkChannel.getFirst()).getName(),
@@ -282,16 +271,6 @@ public class MessageHandler {
     public void updateCounters(HashMap<Integer, HashMap<String, Integer>> counters) {
         this.counters.clear();
         this.counters.putAll(counters);
-    }
-
-    // Update Custom Timers
-    public void updateCustomTimers(HashMap<Integer, HashSet<Timer>> customTimers) {
-        this.customTimers.clear();
-        this.customTimers.putAll(customTimers);
-    }
-
-    public void updateCustomTimers(int channelID, HashSet<Timer> customTimers) {
-        this.customTimers.replace(channelID, customTimers);
     }
 
     // Reset Congratulated

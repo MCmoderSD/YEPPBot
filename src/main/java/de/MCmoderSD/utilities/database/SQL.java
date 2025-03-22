@@ -82,7 +82,8 @@ public class SQL extends Driver {
                             Users (
                             id INT PRIMARY KEY,
                             name VARCHAR(25) NOT NULL,
-                            birthdate VARCHAR(10) CHAR SET ascii
+                            birthdate VARCHAR(10) CHAR SET ascii,
+                            chatHistory LONGBLOB
                             ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                             """
             ).execute();
@@ -224,7 +225,7 @@ public class SQL extends Driver {
 
             // Query
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT id, birthdate FROM Users WHERE birthdate IS NOT NULL"
+                    "SELECT id, birthdate FROM Users WHERE birthdate IS NOT NULL AND birthdate != ''"
             );
 
             // Execute

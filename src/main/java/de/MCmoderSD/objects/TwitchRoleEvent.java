@@ -5,12 +5,13 @@ import com.github.twitch4j.eventsub.events.ChannelModeratorRemoveEvent;
 import com.github.twitch4j.eventsub.events.ChannelVipAddEvent;
 import com.github.twitch4j.eventsub.events.ChannelVipRemoveEvent;
 
+import java.io.*;
 import java.sql.Timestamp;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 
 @SuppressWarnings("unused")
-public class TwitchRoleEvent {
+public class TwitchRoleEvent implements Serializable {
 
     // Constants
     private final Timestamp timestamp;
@@ -145,7 +146,18 @@ public class TwitchRoleEvent {
     }
 
     public enum Role {
-        VIP(),
-        MOD()
+        VIP, MOD
+    }
+
+    public byte[] getBytes() throws IOException {
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
+        ObjectOutputStream stream = new ObjectOutputStream(data);
+        stream.writeObject(this);
+        stream.flush();
+        return data.toByteArray();
+    }
+
+    public static TwitchRoleEvent fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+        return (TwitchRoleEvent) new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
     }
 }
