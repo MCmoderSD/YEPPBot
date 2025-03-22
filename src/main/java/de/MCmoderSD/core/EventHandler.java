@@ -159,17 +159,21 @@ public class EventHandler {
                 // Check if OpenAI is enabled
                 if (openAI == null) return;
 
-                // Moderation Check
-                ModerationPrompt prompt = openAI.moderate(messageEvent.getMessage());
+                try {
 
-                // Extract Data
-                Rating rating = prompt.getRatings().getFirst();
-                String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
+                    // Moderation Check
+                    ModerationPrompt prompt = openAI.moderate(messageEvent.getMessage());
 
-                // Add Rating to Database
-                logManager.addRating(id, rating);
-                logManager.linkRating(event.getEventId(), id);
+                    // Extract Data
+                    Rating rating = prompt.getRatings().getFirst();
+                    String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
 
+                    // Add Rating to Database
+                    logManager.addRating(id, rating);
+                    logManager.linkRating(event.getEventId(), id);
+                } catch (Exception e) {
+                    System.err.println("Error while moderating message: " + e.getMessage());
+                }
             }).start();
 
             // Update Frame
@@ -202,17 +206,21 @@ public class EventHandler {
                 // Check if OpenAI is enabled
                 if (openAI == null) return;
 
-                // Moderation Check
-                ModerationPrompt prompt = openAI.moderate(messageEvent.getMessage());
+                try {
 
-                // Extract Data
-                Rating rating = prompt.getRatings().getFirst();
-                String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
+                    // Moderation Check
+                    ModerationPrompt prompt = openAI.moderate(messageEvent.getMessage());
 
-                // Add Rating to Database
-                logManager.addRating(id, rating);
-                logManager.linkRating(event.getEventId(), id);
+                    // Extract Data
+                    Rating rating = prompt.getRatings().getFirst();
+                    String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
 
+                    // Add Rating to Database
+                    logManager.addRating(id, rating);
+                    logManager.linkRating(event.getEventId(), id);
+                } catch (Exception e) {
+                    System.err.println("Error while moderating message: " + e.getMessage());
+                }
             }).start();
 
             // Update Frame
