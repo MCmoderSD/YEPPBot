@@ -9,16 +9,33 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
 
-@SuppressWarnings({"BusyWait"})
+@SuppressWarnings("BusyWait")
 public class GenerateRatings {
 
-    // Change Encryption Token
+    // Main
     public static void main(String[] args) {
 
+        // Models
+        ModerationModel[] models = {
+                ModerationModel.OMNI_MODERATION_LATEST,
+                ModerationModel.OMNI_MODERATION_LATEST,
+                ModerationModel.TEXT_MODERATION_LATEST
+        };
+
+        // Variables
+        var i = 0;
+        ModerationModel model = models[i];
+
         // Loop until success
-        while (!loop()) {
-            System.out.println("Retrying...");
+        while (!loop(model)) {
             try {
+                System.err.println("Retrying...");
+
+                // Increment model index
+                i++;
+                if (i >= models.length) i = 0;
+                model = models[i];
+
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 System.err.println("Error: " + e.getMessage());
@@ -26,9 +43,10 @@ public class GenerateRatings {
         }
     }
 
-    private static boolean loop() {
+    // Loop
+    private static boolean loop(ModerationModel model) {
         try {
-            generate();
+            generate(model);
         } catch (SQLException e) {
             System.err.println("SQL Error: " + e.getMessage());
             return false;
@@ -44,11 +62,12 @@ public class GenerateRatings {
         return true;
     }
 
-    private static void generate() throws SQLException, IOException {
+    // Generate Ratings
+    private static void generate(ModerationModel model) throws SQLException, IOException {
 
-        // Database connection
+        // Variables
         String host = "localhost";
-        int port = 3306; // SQL Default Port
+        var port = 3306; // SQL Default Port
         String database = "your_database";
         String username = "your_username";
         String password = "your_password";
@@ -57,6 +76,7 @@ public class GenerateRatings {
         String openAIKey = "your_openai_key";
         OpenAI openAI = new OpenAI(openAIKey);
 
+        // Connect to the database
         System.out.println("Connecting to database...");
         Connection connection = DriverManager.getConnection(Driver.DatabaseType.MARIADB.getUrl(host, port, database), username, password);
 
@@ -65,10 +85,13 @@ public class GenerateRatings {
 
         // SQL query to count rows with null ratingId
         ResultSet countResultSet = connection.createStatement().executeQuery("SELECT COUNT(*) FROM EventLog WHERE ratingId IS NULL");
+
+        // Get the count
         var fetchSize = 0;
         if (countResultSet.next()) fetchSize = countResultSet.getInt(1);
         System.out.println("Rows: " + fetchSize + "\n");
 
+        // Fetch rows with null ratingId
         System.out.println("Fetching rows...");
         ResultSet resultSet = connection.createStatement().executeQuery("SELECT m.id, m.message FROM MessageLog m JOIN EventLog e ON m.id = e.id WHERE e.ratingId IS NULL;");
         System.out.println("Fetched rows!\n");
@@ -78,10 +101,10 @@ public class GenerateRatings {
 
         // Iterate through the result set
         while (resultSet.next()) {
-            var time = System.nanoTime();
+            var time = System.nanoTime(); // Start time
 
             // Prompt
-            ModerationPrompt prompt = openAI.moderate(ModerationModel.OMNI_MODERATION_LATEST, resultSet.getString("message"));
+            ModerationPrompt prompt = openAI.moderate(model, resultSet.getString("message"));
             String ratingId = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
             Rating rating = prompt.getRatings().getFirst();
             var ratingBytes = rating.getBytes();

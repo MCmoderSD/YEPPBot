@@ -54,7 +54,8 @@ public class ChannelManager {
                     instagram VARCHAR(500),
                     tiktok VARCHAR(500),
                     twitter VARCHAR(500),
-                    youtube VARCHAR(500)
+                    youtube VARCHAR(500),
+                    FOREIGN KEY (id) REFERENCES Users(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();

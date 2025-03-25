@@ -43,7 +43,8 @@ public class EventManager {
                         year SMALLINT NOT NULL,
                         id INT NOT NULL,
                         joined DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        gaveUp DATETIME DEFAULT NULL
+                        gaveUp DATETIME DEFAULT NULL,
+                        FOREIGN KEY (id) REFERENCES Users(id)
                         ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                         """, table)).execute();
             }

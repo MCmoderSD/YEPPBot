@@ -73,7 +73,8 @@ public class LogManager {
                     sexual BIT NOT NULL DEFAULT FALSE,
                     sexualMinors BIT NOT NULL DEFAULT FALSE,
                     violence BIT NOT NULL DEFAULT FALSE,
-                    violenceGraphic BIT NOT NULL DEFAULT FALSE
+                    violenceGraphic BIT NOT NULL DEFAULT FALSE,
+                    FOREIGN KEY (id) REFERENCES Rating(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -95,7 +96,8 @@ public class LogManager {
                     sexual DOUBLE NOT NULL DEFAULT 0 CHECK (sexual >= 0 AND sexual <= 1),
                     sexualMinors DOUBLE NOT NULL DEFAULT 0 CHECK (sexualMinors >= 0 AND sexualMinors <= 1),
                     violence DOUBLE NOT NULL DEFAULT 0 CHECK (violence >= 0 AND violence <= 1),
-                    violenceGraphic DOUBLE NOT NULL DEFAULT 0 CHECK (violenceGraphic >= 0 AND violenceGraphic <= 1)
+                    violenceGraphic DOUBLE NOT NULL DEFAULT 0 CHECK (violenceGraphic >= 0 AND violenceGraphic <= 1),
+                    FOREIGN KEY (id) REFERENCES Rating(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
