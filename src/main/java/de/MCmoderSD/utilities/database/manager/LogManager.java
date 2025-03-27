@@ -12,6 +12,7 @@ import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 import de.MCmoderSD.enums.LoyaltyType;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
+import de.MCmoderSD.openai.objects.EmbeddingPrompt;
 import de.MCmoderSD.openai.objects.Rating;
 import de.MCmoderSD.utilities.database.SQL;
 
@@ -110,6 +111,19 @@ public class LogManager {
                     ratingId VARCHAR(32) UNIQUE,
                     event LONGBLOB NOT NULL,
                     FOREIGN KEY (ratingId) REFERENCES Rating(id)
+                    ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
+                    """
+            ).execute();
+
+            // SQL statement for creating the embedding log table
+            connection.prepareStatement(condition +
+                    """
+                    EmbeddingLog (
+                    id VARCHAR (36) PRIMARY KEY,
+                    token LONG NOT NULL DEFAULT 0,
+                    type ENUM('text-embedding-ada-002', 'text-embedding-3-small', 'text-embedding-3-large') NOT NULL,
+                    embedding BLOB NOT NULL CHECK ( LENGTH(embedding) <= 12288),
+                    FOREIGN KEY (id) REFERENCES EventLog(id)
                     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=1 CHARSET=utf8mb4
                     """
             ).execute();
@@ -819,6 +833,30 @@ public class LogManager {
             scoresStatement.close();
 
         } catch (SQLException | IOException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void logEmbedding(TwitchMessageEvent event, EmbeddingPrompt prompt) {
+        try {
+            if (!sql.isConnected()) sql.connect(); // connect
+
+            // Prepare statement
+            PreparedStatement preparedStatement = sql.getConnection().prepareStatement(
+                    "INSERT INTO EmbeddingLog (id, token, type, embedding) VALUES (?, ?, ?, ?)"
+            );
+
+            // Set values and execute
+            preparedStatement.setString(1, event.getEventId());                 // set id
+            preparedStatement.setLong(2, prompt.getTotalTokens());              // set token
+            preparedStatement.setString(3, prompt.getModel().toString());       // set type
+            preparedStatement.setBytes(4, prompt.getEmbedding().getBytes());    // set embedding
+            preparedStatement.executeUpdate(); // execute
+
+            // Close resources
+            preparedStatement.close();
+
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }

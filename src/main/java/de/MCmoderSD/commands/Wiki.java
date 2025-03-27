@@ -83,7 +83,7 @@ public class Wiki {
                                 "Please summarize the following text into " + language.getName() + " used in the text. Answer only in 500 or less chars",
                                 null,
                                 summary
-                        ));
+                        ).getText());
 
                         // Filter Response for argument injection
                         response = removePrefix(response);

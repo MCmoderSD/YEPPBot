@@ -7,7 +7,11 @@ import de.MCmoderSD.sql.Driver;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 @SuppressWarnings("BusyWait")
 public class GenerateRatings {
@@ -106,7 +110,7 @@ public class GenerateRatings {
             // Prompt
             ModerationPrompt prompt = openAI.moderate(model, resultSet.getString("message"));
             String ratingId = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
-            Rating rating = prompt.getRatings().getFirst();
+            Rating rating = prompt.getRating();
             var ratingBytes = rating.getBytes();
 
             // Rating Flags

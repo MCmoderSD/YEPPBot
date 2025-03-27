@@ -15,5 +15,14 @@
     "devMessage": "You are the best TwitchBot that ever existed!",
     "spendingLimit": 32768,
     "priceFactor": 0.25
+  },
+
+  "moderation": {
+    "model": "omni-moderation-latest"
+  },
+
+  "embeddings": {
+    "model": "text-embedding-3-large",
+    "dimensions": 3072
   }
 }

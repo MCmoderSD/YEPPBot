@@ -24,6 +24,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.openai.core.OpenAI;
+import de.MCmoderSD.openai.objects.EmbeddingPrompt;
 import de.MCmoderSD.openai.objects.ModerationPrompt;
 import de.MCmoderSD.openai.objects.Rating;
 import de.MCmoderSD.utilities.database.SQL;
@@ -69,6 +70,8 @@ public class EventHandler {
     // Flags
     private boolean cli;
     private boolean log;
+    private boolean moderation;
+    private boolean embedding;
 
     // Constructor
     public EventHandler(BotClient botClient, Frame frame, SQL sql, EventManager eventManager, MessageHandler messageHandler, HelixHandler helixHandler, @Nullable OpenAI openAI) {
@@ -84,6 +87,8 @@ public class EventHandler {
         // Get Config
         cli = botClient.isCli();
         log = botClient.isLog();
+        moderation = botClient.isModeration();
+        embedding = botClient.isEmbedding();
 
         // Init HashMaps
         lastMessage = new HashMap<>();
@@ -147,40 +152,10 @@ public class EventHandler {
 
             // TwitchMessageEvent
             TwitchMessageEvent messageEvent = new TwitchMessageEvent(event);
-            lastMessage.replace(messageEvent.getChannelId(), messageEvent);
-
-            // Log Message
-            messageEvent.logToConsole();
-            if (log) new Thread(() -> {
-
-                // Log Message
-                logManager.logMessage(messageEvent);
-
-                // Check if OpenAI is enabled
-                if (openAI == null) return;
-
-                try {
-
-                    // Moderation Check
-                    ModerationPrompt prompt = openAI.moderate(messageEvent.getMessage());
-
-                    // Extract Data
-                    Rating rating = prompt.getRatings().getFirst();
-                    String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
-
-                    // Add Rating to Database
-                    logManager.addRating(id, rating);
-                    logManager.linkRating(event.getEventId(), id);
-                } catch (Exception e) {
-                    System.err.println("Error while moderating message: " + e.getMessage());
-                }
-            }).start();
-
-            // Update Frame
-            if (!cli) frame.log(messageEvent);
+            lastCheer.replace(messageEvent.getChannelId(), messageEvent);
 
             // Handle Message
-            messageHandler.handleMessage(messageEvent);
+            handleMessageEvent(messageEvent);
 
         }).start();
     }
@@ -197,37 +172,8 @@ public class EventHandler {
             TwitchMessageEvent messageEvent = new TwitchMessageEvent(event);
             lastCheer.replace(messageEvent.getChannelId(), messageEvent);
 
-            messageEvent.logToConsole();
-            if (log) new Thread(() -> {
-
-                // Log Message
-                logManager.logMessage(messageEvent);
-
-                // Check if OpenAI is enabled
-                if (openAI == null) return;
-
-                try {
-
-                    // Moderation Check
-                    ModerationPrompt prompt = openAI.moderate(messageEvent.getMessage());
-
-                    // Extract Data
-                    Rating rating = prompt.getRatings().getFirst();
-                    String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
-
-                    // Add Rating to Database
-                    logManager.addRating(id, rating);
-                    logManager.linkRating(event.getEventId(), id);
-                } catch (Exception e) {
-                    System.err.println("Error while moderating message: " + e.getMessage());
-                }
-            }).start();
-
-            // Update Frame
-            if (!cli) frame.log(messageEvent);
-
             // Handle Message
-            messageHandler.handleMessage(messageEvent);
+            handleMessageEvent(messageEvent);
 
         }).start();
     }
@@ -392,6 +338,62 @@ public class EventHandler {
         }).start();
     }
 
+    private void handleMessageEvent(TwitchMessageEvent event) {
+
+        // Log Message
+        event.logToConsole();
+        if (log) new Thread(() -> {
+
+            // Log Message
+            logManager.logMessage(event);
+
+            // Check if OpenAI is enabled
+            if (openAI == null) return;
+
+            try {
+
+                // Check if moderation is enabled
+                if (!moderation) return;
+
+                // Moderation Check
+                ModerationPrompt prompt = openAI.moderate(event.getMessage());
+
+                // Extract Data
+                Rating rating = prompt.getRating();
+                String id = prompt.getId().startsWith("modr-") ? prompt.getId().substring(5) : prompt.getId();
+
+                // Add Rating to Database
+                logManager.addRating(id, rating);
+                logManager.linkRating(event.getEventId(), id);
+
+            } catch (Exception e) {
+                System.err.println("Error while moderating message: " + e.getMessage());
+            }
+
+
+            try {
+
+                // Check if embedding is enabled
+                if (!embedding) return;
+
+                // Create Embedding
+                EmbeddingPrompt prompt = openAI.embedding(event.getMessage());
+
+                // Log Embedding
+                logManager.logEmbedding(event, prompt);
+
+            } catch (Exception e) {
+                System.err.println("Error while creating embedding: " + e.getMessage());
+            }
+        }).start();
+
+        // Update Frame
+        if (!cli) frame.log(event);
+
+        // Handle Message
+        messageHandler.handleMessage(event);
+    }
+
     // Getter
     public boolean isCli() {
         return cli;
@@ -399,6 +401,14 @@ public class EventHandler {
 
     public boolean isLog() {
         return log;
+    }
+
+    public boolean isModeration() {
+        return moderation;
+    }
+
+    public boolean isEmbedding() {
+        return embedding;
     }
 
     public HashMap<Integer, TwitchMessageEvent> getLastMessage() {
@@ -543,6 +553,14 @@ public class EventHandler {
 
     public void setCli(boolean cli) {
         this.cli = cli;
+    }
+
+    public void setModeration(boolean moderation) {
+        this.moderation = moderation;
+    }
+
+    public void setEmbedding(boolean embedding) {
+        this.embedding = embedding;
     }
 
     public void clearAll() {

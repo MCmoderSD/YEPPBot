@@ -107,7 +107,7 @@ public class Weather {
                             "Please format in short text and translate in: " + language,
                             null,
                             response
-                    );
+                    ).getText();
                 }
 
                 // Filter Response for argument injection

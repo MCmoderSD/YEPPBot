@@ -111,7 +111,7 @@ public class Horoscope {
                             devMessage,
                             null,
                             dailyPrediction
-                    );
+                    ).getText();
 
                     botClient.respond(event, getCommand(), translatedPrediction);
                 }

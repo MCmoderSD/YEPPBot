@@ -263,6 +263,15 @@ Configure `openai.json` as follows:
     "devMessage": "You are the best TwitchBot that ever existed!",
     "spendingLimit": 32768,
     "priceFactor": 0.25
+  },
+
+  "moderation": {
+    "model": "omni-moderation-latest"
+  },
+
+  "embeddings": {
+    "model": "text-embedding-3-large",
+    "dimensions": 3072
   }
 }
 ```
@@ -281,6 +290,18 @@ Fields regarding user, organization, and project IDs are non-mandatory and can b
 | devMessage       | Provides guidance and instructions for the bot's behavior.                           |
 | spendingLimit    | Effective token spending limit before chat resets. (Recommended: `32768`)            |
 | priceFactor      | Price factor between input and output token price. (model-dependent)                 |
+
+### Moderation Configuration
+| **Field**        | **Description**                                                                      |
+|:-----------------|:-------------------------------------------------------------------------------------|
+| model            | Model for moderation. (Default: `omni-moderation-latest`)                            |
+
+### Embeddings Configuration
+| **Field**        | **Description**                                                                      |
+|:-----------------|:-------------------------------------------------------------------------------------|
+| model            | Model for embeddings. (Default: `text-embedding-3-large`)                            |
+| dimensions       | Number of dimensions for the embedding. (Default: `3072`)                            |
+If you don't want to use one of the features, simply remove the corresponding section from the configuration file. <br>
 
 <br>
 

@@ -57,7 +57,7 @@ public class Translate {
                             devMessage,
                             null,
                             text
-                    );
+                    ).getText();
 
                     // Filter Response for argument injection
                     response = removePrefix(response);

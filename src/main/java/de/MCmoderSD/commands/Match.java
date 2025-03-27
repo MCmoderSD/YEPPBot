@@ -132,7 +132,7 @@ public class Match {
                             devMessage,
                             null,
                             response.toString()
-                    ));
+                    ).getText());
                 }
 
                 // Check if no compatible users found

@@ -98,6 +98,8 @@ public class BotClient {
     // Attributes
     private boolean cli;
     private boolean log;
+    private boolean moderation;
+    private boolean embedding;
 
     // Constructor
     public BotClient(Credentials credentials, SQL sql, @Nullable Frame frame, @Nullable OpenAI openAI) {
@@ -127,6 +129,8 @@ public class BotClient {
         // Init Attributes
         cli = Main.terminal.hasArg(CLI) || Main.terminal.hasArg(CONTAINER);
         log = !Main.terminal.hasArg(NO_LOG);
+        moderation = openAI != null && credentials.getOpenAIConfig().has("moderation");
+        embedding = openAI != null && credentials.getOpenAIConfig().has("embeddings");
 
         // Init Server
         JsonNode serverConfig = credentials.getServerConfig();
@@ -190,6 +194,7 @@ public class BotClient {
         boolean giphy = credentials.hasGiphy();
         boolean riot = credentials.hasRiot();
         boolean openAIChat = credentials.validateOpenAIConfig();
+        if (openAIChat) OpenAI.setConfig(credentials.getOpenAIConfig());
 
         // Loading Standard Commands
         new Join(this, messageHandler);
@@ -218,7 +223,7 @@ public class BotClient {
 
         // Loading OpenAI Chat Commands
         if (openAIChat) {
-            new Conversation(this, messageHandler, sql, openAI, credentials.getOpenAIConfig());
+            new Conversation(this, messageHandler, openAI, credentials.getOpenAIConfig());
             new Match(this, messageHandler, helixHandler, sql, openAI);
             new Translate(this, messageHandler, openAI);
             new Prompt(this, messageHandler, openAI);
@@ -434,6 +439,14 @@ public class BotClient {
         this.log = log;
     }
 
+    public void setModeration(boolean moderation) {
+        this.moderation = moderation;
+    }
+
+    public void setEmbedding(boolean embedding) {
+        this.embedding = embedding;
+    }
+
     // Checker
     public boolean isAdmin(TwitchMessageEvent event) {
         return admins.contains(event.getUser());
@@ -477,6 +490,14 @@ public class BotClient {
 
     public boolean isCli() {
         return cli || Main.terminal.hasArg(CONTAINER);
+    }
+
+    public boolean isModeration() {
+        return moderation;
+    }
+
+    public boolean isEmbedding() {
+        return embedding;
     }
 
     // Getter
