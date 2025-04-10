@@ -1,5 +1,5 @@
-import com.openai.models.moderations.ModerationModel;
 import de.MCmoderSD.openai.core.OpenAI;
+import de.MCmoderSD.openai.model.ModerationModel;
 import de.MCmoderSD.openai.objects.ModerationPrompt;
 import de.MCmoderSD.openai.objects.Rating;
 import de.MCmoderSD.sql.Driver;

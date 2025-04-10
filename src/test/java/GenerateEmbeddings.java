@@ -1,4 +1,3 @@
-import com.openai.models.embeddings.EmbeddingModel;
 import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.openai.objects.EmbeddingPrompt;
 import de.MCmoderSD.sql.Driver;
@@ -10,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+
+import static de.MCmoderSD.openai.model.EmbeddingModel.TEXT_EMBEDDING_3_LARGE;
 
 @SuppressWarnings("BusyWait")
 public class GenerateEmbeddings {
@@ -89,7 +90,7 @@ public class GenerateEmbeddings {
 
             // Prompt
             EmbeddingPrompt prompt = openAI.embedding(
-                    EmbeddingModel.TEXT_EMBEDDING_3_LARGE,
+                    TEXT_EMBEDDING_3_LARGE,
                     user,
                     3072L,
                     resultSet.getString("message")
