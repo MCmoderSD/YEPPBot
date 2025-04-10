@@ -4,8 +4,8 @@ import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.SQL;
-import de.MCmoderSD.utilities.database.manager.QuoteManager;
+import de.MCmoderSD.database.SQL;
+import de.MCmoderSD.database.manager.QuoteManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;

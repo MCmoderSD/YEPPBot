@@ -1,4 +1,4 @@
-package de.MCmoderSD.utilities.database.manager;
+package de.MCmoderSD.database.manager;
 
 import com.github.twitch4j.chat.events.channel.RaidEvent;
 import com.github.twitch4j.common.events.domain.EventChannel;
@@ -14,7 +14,7 @@ import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchRoleEvent;
 import de.MCmoderSD.openai.objects.EmbeddingPrompt;
 import de.MCmoderSD.openai.objects.Rating;
-import de.MCmoderSD.utilities.database.SQL;
+import de.MCmoderSD.database.SQL;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -852,7 +852,7 @@ public class LogManager {
             // Set values and execute
             preparedStatement.setString(1, event.getEventId());                 // set id
             preparedStatement.setLong(2, prompt.getTotalTokens());              // set token
-            preparedStatement.setString(3, prompt.getModel().toString());       // set type
+            preparedStatement.setString(3, prompt.getModel().getName());        // set type
             preparedStatement.setBytes(4, prompt.getEmbedding().getBytes());    // set embedding
             preparedStatement.executeUpdate(); // execute
 

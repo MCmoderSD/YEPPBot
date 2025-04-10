@@ -4,8 +4,8 @@ import de.MCmoderSD.commands.blueprints.Event;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
-import de.MCmoderSD.utilities.database.SQL;
-import de.MCmoderSD.utilities.database.manager.EventManager;
+import de.MCmoderSD.database.SQL;
+import de.MCmoderSD.database.manager.EventManager;
 
 public class NoNutNovember extends Event {
 

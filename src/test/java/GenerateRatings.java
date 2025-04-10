@@ -2,6 +2,7 @@ import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.openai.model.ModerationModel;
 import de.MCmoderSD.openai.objects.ModerationPrompt;
 import de.MCmoderSD.openai.objects.Rating;
+import de.MCmoderSD.openai.objects.Rating.Flag;
 import de.MCmoderSD.sql.Driver;
 
 import java.io.IOException;
@@ -13,6 +14,9 @@ import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import static de.MCmoderSD.openai.model.ModerationModel.OMNI_MODERATION_LATEST;
+import static de.MCmoderSD.openai.model.ModerationModel.TEXT_MODERATION_LATEST;
+
 @SuppressWarnings("BusyWait")
 public class GenerateRatings {
 
@@ -21,9 +25,9 @@ public class GenerateRatings {
 
         // Models
         ModerationModel[] models = {
-                ModerationModel.OMNI_MODERATION_LATEST,
-                ModerationModel.OMNI_MODERATION_LATEST,
-                ModerationModel.TEXT_MODERATION_LATEST
+                OMNI_MODERATION_LATEST,
+                OMNI_MODERATION_LATEST,
+                TEXT_MODERATION_LATEST
         };
 
         // Variables
@@ -114,19 +118,19 @@ public class GenerateRatings {
             var ratingBytes = rating.getBytes();
 
             // Rating Flags
-            Rating.Flag harassment = rating.getHarassment();
-            Rating.Flag harassmentThreatening = rating.getHarassmentThreatening();
-            Rating.Flag hate = rating.getHate();
-            Rating.Flag hateThreatening = rating.getHateThreatening();
-            Rating.Flag illicit = rating.getIllicit();
-            Rating.Flag illicitViolent = rating.getIllicitViolent();
-            Rating.Flag selfHarm = rating.getSelfHarm();
-            Rating.Flag selfHarmInstructions = rating.getSelfHarmInstructions();
-            Rating.Flag selfHarmIntent = rating.getSelfHarmIntent();
-            Rating.Flag sexual = rating.getSexual();
-            Rating.Flag sexualMinors = rating.getSexualMinors();
-            Rating.Flag violence = rating.getViolence();
-            Rating.Flag violenceGraphic = rating.getViolenceGraphic();
+            Flag harassment = rating.getHarassment();
+            Flag harassmentThreatening = rating.getHarassmentThreatening();
+            Flag hate = rating.getHate();
+            Flag hateThreatening = rating.getHateThreatening();
+            Flag illicit = rating.getIllicit();
+            Flag illicitViolent = rating.getIllicitViolent();
+            Flag selfHarm = rating.getSelfHarm();
+            Flag selfHarmInstructions = rating.getSelfHarmInstructions();
+            Flag selfHarmIntent = rating.getSelfHarmIntent();
+            Flag sexual = rating.getSexual();
+            Flag sexualMinors = rating.getSexualMinors();
+            Flag violence = rating.getViolence();
+            Flag violenceGraphic = rating.getViolenceGraphic();
 
             // Prepared Statements
             PreparedStatement ratingStatement;

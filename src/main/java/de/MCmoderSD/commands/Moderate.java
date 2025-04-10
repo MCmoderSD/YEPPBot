@@ -5,8 +5,8 @@ import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.SQL;
-import de.MCmoderSD.utilities.database.manager.ChannelManager;
+import de.MCmoderSD.database.SQL;
+import de.MCmoderSD.database.manager.ChannelManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;

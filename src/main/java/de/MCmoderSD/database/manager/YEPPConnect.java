@@ -1,7 +1,7 @@
-package de.MCmoderSD.utilities.database.manager;
+package de.MCmoderSD.database.manager;
 
 import de.MCmoderSD.objects.TwitchMessageEvent;
-import de.MCmoderSD.utilities.database.SQL;
+import de.MCmoderSD.database.SQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

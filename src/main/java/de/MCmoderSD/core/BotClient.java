@@ -23,7 +23,7 @@ import de.MCmoderSD.objects.TwitchUser;
 import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.server.Server;
 import de.MCmoderSD.server.modules.AudioBroadcast;
-import de.MCmoderSD.utilities.database.SQL;
+import de.MCmoderSD.database.SQL;
 import de.MCmoderSD.JavaAudioLibrary.AudioFile;
 
 import org.jetbrains.annotations.Nullable;

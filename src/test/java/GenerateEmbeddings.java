@@ -103,10 +103,10 @@ public class GenerateEmbeddings {
 
             // Set parameters
             preparedStatement.setString(1, resultSet.getString("id"));  // ID
-            preparedStatement.setLong(2, prompt.getTotalTokens());              // Token
-            preparedStatement.setString(3, prompt.getModel().toString());       // Type
-            preparedStatement.setBytes(4, prompt.getEmbedding().getBytes());    // Embedding
-            preparedStatement.executeUpdate(); // Execute the update
+            preparedStatement.setLong(2, prompt.getTotalTokens());                  // Token
+            preparedStatement.setString(3, prompt.getModel().getName());            // Type
+            preparedStatement.setBytes(4, prompt.getEmbedding().getBytes());        // Embedding
+            preparedStatement.executeUpdate(); // Execute
 
             // Print time taken
             done++;

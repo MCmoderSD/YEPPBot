@@ -27,9 +27,9 @@ import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.openai.objects.EmbeddingPrompt;
 import de.MCmoderSD.openai.objects.ModerationPrompt;
 import de.MCmoderSD.openai.objects.Rating;
-import de.MCmoderSD.utilities.database.SQL;
-import de.MCmoderSD.utilities.database.manager.ChannelManager;
-import de.MCmoderSD.utilities.database.manager.LogManager;
+import de.MCmoderSD.database.SQL;
+import de.MCmoderSD.database.manager.ChannelManager;
+import de.MCmoderSD.database.manager.LogManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

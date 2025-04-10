@@ -1,8 +1,8 @@
-package de.MCmoderSD.utilities.database.manager;
+package de.MCmoderSD.database.manager;
 
 import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.enums.Account;
-import de.MCmoderSD.utilities.database.SQL;
+import de.MCmoderSD.database.SQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

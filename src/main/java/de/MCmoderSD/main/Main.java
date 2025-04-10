@@ -4,7 +4,7 @@ import de.MCmoderSD.UI.Frame;
 import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.enums.Argument;
 import de.MCmoderSD.openai.core.OpenAI;
-import de.MCmoderSD.utilities.database.SQL;
+import de.MCmoderSD.database.SQL;
 
 import de.MCmoderSD.json.JsonUtility;
 import java.awt.HeadlessException;

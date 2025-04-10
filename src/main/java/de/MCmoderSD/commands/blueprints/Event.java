@@ -5,8 +5,8 @@ import de.MCmoderSD.core.HelixHandler;
 import de.MCmoderSD.core.MessageHandler;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import de.MCmoderSD.objects.TwitchUser;
-import de.MCmoderSD.utilities.database.SQL;
-import de.MCmoderSD.utilities.database.manager.EventManager;
+import de.MCmoderSD.database.SQL;
+import de.MCmoderSD.database.manager.EventManager;
 
 import java.sql.Timestamp;
 

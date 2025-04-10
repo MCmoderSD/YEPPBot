@@ -1,4 +1,4 @@
-package de.MCmoderSD.utilities.database;
+package de.MCmoderSD.database;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -6,15 +6,15 @@ import de.MCmoderSD.sql.Driver;
 import de.MCmoderSD.objects.Birthdate;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 
-import de.MCmoderSD.utilities.database.manager.AssetManager;
-import de.MCmoderSD.utilities.database.manager.ChannelManager;
-import de.MCmoderSD.utilities.database.manager.CustomManager;
-import de.MCmoderSD.utilities.database.manager.EventManager;
-import de.MCmoderSD.utilities.database.manager.LogManager;
-import de.MCmoderSD.utilities.database.manager.LurkManager;
-import de.MCmoderSD.utilities.database.manager.QuoteManager;
-import de.MCmoderSD.utilities.database.manager.TokenManager;
-import de.MCmoderSD.utilities.database.manager.YEPPConnect;
+import de.MCmoderSD.database.manager.AssetManager;
+import de.MCmoderSD.database.manager.ChannelManager;
+import de.MCmoderSD.database.manager.CustomManager;
+import de.MCmoderSD.database.manager.EventManager;
+import de.MCmoderSD.database.manager.LogManager;
+import de.MCmoderSD.database.manager.LurkManager;
+import de.MCmoderSD.database.manager.QuoteManager;
+import de.MCmoderSD.database.manager.TokenManager;
+import de.MCmoderSD.database.manager.YEPPConnect;
 
 import javax.management.InvalidAttributeValueException;
 
