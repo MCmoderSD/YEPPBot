@@ -167,6 +167,11 @@ public class Format {
         return input.replaceAll("\\b(" + repetition + ")\\s+\\1\\b", "$1");
     }
 
+    // Remove Markdown Links
+    public static String removeMarkdownLinks(String input) {
+        return input.replaceAll("\\[([^]]+)]\\(([^)]+)\\)", "");
+    }
+
     // Remove Markdown Formatting
     public static String removeMarkdown(String input) {
         return input
@@ -189,7 +194,7 @@ public class Format {
 
     // Format OpenAI Response
     public static String formatOpenAIResponse(String response, String emote) {
-        return removePrefix(removeRepetitions(removeMarkdown(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + SPACE), emote)), emote));
+        return removePrefix(removeRepetitions(removeMarkdown(removeMarkdownLinks(replaceEmojis(response.replaceAll("(?i)" + emote + "[.,!?\\s]*", emote + SPACE), emote))), emote));
     }
 
     // Format Scopes

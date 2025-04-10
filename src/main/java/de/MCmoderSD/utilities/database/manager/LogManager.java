@@ -17,7 +17,10 @@ import de.MCmoderSD.openai.objects.Rating;
 import de.MCmoderSD.utilities.database.SQL;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import static de.MCmoderSD.utilities.other.Format.*;
 

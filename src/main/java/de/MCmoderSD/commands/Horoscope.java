@@ -110,7 +110,8 @@ public class Horoscope {
                             null,
                             devMessage,
                             null,
-                            dailyPrediction
+                            dailyPrediction,
+                            null
                     ).getText();
 
                     botClient.respond(event, getCommand(), translatedPrediction);
