@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import static de.MCmoderSD.openai.model.EmbeddingModel.TEXT_EMBEDDING_3_LARGE;
+import static de.MCmoderSD.openai.models.EmbeddingModel.TEXT_EMBEDDING_3_LARGE;
 
 @SuppressWarnings("BusyWait")
 public class GenerateEmbeddings {

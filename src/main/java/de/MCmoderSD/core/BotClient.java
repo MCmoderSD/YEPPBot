@@ -41,6 +41,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static de.MCmoderSD.enums.Argument.*;
+import static de.MCmoderSD.enums.Scope.*;
 import static de.MCmoderSD.utilities.other.Format.*;
 
 @SuppressWarnings({"unused", "SameReturnValue"})
@@ -50,15 +51,15 @@ public class BotClient {
     public static final String PROVIDER = "twitch";
     public static final long RATE_LIMIT = 600L;
     public static final Scope[] REQUIRED_SCOPES = {
-            Scope.CHANNEL_BOT,
-            Scope.MODERATION_READ,
-            Scope.CHANNEL_READ_VIPS,
-            Scope.MODERATOR_READ_FOLLOWERS,
-            Scope.BITS_READ,
-            Scope.CHANNEL_READ_SUBSCRIPTIONS,
-            Scope.ANALYTICS_READ_EXTENSIONS,
-            Scope.ANALYTICS_READ_GAMES,
-            Scope.MODERATOR_MANAGE_SHOUTOUTS
+            CHANNEL_BOT,
+            MODERATION_READ,
+            CHANNEL_READ_VIPS,
+            MODERATOR_READ_FOLLOWERS,
+            BITS_READ,
+            CHANNEL_READ_SUBSCRIPTIONS,
+            ANALYTICS_READ_EXTENSIONS,
+            ANALYTICS_READ_GAMES,
+            MODERATOR_MANAGE_SHOUTOUTS
     };
 
     // Associations
@@ -227,6 +228,7 @@ public class BotClient {
             new Match(this, messageHandler, helixHandler, sql, openAI);
             new Translate(this, messageHandler, openAI);
             new Prompt(this, messageHandler, openAI);
+            new Search(this, messageHandler, openAI);
             new Wiki(this, messageHandler, openAI);
         }
 

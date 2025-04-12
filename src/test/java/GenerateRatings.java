@@ -1,5 +1,5 @@
 import de.MCmoderSD.openai.core.OpenAI;
-import de.MCmoderSD.openai.model.ModerationModel;
+import de.MCmoderSD.openai.models.ModerationModel;
 import de.MCmoderSD.openai.objects.ModerationPrompt;
 import de.MCmoderSD.openai.objects.Rating;
 import de.MCmoderSD.openai.objects.Rating.Flag;
@@ -14,8 +14,8 @@ import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import static de.MCmoderSD.openai.model.ModerationModel.OMNI_MODERATION_LATEST;
-import static de.MCmoderSD.openai.model.ModerationModel.TEXT_MODERATION_LATEST;
+import static de.MCmoderSD.openai.models.ModerationModel.OMNI_MODERATION_LATEST;
+import static de.MCmoderSD.openai.models.ModerationModel.TEXT_MODERATION_LATEST;
 
 @SuppressWarnings("BusyWait")
 public class GenerateRatings {
