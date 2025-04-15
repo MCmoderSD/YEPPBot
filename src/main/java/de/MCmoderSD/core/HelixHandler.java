@@ -137,6 +137,12 @@ public class HelixHandler {
             return true;
         }
 
+        // Check for error
+        if (response.statusCode() != 200) {
+            System.err.println("Failed to get token: " + response.body());
+            return false;
+        }
+
         // Create new token
         AuthToken token = new AuthToken(this, response.body());
 
@@ -663,8 +669,8 @@ public class HelixHandler {
 
             // Extract code and scopes
             String query = exchange.getRequestURI().getQuery();
+            System.out.println("Query: " + query);
             if (query != null && query.contains("code=")) {
-
                 // Create body
                 String body = String.format(
                         "client_id=%s&client_secret=%s&code=%s&grant_type=authorization_code&redirect_uri=https://%s:%d/callback",
