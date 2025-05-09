@@ -7,7 +7,7 @@
 
     <groupId>de.MCmoderSD</groupId>
     <artifactId>YEPPBot</artifactId>
-    <version>1.24.2</version>
+    <version>1.25.0</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -53,6 +53,13 @@
             <version>1.0.1</version>
         </dependency>
 
+        <!-- Helix-API -->
+        <dependency>
+            <groupId>de.MCmoderSD</groupId>
+            <artifactId>Helix-API</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
         <!-- HTTPS-Server -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
@@ -78,21 +85,21 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>JSQL-Driver</artifactId>
-            <version>2.1.0</version>
+            <version>2.2.0</version>
         </dependency>
 
-        <!-- Logback -->
+        <!-- SLF4J API -->
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.18</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>2.0.17</version>
         </dependency>
 
         <!-- OpenAI -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>OpenAI</artifactId>
-            <version>2.6.3</version>
+            <version>2.7.0</version>
         </dependency>
 
         <!-- OpenWeatherMap -->

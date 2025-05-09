@@ -1,4 +1,3 @@
-import de.MCmoderSD.core.BotClient;
 import de.MCmoderSD.enums.SubTier;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import java.io.IOException;

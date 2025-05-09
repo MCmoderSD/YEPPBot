@@ -12,8 +12,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.sql.Timestamp;
 
-import static de.MCmoderSD.core.BotClient.prefixes;
-import static de.MCmoderSD.utilities.other.Format.*;
+import static de.MCmoderSD.other.Format.SPACE;
+import static de.MCmoderSD.other.Format.trimMessage;
+
 
 public class TwitchMessageEvent implements Serializable{
 
@@ -26,10 +27,6 @@ public class TwitchMessageEvent implements Serializable{
     // ID
     private final Integer channelId;
     private final Integer userId;
-
-    // Attributes
-    private final String channel;
-    private final String user;
 
     // Message
     private final String message;
@@ -54,26 +51,11 @@ public class TwitchMessageEvent implements Serializable{
         timestamp = new Timestamp(event.getFiredAt().getTimeInMillis());
 
         // Get ID's
-        channelId = Integer.parseInt(trimMessage(event.getChannel().getId()));
-        userId = Integer.parseInt(trimMessage(event.getUser().getId()));
-
-        // Get Names
-        channel = trimMessage(event.getChannel().getName().toLowerCase());
-        user = trimMessage(event.getUser().getName().toLowerCase());
+        channelId = Integer.parseInt(event.getChannel().getId());
+        userId = Integer.parseInt(event.getUser().getId());
 
         // Get Message
         message = trimMessage(event.getMessage());
-
-        // Set Additional Information
-        subMonths = event.getSubscriberMonths();
-        subTier = SubTier.getSubTier(event.getSubscriptionTier());
-        bits = 0;
-
-        // Set Flags
-        isCheer = false;
-        isCommand = isCommand(message);
-        hasBotName = hasBotName(message);
-        hasYEPP = message.contains("YEPP");
     }
 
     // Cheer Event
@@ -102,29 +84,6 @@ public class TwitchMessageEvent implements Serializable{
         subMonths = event.getSubscriberMonths();
         subTier = SubTier.getSubTier(event.getSubscriptionTier());
         bits = event.getBits();
-
-        // Set Flags
-        isCheer = 0 < bits;
-        isCommand = isCommand(message);
-        hasBotName = hasBotName(message);
-        hasYEPP = message.contains("YEPP");
-    }
-
-    // Manual Event
-    public TwitchMessageEvent(String eventId, Timestamp timestamp, Integer channelId, Integer userId, String channel, String user, String message, @Nullable Integer subMonths, @Nullable SubTier subTier, @Nullable Integer bits) {
-
-        // Set Parameters
-        this.eventId = eventId;
-        this.timestamp = timestamp;
-        this.channelId = channelId;
-        this.userId = userId;
-        this.channel = trimMessage(channel).toLowerCase();
-        this.user = trimMessage(user).toLowerCase();
-        this.message = trimMessage(message);
-        this.subMonths = subMonths == null ? 0 : subMonths;
-        this.subTier = subTier == null ? SubTier.NONE : subTier;
-        this.bits = bits == null ? 0 : bits;
-        assert bits != null;
 
         // Set Flags
         isCheer = 0 < bits;
