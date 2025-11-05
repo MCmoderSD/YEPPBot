@@ -18,7 +18,7 @@ out/artifacts/
 ### Resources ###
 src/main/resources/config/config.json
 src/main/resources/META-INF/
-src/main/resources/Resources.zip
+src/main/Resources.zip
 src/test/resources/
 
 ### Target ###
