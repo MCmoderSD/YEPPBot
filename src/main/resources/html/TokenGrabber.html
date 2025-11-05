@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Token Grabber</title>
+    <meta name="author" content="MCmoderSD">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            margin: 0;
+            background-color: #0a0c10;
+            color: #72b1f4;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 1rem 0;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin-top: 3rem;
+        }
+
+        header p#clientId {
+            margin-top: 1rem;
+        }
+
+        #tokenBox {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 1rem 2rem;
+            border: 2px solid #72b1f4;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            word-break: break-all;
+            user-select: all;
+            transition: transform 0.2s ease-out;
+
+        }
+
+        #tokenBox:hover {
+            transform: scale(1.125);
+            transition: transform 0.125s ease-in;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 1rem;
+            color: #72b1f4;
+            padding: 1rem 1.5rem;
+            line-height: 1.5rem;
+            margin-top: auto;
+            margin-bottom: 5rem
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+        }
+
+    </style>
+</head>
+<body>
+<header>
+    <h1>Your OAuth Token:</h1>
+    <div id="tokenBox">Loading...</div>
+
+    <p id="client">This token was requested by a Twitch application with client ID:</p>
+    <p id="clientId"><%clientId%></p>
+</header>
+
+<footer>
+    <p>This OAuth token is securely provided by Twitch and handled only within your browser.</p>
+    <p>It is never stored, transmitted, or accessed by this page or any third party.</p>
+    <p>Keep it private — anyone with this token can act as your account.</p>
+</footer>
+
+<script>
+    (function() {
+        const fragment = location.hash.startsWith('#') ? location.hash.slice(1) : location.hash;
+        const params = new URLSearchParams(fragment);
+        const token = params.get('access_token');
+        const tokenBox = document.getElementById('tokenBox');
+
+        tokenBox.textContent = token ? token : 'No token found!';
+
+        tokenBox.addEventListener('click', () => {
+            if (!token) return;
+            navigator.clipboard.writeText(token);
+            tokenBox.classList.add('copied');
+            setTimeout(() => tokenBox.classList.remove('copied'), 600);
+        });
+    })();
+</script>
+</body>
+</html>

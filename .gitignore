@@ -1,41 +1,29 @@
 ### IntelliJ IDEA ###
 .idea/
-*.iws
-*.iml
-*.ipr
+
+### Maven ###
+.mvn/
+
+### Certificates ###
+certificates/account.key
+certificates/fullchain.pem
+certificates/privkey.pem
 
 ### Docs ###
 docs/java/
 
-### artifacts ###
+### Output ###
 out/artifacts/
+
+### Resources ###
+src/main/resources/config/config.json
+src/main/resources/META-INF/
+src/main/resources/Resources.zip
+src/test/resources/
 
 ### Target ###
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### api keys ###
-src/main/resources/api/api.json
-src/main/resources/api/openai.json
-
-### config ###
-src/main/resources/config/bot.json
-src/main/resources/config/devConfig.json
-src/main/resources/config/channels.txt
-src/main/resources/config/devList.txt
-src/main/resources/config/server.json
-src/main/resources/config/devServer.json
-
-### database ###
-src/main/resources/database/sql.json
-src/main/resources/database/dev.json
-
-### meta-inf ###
-src/main/resources/META-INF/
-
-### storage ###
-storage/api/
-storage/config/
-storage/database/
+### Test Files ###
+TestStatic.webm
+TwitchBot.zip
