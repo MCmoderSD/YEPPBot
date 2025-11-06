@@ -20,7 +20,7 @@ UserImages/
 src/main/resources/config/config.json
 src/main/resources/config/dev-config.json
 src/main/resources/META-INF/
-src/main/Resources.zip
+src/main/resources.zip
 src/test/resources/
 
 ### Target ###
@@ -29,3 +29,4 @@ target/
 ### Test Files ###
 TestStatic.webm
 TwitchBot.zip
+storage.zip
