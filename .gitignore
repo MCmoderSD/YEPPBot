@@ -14,9 +14,11 @@ docs/java/
 
 ### Output ###
 out/artifacts/
+UserImages/
 
 ### Resources ###
 src/main/resources/config/config.json
+src/main/resources/config/dev-config.json
 src/main/resources/META-INF/
 src/main/Resources.zip
 src/test/resources/

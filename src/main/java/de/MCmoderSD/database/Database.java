@@ -2,6 +2,8 @@ package de.MCmoderSD.database;
 
 import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.database.manager.*;
+import de.MCmoderSD.enums.ImageFormat;
+import de.MCmoderSD.enums.UserImageType;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.sql.Driver;
 
@@ -9,14 +11,18 @@ import tools.jackson.databind.JsonNode;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import java.util.*;
 
-import static de.MCmoderSD.tools.GZIP.*;
+import static de.MCmoderSD.enums.ImageFormat.getFormat;
 import static de.MCmoderSD.utilities.FormatUUID.*;
-import static de.MCmoderSD.utilities.ImageDownloader.downloadImage;
+import static de.MCmoderSD.enums.UserImageType.*;
+import static de.MCmoderSD.tools.GZIP.*;
+import static java.util.UUID.fromString;
 
 public class Database extends Driver {
 
@@ -43,15 +49,15 @@ public class Database extends Driver {
         this.twitchBot = twitchBot;
 
         // Load Tables
-        var users = loadTables("database/Users.sql");
-        var channels = loadTables("database/Channels.sql");
+        var userTable = loadTables("database/UserTable.sql");
+        var channelTable = loadTables("database/ChannelTable.sql");
         var messages = loadTables("database/Messages.sql");
         var events = loadTables("database/Events.sql");
         var lurker = loadTables("database/Lurker.sql");
 
         // Initialize Tables
-        initTables(users);
-        initTables(channels);
+        initTables(userTable);      // User & UserImage Tables
+        initTables(channelTable);   // Channel & Blacklist Tables   | needs UserTable
         initTables(messages);
         initTables(events);
         initTables(lurker);
@@ -107,16 +113,16 @@ public class Database extends Driver {
         }
     }
 
-    private void checkProfileImage(TwitchUser user, String profileImageUrl) {
+    private void checkImage(TwitchUser user, String imageUrl, UserImageType imageType) {
         new Thread(() -> {
             try {
 
-                // Extract UUID from URL
-                var uuid = asBytes(UUID.fromString(profileImageUrl.substring(47, 83)));
+                // Image UUID
+                var uuid = asBytes(fromString(imageUrl.substring(47, 83)));
 
                 // Check if image is already downloaded
                 PreparedStatement checkStatement = connection.prepareStatement(
-                        "SELECT COUNT(uuid) AS count FROM ProfileImage WHERE uuid = ?;"
+                        "SELECT COUNT(uuid) AS count FROM UserImage WHERE uuid = ?;"
                 );
 
                 // Set the query value
@@ -132,84 +138,39 @@ public class Database extends Driver {
                 checkStatement.close();
                 resultSet.close();
 
-                // Download Image
-                byte[] imageData = downloadImage(profileImageUrl);
-                byte[] compressedData = deflateObject(imageData);
-
                 // Variables
-                var size = compressedData.length;
+                byte[] imageData;
+                byte[] compressedData;
+                ImageFormat imageFormat = getFormat(imageUrl);
+
+                // Download Image
+                try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
+                    imageData = bufferedInputStream.readAllBytes();
+                } catch (IOException | URISyntaxException e) {
+                    throw new RuntimeException("Failed to download image from URL: " + imageUrl, e);
+                }
+
+                // Compress Image
+                compressedData = deflate(imageData);
+
+                // Image Sizes
                 var uncompressed = imageData.length;
+                var compressed = compressedData.length;
 
                 // Insert into database
                 PreparedStatement insertStatement = connection.prepareStatement(
-                        "INSERT INTO ProfileImage (uuid, id, url, size, uncompressed, image) VALUES (?, ?, ?, ?, ?, ?);"
+                        "INSERT INTO UserImage (uuid, id, url, size, totalSize, type, format, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
                 );
 
                 // Set the insert values
-                insertStatement.setBytes(1, uuid);              // Image UUID
-                insertStatement.setInt(2, user.getId());        // User ID
-                insertStatement.setString(3, profileImageUrl);  // Image URL
-                insertStatement.setInt(4, size);                // Compressed Size
-                insertStatement.setInt(5, uncompressed);        // Uncompressed Size
-                insertStatement.setBytes(6, compressedData);    // Image Data (compressed)
-
-                // Execute the statement
-                insertStatement.executeUpdate();
-
-                // Close the statement
-                insertStatement.close();
-
-            } catch (SQLException | IOException e) {
-                throw new RuntimeException("Failed to check profile image for TwitchUser with id " + user.getId() + ": " + e.getMessage(), e);
-            }
-        }).start();
-    }
-
-    private void checkOfflineImage(TwitchUser user, String offlineImageUrl) {
-        new Thread(() -> {
-            try {
-
-                // Extract UUID from URL
-                var uuid = asBytes(UUID.fromString(offlineImageUrl.substring(47, 83)));
-
-                // Check if image is already downloaded
-                PreparedStatement checkStatement = connection.prepareStatement(
-                        "SELECT COUNT(uuid) AS count FROM OfflineImage WHERE uuid = ?;"
-                );
-
-                // Set the query value
-                checkStatement.setBytes(1, uuid);   // Image UUID
-
-                // Execute the query
-                var resultSet = checkStatement.executeQuery();
-
-                // If image exists, return
-                if (resultSet.next() && resultSet.getInt(1) == 1) return;
-
-                // Close resources
-                checkStatement.close();
-                resultSet.close();
-
-                // Download Image
-                byte[] imageData = downloadImage(offlineImageUrl);
-                byte[] compressedData = deflateObject(imageData);
-
-                // Variables
-                var size = compressedData.length;
-                var uncompressed = imageData.length;
-
-                // Insert into database
-                PreparedStatement insertStatement = connection.prepareStatement(
-                        "INSERT INTO OfflineImage (uuid, id, url, size, uncompressed, image) VALUES (?, ?, ?, ?, ?, ?);"
-                );
-
-                // Set the insert values
-                insertStatement.setBytes(1, uuid);              // Image UUID
-                insertStatement.setInt(2, user.getId());        // User ID
-                insertStatement.setString(3, offlineImageUrl);  // Image URL
-                insertStatement.setInt(4, size);                // Compressed Size
-                insertStatement.setInt(5, uncompressed);        // Uncompressed Size
-                insertStatement.setBytes(6, compressedData);    // Image Data (compressed)
+                insertStatement.setBytes(1, uuid);                  // Image UUID
+                insertStatement.setInt(2, user.getId());            // User ID
+                insertStatement.setString(3, imageUrl);             // Image URL
+                insertStatement.setInt(4, compressed);              // Compressed Size
+                insertStatement.setInt(5, uncompressed);            // Uncompressed Size
+                insertStatement.setString(6, imageType.name());     // Image Type (Profile or Offline)
+                insertStatement.setString(7, imageFormat.name());   // Image Format (JPEG, PNG, GIF)
+                insertStatement.setBytes(8, compressedData);        // Image Data (compressed)
 
                 // Execute the statement
                 insertStatement.executeUpdate();
@@ -262,8 +223,8 @@ public class Database extends Driver {
                 preparedStatement.close();
 
                 // Check profile image
-                if (profileImageUrl != null && validUUID(profileImageUrl.substring(47, 83))) checkProfileImage(user, profileImageUrl);
-                if (offlineImageUrl != null && validUUID(offlineImageUrl.substring(47, 83))) checkOfflineImage(user, offlineImageUrl);
+                if (profileImageUrl != null && validUUID(profileImageUrl.substring(47, 83))) checkImage(user, profileImageUrl, PROFILE);
+                if (offlineImageUrl != null && validUUID(offlineImageUrl.substring(47, 83))) checkImage(user, offlineImageUrl, OFFLINE);
 
             } catch (SQLException | IOException e) {
                 throw new RuntimeException("Failed to add or update TwitchUser with id " + user.getId() + ": " + e.getMessage(), e);

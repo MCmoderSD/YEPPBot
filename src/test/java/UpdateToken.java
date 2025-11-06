@@ -1,3 +1,4 @@
+/*
 import de.MCmoderSD.encryption.Encryption;
 import de.MCmoderSD.sql.Driver;
 
@@ -57,3 +58,4 @@ public class UpdateToken {
         }
     }
 }
+*/

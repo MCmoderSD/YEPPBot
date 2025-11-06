@@ -1,3 +1,4 @@
+/*
 import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.openai.objects.EmbeddingPrompt;
 import de.MCmoderSD.sql.Driver;
@@ -115,3 +116,4 @@ public class GenerateEmbeddings {
         }
     }
 }
+*/

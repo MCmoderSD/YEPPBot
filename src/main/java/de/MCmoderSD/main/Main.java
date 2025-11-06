@@ -31,6 +31,10 @@ public class Main {
 
         // Load Config
         JsonNode config = JsonUtility.getInstance().load("/config/config.json");
+        if (args.length == 1 && args[0].equalsIgnoreCase("-dev")) {
+            config = JsonUtility.getInstance().load("/config/dev-config.json");
+            DEBUG = true;
+        }
 
         // Check Config
         if (config == null || config.isNull() || config.isEmpty()) throw new IllegalArgumentException("Config file is missing or empty");

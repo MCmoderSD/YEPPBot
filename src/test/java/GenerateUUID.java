@@ -1,3 +1,4 @@
+/*
 import de.MCmoderSD.enums.SubTier;
 import de.MCmoderSD.objects.TwitchMessageEvent;
 import java.io.IOException;
@@ -102,3 +103,4 @@ public class GenerateUUID{
         return hexString.toString();
     }
 }
+*/
