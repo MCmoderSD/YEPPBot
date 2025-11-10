@@ -23,6 +23,7 @@ public abstract class CommandBuilder {
     protected final EventLogManager eventLogManager;
     protected final BirthdayManager birthdayManager;
     protected final LurkManager lurkManager;
+    protected final QuoteManager quoteManager;
 
     // Handlers
     protected final HelixHandler helixHandler;
@@ -58,6 +59,7 @@ public abstract class CommandBuilder {
         eventLogManager = database.getEventLogManager();
         birthdayManager = database.getBirthdayManager();
         lurkManager = database.getLurkManager();
+        quoteManager = database.getQuoteManager();
 
         // Set Handlers
         helixHandler = twitchBot.getHelixHandler();

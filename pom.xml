@@ -28,14 +28,14 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>Helix-API</artifactId>
-            <version>2.0.3</version>
+            <version>2.0.5</version>
         </dependency>
 
         <!-- HTTPS-Server -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>HTTPS-Server</artifactId>
-            <version>3.0.4</version>
+            <version>3.0.5</version>
         </dependency>
 
         <!-- JSON Utility -->
@@ -95,6 +95,19 @@
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
+
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>config/</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>de.MCmoderSD.main.Main</mainClass>
@@ -104,6 +117,7 @@
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
+
                         </configuration>
                     </execution>
                 </executions>

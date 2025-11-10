@@ -140,7 +140,6 @@ public class CommandHandler {
 
         // Check Parameters
         if (blacklist == null) throw new IllegalArgumentException("Blacklist cannot be null");
-        if (blacklist.isEmpty()) return;
 
         // Update Blacklist
         this.blacklist.clear();

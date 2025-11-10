@@ -11,17 +11,10 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
-import de.MCmoderSD.commands.Lurk;
-import de.MCmoderSD.commands.Ping;
-import de.MCmoderSD.commands.Say;
-import de.MCmoderSD.commands.Status;
+import de.MCmoderSD.commands.*;
 
 import de.MCmoderSD.database.Database;
-import de.MCmoderSD.database.manager.ChannelManager;
-import de.MCmoderSD.database.manager.CommandManager;
-import de.MCmoderSD.database.manager.EventLogManager;
-import de.MCmoderSD.database.manager.BirthdayManager;
-import de.MCmoderSD.database.manager.LurkManager;
+import de.MCmoderSD.database.manager.*;
 
 import de.MCmoderSD.handlers.EventHandler;
 import de.MCmoderSD.handlers.MessageHandler;
@@ -64,6 +57,7 @@ public class TwitchBot {
     private final EventLogManager eventLogManager;
     private final BirthdayManager birthdayManager;
     private final LurkManager lurkManager;
+    private final QuoteManager quoteManager;
 
     // Configuration
     private final TwitchUser botUser;               // Bot User
@@ -116,6 +110,7 @@ public class TwitchBot {
         eventLogManager = database.getEventLogManager();
         birthdayManager = database.getBirthdayManager();
         lurkManager = database.getLurkManager();
+        quoteManager = database.getQuoteManager();
 
         // Parse Owners
         HashSet<Integer> ownerIds = new HashSet<>();
@@ -193,13 +188,18 @@ public class TwitchBot {
 
         // Initialize Commands
         new Lurk(this);
+        new Moderate(this);
         new Ping(this);
+        new Quote(this);
+        new RoleSwap(this);
         new Say(this);
+        new Shoutout(this);
         new Status(this);
 
         // Add Initial Channels from Config to Database
         HashSet<TwitchUser> configChannels = checkChannelConfig(twitchConfig, userHandler);
-        for (var channel : configChannels) database.getChannelManager().joinChannel(channel);
+        for (var channel : configChannels) channelManager.joinChannel(channel);
+        channelManager.joinChannel(botUser); // Ensure Bot Joins Its Own Channel
 
         // Obtain Channels from Database
         HashMap<TwitchUser, Boolean> channels = database.getChannelManager().getChannels();
@@ -415,6 +415,10 @@ public class TwitchBot {
 
     public LurkManager getLurkManager() {
         return lurkManager;
+    }
+
+    public QuoteManager getQuoteManager() {
+        return quoteManager;
     }
 
     // Configuration Getters

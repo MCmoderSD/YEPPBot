@@ -98,8 +98,8 @@ public class LurkManager {
                 );
 
                 // Set the insert values
-                insertTraitorStatement.setBoolean(1, true);
-                insertTraitorStatement.setInt(2, user.getId()); // Lurker
+                insertTraitorStatement.setBoolean(1, true);         // Traitor Flag
+                insertTraitorStatement.setInt(2, user.getId());     // Lurker ID
 
                 // Execute the statement
                 insertTraitorStatement.executeUpdate();

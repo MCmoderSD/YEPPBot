@@ -128,6 +128,7 @@ public class ChannelManager {
                 // Set the insert values
                 insertChannelStatement.setInt(1, channel.getId());  // Channel ID
                 insertChannelStatement.setBoolean(2, autoShoutout); // Auto Shoutout flag
+                insertChannelStatement.setBoolean(3, autoShoutout); // Auto Shoutout flag
 
                 // Execute the statement
                 insertChannelStatement.executeUpdate();

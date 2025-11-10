@@ -35,6 +35,7 @@ public class Database extends Driver {
     private final EventLogManager eventLogManager;
     private final BirthdayManager birthdayManager;
     private final LurkManager lurkManager;
+    private final QuoteManager quoteManager;
 
     // Constructor
     public Database(DatabaseType databaseType, JsonNode config, TwitchBot twitchBot) {
@@ -54,13 +55,15 @@ public class Database extends Driver {
         var messages = loadTables("database/Messages.sql");
         var events = loadTables("database/Events.sql");
         var lurker = loadTables("database/Lurker.sql");
+        var quotes = loadTables("database/QuoteTable.sql");
 
         // Initialize Tables
         initTables(userTable);      // User & UserImage Tables
         initTables(channelTable);   // Channel & Blacklist Tables   | needs UserTable
         initTables(messages);
         initTables(events);
-        initTables(lurker);
+        initTables(lurker);         // Lurker Table                 | needs UserTable
+        initTables(quotes);         // Quote Table                  | needs ChannelTable
 
         // Initialize Managers
         channelManager = new ChannelManager(this);
@@ -68,6 +71,7 @@ public class Database extends Driver {
         eventLogManager = new EventLogManager(this);
         birthdayManager = new BirthdayManager(this);
         lurkManager = new LurkManager(this);
+        quoteManager = new QuoteManager(this);
     }
 
     private static ArrayList<String> loadTables(String path) {
@@ -251,5 +255,9 @@ public class Database extends Driver {
 
     public LurkManager getLurkManager() {
         return lurkManager;
+    }
+
+    public QuoteManager getQuoteManager() {
+        return quoteManager;
     }
 }

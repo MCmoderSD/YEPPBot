@@ -134,5 +134,5 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64/v8
           tags: |
-            mcmodersd/testing:${{ env.version }}
-            mcmodersd/testing:latest
+            mcmodersd/yeppbot:${{ env.version }}
+            mcmodersd/yeppbot:latest

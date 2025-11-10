@@ -1,10 +1,8 @@
 package de.MCmoderSD.main;
 
 import de.MCmoderSD.core.TwitchBot;
-import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.enums.Scope;
 import de.MCmoderSD.helix.handler.*;
-import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.server.core.Server;
 import de.MCmoderSD.utilities.TokenGrabber;
@@ -30,11 +28,14 @@ public class Main {
     public static void main(String[] args) throws IOException, URISyntaxException {
 
         // Load Config
-        JsonNode config = JsonUtility.getInstance().load("/config/config.json");
-        if (args.length == 1 && args[0].equalsIgnoreCase("-dev")) {
+        JsonNode config;
+        if (args.length == 2 && args[0].equalsIgnoreCase("-config")) {
+            config = JsonUtility.getInstance().load(args[1], true);
+        }
+        else if (args.length == 1 && args[0].equalsIgnoreCase("-dev")) {
             config = JsonUtility.getInstance().load("/config/dev-config.json");
             DEBUG = true;
-        }
+        } else config = JsonUtility.getInstance().load("/config/config.json");
 
         // Check Config
         if (config == null || config.isNull() || config.isEmpty()) throw new IllegalArgumentException("Config file is missing or empty");

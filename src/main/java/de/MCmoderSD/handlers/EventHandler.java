@@ -5,6 +5,7 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageActionEvent;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.chat.events.channel.RaidEvent;
 
+import com.github.twitch4j.eventsub.domain.chat.Raid;
 import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.database.Database;
@@ -43,6 +44,8 @@ public class EventHandler {
 
     // Attributes
     private final ConcurrentHashMap<Integer, TwitchUser> userCache;
+    private final ConcurrentHashMap<Integer, RaidEvent> raidCache;
+    private final ConcurrentHashMap<Integer, ChannelFollowEvent> followCache;
 
     // Constructor
     public EventHandler(TwitchBot twitchBot) {
@@ -74,6 +77,8 @@ public class EventHandler {
 
         // Initialize Attributes
         userCache = new ConcurrentHashMap<>();
+        raidCache = new ConcurrentHashMap<>();
+        followCache = new ConcurrentHashMap<>();
 
         // Message Events
         eventManager.onEvent(ChannelMessageEvent.class, this::handleMessageEvent);
@@ -180,6 +185,9 @@ public class EventHandler {
             TwitchUser channel = raidEvent.getChannel();
             TwitchUser raider = raidEvent.getUser();
 
+            // Cache Raid Event
+            raidCache.put(channel.getId(), event);
+
             // Send Shoutout
             if (channelManager.getAutoShoutoutChannels().get(channel.getId())) streamHandler.sendShoutout(raider, channel);
 
@@ -194,6 +202,9 @@ public class EventHandler {
 
             // ToDo DEBUG
             System.out.printf("%s %s followed %s%n", EVENT, followEvent.getUser().getDisplayName(), followEvent.getChannel().getDisplayName());
+
+            // Cache Follow Event
+            followCache.put(followEvent.getChannel().getId(), event);
 
             // Log Follow Event
             eventLogManager.logFollowEvent(followEvent);
@@ -220,5 +231,40 @@ public class EventHandler {
 
     public HashMap<Integer, TwitchUser> getUserCache() {
         return new HashMap<>(userCache);
+    }
+
+    public HashMap<Integer, RaidEvent> getRaidCache() {
+        return new HashMap<>(raidCache);
+    }
+
+    public HashMap<Integer, ChannelFollowEvent> getFollowCache() {
+        return new HashMap<>(followCache);
+    }
+
+    public TwitchUser getTwitchUser(Integer id) {
+
+        // Check Parameters
+        if (id == null || id <= 0) throw new IllegalArgumentException("Invalid user ID");
+
+        // Return User
+        return userCache.getOrDefault(id, null);
+    }
+
+    public RaidEvent getRaidEvent(Integer channelId) {
+
+        // Check Parameters
+        if (channelId == null || channelId <= 0) throw new IllegalArgumentException("Invalid channel ID");
+
+        // Return Raid Event
+        return raidCache.getOrDefault(channelId, null);
+    }
+
+    public ChannelFollowEvent getFollowEvent(Integer channelId) {
+
+        // Check Parameters
+        if (channelId == null || channelId <= 0) throw new IllegalArgumentException("Invalid channel ID");
+
+        // Return Follow Event
+        return followCache.getOrDefault(channelId, null);
     }
 }
