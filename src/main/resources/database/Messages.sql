@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS MessageContent
 
 
 
-
 # MessageEvent table to store message events
 CREATE TABLE IF NOT EXISTS MessageEvent
 (
@@ -24,11 +23,11 @@ CREATE TABLE IF NOT EXISTS MessageEvent
     deviceType          ENUM ('WEB', 'IOS', 'ANDROID', 'UNKNOWN')           NOT NULL DEFAULT 'UNKNOWN',             # Device Type
     subTier             ENUM ('NONE', 'TIER1', 'TIER2', 'TIER3', 'PRIME')   NOT NULL DEFAULT 'NONE',                # Subscription Tier
     subMonths           INT                                                 NOT NULL DEFAULT 0,                     # Subscription Months
-    action              BIT                                                 NOT NULL DEFAULT false,                 # Action Message (/me)
-    highlighted         BIT                                                 NOT NULL DEFAULT false,                 # Highlighted Message
-    firstMessage        BIT                                                 NOT NULL DEFAULT false,                 # First Message
-    userIntroduction    BIT                                                 NOT NULL DEFAULT false,                 # User Introduction
-    skipSubsModeMessage BIT                                                 NOT NULL DEFAULT false,                 # Skip Subs Mode Message
+    action              BIT                                                 NOT NULL DEFAULT FALSE,                 # Action Message (/me)
+    highlighted         BIT                                                 NOT NULL DEFAULT FALSE,                 # Highlighted Message
+    firstMessage        BIT                                                 NOT NULL DEFAULT FALSE,                 # First Message
+    userIntroduction    BIT                                                 NOT NULL DEFAULT FALSE,                 # User Introduction
+    skipSubsModeMessage BIT                                                 NOT NULL DEFAULT FALSE,                 # Skip Subs Mode Message
     event               BLOB                UNIQUE                          NOT NULL,                               # Full Event Data (compressed)
     FOREIGN KEY (channelId) REFERENCES User (id)                ON DELETE CASCADE,                                  # Foreign Key to User Table (Channel)
     FOREIGN KEY (userId)    REFERENCES User (id)                ON DELETE CASCADE,                                  # Foreign Key to User Table (User)
@@ -38,7 +37,6 @@ CREATE TABLE IF NOT EXISTS MessageEvent
     KEY_BLOCK_SIZE = 1          # Key Block Size
     CHARACTER SET = utf8mb4     # UTF-8 MB4 Character Set
     COLLATE utf8mb4_bin;        # Binary Collation for utf8mb4
-
 
 
 
@@ -62,7 +60,6 @@ CREATE TABLE IF NOT EXISTS ResponseMessage
     KEY_BLOCK_SIZE = 1          # Key Block Size
     CHARACTER SET = utf8mb4     # UTF-8 MB4 Character Set
     COLLATE utf8mb4_bin;        # Binary Collation for utf8mb4
-
 
 
 

@@ -1,14 +1,9 @@
 package de.MCmoderSD.database.manager;
 
-import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.database.Database;
-import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -36,35 +31,6 @@ public class CommandManager {
         connection = database.getConnection();
     }
 
-    private boolean waitTillMessageLogged(UUID messageId, int attemptsLeft) {
-        try {
-
-            // Prepare the query
-            PreparedStatement checkStatement = connection.prepareStatement(
-                    "SELECT COUNT(*) FROM MessageEvent WHERE id = ?;"
-            );
-
-            // Set the query parameter
-            checkStatement.setBytes(1, asBytes(messageId));
-
-            // Execute the query
-            var resultSet = checkStatement.executeQuery();
-            resultSet.next();
-            var count = resultSet.getInt(1);
-
-            // Close resources
-            resultSet.close();
-            checkStatement.close();
-
-            // Return whether the message is already logged
-            if (count == 0 && attemptsLeft > 0) return waitTillMessageLogged(messageId, attemptsLeft - 1);
-            return count > 0;
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to check if message is already logged: " + e.getMessage(), e);
-        }
-    }
-
     public void logResponse(MessageEvent event, String command, String response) {
         new Thread(() -> {
             try {
@@ -75,7 +41,9 @@ public class CommandManager {
                 if (response == null || response.isBlank()) throw new IllegalArgumentException("Invalid response");
 
                 // Variables
-                byte[] contentHash = xxHash64(response);
+                byte[] contentHash = xxHash64(response);                            // Response Content Hash
+                byte[] uuid = asBytes(UUID.randomUUID());                           // Random UUID
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());    // Current Timestamp
 
                 // Insert message content
                 PreparedStatement insertContentStatement = connection.prepareStatement(
@@ -93,7 +61,7 @@ public class CommandManager {
                 insertContentStatement.close();
 
                 // Ensure the original message is logged
-                waitTillMessageLogged(event.getId(), 10);
+                database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert message event
                 PreparedStatement insertEventStatement = connection.prepareStatement(
@@ -101,13 +69,13 @@ public class CommandManager {
                 );
 
                 // Set the insert values
-                insertEventStatement.setBytes(1, asBytes(UUID.randomUUID()));                       // Response ID
-                insertEventStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));    // Fired At
-                insertEventStatement.setInt(3, event.getChannel().getId());                         // Channel ID
-                insertEventStatement.setInt(4, event.getUser().getId());                            // User ID
-                insertEventStatement.setString(5, command);                                         // Command
-                insertEventStatement.setBytes(6, contentHash);                                      // Response Content Hash
-                insertEventStatement.setBytes(7, asBytes(event.getId()));                           // Message Event ID
+                insertEventStatement.setBytes(1, uuid);                     // Response ID
+                insertEventStatement.setTimestamp(2, timestamp);            // Fired At
+                insertEventStatement.setInt(3, event.getChannel().getId()); // Channel ID
+                insertEventStatement.setInt(4, event.getUser().getId());    // User ID
+                insertEventStatement.setString(5, command);                 // Command
+                insertEventStatement.setBytes(6, contentHash);              // Response Content Hash
+                insertEventStatement.setBytes(7, asBytes(event.getId()));   // Message Event ID
 
                 // Execute the statement
                 insertEventStatement.executeUpdate();
@@ -134,6 +102,7 @@ public class CommandManager {
                 // Variables
                 String argsJoined = String.join(" ", args);
                 byte[] argsHash = xxHash64(argsJoined);
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
                 // Insert command arguments
                 PreparedStatement insertArgsStatement = connection.prepareStatement(
@@ -151,7 +120,7 @@ public class CommandManager {
                 insertArgsStatement.close();
 
                 // Ensure the original message is logged
-                waitTillMessageLogged(event.getId(), 10);
+                database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert command event
                 PreparedStatement insertEventStatement = connection.prepareStatement(
@@ -159,12 +128,12 @@ public class CommandManager {
                 );
 
                 // Set the insert values
-                insertEventStatement.setBytes(1, asBytes(event.getId()));                           // Message Event ID
-                insertEventStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));    // Fired At
-                insertEventStatement.setInt(3, event.getChannel().getId());                         // Channel ID
-                insertEventStatement.setInt(4, event.getUser().getId());                            // User ID
-                insertEventStatement.setString(5, command);                                         // Command
-                insertEventStatement.setBytes(6, argsHash);                                         // Arguments Hash
+                insertEventStatement.setBytes(1, asBytes(event.getId()));       // Message Event ID
+                insertEventStatement.setTimestamp(2, timestamp);                // Fired At
+                insertEventStatement.setInt(3, event.getChannel().getId());     // Channel ID
+                insertEventStatement.setInt(4, event.getUser().getId());        // User ID
+                insertEventStatement.setString(5, command);                     // Command
+                insertEventStatement.setBytes(6, argsHash);                     // Arguments Hash
 
                 // Execute the statement
                 insertEventStatement.executeUpdate();

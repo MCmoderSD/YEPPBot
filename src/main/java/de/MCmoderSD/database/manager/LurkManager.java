@@ -2,10 +2,15 @@ package de.MCmoderSD.database.manager;
 
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
+import de.MCmoderSD.objects.MessageEvent;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import static de.MCmoderSD.tools.GZIP.inflateObject;
+import static de.MCmoderSD.utilities.FormatUUID.asBytes;
 
 public class LurkManager {
 
@@ -28,23 +33,32 @@ public class LurkManager {
         connection = database.getConnection();
     }
 
-    public void addLurk(TwitchUser user, TwitchUser channel) {
+    private static MessageEvent inflateEvent(byte[] data) {
+        try {
+            return (MessageEvent) inflateObject(data);
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Failed to inflate TwitchUser object: " + e.getMessage(), e);
+        }
+    }
+
+    public void addLurk(MessageEvent event) {
         new Thread(() -> {
             try {
 
                 // Check Parameters
-                if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
-                if (channel == null) throw new IllegalArgumentException("TwitchUser channel cannot be null");
+                if (event == null) throw new IllegalArgumentException("MessageEvent event cannot be null");
+
+                // Ensure the event is logged
+                database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert lurk entry
                 PreparedStatement insertLurkStatement = connection.prepareStatement(
-                        "INSERT INTO Lurker (lurkerId, channelId, timestamp) VALUES (?, ?, ?);"
+                        "INSERT INTO Lurker (eventId, lurkerId) VALUES (?, ?);"
                 );
 
                 // Set the insert values
-                insertLurkStatement.setInt(1, user.getId());                                    // Lurker
-                insertLurkStatement.setInt(2, channel.getId());                                 // Channel
-                insertLurkStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis())); // Timestamp
+                insertLurkStatement.setBytes(1, asBytes(event.getId()));    // Event ID
+                insertLurkStatement.setInt(2, event.getUser().getId());     // Lurker ID
 
                 // Execute the statement
                 insertLurkStatement.executeUpdate();
@@ -71,7 +85,7 @@ public class LurkManager {
                 );
 
                 // Set the delete values
-                deleteLurkStatement.setInt(1, user.getId()); // Lurker
+                deleteLurkStatement.setInt(1, user.getId()); // Lurker ID
 
                 // Execute the statement
                 deleteLurkStatement.executeUpdate();
@@ -98,8 +112,8 @@ public class LurkManager {
                 );
 
                 // Set the insert values
-                insertTraitorStatement.setBoolean(1, true);         // Traitor Flag
-                insertTraitorStatement.setInt(2, user.getId());     // Lurker ID
+                insertTraitorStatement.setBoolean(1, true);     // Traitor Flag
+                insertTraitorStatement.setInt(2, user.getId()); // Lurker ID
 
                 // Execute the statement
                 insertTraitorStatement.executeUpdate();
@@ -116,9 +130,12 @@ public class LurkManager {
     public Timestamp getLurkTime(TwitchUser user) {
         try {
 
+            // Check Parameters
+            if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
+
             // Query lurk time
             PreparedStatement queryLurkTimeStatement = connection.prepareStatement(
-                    "SELECT timestamp FROM Lurker WHERE lurkerId = ?;"
+                    "SELECT e.firedAt FROM Lurker l, MessageEvent e WHERE lurkerId = ? AND e.id = l.eventId;"
             );
 
             // Set the query values
@@ -131,14 +148,14 @@ public class LurkManager {
             Timestamp startTime = null;
 
             // Process results
-            if (resultSet.next()) startTime = resultSet.getTimestamp("timestamp");
+            if (resultSet.next()) startTime = resultSet.getTimestamp("firedAt");
 
             // Close resources
             resultSet.close();
             queryLurkTimeStatement.close();
 
-            // Check result
-            if (startTime == null) throw new IllegalStateException("No lurk entry found for user with ID " + user.getId());
+            // Check if lurk time was found
+            if (startTime == null) throw new RuntimeException("Lurk time not found for user ID: " + user.getId());
 
             // Return lurk time
             return startTime;
@@ -148,12 +165,50 @@ public class LurkManager {
         }
     }
 
+    public MessageEvent getLurkEvent(TwitchUser user) {
+        try {
+
+            // Check Parameters
+            if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
+
+            // Query lurk event
+            PreparedStatement queryLurkEventStatement = connection.prepareStatement(
+                    "SELECT event FROM MessageEvent e, Lurker l WHERE lurkerId = ? AND e.id = l.eventId;"
+            );
+
+            // Set the query values
+            queryLurkEventStatement.setInt(1, user.getId()); // Lurker
+
+            // Execute the query
+            var resultSet = queryLurkEventStatement.executeQuery();
+
+            // Variable
+            MessageEvent lurkEvent = null;
+
+            // Process results
+            if (resultSet.next()) lurkEvent = inflateEvent(resultSet.getBytes("event"));
+
+            // Close resources
+            resultSet.close();
+            queryLurkEventStatement.close();
+
+            // Check if lurk event was found
+            if (lurkEvent == null) throw new RuntimeException("Lurk event not found for user ID: " + user.getId());
+
+            // Return lurk event
+            return lurkEvent;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to retrieve lurk event", e);
+        }
+    }
+
     public HashMap<Integer, Integer> getLurks() {
         try {
 
             // Query lurk entries
             PreparedStatement queryLurkStatement = connection.prepareStatement(
-                    "SELECT lurkerId, channelId FROM Lurker;"
+                    "SELECT userId, channelId FROM MessageEvent e, Lurker l WHERE e.id = l.eventId;"
             );
 
             // Execute the query
@@ -163,7 +218,7 @@ public class LurkManager {
             HashMap<Integer, Integer> lurkMap = new HashMap<>();
 
             // Process results
-            while (resultSet.next()) lurkMap.put(resultSet.getInt("lurkerId"), resultSet.getInt("channelId"));
+            while (resultSet.next()) lurkMap.put(resultSet.getInt("userId"), resultSet.getInt("channelId"));
 
             // Close resources
             resultSet.close();
@@ -177,16 +232,16 @@ public class LurkManager {
         }
     }
 
-    public HashSet<Integer> getTraitor() {
+    public HashSet<Integer> getTraitors() {
         try {
 
-            // Query traitor entries
-            PreparedStatement queryTraitorStatement = connection.prepareStatement(
+            // Query traitors entries
+            PreparedStatement queryTraitorsStatement = connection.prepareStatement(
                     "SELECT lurkerId FROM Lurker WHERE traitor = TRUE;"
             );
 
             // Execute the query
-            var resultSet = queryTraitorStatement.executeQuery();
+            var resultSet = queryTraitorsStatement.executeQuery();
 
             // Variables
             HashSet<Integer> traitorSet = new HashSet<>();
@@ -196,7 +251,7 @@ public class LurkManager {
 
             // Close resources
             resultSet.close();
-            queryTraitorStatement.close();
+            queryTraitorsStatement.close();
 
             // Return traitor set
             return traitorSet;

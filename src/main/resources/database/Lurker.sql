@@ -1,11 +1,10 @@
 # Lurker Table Definition
 CREATE TABLE IF NOT EXISTS Lurker (
-    lurkerId    INT         PRIMARY KEY,                                # Lurker User ID
-    channelId   INT         NOT NULL,                                   # Lurk Channel ID
-    traitor     BIT         NOT NULL        DEFAULT FALSE,              # Is Traitor
-    timestamp   TIMESTAMP   NOT NULL        DEFAULT CURRENT_TIMESTAMP,  # Lurk Timestamp
-    FOREIGN KEY (lurkerId)  REFERENCES User(id) ON DELETE CASCADE,      # Foreign Key to User Table
-    FOREIGN KEY (channelId) REFERENCES User(id) ON DELETE CASCADE       # Foreign Key to Channel Table
+    eventId     UUID    PRIMARY KEY,                                        # Event ID
+    lurkerId    INT     NOT NULL,                                           # Lurker User ID
+    traitor     BIT     NOT NULL        DEFAULT FALSE,                      # Is Traitor
+    FOREIGN KEY (eventId) REFERENCES MessageEvent(id) ON DELETE CASCADE,    # Foreign Key to MessageEvent Table
+    FOREIGN KEY (lurkerId) REFERENCES User(id) ON DELETE CASCADE            # Foreign Key to User Table
 )
     ROW_FORMAT = COMPRESSED     # Compressed Row Format
     KEY_BLOCK_SIZE = 1          # Key Block Size

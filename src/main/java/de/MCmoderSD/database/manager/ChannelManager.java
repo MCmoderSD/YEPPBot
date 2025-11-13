@@ -41,7 +41,7 @@ public class ChannelManager {
         }
     }
 
-    private void setActive(TwitchUser channel, boolean active) {
+    private void addChannel(TwitchUser channel) {
         new Thread(() -> {
             try {
 
@@ -53,13 +53,11 @@ public class ChannelManager {
 
                 // Insert channel
                 PreparedStatement insertChannelStatement = connection.prepareStatement(
-                        "INSERT INTO Channel (id, active) VALUES (?, ?) ON DUPLICATE KEY UPDATE active = ?"
+                        "INSERT IGNORE INTO Channel (id) VALUES (?)"
                 );
 
                 // Set the insert values
                 insertChannelStatement.setInt(1, channel.getId());  // Channel ID
-                insertChannelStatement.setBoolean(2, active);      // Active flag
-                insertChannelStatement.setBoolean(3, active);      // Active flag
 
                 // Execute the statement
                 insertChannelStatement.executeUpdate();
@@ -68,7 +66,38 @@ public class ChannelManager {
                 insertChannelStatement.close();
 
             } catch (SQLException e) {
-                throw new RuntimeException("Failed to join channel: " + e.getMessage(), e);
+                throw new RuntimeException("Failed to add channel: " + e.getMessage(), e);
+            }
+        }).start();
+    }
+
+    private void setActive(TwitchUser channel, boolean active) {
+        new Thread(() -> {
+            try {
+
+                // Check Parameters
+                if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
+
+                // Add Channel to database
+                addChannel(channel);
+
+                // Update channel active status
+                PreparedStatement updateChannelStatement = connection.prepareStatement(
+                        "UPDATE Channel SET active = ? WHERE id = ?"
+                );
+
+                // Set the update values
+                updateChannelStatement.setBoolean(1, active);       // Active flag
+                updateChannelStatement.setInt(2, channel.getId());  // Channel ID
+
+                // Execute the statement
+                updateChannelStatement.executeUpdate();
+
+                // Close the statement
+                updateChannelStatement.close();
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to set channel active status: " + e.getMessage(), e);
             }
         }).start();
     }
@@ -117,29 +146,38 @@ public class ChannelManager {
                 // Check Parameters
                 if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
 
-                // Add Twitch User to database
-                database.addTwitchUser(channel);
+                // Add Channel to database
+                addChannel(channel);
 
-                // Insert channel
-                PreparedStatement insertChannelStatement = connection.prepareStatement(
-                        "INSERT INTO Channel (id, autoShoutout) VALUES (?, ?) ON DUPLICATE KEY UPDATE autoShoutout = ?"
+                // Update channel auto shoutout status
+                PreparedStatement updateChannelStatement = connection.prepareStatement(
+                        "UPDATE Channel SET autoShoutout = ? WHERE id = ?"
                 );
 
-                // Set the insert values
-                insertChannelStatement.setInt(1, channel.getId());  // Channel ID
-                insertChannelStatement.setBoolean(2, autoShoutout); // Auto Shoutout flag
-                insertChannelStatement.setBoolean(3, autoShoutout); // Auto Shoutout flag
+                // Set the update values
+                updateChannelStatement.setBoolean(1, autoShoutout); // Auto Shout
+                updateChannelStatement.setInt(2, channel.getId());  // Channel ID
 
                 // Execute the statement
-                insertChannelStatement.executeUpdate();
+                updateChannelStatement.executeUpdate();
 
                 // Close the statement
-                insertChannelStatement.close();
+                updateChannelStatement.close();
 
             } catch (SQLException e) {
                 throw new RuntimeException("Failed to set auto shoutout: " + e.getMessage(), e);
             }
         }).start();
+    }
+
+    @SuppressWarnings("unused")
+    public void enableAutoShoutout(TwitchUser channel) {
+        setAutoShoutout(channel, true);
+    }
+
+    @SuppressWarnings("unused")
+    public void disableAutoShoutout(TwitchUser channel) {
+        setAutoShoutout(channel, false);
     }
 
     public HashMap<Integer, Boolean> getAutoShoutoutChannels() {
@@ -176,11 +214,10 @@ public class ChannelManager {
 
             // Check Parameters
             if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
-            if (command == null || command.isBlank())
-                throw new IllegalArgumentException("Command cannot be null or blank");
+            if (command == null || command.isBlank()) throw new IllegalArgumentException("Command cannot be null or blank");
 
-            // Add Twitch User to database
-            database.addTwitchUser(channel);
+            // Add Channel to database
+            addChannel(channel);
 
             // Insert blacklist entry
             PreparedStatement insertBlacklistStatement = connection.prepareStatement(
@@ -212,8 +249,8 @@ public class ChannelManager {
             if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
             if (command == null || command.isBlank()) throw new IllegalArgumentException("Command cannot be null or blank");
 
-            // Add Twitch User to database
-            database.addTwitchUser(channel);
+            // Add Channel to database
+            addChannel(channel);
 
             // Delete blacklist entry
             PreparedStatement deleteBlacklistStatement = connection.prepareStatement(

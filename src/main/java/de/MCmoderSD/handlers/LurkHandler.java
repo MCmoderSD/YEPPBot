@@ -52,9 +52,8 @@ public class LurkHandler {
         }
 
         // Initialize Attributes
-        traitorList = new HashSet<>();
-        lurkList = new ConcurrentHashMap<>();
-        lurkList.putAll(lurkManager.getLurks());
+        traitorList = lurkManager.getTraitors();
+        lurkList = new ConcurrentHashMap<>(lurkManager.getLurks());
     }
 
     public void handleLurk(MessageEvent event) {
@@ -64,16 +63,17 @@ public class LurkHandler {
             if (event == null) throw new IllegalArgumentException("MessageEvent cannot be null");
 
             // Get user and channel
-            TwitchUser user = event.getUser();
-            TwitchUser channel = event.getChannel();
-            Integer userId = user.getId();
-            Integer channelId = channel.getId();
+            var user = event.getUser();
+            var channel = event.getChannel();
+            var userId = user.getId();
+            var channelId = channel.getId();
 
             // Check for lurk command
             String message = event.getMessage().toLowerCase();
             for (var command : lurkCommands) if (command.contains(message)) {
                 lurkManager.removeLurk(user);
-                traitorList.remove(channelId);
+                traitorList.remove(userId);
+                lurkList.remove(userId);
                 return;
             }
 
@@ -86,15 +86,17 @@ public class LurkHandler {
             // If user is a traitor but already marked as one, do nothing
             if (isTraitor && traitorList.contains(userId)) return;
 
-            // If user already marked as traitor for this channel, do nothing
             if (isTraitor) {
 
                 // Add to traitor list
                 traitorList.add(userId);
                 lurkManager.addTraitor(user);
 
+                // Get Message Event
+                MessageEvent lurkEvent = lurkManager.getLurkEvent(user);
+
                 // Show traitor message
-                twitchBot.sendMessage(lurkList.get(userId), tagUser(user, "ist ein dreckiger Verräter, hab den Kek gerade im Chat von " + tagUser(channel, "gesehen! YEPP")));
+                twitchBot.sendMessage(lurkEvent, "Lurk-Traitor", tagUser(user, "ist ein dreckiger Verräter, hab den Kek gerade im Chat von " + tagUser(channel, "gesehen! YEPP")));
 
             } else {
 
@@ -118,10 +120,10 @@ public class LurkHandler {
         if (event == null) throw new IllegalArgumentException("MessageEvent cannot be null");
 
         // Variables
-        TwitchUser user = event.getUser();
-        TwitchUser channel = event.getChannel();
-        Integer userId = user.getId();
-        Integer channelId = channel.getId();
+        var user = event.getUser();
+        var channel = event.getChannel();
+        var userId = user.getId();
+        var channelId = channel.getId();
 
         // Reset traitor list
         traitorList.remove(userId);
@@ -130,8 +132,8 @@ public class LurkHandler {
         if (lurkList.contains(userId)) lurkManager.removeLurk(user);
 
         // Add to lurk list
+        lurkManager.addLurk(event);         // Database entry
         lurkList.put(userId, channelId);    // Local entry
-        lurkManager.addLurk(user, channel); // Database entry
     }
 
     private static String formatLurkTime(Timestamp startTime) {

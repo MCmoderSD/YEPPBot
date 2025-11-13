@@ -324,37 +324,6 @@ public class TwitchBot {
         return success;
     }
 
-    public boolean sendMessage(Integer channelId, String message) {
-
-        // Check Parameters
-        if (channelId == null || channelId <= 0) throw new IllegalArgumentException("Invalid Channel ID");
-        if (message == null || message.isBlank()) throw new IllegalArgumentException("Message cannot be null or blank");
-
-        // Parse Channel
-        TwitchUser channel = userHandler.getTwitchUser(channelId);
-
-        // Normalize Message
-        message = normalizeMessage(message);
-
-        // Check Message
-        if (message.isBlank() || message.length() > 500) return false;
-
-        // Check Channel
-        if (!isChannelJoined(channel)) if (!joinChannel(channel)) return false;
-
-        // Send Message
-        boolean success = chat.sendMessage(channel.getUsername(), message);
-
-        // Log Message
-        if (success) {
-            System.out.printf("%s <%s> #%s: %s%n", BOT, channel.getDisplayName(), botUser.getDisplayName(), message);
-            // ToDo: Log Message in Database
-        }
-
-        // Return
-        return success;
-    }
-
     public boolean sendMessage(MessageEvent event, String command, String message) {
 
         // Check Parameters

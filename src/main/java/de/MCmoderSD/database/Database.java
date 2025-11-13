@@ -49,21 +49,21 @@ public class Database extends Driver {
         // Set Associations
         this.twitchBot = twitchBot;
 
-        // Load Tables
-        var userTable = loadTables("database/UserTable.sql");
-        var channelTable = loadTables("database/ChannelTable.sql");
-        var messages = loadTables("database/Messages.sql");
-        var events = loadTables("database/Events.sql");
-        var lurker = loadTables("database/Lurker.sql");
-        var quotes = loadTables("database/QuoteTable.sql");
+        // Load Table Statements
+        ArrayList<String> userTable = loadTables("database/UserTable.sql");
+        ArrayList<String> channelTable = loadTables("database/ChannelTable.sql");
+        ArrayList<String> messages = loadTables("database/Messages.sql");
+        ArrayList<String> events = loadTables("database/Events.sql");
+        ArrayList<String> lurker = loadTables("database/Lurker.sql");
+        ArrayList<String> quotes = loadTables("database/QuoteTable.sql");
 
         // Initialize Tables
         initTables(userTable);      // User & UserImage Tables
-        initTables(channelTable);   // Channel & Blacklist Tables   | needs UserTable
-        initTables(messages);
-        initTables(events);
-        initTables(lurker);         // Lurker Table                 | needs UserTable
-        initTables(quotes);         // Quote Table                  | needs ChannelTable
+        initTables(channelTable);   // Channel & Blacklist Tables               | needs UserTable
+        initTables(messages);       // Message, Response & Command Log Tables   | needs UserTable
+        initTables(events);         // Raid & Follow Table                      | needs UserTable
+        initTables(lurker);         // Lurker Table                             | needs UserTable
+        initTables(quotes);         // Quote Table                              | needs ChannelTable
 
         // Initialize Managers
         channelManager = new ChannelManager(this);
@@ -151,7 +151,7 @@ public class Database extends Driver {
                 try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
                     imageData = bufferedInputStream.readAllBytes();
                 } catch (IOException | URISyntaxException e) {
-                    throw new RuntimeException("Failed to download image from URL: " + imageUrl, e);
+                    throw new IOException("Failed to download image from URL: " + imageUrl, e);
                 }
 
                 // Compress Image

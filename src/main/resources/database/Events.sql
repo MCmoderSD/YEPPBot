@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS RaidEvent (
 
 
 
-
 # FollowEvent table to store follow events
 CREATE TABLE IF NOT EXISTS FollowEvent (
     followedAt  TIMESTAMP   NOT NULL    DEFAULT CURRENT_TIMESTAMP,  # Event fired at Timestamp

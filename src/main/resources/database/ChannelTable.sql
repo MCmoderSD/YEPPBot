@@ -1,7 +1,7 @@
 # Channel Table Definition
 CREATE TABLE IF NOT EXISTS Channel (
     id              INT PRIMARY KEY,                        # Twitch User ID
-    active          BIT NOT NULL        DEFAULT TRUE,       # Is Channel Active
+    active          BIT NOT NULL        DEFAULT FALSE,      # Is Channel Active
     autoShoutout    BIT NOT NULL        DEFAULT FALSE,      # Is Auto Shoutout Enabled
     FOREIGN KEY (id) REFERENCES User(id) ON DELETE CASCADE  # Foreign Key to User Table
 )

@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 import static de.MCmoderSD.tools.GZIP.deflateObject;
 import static de.MCmoderSD.utilities.FormatUUID.asBytes;
@@ -35,6 +36,36 @@ public class EventLogManager {
         // Set Attributes
         connection = database.getConnection();
     }
+
+    public boolean waitTillMessageLogged(UUID messageId, int attemptsLeft) {
+        try {
+
+            // Prepare the query
+            PreparedStatement checkStatement = connection.prepareStatement(
+                    "SELECT COUNT(*) FROM MessageEvent WHERE id = ?;"
+            );
+
+            // Set the query parameter
+            checkStatement.setBytes(1, asBytes(messageId));
+
+            // Execute the query
+            var resultSet = checkStatement.executeQuery();
+            resultSet.next();
+            var count = resultSet.getInt(1);
+
+            // Close resources
+            resultSet.close();
+            checkStatement.close();
+
+            // Return whether the message is already logged
+            if (count == 0 && attemptsLeft > 0) return waitTillMessageLogged(messageId, attemptsLeft - 1);
+            else return count > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to check if message is already logged: " + e.getMessage(), e);
+        }
+    }
+
 
     public void logMessageEvent(MessageEvent event) {
         new Thread(() -> {
@@ -87,8 +118,6 @@ public class EventLogManager {
 
                 // Close the statement
                 insertEventStatement.close();
-
-                connection.commit();
 
             } catch (SQLException | IOException e) {
                 throw new RuntimeException("Failed to log MessageEvent: " + e.getMessage(), e);
@@ -145,8 +174,8 @@ public class EventLogManager {
 
                 // Set the insert values
                 insertEventStatement.setTimestamp(1, Timestamp.from(event.getFollowedAt()));   // Followed At Timestamp
-                insertEventStatement.setInt(2, event.getChannel().getId());                    // Channel
-                insertEventStatement.setInt(3, event.getUser().getId());                       // User
+                insertEventStatement.setInt(2, event.getChannel().getId());                    // Channel ID
+                insertEventStatement.setInt(3, event.getUser().getId());                       // User ID
                 insertEventStatement.setBytes(4, eventData);                                   // Full Event Data (compressed)
 
                 // Execute the statement
@@ -156,7 +185,7 @@ public class EventLogManager {
                 insertEventStatement.close();
 
             } catch (SQLException | IOException e) {
-                throw new RuntimeException("Failed to log RaidEvent: " + e.getMessage(), e);
+                throw new RuntimeException("Failed to log FollowEvent: " + e.getMessage(), e);
             }
         }).start();
     }
