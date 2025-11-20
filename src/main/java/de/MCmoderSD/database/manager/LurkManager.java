@@ -72,33 +72,6 @@ public class LurkManager {
         }).start();
     }
 
-    public void removeLurk(TwitchUser user) {
-        new Thread(() -> {
-            try {
-
-                // Check Parameters
-                if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
-
-                // Delete lurk entry
-                PreparedStatement deleteLurkStatement = connection.prepareStatement(
-                        "DELETE FROM Lurker WHERE lurkerId = ?;"
-                );
-
-                // Set the delete values
-                deleteLurkStatement.setInt(1, user.getId()); // Lurker ID
-
-                // Execute the statement
-                deleteLurkStatement.executeUpdate();
-
-                // Close the statement
-                deleteLurkStatement.close();
-
-            } catch (SQLException e) {
-                throw new RuntimeException("Failed to remove lurk entry", e);
-            }
-        }).start();
-    }
-
     public void addTraitor(TwitchUser user) {
         new Thread(() -> {
             try {
@@ -123,6 +96,33 @@ public class LurkManager {
 
             } catch (SQLException e) {
                 throw new RuntimeException("Failed to add traitor entry", e);
+            }
+        }).start();
+    }
+
+    public void removeLurk(TwitchUser user) {
+        new Thread(() -> {
+            try {
+
+                // Check Parameters
+                if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
+
+                // Delete lurk entry
+                PreparedStatement deleteLurkStatement = connection.prepareStatement(
+                        "DELETE FROM Lurker WHERE lurkerId = ?;"
+                );
+
+                // Set the delete values
+                deleteLurkStatement.setInt(1, user.getId()); // Lurker ID
+
+                // Execute the statement
+                deleteLurkStatement.executeUpdate();
+
+                // Close the statement
+                deleteLurkStatement.close();
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to remove lurk entry", e);
             }
         }).start();
     }

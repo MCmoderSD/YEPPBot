@@ -9,19 +9,13 @@ import java.util.ArrayList;
 
 public class Status extends CommandBuilder {
 
-    private final String botIsActive;
-
     // Constructor
     public Status(TwitchBot twitchBot) {
         super(twitchBot);
 
-
         // About
         String[] name = {"status", "test"};
         String description = "Zeigt den Status des Bots an. Also ob er aktiv ist oder nicht.";
-
-        // Constants
-        botIsActive = "Bot ist aktiv!";
 
 
         // Register command
@@ -31,7 +25,7 @@ public class Status extends CommandBuilder {
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                return twitchBot.sendMessage(event, name, botIsActive);
+                return twitchBot.sendMessage(event, name, "Bot ist aktiv!");
             }
         });
 

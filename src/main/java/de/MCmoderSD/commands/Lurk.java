@@ -3,14 +3,10 @@ package de.MCmoderSD.commands;
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.TwitchBot;
-import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.handlers.LurkHandler;
 import de.MCmoderSD.objects.MessageEvent;
 
 import java.util.ArrayList;
-
-import static de.MCmoderSD.utilities.MessageHelper.SPACE;
-import static de.MCmoderSD.utilities.MessageHelper.tagUser;
 
 public class Lurk extends CommandBuilder {
 
@@ -19,7 +15,7 @@ public class Lurk extends CommandBuilder {
         super(twitchBot);
 
         // About
-        String[] name = { "lurk", "lörk", "lürk", "lork", "afk" };
+        String[] name = new String[]{ "lurk", "lörk", "lürk", "lork", "afk" };
         String description = "Sendet den Befehl " + prefix + "lurk in den Chat, um im Lurk zu sein";
 
         // Get Lurk Handler

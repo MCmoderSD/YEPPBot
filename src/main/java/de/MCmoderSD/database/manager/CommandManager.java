@@ -43,7 +43,7 @@ public class CommandManager {
                 // Variables
                 byte[] contentHash = xxHash64(response);                            // Response Content Hash
                 byte[] uuid = asBytes(UUID.randomUUID());                           // Random UUID
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());    // Current Timestamp
+                Timestamp firedAt = new Timestamp(System.currentTimeMillis());      // Current Timestamp
 
                 // Insert message content
                 PreparedStatement insertContentStatement = connection.prepareStatement(
@@ -70,7 +70,7 @@ public class CommandManager {
 
                 // Set the insert values
                 insertEventStatement.setBytes(1, uuid);                     // Response ID
-                insertEventStatement.setTimestamp(2, timestamp);            // Fired At
+                insertEventStatement.setTimestamp(2, firedAt);              // Fired At
                 insertEventStatement.setInt(3, event.getChannel().getId()); // Channel ID
                 insertEventStatement.setInt(4, event.getUser().getId());    // User ID
                 insertEventStatement.setString(5, command);                 // Command
@@ -102,7 +102,7 @@ public class CommandManager {
                 // Variables
                 String argsJoined = String.join(" ", args);
                 byte[] argsHash = xxHash64(argsJoined);
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                Timestamp firedAt = new Timestamp(System.currentTimeMillis());
 
                 // Insert command arguments
                 PreparedStatement insertArgsStatement = connection.prepareStatement(
@@ -129,7 +129,7 @@ public class CommandManager {
 
                 // Set the insert values
                 insertEventStatement.setBytes(1, asBytes(event.getId()));       // Message Event ID
-                insertEventStatement.setTimestamp(2, timestamp);                // Fired At
+                insertEventStatement.setTimestamp(2, firedAt);                  // Fired At
                 insertEventStatement.setInt(3, event.getChannel().getId());     // Channel ID
                 insertEventStatement.setInt(4, event.getUser().getId());        // User ID
                 insertEventStatement.setString(5, command);                     // Command

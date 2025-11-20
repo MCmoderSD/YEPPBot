@@ -45,7 +45,7 @@ public class LurkHandler {
 
         // Initialize Lurk Commands
         lurkCommands = new HashSet<>();
-        String[] commands = { "lurk", "lörk", "lürk", "lork", "afk" };
+        var commands = new String[]{ "lurk", "lörk", "lürk", "lork", "afk" };
         for (var command : commands) for (var prefix : twitchBot.getPrefixes()) {
             lurkCommands.add(prefix + command);
             lurkCommands.add(" " + prefix + command);

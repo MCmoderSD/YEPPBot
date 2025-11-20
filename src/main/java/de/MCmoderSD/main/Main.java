@@ -29,7 +29,7 @@ public class Main {
 
         // Load Config
         JsonNode config;
-        if (args.length == 2 && args[0].equalsIgnoreCase("-config")) {
+        if (args.length == 2 && args[0].equalsIgnoreCase("-c")) {
             config = JsonUtility.getInstance().load(args[1], true);
         }
         else if (args.length == 1 && args[0].equalsIgnoreCase("-dev")) {

@@ -1,15 +1,12 @@
 package de.MCmoderSD.database.manager;
 
 import de.MCmoderSD.database.Database;
-import de.MCmoderSD.encryption.enums.Hash;
 import de.MCmoderSD.helix.objects.TwitchUser;
 
-import java.nio.file.LinkOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class QuoteManager {
@@ -51,7 +48,7 @@ public class QuoteManager {
             var resultSet = getQuotesStatement.executeQuery();
 
             // Process the results
-            var quotes = new LinkedHashMap<Integer, String>();
+            LinkedHashMap<Integer, String> quotes = new LinkedHashMap<>();
             while (resultSet.next()) quotes.put(resultSet.getInt("id"), resultSet.getString("quote"));
 
             // Close resources
@@ -91,14 +88,11 @@ public class QuoteManager {
                     updateQuoteStatement.setInt(1, i);
                     updateQuoteStatement.setInt(2, channelId);
                     updateQuoteStatement.setInt(3, quoteIds.get(i));
-                    updateQuoteStatement.addBatch();
+                    updateQuoteStatement.execute();
                 }
 
                 // Check statement
                 if (updateQuoteStatement == null) return;
-
-                // Execute batch
-                updateQuoteStatement.executeBatch();
 
                 // Close resources
                 updateQuoteStatement.close();
