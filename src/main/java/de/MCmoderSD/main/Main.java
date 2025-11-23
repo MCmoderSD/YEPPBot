@@ -25,26 +25,41 @@ public class Main {
     // Attributes
     private static final long UPTIME = System.nanoTime();
 
+    @SuppressWarnings("CommentedOutCode")
     public static void main(String[] args) {
-
-        // Parse Arguments
-        ArrayList<String> arguments = parseArguments(args);
-
         try {
-            init(arguments);
-        } catch (Exception e) {
-            throw new RuntimeException("Fatal error during initialization: " + e.getMessage(), e);
+
+            // Initialize Twitch Bot
+            TwitchBot twitchBot = init(parseArguments(args));
+
+            // Token Grabber active
+            if (twitchBot == null) return;
+
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException("Failed to initialize Twitch Bot", e);
         }
+
+//        Scope[] all = Scope.values();
+//        Scope[] used = new ArrayList<>(Arrays.asList(
+//                UserHandler.REQUIRED_SCOPES,
+//                ChatHandler.REQUIRED_SCOPES,
+//                RoleHandler.REQUIRED_SCOPES,
+//                StreamHandler.REQUIRED_SCOPES,
+//                ChannelHandler.REQUIRED_SCOPES)
+//        ).stream().flatMap(Stream::of).distinct().toArray(Scope[]::new);
+//        System.out.println("Authenticate: " + twitchBot.getHelixHandler().getAuthorizationUrl(used));
+
+        System.out.println("Twitch Bot startup took " + ((System.nanoTime() - UPTIME) / 1_000_000) + " ms");
+        System.out.println("Twitch Bot is now running. Version: " + VERSION);
     }
 
-    private static void init(ArrayList<String> args) throws IOException, URISyntaxException {
+    private static TwitchBot init(ArrayList<String> args) throws IOException, URISyntaxException {
 
         // Print Startup Message
         System.out.printf("%s%nYEPPBot v%s is starting up...%n", ICON, VERSION);
 
         // Check Arguments
         var argSize = args.size();
-        boolean noArgs = args.isEmpty();
         boolean dev = args.contains("-dev");
         boolean debug = args.contains("-debug");
 
@@ -87,23 +102,10 @@ public class Main {
         server.start();
 
         // Initialize Token Grabber if needed
-        if (needsTokenGrabber(twitchConfig, server)) return;
+        if (needsTokenGrabber(twitchConfig, server)) return null;
 
         // Initialize Twitch Bot
-        TwitchBot twitchBot = new TwitchBot(twitchConfig, databaseConfig, server);
-
-//        Scope[] all = Scope.values();
-//        Scope[] used = new ArrayList<>(Arrays.asList(
-//                UserHandler.REQUIRED_SCOPES,
-//                ChatHandler.REQUIRED_SCOPES,
-//                RoleHandler.REQUIRED_SCOPES,
-//                StreamHandler.REQUIRED_SCOPES,
-//                ChannelHandler.REQUIRED_SCOPES)
-//        ).stream().flatMap(Stream::of).distinct().toArray(Scope[]::new);
-//        System.out.println("Authenticate: " + twitchBot.getHelixHandler().getAuthorizationUrl(used));
-
-        System.out.println("Twitch Bot startup took " + ((System.nanoTime() - UPTIME) / 1_000_000) + " ms");
-        System.out.println("Twitch Bot is now running. Version: " + VERSION);
+        return new TwitchBot(twitchConfig, databaseConfig, server);
     }
 
     private static ArrayList<String> parseArguments(String[] args) {

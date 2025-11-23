@@ -48,46 +48,46 @@ jobs:
           mv target/${{ env.artifact }}-shaded.jar ${{ env.artifact }}.jar
           rm -rf target
 
-      - name: Install GitHub CLI
-        run: sudo apt update && sudo apt upgrade -y && sudo apt install -y gh
-
-      - name: Authenticate GitHub CLI
-        run: echo "$token" | gh auth login --with-token
-        env:
-          token: ${{ env.token }}
-
-      - name: Check for existing release
-        run: |
-          VERSION="${{ env.version }}"
-          TAG_EXISTS=$(gh release view "$VERSION" --json tagName --jq ".tagName" 2>&1 || true)
-          echo "TAG_EXISTS: $TAG_EXISTS"
-          if [[ "$TAG_EXISTS" == *"release not found"* ]]; then
-            echo "No release tag found for version $VERSION."
-          else
-            echo "Release tag found: $TAG_EXISTS"
-            echo "Deleting release and tag: $TAG_EXISTS"
-            gh release delete "$TAG_EXISTS" -y --cleanup-tag
-            if git rev-parse "$TAG_EXISTS" >/dev/null 2>&1; then
-              git tag -d "$TAG_EXISTS"
-              git push origin --delete "$TAG_EXISTS"
-            else
-              echo "Tag $TAG_EXISTS not found locally."
-            fi
-          fi
-
-      - name: Get latest existing release tag
-        run: |
-          TAG=$(git tag --sort=-creatordate | grep -v "${{ env.version }}" | head -n 1 || true)
-          if [ -z "$TAG" ]; then
-            echo "No previous tag found."
-            CHANGELOG_URL="https://github.com/${{ github.repository }}/commits/${{ env.version }}"
-          else
-            echo "Previous tag: $TAG"
-            CHANGELOG_URL="https://github.com/${{ github.repository }}/compare/$TAG...${{ env.version }}"
-          fi
-          echo "tag=$TAG" >> $GITHUB_ENV
-          echo "changelog_url=$CHANGELOG_URL" >> $GITHUB_ENV
-
+#      - name: Install GitHub CLI
+#        run: sudo apt update && sudo apt upgrade -y && sudo apt install -y gh
+#
+#      - name: Authenticate GitHub CLI
+#        run: echo "$token" | gh auth login --with-token
+#        env:
+#          token: ${{ env.token }}
+#
+#      - name: Check for existing release
+#        run: |
+#          VERSION="${{ env.version }}"
+#          TAG_EXISTS=$(gh release view "$VERSION" --json tagName --jq ".tagName" 2>&1 || true)
+#          echo "TAG_EXISTS: $TAG_EXISTS"
+#          if [[ "$TAG_EXISTS" == *"release not found"* ]]; then
+#            echo "No release tag found for version $VERSION."
+#          else
+#            echo "Release tag found: $TAG_EXISTS"
+#            echo "Deleting release and tag: $TAG_EXISTS"
+#            gh release delete "$TAG_EXISTS" -y --cleanup-tag
+#            if git rev-parse "$TAG_EXISTS" >/dev/null 2>&1; then
+#              git tag -d "$TAG_EXISTS"
+#              git push origin --delete "$TAG_EXISTS"
+#            else
+#              echo "Tag $TAG_EXISTS not found locally."
+#            fi
+#          fi
+#
+#      - name: Get latest existing release tag
+#        run: |
+#          TAG=$(git tag --sort=-creatordate | grep -v "${{ env.version }}" | head -n 1 || true)
+#          if [ -z "$TAG" ]; then
+#            echo "No previous tag found."
+#            CHANGELOG_URL="https://github.com/${{ github.repository }}/commits/${{ env.version }}"
+#          else
+#            echo "Previous tag: $TAG"
+#            CHANGELOG_URL="https://github.com/${{ github.repository }}/compare/$TAG...${{ env.version }}"
+#          fi
+#          echo "tag=$TAG" >> $GITHUB_ENV
+#          echo "changelog_url=$CHANGELOG_URL" >> $GITHUB_ENV
+#
       - name: Calculate Hashes
         run: |
           FILE=${{ env.artifact }}.jar
@@ -98,21 +98,21 @@ jobs:
           echo "sha1=$SHA1" >> $GITHUB_ENV
           echo "sha256=$SHA256" >> $GITHUB_ENV
           echo "file=$FILE" >> $GITHUB_ENV
-
-      - name: Create new release
-        uses: softprops/action-gh-release@v2.2.1
-        with:
-          files: ${{ env.file }}
-          tag_name: ${{ env.version }}
-          name: "${{ env.repository}} - Release ${{ env.version }}"
-          body: |
-            **Full Changelog**: ${{ env.changelog_url }}
-
-            ## Checksums:
-
-            - MD5: ${{ env.md5 }}
-            - SHA1: ${{ env.sha1 }}
-            - SHA256: ${{ env.sha256 }}
+#
+#      - name: Create new release
+#        uses: softprops/action-gh-release@v2.2.1
+#        with:
+#          files: ${{ env.file }}
+#          tag_name: ${{ env.version }}
+#          name: "${{ env.repository}} - Release ${{ env.version }}"
+#          body: |
+#            **Full Changelog**: ${{ env.changelog_url }}
+#
+#            ## Checksums:
+#
+#            - MD5: ${{ env.md5 }}
+#            - SHA1: ${{ env.sha1 }}
+#            - SHA256: ${{ env.sha256 }}
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3.3.0
