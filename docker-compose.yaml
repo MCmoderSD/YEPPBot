@@ -1,0 +1,14 @@
+services:
+  yeppbot:
+    container_name: YEPPBot
+    image: mcmodersd/yeppbot:1.25.0-PTB-latest
+    restart: unless-stopped
+    volumes:
+      - ./config.json:/app/config.json
+      - ./account.key:/app/account.key
+      - ./privkey.pem:/app/privkey.pem
+      - ./fullchain.pem:/app/fullchain.pem
+
+networks:
+  default:
+    name: YEPPBot-Network

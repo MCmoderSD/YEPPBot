@@ -7,7 +7,7 @@ WORKDIR /app
 COPY /YEPPBot.jar /app/YEPPBot.jar
 
 # Expose Ports
-EXPOSE 443
+EXPOSE 420
 
 # Run Application
-ENTRYPOINT ["java", "-jar", "/app/YEPPBot.jar"]
+ENTRYPOINT ["java", "-jar", "/app/YEPPBot.jar", "-c", "/app/config.json"]
