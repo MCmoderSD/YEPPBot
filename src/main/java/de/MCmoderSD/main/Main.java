@@ -66,7 +66,7 @@ public class Main {
         // Set Debug Mode
         if (debug || dev) {
             DEBUG = true;
-            System.out.println(MessageHelper.DEBUG + "Debug mode is enabled");
+            System.out.printf("%s %s%n", MessageHelper.DEBUG, "Debug mode is enabled");
         }
 
         // Load Config

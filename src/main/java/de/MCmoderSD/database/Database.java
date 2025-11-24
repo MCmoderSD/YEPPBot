@@ -163,7 +163,7 @@ public class Database extends Driver {
 
                 // Insert into database
                 PreparedStatement insertStatement = connection.prepareStatement(
-                        "INSERT INTO UserImage (uuid, id, url, size, totalSize, type, format, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+                        "INSERT IGNORE INTO UserImage (uuid, id, url, size, totalSize, type, format, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
                 );
 
                 // Set the insert values
