@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS UserImage (
     totalSize       INT                         NOT NULL,       # Uncompressed Size
     type            ENUM('PROFILE', 'OFFLINE')  NOT NULL,       # Image Type (Profile or Offline)
     format          ENUM('JPEG', 'PNG', 'GIF')  NOT NULL,       # Image Format (JPEG, PNG, GIF)
-    image           MEDIUMBLOB    UNIQUE        NOT NULL,       # Image Data (compressed)
+    image           MEDIUMBLOB                  NOT NULL,       # Image Data (compressed)
     FOREIGN KEY (id) REFERENCES User(id) ON DELETE CASCADE      # Foreign Key to User Table
 )
     ROW_FORMAT = COMPRESSED     # Compressed Row Format

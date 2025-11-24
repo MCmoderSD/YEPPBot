@@ -85,7 +85,6 @@ public class Main {
         } else if (dev) config = JsonUtility.getInstance().load("/config/dev-config.json");
         else config = JsonUtility.getInstance().load("/config/config.json");
 
-
         // Check Config
         if (config == null || config.isNull() || config.isEmpty()) throw new IllegalArgumentException("Config file is missing or empty");
         if (!config.has("twitch") || config.get("twitch").isNull() || config.get("twitch").isEmpty()) throw new IllegalArgumentException("Config file missing 'twitch' section");

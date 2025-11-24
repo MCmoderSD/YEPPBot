@@ -21,9 +21,11 @@ import static de.MCmoderSD.utilities.FormatUUID.*;
 import static de.MCmoderSD.enums.UserImageType.*;
 import static de.MCmoderSD.tools.GZIP.*;
 
+import static java.util.UUID.fromString;
+
 public class UserImageTool {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws IOException, URISyntaxException {
 
         // Initialize SQL
         SQL sql = new SQL(JsonUtility.getInstance().load("/database.json"));
@@ -33,35 +35,112 @@ public class UserImageTool {
         System.out.println("Total Users: " + users.size());
 
         // Download Profile and Offline Images
-        for (TwitchUser user : users) {
+        for (var user : users) new Thread(() -> {
+
+            // Profile Image
             var profileUrl = user.getProfileImageUrl();
             if (profileUrl != null && validUUID(profileUrl.substring(47, 83))) sql.checkImage(user, profileUrl, PROFILE);
 
+            // Offline Image
             var offlineUrl = user.getOfflineImageUrl();
             if (offlineUrl != null && validUUID(offlineUrl.substring(47, 83))) sql.checkImage(user, offlineUrl, OFFLINE);
-        }
 
+        }).start();
+
+        // Write Images to Disk
         sql.writeImages();
     }
 
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private static class SQL extends Driver {
 
         public SQL(JsonNode config) {
+
+            // Initialize the Database Driver
             super(DatabaseType.MARIADB, config);
+
+            // Initialize Tables
+            try {
+
+                // User Table
+                PreparedStatement userTable = connection.prepareStatement(
+                        """
+                    
+                                # User Table Definition
+                    CREATE TABLE IF NOT EXISTS User (
+                        id              INT                 PRIMARY KEY,                                                # Twitch User ID
+                        username        VARCHAR(25)         UNIQUE                      NOT NULL,                       # Twitch Username
+                        displayName     VARCHAR(25)         UNIQUE                      NOT NULL,                       # Twitch Display Name
+                        type            ENUM('USER', 'STAFF', 'GLOBAL_MOD', 'ADMIN')    NOT NULL    DEFAULT 'USER',     # Type
+                        broadcasterType ENUM('NONE', 'AFFILIATE', 'PARTNER')            NOT NULL    DEFAULT 'NONE',     # Broadcaster Type
+                        user            BLOB                UNIQUE                      NOT NULL                        # TwitchUser Object (compressed)
+                    )
+                        ROW_FORMAT = COMPRESSED     # Compressed Row Format
+                        KEY_BLOCK_SIZE = 1          # Key Block Size
+                        CHARACTER SET = utf8mb4     # UTF-8 MB4 Character Set
+                        COLLATE utf8mb4_bin;        # Binary Collation for utf8mb4
+                    """
+                );
+
+                // UserImage Table
+                PreparedStatement userImageTable = connection.prepareStatement(
+                                """
+                    # UserImage Table Definition
+                    CREATE TABLE IF NOT EXISTS UserImage (
+                        uuid            UUID        PRIMARY KEY,                    # Image UUID
+                        id              INT                         NOT NULL,       # User ID
+                        url             TEXT        UNIQUE          NOT NULL,       # Image URL
+                        size            INT                         NOT NULL,       # Compressed Size
+                        totalSize       INT                         NOT NULL,       # Uncompressed Size
+                        type            ENUM('PROFILE', 'OFFLINE')  NOT NULL,       # Image Type (Profile or Offline)
+                        format          ENUM('JPEG', 'PNG', 'GIF')  NOT NULL,       # Image Format (JPEG, PNG, GIF)
+                        image           MEDIUMBLOB                  NOT NULL,       # Image Data (compressed)
+                        FOREIGN KEY (id) REFERENCES User(id) ON DELETE CASCADE      # Foreign Key to User Table
+                    )
+                        ROW_FORMAT = COMPRESSED     # Compressed Row Format
+                        KEY_BLOCK_SIZE = 1          # Key Block Size
+                        CHARACTER SET = utf8mb4     # UTF-8 MB4 Character Set
+                        COLLATE utf8mb4_bin;        # Binary Collation for utf8mb4
+                    """
+                );
+
+                // Execute Table Creation
+                userTable.executeUpdate();
+                userImageTable.executeUpdate();
+
+                // Close Resources
+                userTable.close();
+                userImageTable.close();
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to initialize UserImageTool tables: " + e.getMessage(), e);
+            }
         }
 
-        public HashSet<TwitchUser> getTwitchUsers() throws Exception {
+        public HashSet<TwitchUser> getTwitchUsers() {
+            try {
 
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT id, user FROM  User"
-            );
+                // Get all users
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        "SELECT id, user FROM  User"
+                );
 
-            var resultSet = preparedStatement.executeQuery();
-            HashSet<TwitchUser> users = new HashSet<>();
-            while (resultSet.next()) users.add((TwitchUser) inflateObject(resultSet.getBytes("user")));
-            return users;
+                // Execute query
+                var resultSet = preparedStatement.executeQuery();
+
+                // Process results
+                HashSet<TwitchUser> users = new HashSet<>();
+                while (resultSet.next()) users.add((TwitchUser) inflateObject(resultSet.getBytes("user")));
+
+                // Close resources
+                resultSet.close();
+                preparedStatement.close();
+
+                // Return users
+                return users;
+
+            } catch (SQLException | IOException | ClassNotFoundException e) {
+                throw new RuntimeException("Failed to get TwitchUsers: " + e.getMessage(), e);
+            }
         }
 
         public void checkImage(TwitchUser user, String imageUrl, UserImageType imageType) {
@@ -69,7 +148,7 @@ public class UserImageTool {
                 try {
 
                     // Image UUID
-                    var uuid = asBytes(UUID.fromString(imageUrl.substring(47, 83)));
+                    var uuid = asBytes(fromString(imageUrl.substring(47, 83)));
 
                     // Check if image is already downloaded
                     PreparedStatement checkStatement = connection.prepareStatement(
@@ -98,7 +177,7 @@ public class UserImageTool {
                     try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
                         imageData = bufferedInputStream.readAllBytes();
                     } catch (IOException | URISyntaxException e) {
-                        throw new RuntimeException("Failed to download image from URL: " + imageUrl, e);
+                        throw new IOException("Failed to download image from URL: " + imageUrl, e);
                     }
 
                     // Compress Image
@@ -135,38 +214,50 @@ public class UserImageTool {
             }).start();
         }
 
-        public void writeImages() throws Exception {
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        public void writeImages() {
+            try {
 
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT i.image, u.user, i.uuid, i.type, i.format FROM UserImage i JOIN User u ON i.id = u.id;"
-            );
+                // Get all images
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        "SELECT i.image, u.user, i.uuid, i.type, i.format FROM UserImage i, User u WHERE i.id = u.id;"
+                );
 
-            var resultSet = preparedStatement.executeQuery();
+                // Execute query
+                var resultSet = preparedStatement.executeQuery();
 
-            // Create directories
-            File dir = new File("UserImages/");
-            File profileDir = new File(dir, "Profile/");
-            File offlineDir = new File(dir, "Offline/");
-            if (!profileDir.exists()) profileDir.mkdirs();
-            if (!offlineDir.exists()) offlineDir.mkdirs();
+                // Create directories
+                File dir = new File("UserImages/");
+                File profileDir = new File(dir, "Profile/");
+                File offlineDir = new File(dir, "Offline/");
+                if (!profileDir.exists()) profileDir.mkdirs();
+                if (!offlineDir.exists()) offlineDir.mkdirs();
 
-            while (resultSet.next()) {
+                // Write images
+                while (resultSet.next()) {
+                    try {
 
-                // Get Data
-                byte[] imageData = inflate(resultSet.getBytes("image"));
-                TwitchUser user = (TwitchUser) inflateObject(resultSet.getBytes("user"));
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                UserImageType imageType = UserImageType.valueOf(resultSet.getString("type"));
-                ImageFormat imageFormat = ImageFormat.valueOf(resultSet.getString("format"));
+                        // Get Data
+                        byte[] imageData = inflate(resultSet.getBytes("image"));
+                        TwitchUser user = (TwitchUser) inflateObject(resultSet.getBytes("user"));
+                        UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                        UserImageType imageType = UserImageType.valueOf(resultSet.getString("type"));
+                        ImageFormat imageFormat = ImageFormat.valueOf(resultSet.getString("format"));
 
-                // Create file
-                File imageFile = switch (imageType) {
-                    case PROFILE -> new File(profileDir, user.getDisplayName() + "_" + uuid + "." + imageFormat.name().toLowerCase());
-                    case OFFLINE -> new File(offlineDir, user.getDisplayName() + "_" + uuid + "." + imageFormat.name().toLowerCase());
-                };
+                        // Create file
+                        File imageFile = switch (imageType) {
+                            case PROFILE -> new File(profileDir, user.getDisplayName() + "_" + uuid + "." + imageFormat.name().toLowerCase());
+                            case OFFLINE -> new File(offlineDir, user.getDisplayName() + "_" + uuid + "." + imageFormat.name().toLowerCase());
+                        };
 
-                // Write file
-                Files.write(imageFile.toPath(), imageData);
+                        // Write file
+                        Files.write(imageFile.toPath(), imageData);
+                    } catch (IOException | ClassNotFoundException | SQLException e) {
+                        throw new RuntimeException("Failed to write user image: " + e.getMessage(), e);
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to write user images: " + e.getMessage(), e);
             }
         }
     }
