@@ -3,14 +3,13 @@ package de.MCmoderSD.database.manager;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static de.MCmoderSD.tools.GZIP.inflateObject;
+import static de.MCmoderSD.utilities.ZipUtil.inflateTwitchUser;
 
 public class ChannelManager {
 
@@ -31,14 +30,6 @@ public class ChannelManager {
 
         // Set Attributes
         connection = database.getConnection();
-    }
-
-    private static TwitchUser inflateTwitchUser(byte[] data) {
-        try {
-            return (TwitchUser) inflateObject(data);
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Failed to inflate TwitchUser object: " + e.getMessage(), e);
-        }
     }
 
     private void addChannel(TwitchUser channel) {

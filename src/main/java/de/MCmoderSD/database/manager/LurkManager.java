@@ -4,13 +4,12 @@ import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static de.MCmoderSD.tools.GZIP.inflateObject;
 import static de.MCmoderSD.utilities.FormatUUID.asBytes;
+import static de.MCmoderSD.utilities.ZipUtil.inflateEvent;
 
 public class LurkManager {
 
@@ -31,14 +30,6 @@ public class LurkManager {
 
         // Set Attributes
         connection = database.getConnection();
-    }
-
-    private static MessageEvent inflateEvent(byte[] data) {
-        try {
-            return (MessageEvent) inflateObject(data);
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Failed to inflate TwitchUser object: " + e.getMessage(), e);
-        }
     }
 
     public void addLurk(MessageEvent event) {

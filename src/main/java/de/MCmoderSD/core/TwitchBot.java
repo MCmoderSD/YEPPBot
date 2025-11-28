@@ -337,8 +337,9 @@ public class TwitchBot {
         // Check Message
         if (message.isBlank() || message.length() > 500) return false;
 
-        // Variables
-        TwitchUser channel = event.getChannel();
+        // Get Channel
+        boolean oldEvent = System.currentTimeMillis() - event.getFiredAt().toEpochMilli() > 60000;
+        TwitchUser channel = oldEvent ? userHandler.getTwitchUser(event.getChannel().getId()) : event.getChannel();
 
         // Check Channel
         if (!isChannelJoined(channel)) if (!joinChannel(channel)) return false;
