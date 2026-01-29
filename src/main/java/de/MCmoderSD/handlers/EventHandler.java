@@ -5,7 +5,6 @@ import com.github.twitch4j.chat.events.channel.ChannelMessageActionEvent;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.chat.events.channel.RaidEvent;
 
-import com.github.twitch4j.eventsub.domain.chat.Raid;
 import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
 import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.database.Database;
@@ -134,7 +133,7 @@ public class EventHandler {
             var messageEvent = new MessageEvent(event, this);
 
             // ToDo DEBUG
-            //System.out.println("Nonce: " + event.getNonce() + " Device Type: " + messageEvent.getDeviceType());
+            //IO.println("Nonce: " + event.getNonce() + " Device Type: " + messageEvent.getDeviceType());
             System.out.printf("%s <%s> #%s: %s%n", DEBUG, messageEvent.getChannel().getDisplayName(), messageEvent.getUser().getDisplayName(), messageEvent.getMessage());
 
             // Log Message Event
@@ -157,7 +156,7 @@ public class EventHandler {
             var messageEvent = new MessageEvent(event, this);
 
             // ToDo DEBUG
-            //System.out.println("Nonce: " + event.getNonce() + " Device Type: " + messageEvent.getDeviceType());
+            //IO.println("Nonce: " + event.getNonce() + " Device Type: " + messageEvent.getDeviceType());
             System.out.printf("%s <%s> #%s: %s%n", DEBUG, messageEvent.getChannel().getDisplayName(), messageEvent.getUser().getDisplayName(), messageEvent.getMessage());
 
             // Log Message Event

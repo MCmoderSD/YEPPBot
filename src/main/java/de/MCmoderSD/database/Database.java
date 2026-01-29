@@ -7,8 +7,6 @@ import de.MCmoderSD.enums.UserImageType;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.sql.Driver;
 
-import tools.jackson.databind.JsonNode;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -38,10 +36,14 @@ public class Database extends Driver {
     private final QuoteManager quoteManager;
 
     // Constructor
-    public Database(DatabaseType databaseType, JsonNode config, TwitchBot twitchBot) {
+    public Database(Builder builder, TwitchBot twitchBot) {
 
         // Initialize Driver
-        super(databaseType, config);
+        super(builder);
+
+        // Connect to Database
+        setAutoReconnect(true);
+        connect();
 
         // Check Parameters
         if (twitchBot == null) throw new IllegalArgumentException("TwitchBot cannot be null");

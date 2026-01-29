@@ -18,14 +18,14 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5.0.0
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'zulu'
 
       - name: Extract version and artifact name
@@ -101,7 +101,7 @@ jobs:
           echo "file=$FILE" >> $GITHUB_ENV
 
       - name: Create new release
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.file }}
           tag_name: ${{ env.version }}
@@ -116,7 +116,7 @@ jobs:
             - SHA256: ${{ env.sha256 }}
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -125,10 +125,10 @@ jobs:
         run: mv "${{ env.file }}" "YEPPBot.jar"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.10.0
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push to Docker Hub
-        uses: docker/build-push-action@v6.15.0
+        uses: docker/build-push-action@v6
         with:
           context: ./
           push: true

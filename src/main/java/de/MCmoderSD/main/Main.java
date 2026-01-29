@@ -1,6 +1,7 @@
 package de.MCmoderSD.main;
 
 import de.MCmoderSD.core.TwitchBot;
+import de.MCmoderSD.helix.enums.Scope;
 import de.MCmoderSD.helix.handler.*;
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.server.core.Server;
@@ -11,6 +12,8 @@ import tools.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static de.MCmoderSD.utilities.MessageHelper.ICON;
 
@@ -25,8 +28,7 @@ public class Main {
     // Attributes
     private static final long UPTIME = System.nanoTime();
 
-    @SuppressWarnings("CommentedOutCode")
-    public static void main(String[] args) {
+    void main(String[] args) {
         try {
 
             // Initialize Twitch Bot
@@ -35,22 +37,24 @@ public class Main {
             // Token Grabber active
             if (twitchBot == null) return;
 
+            Scope[] all = Scope.values();
+            Scope[] used = new ArrayList<>(Arrays.asList(
+                    UserHandler.REQUIRED_SCOPES,
+                    ChatHandler.REQUIRED_SCOPES,
+                    RoleHandler.REQUIRED_SCOPES,
+                    StreamHandler.REQUIRED_SCOPES,
+                    ChannelHandler.REQUIRED_SCOPES
+            )).stream().flatMap(Stream::of).distinct().toArray(Scope[]::new);
+            IO.println("Authenticate: " + twitchBot.getHelixHandler().getAuthorizationUrl(used));
+
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException("Failed to initialize Twitch Bot", e);
         }
 
-//        Scope[] all = Scope.values();
-//        Scope[] used = new ArrayList<>(Arrays.asList(
-//                UserHandler.REQUIRED_SCOPES,
-//                ChatHandler.REQUIRED_SCOPES,
-//                RoleHandler.REQUIRED_SCOPES,
-//                StreamHandler.REQUIRED_SCOPES,
-//                ChannelHandler.REQUIRED_SCOPES)
-//        ).stream().flatMap(Stream::of).distinct().toArray(Scope[]::new);
-//        System.out.println("Authenticate: " + twitchBot.getHelixHandler().getAuthorizationUrl(used));
 
-        System.out.println("Twitch Bot startup took " + ((System.nanoTime() - UPTIME) / 1_000_000) + " ms");
-        System.out.println("Twitch Bot is now running. Version: " + VERSION);
+
+        IO.println("Twitch Bot startup took " + ((System.nanoTime() - UPTIME) / 1_000_000) + " ms");
+        IO.println("Twitch Bot is now running. Version: " + VERSION);
     }
 
     private static TwitchBot init(ArrayList<String> args) throws IOException, URISyntaxException {

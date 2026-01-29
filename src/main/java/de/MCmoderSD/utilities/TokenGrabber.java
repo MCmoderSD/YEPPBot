@@ -33,9 +33,9 @@ public class TokenGrabber {
         String redirectURL = application.get("oAuthRedirectURL").asString();
 
         // Print Credentials
-        System.out.println("\nTwitch Application Credentials:");
-        System.out.println(" - Client ID: " + clientId);
-        System.out.println(" - OAuth Redirect URL: " + redirectURL);
+        IO.println("\nTwitch Application Credentials:");
+        IO.println(" - Client ID: " + clientId);
+        IO.println(" - OAuth Redirect URL: " + redirectURL);
 
         // Build Scopes
         StringBuilder scopeBuilder = new StringBuilder();

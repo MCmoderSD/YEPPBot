@@ -1,6 +1,6 @@
 
-# Base Image JRE 21
-FROM eclipse-temurin:21-jre-alpine
+# Base Image JRE 25
+FROM eclipse-temurin:25-jre-alpine
 
 # Set Up
 WORKDIR /app

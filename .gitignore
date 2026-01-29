@@ -9,9 +9,6 @@ certificates/account.key
 certificates/fullchain.pem
 certificates/privkey.pem
 
-### Docs ###
-docs/java/
-
 ### Output ###
 out/artifacts/
 UserImages/

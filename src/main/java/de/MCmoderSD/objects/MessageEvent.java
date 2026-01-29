@@ -111,23 +111,22 @@ public class MessageEvent implements Serializable {
 
     // Methods
     public void printInfo() {
-        System.out.println("--- Message Event Info ---");
-        System.out.println("Event ID: " + id);
-        System.out.println("Fired At: " + ofPattern(TIMESTAMP_FORMAT).withZone(ZoneId.systemDefault()).format(firedAt));
-        System.out.println("Channel: " + channel.getDisplayName() + " (ID: " + channel.getId() + ")");
-        System.out.println("User: " + user.getDisplayName() +       " (ID: " + user.getId() + ")");
-        System.out.println("Message: " + message);
-
-        System.out.println("Permissions: " + Arrays.toString(permissions.toArray()));
-        System.out.println("Device Type: " + deviceType);
-        System.out.println("Subscription Tier: " + subTier);
-        System.out.println("Subscriber Months: " + subMonths);
-        System.out.println("Is Action: " + isAction);
-        System.out.println("Is Highlighted: " + isHighlighted);
-        System.out.println("Is First Message: " + isFirstMessage);
-        System.out.println("Is User Introduction: " + isUserIntroduction);
-        System.out.println("Is Skip Subs Mode Message: " + isSkipSubsModeMessage);
-        System.out.println("--------------------------");
+        IO.println("--- Message Event Info ---");
+        IO.println("Event ID: " + id);
+        IO.println("Fired At: " + ofPattern(TIMESTAMP_FORMAT).withZone(ZoneId.systemDefault()).format(firedAt));
+        IO.println("Channel: " + channel.getDisplayName() + " (ID: " + channel.getId() + ")");
+        IO.println("User: " + user.getDisplayName() +       " (ID: " + user.getId() + ")");
+        IO.println("Message: " + message);
+        IO.println("Permissions: " + Arrays.toString(permissions.toArray()));
+        IO.println("Device Type: " + deviceType);
+        IO.println("Subscription Tier: " + subTier);
+        IO.println("Subscriber Months: " + subMonths);
+        IO.println("Is Action: " + isAction);
+        IO.println("Is Highlighted: " + isHighlighted);
+        IO.println("Is First Message: " + isFirstMessage);
+        IO.println("Is User Introduction: " + isUserIntroduction);
+        IO.println("Is Skip Subs Mode Message: " + isSkipSubsModeMessage);
+        IO.println("--------------------------");
     }
 
     // Getters

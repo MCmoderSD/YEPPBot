@@ -1,0 +1,10 @@
+### IntelliJ IDEA ###
+.idea/
+
+### Maven ###
+.mvn/
+
+### Test Files ###
+TestStatic.webm
+TwitchBot.zip
+storage.zip
