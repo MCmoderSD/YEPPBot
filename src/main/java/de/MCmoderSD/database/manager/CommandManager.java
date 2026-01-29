@@ -3,7 +3,9 @@ package de.MCmoderSD.database.manager;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.objects.MessageEvent;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -15,9 +17,6 @@ public class CommandManager {
     // Associations
     private final Database database;
 
-    // Attributes
-    private final Connection connection;
-
     // Constructor
     public CommandManager(Database database) {
 
@@ -26,9 +25,6 @@ public class CommandManager {
 
         // Set Associations
         this.database = database;
-
-        // Set Attributes
-        connection = database.getConnection();
     }
 
     public void logResponse(MessageEvent event, String command, String response) {
@@ -46,7 +42,7 @@ public class CommandManager {
                 Timestamp firedAt = new Timestamp(System.currentTimeMillis());      // Current Timestamp
 
                 // Insert message content
-                PreparedStatement insertContentStatement = connection.prepareStatement(
+                PreparedStatement insertContentStatement = database.getConnection().prepareStatement(
                         "INSERT IGNORE INTO MessageContent (hash, content) VALUES (?, ?);"
                 );
 
@@ -64,7 +60,7 @@ public class CommandManager {
                 database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert message event
-                PreparedStatement insertEventStatement = connection.prepareStatement(
+                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO ResponseMessage (id, firedAt, channelId, userId, command, content, messageId) VALUES (?, ?, ?, ?, ?, ?, ?);"
                 );
 
@@ -105,7 +101,7 @@ public class CommandManager {
                 Timestamp firedAt = new Timestamp(System.currentTimeMillis());
 
                 // Insert command arguments
-                PreparedStatement insertArgsStatement = connection.prepareStatement(
+                PreparedStatement insertArgsStatement = database.getConnection().prepareStatement(
                         "INSERT IGNORE INTO MessageContent (hash, content) VALUES (?, ?);"
                 );
 
@@ -123,7 +119,7 @@ public class CommandManager {
                 database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert command event
-                PreparedStatement insertEventStatement = connection.prepareStatement(
+                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO CommandLog (messageId, firedAt, channelId, userId, command, args) VALUES (?, ?, ?, ?, ?, ?);"
                 );
 

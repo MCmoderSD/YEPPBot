@@ -6,7 +6,6 @@ import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.objects.RaidEvent;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -21,9 +20,6 @@ public class EventLogManager {
     // Associations
     private final Database database;
 
-    // Attributes
-    private final Connection connection;
-
     // Constructor
     public EventLogManager(Database database) {
 
@@ -32,16 +28,13 @@ public class EventLogManager {
 
         // Set Associations
         this.database = database;
-
-        // Set Attributes
-        connection = database.getConnection();
     }
 
     public boolean waitTillMessageLogged(UUID messageId, int attemptsLeft) {
         try {
 
             // Prepare the query
-            PreparedStatement checkStatement = connection.prepareStatement(
+            PreparedStatement checkStatement = database.getConnection().prepareStatement(
                     "SELECT COUNT(*) FROM MessageEvent WHERE id = ?;"
             );
 
@@ -78,7 +71,7 @@ public class EventLogManager {
                 byte[] contentHash = xxHash64(event.getMessage());
 
                 // Insert message content
-                PreparedStatement insertContentStatement = connection.prepareStatement(
+                PreparedStatement insertContentStatement = database.getConnection().prepareStatement(
                         "INSERT IGNORE INTO MessageContent (hash, content) VALUES (?, ?);"
                 );
 
@@ -93,7 +86,7 @@ public class EventLogManager {
                 insertContentStatement.close();
 
                 // Insert message event
-                PreparedStatement insertEventStatement = connection.prepareStatement(
+                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO MessageEvent (id, firedAt, channelId, userId, content, deviceType, subTier, subMonths, action, highlighted, firstMessage, userIntroduction, skipSubsModeMessage, event) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
                 );
 
@@ -133,7 +126,7 @@ public class EventLogManager {
                 if (event == null) throw new IllegalArgumentException("RaidEvent cannot be null");
 
                 // Insert raid event
-                PreparedStatement insertEventStatement = connection.prepareStatement(
+                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO RaidEvent (id, firedAt, channelId, userId, viewers, event) VALUES (?, ?, ?, ?, ?, ?);"
                 );
 
@@ -168,7 +161,7 @@ public class EventLogManager {
                 byte[] eventData = deflateObject(event);
 
                 // Insert raid event
-                PreparedStatement insertEventStatement = connection.prepareStatement(
+                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO FollowEvent (followedAt, channelId, userId, event) VALUES (?, ?, ?, ?);"
                 );
 

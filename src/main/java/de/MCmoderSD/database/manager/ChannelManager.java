@@ -3,7 +3,6 @@ package de.MCmoderSD.database.manager;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -16,9 +15,6 @@ public class ChannelManager {
     // Associations
     private final Database database;
 
-    // Attributes
-    private final Connection connection;
-
     // Constructor
     public ChannelManager(Database database) {
 
@@ -27,9 +23,6 @@ public class ChannelManager {
 
         // Set Associations
         this.database = database;
-
-        // Set Attributes
-        connection = database.getConnection();
     }
 
     private void addChannel(TwitchUser channel) {
@@ -43,7 +36,7 @@ public class ChannelManager {
                 database.addTwitchUser(channel);
 
                 // Insert channel
-                PreparedStatement insertChannelStatement = connection.prepareStatement(
+                PreparedStatement insertChannelStatement = database.getConnection().prepareStatement(
                         "INSERT IGNORE INTO Channel (id) VALUES (?)"
                 );
 
@@ -73,7 +66,7 @@ public class ChannelManager {
                 addChannel(channel);
 
                 // Update channel active status
-                PreparedStatement updateChannelStatement = connection.prepareStatement(
+                PreparedStatement updateChannelStatement = database.getConnection().prepareStatement(
                         "UPDATE Channel SET active = ? WHERE id = ?"
                 );
 
@@ -105,7 +98,7 @@ public class ChannelManager {
         try {
 
             // Prepare statement
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            PreparedStatement preparedStatement = database.getConnection().prepareStatement(
                     "SELECT user, active FROM User u, Channel c WHERE u.id = c.id"
             );
 
@@ -141,7 +134,7 @@ public class ChannelManager {
                 addChannel(channel);
 
                 // Update channel auto shoutout status
-                PreparedStatement updateChannelStatement = connection.prepareStatement(
+                PreparedStatement updateChannelStatement = database.getConnection().prepareStatement(
                         "UPDATE Channel SET autoShoutout = ? WHERE id = ?"
                 );
 
@@ -175,7 +168,7 @@ public class ChannelManager {
         try {
 
             // Prepare statement
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            PreparedStatement preparedStatement = database.getConnection().prepareStatement(
                     "SELECT id, autoShoutout FROM Channel"
             );
 
@@ -211,7 +204,7 @@ public class ChannelManager {
             addChannel(channel);
 
             // Insert blacklist entry
-            PreparedStatement insertBlacklistStatement = connection.prepareStatement(
+            PreparedStatement insertBlacklistStatement = database.getConnection().prepareStatement(
                     "INSERT IGNORE INTO Blacklist (id, command) VALUES (?, ?)"
             );
 
@@ -244,7 +237,7 @@ public class ChannelManager {
             addChannel(channel);
 
             // Delete blacklist entry
-            PreparedStatement deleteBlacklistStatement = connection.prepareStatement(
+            PreparedStatement deleteBlacklistStatement = database.getConnection().prepareStatement(
                     "DELETE IGNORE FROM Blacklist WHERE id = ? AND command = ?"
             );
 
@@ -270,7 +263,7 @@ public class ChannelManager {
         try {
 
             // Prepare statement
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            PreparedStatement preparedStatement = database.getConnection().prepareStatement(
                     "SELECT id, command FROM Blacklist"
             );
 

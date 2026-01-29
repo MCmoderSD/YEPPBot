@@ -13,8 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import java.util.*;
+import java.util.ArrayList;
 
 import static de.MCmoderSD.enums.ImageFormat.getFormat;
 import static de.MCmoderSD.utilities.FormatUUID.*;

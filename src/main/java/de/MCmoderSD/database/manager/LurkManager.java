@@ -4,7 +4,9 @@ import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -16,9 +18,6 @@ public class LurkManager {
     // Associations
     private final Database database;
 
-    // Attributes
-    private final Connection connection;
-
     // Constructor
     public LurkManager(Database database) {
 
@@ -27,9 +26,6 @@ public class LurkManager {
 
         // Set Associations
         this.database = database;
-
-        // Set Attributes
-        connection = database.getConnection();
     }
 
     public void addLurk(MessageEvent event) {
@@ -43,7 +39,7 @@ public class LurkManager {
                 database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert lurk entry
-                PreparedStatement insertLurkStatement = connection.prepareStatement(
+                PreparedStatement insertLurkStatement = database.getConnection().prepareStatement(
                         "INSERT INTO Lurker (eventId, lurkerId) VALUES (?, ?);"
                 );
 
@@ -71,7 +67,7 @@ public class LurkManager {
                 if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
                 // Insert traitor entry
-                PreparedStatement insertTraitorStatement = connection.prepareStatement(
+                PreparedStatement insertTraitorStatement = database.getConnection().prepareStatement(
                         "UPDATE Lurker SET traitor = ? WHERE lurkerId = ?;"
                 );
 
@@ -99,7 +95,7 @@ public class LurkManager {
                 if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
                 // Delete lurk entry
-                PreparedStatement deleteLurkStatement = connection.prepareStatement(
+                PreparedStatement deleteLurkStatement = database.getConnection().prepareStatement(
                         "DELETE FROM Lurker WHERE lurkerId = ?;"
                 );
 
@@ -125,7 +121,7 @@ public class LurkManager {
             if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
             // Query lurk time
-            PreparedStatement queryLurkTimeStatement = connection.prepareStatement(
+            PreparedStatement queryLurkTimeStatement = database.getConnection().prepareStatement(
                     "SELECT e.firedAt FROM Lurker l, MessageEvent e WHERE lurkerId = ? AND e.id = l.eventId;"
             );
 
@@ -163,7 +159,7 @@ public class LurkManager {
             if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
             // Query lurk event
-            PreparedStatement queryLurkEventStatement = connection.prepareStatement(
+            PreparedStatement queryLurkEventStatement = database.getConnection().prepareStatement(
                     "SELECT event FROM MessageEvent e, Lurker l WHERE lurkerId = ? AND e.id = l.eventId;"
             );
 
@@ -198,7 +194,7 @@ public class LurkManager {
         try {
 
             // Query lurk entries
-            PreparedStatement queryLurkStatement = connection.prepareStatement(
+            PreparedStatement queryLurkStatement = database.getConnection().prepareStatement(
                     "SELECT userId, channelId FROM MessageEvent e, Lurker l WHERE e.id = l.eventId;"
             );
 
@@ -227,7 +223,7 @@ public class LurkManager {
         try {
 
             // Query traitors entries
-            PreparedStatement queryTraitorsStatement = connection.prepareStatement(
+            PreparedStatement queryTraitorsStatement = database.getConnection().prepareStatement(
                     "SELECT lurkerId FROM Lurker WHERE traitor = TRUE;"
             );
 

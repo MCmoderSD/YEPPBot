@@ -3,7 +3,6 @@ package de.MCmoderSD.database.manager;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,9 +13,6 @@ public class QuoteManager {
     // Associations
     private final Database database;
 
-    // Attributes
-    private final Connection connection;
-
     // Constructor
     public QuoteManager(Database database) {
 
@@ -25,9 +21,6 @@ public class QuoteManager {
 
         // Set Associations
         this.database = database;
-
-        // Set Attributes
-        connection = database.getConnection();
     }
 
     public LinkedHashMap<Integer, String> getQuotes(TwitchUser channel) {
@@ -37,7 +30,7 @@ public class QuoteManager {
             if (channel == null) throw new IllegalArgumentException("TwitchUser channel cannot be null");
 
             // Prepare the query
-            var getQuotesStatement = connection.prepareStatement(
+            var getQuotesStatement = database.getConnection().prepareStatement(
                     "SELECT id, quote FROM Quote WHERE channelId = ? ORDER BY id;"
             );
 
@@ -80,7 +73,7 @@ public class QuoteManager {
                 for (var i = 0; i < quoteIds.size(); i++) {
 
                     // Prepare statement
-                    updateQuoteStatement = connection.prepareStatement(
+                    updateQuoteStatement = database.getConnection().prepareStatement(
                             "UPDATE Quote SET id = ? WHERE channelId = ? AND id = ?"
                     );
 
@@ -116,7 +109,7 @@ public class QuoteManager {
                 var index = getQuotes(channel).size();
 
                 // Insert quote entry
-                var insertQuoteStatement = connection.prepareStatement(
+                var insertQuoteStatement = database.getConnection().prepareStatement(
                         "INSERT INTO Quote (channelId, id, quote) VALUES (?, ?, ?);"
                 );
 
@@ -146,7 +139,7 @@ public class QuoteManager {
                 if (channel == null) throw new IllegalArgumentException("TwitchUser channel cannot be null");
 
                 // Delete quote entry
-                var deleteQuoteStatement = connection.prepareStatement(
+                var deleteQuoteStatement = database.getConnection().prepareStatement(
                         "DELETE FROM Quote WHERE channelId = ? AND id = ?;"
                 );
 
@@ -179,7 +172,7 @@ public class QuoteManager {
                 if (channel == null) throw new IllegalArgumentException("TwitchUser channel cannot be null");
 
                 // Update quote entry
-                var updateQuoteStatement = connection.prepareStatement(
+                var updateQuoteStatement = database.getConnection().prepareStatement(
                         "UPDATE Quote SET quote = ? WHERE channelId = ? AND id = ?;"
                 );
 
