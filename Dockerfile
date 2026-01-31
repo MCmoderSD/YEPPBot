@@ -10,4 +10,9 @@ COPY /YEPPBot.jar /app/YEPPBot.jar
 EXPOSE 420
 
 # Run Application
-ENTRYPOINT ["java", "-jar", "/app/YEPPBot.jar", "-c", "/app/config.json"]
+ENTRYPOINT ["java",
+    "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+    "--add-opens", "java.base/sun.misc=ALL-UNNAMED",
+    "-jar", "/app/YEPPBot.jar",
+    "-c", "/app/config.json"
+]

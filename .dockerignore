@@ -4,6 +4,22 @@
 ### Maven ###
 .mvn/
 
+### Certificates ###
+certificates/account.key
+certificates/fullchain.pem
+certificates/privkey.pem
+
+### Output ###
+out/artifacts/
+UserImages/
+
+### Resources ###
+src/main/resources/config/config.json
+src/main/resources/config/dev-config.json
+src/main/resources/META-INF/
+src/main/resources.zip
+src/test/resources/
+
 ### Test Files ###
 TestStatic.webm
 TwitchBot.zip
