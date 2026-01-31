@@ -121,25 +121,12 @@ public class TwitchBot {
         lurkManager = database.getLurkManager();
         quoteManager = database.getQuoteManager();
 
-        // Parse Owners
-        HashSet<Integer> ownerIds = new HashSet<>();
-        for (var owner : twitchConfig.get("owner")) ownerIds.add(owner.asInt());
-
-        // Parse Bot Aliases
-        botAliases = new HashSet<>();
-        for (var alias : twitchConfig.get("botAlias")) botAliases.add(alias.asString());
-
         // Parse Config
         JsonNode applicationConfig = twitchConfig.get("application");
         JsonNode credentialConfig = applicationConfig.get("credentials");
         String oauthToken = twitchConfig.get("oauthToken").asString();
         String clientId = credentialConfig.get("clientId").asString();
         String clientSecret = credentialConfig.get("clientSecret").asString();
-
-        // Parse Prefixes
-        prefixes = new ArrayList<>();
-        for (var prefix : twitchConfig.get("prefix")) prefixes.add(prefix.asString());
-        prefix = prefixes.getFirst();
 
         // Initialize Twitch Client Builder
         TwitchClientBuilder clientBuilder = TwitchClientBuilder.builder();
@@ -156,8 +143,17 @@ public class TwitchBot {
 
         // Obtain Twitch Users
         botUser = obtainBotUser(defaultAuthToken);
-        owners = obtainOwnerUsers(ownerIds, defaultAuthToken);
+        owners = obtainOwnerUsers(twitchConfig.get("owner"), defaultAuthToken);
         owners.add(botUser);
+
+        // Parse Bot Aliases
+        botAliases = new HashSet<>();
+        for (var alias : twitchConfig.get("botAlias")) botAliases.add(alias.asString());
+
+        // Parse Prefixes
+        prefixes = new ArrayList<>();
+        for (var prefix : twitchConfig.get("prefix")) prefixes.add(prefix.asString());
+        prefix = prefixes.getFirst();
 
         // Set Owners and Prefixes
         for (var owner : owners) clientBuilder =  clientBuilder.withBotOwnerId(owner.getId().toString());   // Set Owners
@@ -206,7 +202,7 @@ public class TwitchBot {
         new Status(this);
 
         // Add Initial Channels from Config to Database
-        HashSet<TwitchUser> configChannels = checkChannelConfig(twitchConfig, userHandler);
+        HashSet<TwitchUser> configChannels = obtainChannels(twitchConfig.get("channel"), userHandler);
         for (var channel : configChannels) channelManager.joinChannel(channel);
         channelManager.joinChannel(botUser); // Ensure Bot Joins Its Own Channel
 
@@ -230,62 +226,197 @@ public class TwitchBot {
         return new TwitchUser(TwitchClientBuilder.builder().withEnableHelix(true).build().getHelix().getUsers(defaultAuthToken.getAccessToken(), null, null).execute().getUsers().getFirst());
     }
 
-    private static HashSet<TwitchUser> obtainOwnerUsers(HashSet<Integer> ownerIds, OAuth2Credential defaultAuthToken) {
+    private static HashSet<TwitchUser> obtainOwnerUsers(JsonNode ownerArray, OAuth2Credential defaultAuthToken) {
 
         // Check Parameters
-        if (ownerIds == null || ownerIds.isEmpty()) throw new IllegalArgumentException("Owner IDs cannot be null or empty");
+        if (ownerArray == null || ownerArray.isNull() || ownerArray.isEmpty() || !ownerArray.isArray()) throw new IllegalArgumentException("Owner IDs cannot be null, empty, and must be an array");
         if (defaultAuthToken == null) throw new IllegalArgumentException("Default Auth Token cannot be null");
 
-        // Variables
-        HashSet<TwitchUser> owners = new HashSet<>();
+        // Initialize Temporary Helix Client
         TwitchHelix tempHelix = TwitchClientBuilder.builder().withEnableHelix(true).build().getHelix();
 
-        // Check size and chunk
-        var size = ownerIds.size();
-        if (size > 100) {
-            for (var i = 0; i < size; i += 100) owners.addAll(obtainOwnerUsers(new HashSet<>(ownerIds.stream().toList().subList(i, Math.min(i + 100, size))), defaultAuthToken));
-            return owners;
+        // Parse Owners
+        HashSet<Integer> ownerIds = new HashSet<>();
+        HashSet<String> ownerNames = new HashSet<>();
+        for (var owner : ownerArray) {
+            if (owner == null || owner.isNull()) throw new IllegalArgumentException("Owner ID/Name cannot be null or empty");
+            if (owner.isInt()) ownerIds.add(owner.asInt());
+            else if (owner.isString()) ownerNames.add(owner.asString().toLowerCase());
+            else throw new IllegalArgumentException("Owner ID/Name must be an integer or string");
         }
 
-        // Get Users
-        var userList = tempHelix.getUsers(defaultAuthToken.getAccessToken(), ownerIds.stream().map(Object::toString).toList(), null).execute();
-        if (userList == null) throw new IllegalStateException("Failed to get owner users");
-        var users = userList.getUsers();
-        if (users == null) throw new IllegalStateException("Failed to get owner users");
+        // Batch Owner IDs
+        HashSet<HashSet<Integer>> idBatches = new HashSet<>();
+        HashSet<Integer> currentBatch = new HashSet<>();
+        for (var id : ownerIds) {
+            currentBatch.add(id);
+            if (currentBatch.size() == 100) {
+                idBatches.add(currentBatch);
+                currentBatch = new HashSet<>();
+            }
+        }
+        idBatches.add(currentBatch);
 
-        // Create TwitchUser objects
-        for (var user : users) owners.add(new TwitchUser(user));
+        // Batch Owner Names
+        HashSet<HashSet<String>> nameBatches = new HashSet<>();
+        HashSet<String> currentNameBatch = new HashSet<>();
+        for (var name : ownerNames) {
+            currentNameBatch.add(name);
+            if (currentNameBatch.size() == 100) {
+                nameBatches.add(currentNameBatch);
+                currentNameBatch = new HashSet<>();
+            }
+        }
+        nameBatches.add(currentNameBatch);
 
-        // Check if all owners were found
-        if (owners.size() != ownerIds.size()) {
-            HashSet<Integer> foundIds = new HashSet<>();
-            for (var owner : owners) foundIds.add(owner.getId());
-            for (var id : ownerIds) if (!foundIds.contains(id)) throw new IllegalStateException("Owner with ID " + id + " was not found");
+        // Fetch Owners by ID
+        HashSet<TwitchUser> fetchedIdOwners = new HashSet<>();
+        for (var idBatch : idBatches) {
+            if (idBatch.isEmpty()) continue;
+            var userList = tempHelix.getUsers(defaultAuthToken.getAccessToken(), idBatch.stream().map(Object::toString).toList(), null).execute();
+            if (userList == null) throw new IllegalStateException("Failed to get owner users by ID");
+            var users = userList.getUsers();
+            if (users == null) throw new IllegalStateException("Failed to get owner users by ID");
+            for (var user : users) fetchedIdOwners.add(new TwitchUser(user));
+        }
+
+        // Fetch Owners by Name
+        HashSet<TwitchUser> fetchedNameOwners = new HashSet<>();
+        for (var nameBatch : nameBatches) {
+            if (nameBatch.isEmpty()) continue;
+            var userList = tempHelix.getUsers(defaultAuthToken.getAccessToken(), null, nameBatch.stream().toList()).execute();
+            if (userList == null) throw new IllegalStateException("Failed to get owner users by Name");
+            var users = userList.getUsers();
+            if (users == null) throw new IllegalStateException("Failed to get owner users by Name");
+            for (var user : users) fetchedNameOwners.add(new TwitchUser(user));
+        }
+
+        // Combine Fetched Owners
+        HashSet<TwitchUser> owners = new HashSet<>(fetchedIdOwners);
+        for (var nameOwner : fetchedNameOwners) {
+            boolean exists = false;
+            for (var idOwner : fetchedIdOwners) {
+                if (nameOwner.getId().equals(idOwner.getId())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) owners.add(nameOwner);
+        }
+
+        // Deduplicate Owners
+        HashSet<TwitchUser> deduplicatedOwners = new HashSet<>();
+        for (var owner : owners) {
+            boolean exists = false;
+            for (var dedupOwner : deduplicatedOwners) {
+                if (owner.getId().equals(dedupOwner.getId())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) deduplicatedOwners.add(owner);
+        }
+        owners = deduplicatedOwners;
+
+        // Log Missing Owners
+        for (var id : ownerIds) {
+            boolean found = false;
+            for (var owner : owners) {
+                if (owner.getId().equals(id)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) System.out.printf("%s%s Warning: Owner with ID %d not found!%s%n", BOLD, SYSTEM, id, UNBOLD);
+        }
+
+        // Log Missing Owners
+        for (var name : ownerNames) {
+            boolean found = false;
+            for (var owner : owners) {
+                if (owner.getUsername().equalsIgnoreCase(name)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) System.out.printf("%s%s Warning: Owner with Name '%s' not found!%s%n", BOLD, SYSTEM, name, UNBOLD);
         }
 
         // Return Owners
         return owners;
     }
 
-    private static HashSet<TwitchUser> checkChannelConfig(JsonNode twitchConfig, UserHandler userHandler) {
+    private static HashSet<TwitchUser> obtainChannels(JsonNode channelArray, UserHandler userHandler) {
 
         // Check Parameters
-        if (twitchConfig == null || twitchConfig.isNull() || twitchConfig.isEmpty()) throw new IllegalArgumentException("Twitch config cannot be null or empty");
+        if (channelArray == null || channelArray.isNull() || channelArray.isEmpty() || !channelArray.isArray()) throw new IllegalArgumentException("Channel names cannot be null, empty, and must be an array");
         if (userHandler == null) throw new IllegalArgumentException("UserHandler cannot be null");
 
-        // Check Config
-        if (!twitchConfig.has("channel") || twitchConfig.get("channel").isNull() || twitchConfig.get("channel").isEmpty() || !twitchConfig.get("channel").isArray()) return new HashSet<>();
-
-        // Parse Channels
-        JsonNode channels = twitchConfig.get("channel");
+        // Parse channels
+        HashSet<Integer> channelIds = new HashSet<>();
         HashSet<String> channelNames = new HashSet<>();
-        for (var channel : channels) {
-            if (channel == null || channel.isNull() || !channel.isString()) throw new IllegalArgumentException("Channel name cannot be null and must be a string");
-            channelNames.add(channel.asString().toLowerCase());
+        for (var channel : channelArray) {
+            if (channel.isNumber()) channelIds.add(channel.asInt());
+            else if (channel.isString()) channelNames.add(channel.asString().toLowerCase());
+            else throw new IllegalArgumentException("Channel ID/Name must be an integer or string");
         }
 
-        // Obtain TwitchUsers
-        return userHandler.getTwitchUsersByName(channelNames);
+        // Fetch Channels
+        HashSet<TwitchUser> fetchedIdChannels = channelIds.isEmpty() ? new HashSet<>() : userHandler.getTwitchUsers(channelIds);
+        HashSet<TwitchUser> fetchedNameChannels = channelNames.isEmpty() ? new HashSet<>() : userHandler.getTwitchUsersByName(channelNames);
+
+        // Combine Fetched Channels
+        HashSet<TwitchUser> channels = new HashSet<>(fetchedIdChannels);
+        for (var nameChannel : fetchedNameChannels) {
+            boolean exists = false;
+            for (var idChannel : fetchedIdChannels) {
+                if (nameChannel.getId().equals(idChannel.getId())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) channels.add(nameChannel);
+        }
+
+        // Deduplicate Channels
+        HashSet<TwitchUser> deduplicatedChannels = new HashSet<>();
+        for (var channel : channels) {
+            boolean exists = false;
+            for (var dedupChannel : deduplicatedChannels) {
+                if (channel.getId().equals(dedupChannel.getId())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) deduplicatedChannels.add(channel);
+        }
+        channels = deduplicatedChannels;
+
+        // Log Missing Channels
+        for (var id : channelIds) {
+            boolean found = false;
+            for (var channel : channels) {
+                if (channel.getId().equals(id)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) System.out.printf("%s%s Warning: Channel with ID %d not found!%s%n", BOLD, SYSTEM, id, UNBOLD);
+        }
+
+        for (var name : channelNames) {
+            boolean found = false;
+            for (var channel : channels) {
+                if (channel.getUsername().equalsIgnoreCase(name)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) System.out.printf("%s%s Warning: Channel with Name '%s' not found!%s%n", BOLD, SYSTEM, name, UNBOLD);
+        }
+
+        // Return Channels
+        return channels;
     }
 
     // Setters
@@ -306,6 +437,15 @@ public class TwitchBot {
             System.out.printf("%s%s Joined Channel: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), UNBOLD);
             database.getChannelManager().joinChannel(channel);
         } else System.out.printf("%s%s Failed to Join Channel: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), UNBOLD);
+
+        // Check Moderator Status
+        if (success && !isBroadcaster(botUser, channel)) {
+            try {
+                if (!isModerator(botUser, channel)) roleHandler.addModerator(botUser, channel);
+            } catch (IllegalArgumentException e) {
+                System.out.printf("%s%s Warning: Failed to add bot as moderator in channel %s: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), e.getMessage(), UNBOLD);
+            }
+        }
 
         // Return
         return success;
@@ -328,6 +468,15 @@ public class TwitchBot {
             System.out.printf("%s%s Left Channel: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), UNBOLD);
             database.getChannelManager().leaveChannel(channel);
         } else System.out.printf("%s%s Failed to Leave Channel: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), UNBOLD);
+
+        // Check Moderator Status
+        if (success && !isBroadcaster(botUser, channel)) {
+            try {
+                if (isModerator(botUser, channel)) roleHandler.removeModerator(botUser, channel);
+            } catch (IllegalArgumentException e) {
+                System.out.printf("%s%s Warning: Failed to remove bot as moderator in channel %s: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), e.getMessage(), UNBOLD);
+            }
+        }
 
         // Return
         return success;
@@ -525,8 +674,6 @@ public class TwitchBot {
         if (channel == null) throw new IllegalArgumentException("Channel TwitchUser cannot be null");
 
         // Check Moderator
-        if (isOwner(user)) return true;
-        if (isBot(user)) return true;
         return roleHandler.isModerator(user, channel);
     }
 
@@ -550,8 +697,6 @@ public class TwitchBot {
         if (channel == null) throw new IllegalArgumentException("Channel TwitchUser cannot be null");
 
         // Check Editor
-        if (isOwner(user)) return true;
-        if (isBot(user)) return true;
         return roleHandler.isEditor(user, channel);
     }
 

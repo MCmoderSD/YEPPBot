@@ -37,7 +37,7 @@ public class Main {
             // Token Grabber active
             if (twitchBot == null) return;
 
-            Scope[] all = Scope.values();
+            // Scope[] all = Scope.values();
             Scope[] used = new ArrayList<>(Arrays.asList(
                     UserHandler.REQUIRED_SCOPES,
                     ChatHandler.REQUIRED_SCOPES,
@@ -51,8 +51,7 @@ public class Main {
             throw new RuntimeException("Failed to initialize Twitch Bot", e);
         }
 
-
-
+        // Print Uptime
         IO.println("Twitch Bot startup took " + ((System.nanoTime() - UPTIME) / 1_000_000) + " ms");
         IO.println("Twitch Bot is now running. Version: " + VERSION);
     }

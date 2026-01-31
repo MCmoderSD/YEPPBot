@@ -9,10 +9,7 @@ import de.MCmoderSD.objects.MessageEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.stream.Stream;
-
-import static de.MCmoderSD.utilities.MessageHelper.SPACE;
 
 public class Moderate extends CommandBuilder {
 
@@ -27,7 +24,14 @@ public class Moderate extends CommandBuilder {
         String[] name = {"moderate", "mod", "moderrate", "modderate", "modderrate"};
         String description = "Ändert die Einstellungen des Bots. " + syntax;
 
-        Scope[] scopes = new ArrayList<>(Arrays.asList(UserHandler.REQUIRED_SCOPES, ChatHandler.REQUIRED_SCOPES, RoleHandler.REQUIRED_SCOPES, StreamHandler.REQUIRED_SCOPES, ChannelHandler.REQUIRED_SCOPES))
+        // Scope Array
+        Scope[] scopes = new ArrayList<>(Arrays.asList(
+                UserHandler.REQUIRED_SCOPES,
+                ChatHandler.REQUIRED_SCOPES,
+                RoleHandler.REQUIRED_SCOPES,
+                StreamHandler.REQUIRED_SCOPES,
+                ChannelHandler.REQUIRED_SCOPES
+        ))
                 .stream()
                 .flatMap(Stream::of)
                 .distinct()

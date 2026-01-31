@@ -56,7 +56,7 @@ public class TokenGrabber {
         mountHtml(server, htmlPage.getBytes(), redirectURL.substring(redirectURL.lastIndexOf('/')));
 
         // Authorization URL
-        System.out.printf("\nPlease Authorize with your bot account, to obtain the OAuth Token:\n%s?client_id=%s&redirect_uri=%s&response_type=token&scope=%s",
+        System.out.printf("\nPlease Authorize with your bot account, to obtain the OAuth Token:\n%s?client_id=%s&redirect_uri=%s&response_type=token&scope=%s%n%n%n%n",
                 AUTH_URL,
                 clientId,
                 redirectURL,

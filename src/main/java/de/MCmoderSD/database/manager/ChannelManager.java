@@ -26,64 +26,60 @@ public class ChannelManager {
     }
 
     private void addChannel(TwitchUser channel) {
-        new Thread(() -> {
-            try {
+        try {
 
-                // Check Parameters
-                if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
+            // Check Parameters
+            if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
 
-                // Add Twitch User to database
-                database.addTwitchUser(channel);
+            // Add Twitch User to database
+            database.addTwitchUser(channel);
 
-                // Insert channel
-                PreparedStatement insertChannelStatement = database.getConnection().prepareStatement(
-                        "INSERT IGNORE INTO Channel (id) VALUES (?)"
-                );
+            // Insert channel
+            PreparedStatement insertChannelStatement = database.getConnection().prepareStatement(
+                    "INSERT IGNORE INTO Channel (id) VALUES (?)"
+            );
 
-                // Set the insert values
-                insertChannelStatement.setInt(1, channel.getId());  // Channel ID
+            // Set the insert values
+            insertChannelStatement.setInt(1, channel.getId());  // Channel ID
 
-                // Execute the statement
-                insertChannelStatement.executeUpdate();
+            // Execute the statement
+            insertChannelStatement.executeUpdate();
 
-                // Close the statement
-                insertChannelStatement.close();
+            // Close the statement
+            insertChannelStatement.close();
 
-            } catch (SQLException e) {
-                throw new RuntimeException("Failed to add channel: " + e.getMessage(), e);
-            }
-        }).start();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to add channel: " + e.getMessage(), e);
+        }
     }
 
     private void setActive(TwitchUser channel, boolean active) {
-        new Thread(() -> {
-            try {
+        try {
 
-                // Check Parameters
-                if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
+            // Check Parameters
+            if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
 
-                // Add Channel to database
-                addChannel(channel);
+            // Add Channel to database
+            addChannel(channel);
 
-                // Update channel active status
-                PreparedStatement updateChannelStatement = database.getConnection().prepareStatement(
-                        "UPDATE Channel SET active = ? WHERE id = ?"
-                );
+            // Update channel active status
+            PreparedStatement updateChannelStatement = database.getConnection().prepareStatement(
+                    "UPDATE Channel SET active = ? WHERE id = ?"
+            );
 
-                // Set the update values
-                updateChannelStatement.setBoolean(1, active);       // Active flag
-                updateChannelStatement.setInt(2, channel.getId());  // Channel ID
+            // Set the update values
+            updateChannelStatement.setBoolean(1, active);       // Active flag
+            updateChannelStatement.setInt(2, channel.getId());  // Channel ID
 
-                // Execute the statement
-                updateChannelStatement.executeUpdate();
+            // Execute the statement
+            updateChannelStatement.executeUpdate();
 
-                // Close the statement
-                updateChannelStatement.close();
+            // Close the statement
+            updateChannelStatement.close();
 
-            } catch (SQLException e) {
-                throw new RuntimeException("Failed to set channel active status: " + e.getMessage(), e);
-            }
-        }).start();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to set channel active status: " + e.getMessage(), e);
+        }
     }
 
     public void joinChannel(TwitchUser channel) {
