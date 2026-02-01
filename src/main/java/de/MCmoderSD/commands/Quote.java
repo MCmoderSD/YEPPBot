@@ -59,7 +59,8 @@ public class Quote extends CommandBuilder {
                 // Quote ID
                 if (args.size() == 1) {
 
-                    var quoteId = getQuoteId(args.getFirst());
+                    // Check Quotes
+                    var quoteId = parseQuoteID(args.getFirst());
                     if (quoteId == null || quoteId < 0 || quoteId >= quotes.size()) return twitchBot.sendMessage(event, name, invalidQuoteID);
 
                     // Get Quote
@@ -77,11 +78,13 @@ public class Quote extends CommandBuilder {
 
                 // Variables
                 var action = args.getFirst().toLowerCase();
-                var id = getQuoteId(args.get(1));
+                var id = parseQuoteID(args.get(1));
                 String response;
 
                 // Perform Action
                 switch (action) {
+
+                    // Add Quote
                     case "add": {
                         String quote = String.join(SPACE, args.subList(1, args.size()));
                         quoteManager.addQuote(quote, channel);
@@ -89,11 +92,12 @@ public class Quote extends CommandBuilder {
                         break;
                     }
 
+                    // Remove Quote
                     case "rem":
                     case "del":
                     case "remove":
                     case "delete": {
-                        if (id < 0 || id >= quotes.size()) response = quoteDoesNotExist;
+                        if (id == null || id < 0 || id >= quotes.size()) response = quoteDoesNotExist;
                         else {
                             quoteManager.removeQuote(id, channel);
                             response = String.format("Removed quote #%d.", id + 1);
@@ -101,10 +105,11 @@ public class Quote extends CommandBuilder {
                         break;
                     }
 
+                    // Edit Quote
                     case "edit":
                     case "change":
                     case "update": {
-                        if (id < 0 || id >= quotes.size()) response = quoteDoesNotExist;
+                        if (id == null || id < 0 || id >= quotes.size()) response = quoteDoesNotExist;
                         else {
                             String quote = String.join(SPACE, args.subList(2, args.size()));
                             quoteManager.editQuote(id, quote, channel);
@@ -113,6 +118,28 @@ public class Quote extends CommandBuilder {
                         break;
                     }
 
+                    // First Quote
+                    case "first": {
+                        if (noQuotes) response = noQuotesFound;
+                        else {
+                            String quote = quotes.get(0);
+                            response = String.format("@%s, #%d: %s", user.getDisplayName(), 1, quote);
+                        }
+                        break;
+                    }
+
+                    // Last Quote
+                    case "last": {
+                        if (noQuotes) response = noQuotesFound;
+                        else {
+                            var lastId = quotes.size() - 1;
+                            String quote = quotes.get(lastId);
+                            response = String.format("@%s, #%d: %s", user.getDisplayName(), lastId + 1, quote);
+                        }
+                        break;
+                    }
+
+                    // Invalid
                     default: {
                         response = invalidArgs;
                         break;
@@ -127,8 +154,9 @@ public class Quote extends CommandBuilder {
         if (!registered) throw new IllegalStateException("Command registration failed for command: " + name[0]);
     }
 
-    public Integer getQuoteId(String arg) {
-        if (arg.startsWith("#")) arg = arg.substring(1);
+    // Parse Quote ID
+    private static Integer parseQuoteID(String arg) {
+        while (arg.startsWith("#")) arg = arg.substring(1);
         try {
             return Integer.parseInt(arg) - 1;
         } catch (NumberFormatException e) {

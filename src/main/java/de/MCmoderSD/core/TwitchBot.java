@@ -309,7 +309,7 @@ public class TwitchBot {
         for (var owner : owners) {
             boolean exists = false;
             for (var dedupOwner : deduplicatedOwners) {
-                if (owner.getId().equals(dedupOwner.getId())) {
+                if (owner.equals(dedupOwner)) {
                     exists = true;
                     break;
                 }
@@ -383,7 +383,7 @@ public class TwitchBot {
         for (var channel : channels) {
             boolean exists = false;
             for (var dedupChannel : deduplicatedChannels) {
-                if (channel.getId().equals(dedupChannel.getId())) {
+                if (channel.equals(dedupChannel)) {
                     exists = true;
                     break;
                 }

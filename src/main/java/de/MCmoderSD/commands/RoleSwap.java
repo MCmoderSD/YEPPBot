@@ -15,7 +15,7 @@ public class RoleSwap extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "say <Nachricht>";
+        String syntax = "Syntax: " + prefix + "RoleSwap <Rolle> [Benutzer] [Kanal]";
 
         // About
         String[] name = { "RoleSwap", "RoleChange" };
@@ -29,6 +29,7 @@ public class RoleSwap extends CommandBuilder {
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Get Variables
+                var argsSize = args.size();
                 var user = event.getUser();
                 var channel = event.getChannel();
                 String targetUserName;
@@ -41,23 +42,31 @@ public class RoleSwap extends CommandBuilder {
 
                 // Check Args
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Keine Rolle angegeben. " + syntax);
-                if (args.size() > 2 && !args.get(2).isBlank()) targetChannelName = args.get(2);
-                else targetChannelName = channel.getDisplayName();
-                if (args.size() > 1 && !args.get(1).isBlank()) targetUserName = args.get(1);
-                else targetUserName = user.getDisplayName();
 
-                // Fetch Target Channel
-                if (!(channel.getDisplayName().equals(targetChannelName) || targetChannelName.isBlank())) {
-                    if (targetChannelName.startsWith("@")) targetChannelName = targetChannelName.substring(1);
+                // Parse Target Channel
+                if (argsSize > 2) {
+
+                    // Parse Name
+                    targetChannelName = args.get(2);
+                    while (targetChannelName.startsWith("@")) targetChannelName = targetChannelName.substring(1);
+
+                    // Fetch Target Channel
                     targetChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
                     if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal '" + targetChannelName + "' nicht gefunden.");
+
                 } else targetChannel = channel;
 
-                // Fetch Target User
-                if (!(user.getDisplayName().equals(targetUserName) || targetUserName.isBlank())) {
-                    if (targetUserName.startsWith("@")) targetUserName = targetUserName.substring(1);
+                // Parse Target User
+                if (argsSize > 1) {
+
+                    // Parse Name
+                    targetUserName = args.get(1);
+                    while (targetUserName.startsWith("@")) targetUserName = targetUserName.substring(1);
+
+                    // Fetch Target User
                     targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
                     if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden.");
+
                 } else targetUser = user;
 
                 // Get Role
@@ -94,6 +103,7 @@ public class RoleSwap extends CommandBuilder {
         if (!registered) throw new IllegalStateException("Command registration failed for command: " + name[0]);
     }
 
+    // Role Enum
     private enum Role {
 
         // Values
@@ -109,6 +119,7 @@ public class RoleSwap extends CommandBuilder {
             this.name = name;
         }
 
+        // Getter
         public String getName() {
             return name;
         }
