@@ -29,7 +29,7 @@ public class CommandHandler {
     private final ArrayList<String> prefixes;
     private final HashMap<String, Command> commandMap;
     private final HashMap<String, String> aliasMap;
-    private final HashMap<Integer, HashSet<String>> blacklist;
+    private final HashMap<TwitchUser, HashSet<String>> blacklist;
 
     // Constructor
     public CommandHandler(TwitchBot twitchBot) {
@@ -72,8 +72,8 @@ public class CommandHandler {
     }
 
     private boolean isBlackListed(MessageEvent event, String command) {
-        if (!blacklist.containsKey(event.getChannel().getId())) return false;
-        return blacklist.get(event.getChannel().getId()).contains(command);
+        if (!blacklist.containsKey(event.getChannel())) return false;
+        return blacklist.get(event.getChannel()).contains(command);
     }
 
     public boolean handleCommand(MessageEvent event) {
@@ -136,7 +136,7 @@ public class CommandHandler {
         return true;
     }
 
-    private void updateBlacklist(HashMap<Integer, HashSet<String>> blacklist) {
+    private void updateBlacklist(HashMap<TwitchUser, HashSet<String>> blacklist) {
 
         // Check Parameters
         if (blacklist == null) throw new IllegalArgumentException("Blacklist cannot be null");
@@ -156,8 +156,8 @@ public class CommandHandler {
         if (aliasMap.containsKey(command.toLowerCase())) command = aliasMap.get(command.toLowerCase());
 
         // Check Blacklist
-        if (!blacklist.containsKey(channel.getId())) return false;
-        return blacklist.get(channel.getId()).contains(command.toLowerCase());
+        if (!blacklist.containsKey(channel)) return false;
+        return blacklist.get(channel).contains(command.toLowerCase());
     }
 
     public boolean blacklistAdd(TwitchUser channel, String command) {

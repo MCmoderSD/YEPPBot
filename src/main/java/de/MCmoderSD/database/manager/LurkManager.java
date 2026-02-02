@@ -12,6 +12,7 @@ import java.util.HashSet;
 
 import static de.MCmoderSD.utilities.FormatUUID.asBytes;
 import static de.MCmoderSD.utilities.ZipUtil.inflateEvent;
+import static de.MCmoderSD.utilities.ZipUtil.inflateTwitchUser;
 
 public class LurkManager {
 
@@ -96,7 +97,7 @@ public class LurkManager {
 
                 // Delete lurk entry
                 PreparedStatement deleteLurkStatement = database.getConnection().prepareStatement(
-                        "DELETE FROM Lurker WHERE lurkerId = ?;"
+                        "DELETE IGNORE FROM Lurker WHERE lurkerId = ?;"
                 );
 
                 // Set the delete values
@@ -190,22 +191,31 @@ public class LurkManager {
         }
     }
 
-    public HashMap<Integer, Integer> getLurks() {
+    public HashMap<TwitchUser, TwitchUser> getLurks() {
         try {
 
             // Query lurk entries
             PreparedStatement queryLurkStatement = database.getConnection().prepareStatement(
-                    "SELECT userId, channelId FROM MessageEvent e, Lurker l WHERE e.id = l.eventId;"
+                    """
+                    SELECT lurkerUser.user AS lurker, channelUser.user AS channel
+                    FROM Lurker
+                    JOIN MessageEvent ON eventId = id                       # Event Join
+                    JOIN User AS lurkerUser ON lurkerId = lurkerUser.id     # Lurker Join
+                    JOIN User AS channelUser ON channelId = channelUser.id  # Channel Join
+                    """
             );
 
             // Execute the query
             var resultSet = queryLurkStatement.executeQuery();
 
             // Variables
-            HashMap<Integer, Integer> lurkMap = new HashMap<>();
+            HashMap<TwitchUser, TwitchUser> lurkMap = new HashMap<>();
 
             // Process results
-            while (resultSet.next()) lurkMap.put(resultSet.getInt("userId"), resultSet.getInt("channelId"));
+            while (resultSet.next()) lurkMap.put(
+                    inflateTwitchUser(resultSet.getBytes("lurker")),    // Lurker
+                    inflateTwitchUser(resultSet.getBytes("channel"))    // Channel
+            );
 
             // Close resources
             resultSet.close();
@@ -219,22 +229,22 @@ public class LurkManager {
         }
     }
 
-    public HashSet<Integer> getTraitors() {
+    public HashSet<TwitchUser> getTraitors() {
         try {
 
             // Query traitors entries
             PreparedStatement queryTraitorsStatement = database.getConnection().prepareStatement(
-                    "SELECT lurkerId FROM Lurker WHERE traitor = TRUE;"
+                    "SELECT user FROM Lurker JOIN User ON Lurker.lurkerId = User.id WHERE traitor = TRUE"
             );
 
             // Execute the query
             var resultSet = queryTraitorsStatement.executeQuery();
 
             // Variables
-            HashSet<Integer> traitorSet = new HashSet<>();
+            HashSet<TwitchUser> traitorSet = new HashSet<>();
 
             // Process results
-            while (resultSet.next()) traitorSet.add(resultSet.getInt("lurkerId"));
+            while (resultSet.next()) traitorSet.add(inflateTwitchUser(resultSet.getBytes("user")));
 
             // Close resources
             resultSet.close();

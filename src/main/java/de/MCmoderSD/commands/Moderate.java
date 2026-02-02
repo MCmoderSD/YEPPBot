@@ -48,6 +48,7 @@ public class Moderate extends CommandBuilder {
                 // Variables
                 var channel = event.getChannel();
                 var user = event.getUser();
+                var argsSize = args.size();
 
                 // Check args
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, syntax);
@@ -62,7 +63,7 @@ public class Moderate extends CommandBuilder {
                 // Join/Leave Action
                 if (Arrays.asList("join", "leave").contains(action)) {
 
-                    if (args.size() == 1) switch (action) {
+                    if (argsSize == 1) switch (action) {
                         case "join": {
                             if (twitchBot.joinChannel(user)) return twitchBot.sendMessage(event, name, "Der Bot ist dem Kanal @" + user.getDisplayName() + " beigetreten.");
                             else return twitchBot.sendMessage(event, name, "Der Bot konnte dem Kanal @" + user.getDisplayName() + " nicht beitreten.");
@@ -103,12 +104,12 @@ public class Moderate extends CommandBuilder {
                 if (Arrays.asList("block", "unblock").contains(action)) {
 
                     // Check Args
-                    if (args.size() < 2) return twitchBot.sendMessage(event, name, syntax);
+                    if (argsSize < 2) return twitchBot.sendMessage(event, name, syntax);
 
                     // Get Command/Channel to Block/Unblock
                     String command = args.get(1).toLowerCase();
 
-                    if (args.size() == 2) {
+                    if (argsSize == 2) {
 
                         // Check Permissions
                         if (!twitchBot.isPermitted(user, channel)) return false;

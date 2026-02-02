@@ -42,7 +42,10 @@ public class QuoteManager {
 
             // Process the results
             LinkedHashMap<Integer, String> quotes = new LinkedHashMap<>();
-            while (resultSet.next()) quotes.put(resultSet.getInt("id"), resultSet.getString("quote"));
+            while (resultSet.next()) quotes.put(
+                    resultSet.getInt("id"),         // Quote ID
+                    resultSet.getString("quote")    // Quote Text
+            );
 
             // Close resources
             resultSet.close();
@@ -140,7 +143,7 @@ public class QuoteManager {
 
                 // Delete quote entry
                 var deleteQuoteStatement = database.getConnection().prepareStatement(
-                        "DELETE FROM Quote WHERE channelId = ? AND id = ?;"
+                        "DELETE IGNORE FROM Quote WHERE channelId = ? AND id = ?;"
                 );
 
                 // Set the delete values

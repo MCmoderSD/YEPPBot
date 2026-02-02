@@ -53,7 +53,7 @@ public class ChannelManager {
         }
     }
 
-    private void setActive(TwitchUser channel, boolean active) {
+    public void setActive(TwitchUser channel, boolean active) {
         try {
 
             // Check Parameters
@@ -105,7 +105,10 @@ public class ChannelManager {
             HashMap<TwitchUser, Boolean> activeChannels = new HashMap<>();
 
             // Process results
-            while (resultSet.next()) activeChannels.put(inflateTwitchUser(resultSet.getBytes("user")), resultSet.getBoolean("active"));
+            while (resultSet.next()) activeChannels.put(
+                    inflateTwitchUser(resultSet.getBytes("user")),  // Twitch User
+                    resultSet.getBoolean("active")                  // Active flag
+            );
 
             // Close resources
             resultSet.close();
@@ -160,22 +163,25 @@ public class ChannelManager {
         setAutoShoutout(channel, false);
     }
 
-    public HashMap<Integer, Boolean> getAutoShoutoutChannels() {
+    public HashMap<TwitchUser, Boolean> getAutoShoutoutChannels() {
         try {
 
             // Prepare statement
             PreparedStatement preparedStatement = database.getConnection().prepareStatement(
-                    "SELECT id, autoShoutout FROM Channel"
+                    "SELECT user, autoShoutout FROM Channel JOIN User ON Channel.id = User.id;"
             );
 
             // Execute query
             var resultSet = preparedStatement.executeQuery();
 
             // Prepare result map
-            HashMap<Integer, Boolean> autoShoutoutChannels = new HashMap<>();
+            HashMap<TwitchUser, Boolean> autoShoutoutChannels = new HashMap<>();
 
             // Process results
-            while (resultSet.next()) autoShoutoutChannels.put(resultSet.getInt("id"), resultSet.getBoolean("autoShoutout"));
+            while (resultSet.next()) autoShoutoutChannels.put(
+                    inflateTwitchUser(resultSet.getBytes("user")),  // Twitch User
+                    resultSet.getBoolean("autoShoutout")            // Auto Shoutout flag
+            );
 
             // Close resources
             resultSet.close();
@@ -189,7 +195,7 @@ public class ChannelManager {
         }
     }
 
-    public HashMap<Integer, HashSet<String>> blacklistAdd(TwitchUser channel, String command) {
+    public HashMap<TwitchUser, HashSet<String>> blacklistAdd(TwitchUser channel, String command) {
         try {
 
             // Check Parameters
@@ -222,7 +228,7 @@ public class ChannelManager {
         }
     }
 
-    public HashMap<Integer, HashSet<String>> blacklistRemove(TwitchUser channel, String command) {
+    public HashMap<TwitchUser, HashSet<String>> blacklistRemove(TwitchUser channel, String command) {
         try {
 
             // Check Parameters
@@ -255,26 +261,26 @@ public class ChannelManager {
         }
     }
 
-    public HashMap<Integer, HashSet<String>> getBlacklist() {
+    public HashMap<TwitchUser, HashSet<String>> getBlacklist() {
         try {
 
             // Prepare statement
             PreparedStatement preparedStatement = database.getConnection().prepareStatement(
-                    "SELECT id, command FROM Blacklist"
+                    "SELECT user, command FROM Blacklist JOIN User ON Blacklist.id = User.id"
             );
 
             // Execute query
             var resultSet = preparedStatement.executeQuery();
 
             // Prepare result map
-            HashMap<Integer, HashSet<String>> blacklist = new HashMap<>();
+            HashMap<TwitchUser, HashSet<String>> blacklist = new HashMap<>();
 
             // Process results
             while (resultSet.next()) {
-                var id = resultSet.getInt("id");
-                String command = resultSet.getString("command");
-                blacklist.putIfAbsent(id, new HashSet<>());
-                blacklist.get(id).add(command);
+                TwitchUser user = inflateTwitchUser(resultSet.getBytes("user"));    // Twitch User
+                String command = resultSet.getString("command");                    // Command
+                blacklist.putIfAbsent(user, new HashSet<>());
+                blacklist.get(user).add(command);
             }
 
             // Close resources

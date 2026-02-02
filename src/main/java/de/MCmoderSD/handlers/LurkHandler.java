@@ -1,16 +1,12 @@
 package de.MCmoderSD.handlers;
 
-import de.MCmoderSD.commands.Lurk;
 import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
-import de.MCmoderSD.utilities.MessageHelper;
 
 import java.sql.Timestamp;
-import java.util.Formatter;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,8 +23,8 @@ public class LurkHandler {
 
     // Attributes
     private final HashSet<String> lurkCommands;
-    private final HashSet<Integer> traitorList;
-    private final ConcurrentHashMap<Integer, Integer> lurkList;
+    private final HashSet<TwitchUser> traitorList;
+    private final ConcurrentHashMap<TwitchUser, TwitchUser> lurkList;
 
     // Constructor
     public LurkHandler(TwitchBot twitchBot) {
@@ -65,31 +61,29 @@ public class LurkHandler {
             // Get user and channel
             var user = event.getUser();
             var channel = event.getChannel();
-            var userId = user.getId();
-            var channelId = channel.getId();
 
             // Check for lurk command
             String message = event.getMessage().toLowerCase();
             for (var command : lurkCommands) if (command.contains(message)) {
                 lurkManager.removeLurk(user);
-                traitorList.remove(userId);
-                lurkList.remove(userId);
+                traitorList.remove(user);
+                lurkList.remove(user);
                 return;
             }
 
             // Skip if user not in lurk list
-            if (!lurkList.containsKey(userId)) return;
+            if (!lurkList.containsKey(user)) return;
 
             // Check if user is a traitor
-            boolean isTraitor = !lurkList.get(userId).equals(channelId);
+            boolean isTraitor = !lurkList.get(user).equals(channel);
 
             // If user is a traitor but already marked as one, do nothing
-            if (isTraitor && traitorList.contains(userId)) return;
+            if (isTraitor && traitorList.contains(user)) return;
 
             if (isTraitor) {
 
                 // Add to traitor list
-                traitorList.add(userId);
+                traitorList.add(user);
                 lurkManager.addTraitor(user);
 
                 // Get Message Event
@@ -104,8 +98,8 @@ public class LurkHandler {
                 Timestamp startTime = lurkManager.getLurkTime(user);
 
                 // Remove from lurk list
-                lurkList.remove(userId);
-                traitorList.remove(userId);
+                lurkList.remove(user);
+                traitorList.remove(user);
                 lurkManager.removeLurk(user);
 
                 // Show lurk message
@@ -121,19 +115,16 @@ public class LurkHandler {
 
         // Variables
         var user = event.getUser();
-        var channel = event.getChannel();
-        var userId = user.getId();
-        var channelId = channel.getId();
 
         // Reset traitor list
-        traitorList.remove(userId);
+        traitorList.remove(user);
 
         // Remove from lurk list if already present
-        if (lurkList.contains(userId)) lurkManager.removeLurk(user);
+        if (lurkList.contains(user)) lurkManager.removeLurk(user);
 
         // Add to lurk list
-        lurkManager.addLurk(event);         // Database entry
-        lurkList.put(userId, channelId);    // Local entry
+        lurkManager.addLurk(event);             // Database entry
+        lurkList.put(user, event.getChannel()); // Local entry
     }
 
     private static String formatLurkTime(Timestamp startTime) {

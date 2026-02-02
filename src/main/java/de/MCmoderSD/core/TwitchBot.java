@@ -113,7 +113,7 @@ public class TwitchBot {
                 .withPassword(databaseConfig.get("password").asString());
 
         // Initialize Database
-        database = new Database(dbBuilder, this);
+        database = new Database(dbBuilder);
         channelManager = database.getChannelManager();
         commandManager = database.getCommandManager();
         eventLogManager = database.getEventLogManager();
@@ -192,6 +192,7 @@ public class TwitchBot {
         commandHandler = eventHandler.getCommandHandler();
 
         // Initialize Commands
+        new Birthday(this);
         new Lurk(this);
         new Moderate(this);
         new Ping(this);
@@ -292,31 +293,9 @@ public class TwitchBot {
         }
 
         // Combine Fetched Owners
-        HashSet<TwitchUser> owners = new HashSet<>(fetchedIdOwners);
-        for (var nameOwner : fetchedNameOwners) {
-            boolean exists = false;
-            for (var idOwner : fetchedIdOwners) {
-                if (nameOwner.getId().equals(idOwner.getId())) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) owners.add(nameOwner);
-        }
-
-        // Deduplicate Owners
-        HashSet<TwitchUser> deduplicatedOwners = new HashSet<>();
-        for (var owner : owners) {
-            boolean exists = false;
-            for (var dedupOwner : deduplicatedOwners) {
-                if (owner.equals(dedupOwner)) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) deduplicatedOwners.add(owner);
-        }
-        owners = deduplicatedOwners;
+        HashSet<TwitchUser> owners = new HashSet<>();
+        owners.addAll(fetchedNameOwners);
+        owners.addAll(fetchedIdOwners);
 
         // Log Missing Owners
         for (var id : ownerIds) {
@@ -366,31 +345,9 @@ public class TwitchBot {
         HashSet<TwitchUser> fetchedNameChannels = channelNames.isEmpty() ? new HashSet<>() : userHandler.getTwitchUsersByName(channelNames);
 
         // Combine Fetched Channels
-        HashSet<TwitchUser> channels = new HashSet<>(fetchedIdChannels);
-        for (var nameChannel : fetchedNameChannels) {
-            boolean exists = false;
-            for (var idChannel : fetchedIdChannels) {
-                if (nameChannel.getId().equals(idChannel.getId())) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) channels.add(nameChannel);
-        }
-
-        // Deduplicate Channels
-        HashSet<TwitchUser> deduplicatedChannels = new HashSet<>();
-        for (var channel : channels) {
-            boolean exists = false;
-            for (var dedupChannel : deduplicatedChannels) {
-                if (channel.equals(dedupChannel)) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) deduplicatedChannels.add(channel);
-        }
-        channels = deduplicatedChannels;
+        HashSet<TwitchUser> channels = new HashSet<>();
+        channels.addAll(fetchedNameChannels);
+        channels.addAll(fetchedIdChannels);
 
         // Log Missing Channels
         for (var id : channelIds) {

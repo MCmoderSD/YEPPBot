@@ -34,9 +34,7 @@ CREATE TABLE IF NOT EXISTS MessageEvent
     FOREIGN KEY (content)   REFERENCES MessageContent (hash)    ON DELETE CASCADE                                   # Foreign Key to MessageContent Table
 )
     ROW_FORMAT = COMPRESSED     # Compressed Row Format
-    KEY_BLOCK_SIZE = 1          # Key Block Size
-    CHARACTER SET = utf8mb4     # UTF-8 MB4 Character Set
-    COLLATE utf8mb4_bin;        # Binary Collation for utf8mb4
+    KEY_BLOCK_SIZE = 1;         # Key Block Size
 
 
 
@@ -67,7 +65,7 @@ CREATE TABLE IF NOT EXISTS ResponseMessage
 # CommandLog table to store command log events
 CREATE TABLE IF NOT EXISTS CommandLog
 (
-    messageId   UUID        PRIMARY KEY,                                            # Original Message ID
+    messageId   UUID        NOT NULL,                                               # Original Message ID
     firedAt     TIMESTAMP   NOT NULL        DEFAULT CURRENT_TIMESTAMP,              # Timestamp
     channelId   INT         NOT NULL,                                               # Channel ID
     userId      INT         NOT NULL,                                               # User ID
