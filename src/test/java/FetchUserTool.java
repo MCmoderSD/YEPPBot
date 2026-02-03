@@ -60,7 +60,7 @@ void main() throws IOException, URISyntaxException {
     IO.println("Total IDs to fetch: " + ids.size());
 
     // Fetch Users
-    HashSet<TwitchUser> users = fetchUsers(ids, helix);
+    HashSet<TwitchUser> users = fetchUsersbyID(ids, helix);
     IO.println("Fetched users: " + users.size());
 
     // Update Database
@@ -71,7 +71,7 @@ void main() throws IOException, URISyntaxException {
 }
 
 @SuppressWarnings("unused")
-private HashSet<TwitchUser> fetchUsers(HashSet<Integer> ids, TwitchHelix helix) {
+private HashSet<TwitchUser> fetchUsersbyID(HashSet<Integer> ids, TwitchHelix helix) {
 
     // Batch IDs
     var batches = new ArrayList<ArrayList<String>>();
@@ -102,7 +102,7 @@ private HashSet<TwitchUser> fetchUsers(HashSet<Integer> ids, TwitchHelix helix) 
 }
 
 @SuppressWarnings("unused")
-private HashSet<TwitchUser> fetchUsers(HashSet<String> names, TwitchHelix helix) {
+private HashSet<TwitchUser> fetchUsersByName(HashSet<String> names, TwitchHelix helix) {
 
     // Batch IDs
     var batches = new ArrayList<ArrayList<String>>();

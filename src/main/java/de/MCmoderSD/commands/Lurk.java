@@ -31,7 +31,7 @@ public class Lurk extends CommandBuilder {
                 lurkHandler.addLurk(event);
 
                 // Send Message
-                //return twitchBot.sendMessage(event, "Lurk-Init", tagUser(event.getUser(), " ist jetzt im Lurk!"));
+                //return twitchBot.sendMessage(event, "Lurk-Init", tagUser(event.getUser()) + " ist jetzt im Lurk!"));
                 return true;
             }
         });

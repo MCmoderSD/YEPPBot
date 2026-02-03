@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import static de.MCmoderSD.utilities.FormatUUID.asBytes;
-import static de.MCmoderSD.utilities.ZipUtil.inflateEvent;
+import static de.MCmoderSD.utilities.ZipUtil.inflateMessageEvent;
 import static de.MCmoderSD.utilities.ZipUtil.inflateTwitchUser;
 
 public class LurkManager {
@@ -174,7 +174,7 @@ public class LurkManager {
             MessageEvent lurkEvent = null;
 
             // Process results
-            if (resultSet.next()) lurkEvent = inflateEvent(resultSet.getBytes("event"));
+            if (resultSet.next()) lurkEvent = inflateMessageEvent(resultSet.getBytes("event"));
 
             // Close resources
             resultSet.close();

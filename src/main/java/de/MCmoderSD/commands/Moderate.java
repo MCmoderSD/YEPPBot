@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static de.MCmoderSD.utilities.MessageHelper.tagUser;
+
 public class Moderate extends CommandBuilder {
 
     // Constructor
@@ -65,12 +67,12 @@ public class Moderate extends CommandBuilder {
 
                     if (argsSize == 1) switch (action) {
                         case "join": {
-                            if (twitchBot.joinChannel(user)) return twitchBot.sendMessage(event, name, "Der Bot ist dem Kanal @" + user.getDisplayName() + " beigetreten.");
-                            else return twitchBot.sendMessage(event, name, "Der Bot konnte dem Kanal @" + user.getDisplayName() + " nicht beitreten.");
+                            if (twitchBot.joinChannel(user)) return twitchBot.sendMessage(event, name, "Der Bot ist dem Kanal " + tagUser(user) + " beigetreten. YEPP");
+                            else return twitchBot.sendMessage(event, name, "Der Bot konnte dem Kanal " + tagUser(user) + " nicht beitreten. YEPP");
                         }
                         case "leave": {
-                            twitchBot.sendMessage(event, name, "Versuche, den Kanal @" + user.getDisplayName() + " zu verlassen...");
-                            if (!twitchBot.leaveChannel(user)) return twitchBot.sendMessage(event, name, "Der Bot konnte den Kanal @" + user.getDisplayName() + " nicht verlassen.");
+                            twitchBot.sendMessage(event, name, "Versuche, den Kanal " + tagUser(user) + " zu verlassen...");
+                            if (!twitchBot.leaveChannel(user)) return twitchBot.sendMessage(event, name, "Der Bot konnte den Kanal " + tagUser(user) + " nicht verlassen. YEPP");
                             else return true;
                         }
                     }
@@ -81,7 +83,7 @@ public class Moderate extends CommandBuilder {
                     TwitchUser targetChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
 
                     // Validate Target Channel
-                    if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal @" + targetChannelName + " nicht gefunden.");
+                    if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal @" + targetChannelName + " nicht gefunden. YEPP");
 
                     // Check Permissions
                     if (!(user.equals(targetChannel) || twitchBot.isOwner(user))) return false;
@@ -89,12 +91,12 @@ public class Moderate extends CommandBuilder {
                     // Perform Action
                     switch (action) {
                         case "join": {
-                            if (twitchBot.joinChannel(targetChannel)) return twitchBot.sendMessage(event, name, "Der Bot ist dem Kanal @" + targetChannel.getDisplayName() + " beigetreten.");
-                            else return twitchBot.sendMessage(event, name, "Der Bot konnte dem Kanal @" + targetChannel.getDisplayName() + " nicht beitreten.");
+                            if (twitchBot.joinChannel(targetChannel)) return twitchBot.sendMessage(event, name, "Der Bot ist dem Kanal " + tagUser(targetChannel) + " beigetreten. YEPP");
+                            else return twitchBot.sendMessage(event, name, "Der Bot konnte dem Kanal " + tagUser(targetChannel) + " nicht beitreten. YEPP");
                         }
                         case "leave": {
-                            twitchBot.sendMessage(event, name, "Versuche, den Kanal @" + targetChannel.getDisplayName() + " zu verlassen...");
-                            if (!twitchBot.leaveChannel(targetChannel)) return twitchBot.sendMessage(event, name, "Der Bot konnte den Kanal @" + targetChannel.getDisplayName() + " nicht verlassen.");
+                            twitchBot.sendMessage(event, name, "Versuche, den Kanal " + tagUser(targetChannel) + " zu verlassen...");
+                            if (!twitchBot.leaveChannel(targetChannel)) return twitchBot.sendMessage(event, name, "Der Bot konnte den Kanal " + tagUser(targetChannel) + " nicht verlassen. YEPP");
                             else return true;
                         }
                     }
@@ -117,12 +119,12 @@ public class Moderate extends CommandBuilder {
                         // Perform Action
                         switch (action) {
                             case "block": {
-                                if (commandHandler.blacklistAdd(channel, command)) return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' wurde zur Blacklist hinzugefügt.");
-                                else return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' ist bereits auf der Blacklist oder existiert nicht.");
+                                if (commandHandler.blacklistAdd(channel, command)) return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' wurde zur Blacklist hinzugefügt. YEPP");
+                                else return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' ist bereits auf der Blacklist oder existiert nicht. YEPP");
                             }
                             case "unblock": {
-                                if (commandHandler.blacklistRemove(channel, command)) return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' wurde von der Blacklist entfernt.");
-                                else return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' war nicht auf der Blacklist oder existiert nicht.");
+                                if (commandHandler.blacklistRemove(channel, command)) return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' wurde von der Blacklist entfernt. YEPP");
+                                else return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' war nicht auf der Blacklist oder existiert nicht. YEPP");
                             }
                         }
                     }
@@ -133,7 +135,7 @@ public class Moderate extends CommandBuilder {
                     TwitchUser targetChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
 
                     // Validate Target Channel
-                    if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal '" + targetChannelName + "' nicht gefunden.");
+                    if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal '" + targetChannelName + "' nicht gefunden. YEPP");
 
                     // Check Permissions
                     if (twitchBot.isPermitted(user, targetChannel)) return false;
@@ -141,12 +143,12 @@ public class Moderate extends CommandBuilder {
                     // Perform Action
                     switch (action) {
                         case "block": {
-                            if (commandHandler.blacklistAdd(targetChannel, command)) return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' wurde zur Blacklist von '" + targetChannel.getDisplayName() + "' hinzugefügt.");
-                            else return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' ist bereits auf der Blacklist von '" + targetChannel.getDisplayName() + "' oder existiert nicht.");
+                            if (commandHandler.blacklistAdd(targetChannel, command)) return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' wurde zur Blacklist von hinzugefügt. YEPP");
+                            else return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' ist bereits auf der Blacklist oder existiert nicht. YEPP");
                         }
                         case "unblock": {
-                            if (commandHandler.blacklistRemove(targetChannel, command)) return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' wurde von der Blacklist von '" + targetChannel.getDisplayName() + "' entfernt.");
-                            else return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' war nicht auf der Blacklist von '" + targetChannel.getDisplayName() + "' oder existiert nicht.");
+                            if (commandHandler.blacklistRemove(targetChannel, command)) return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' wurde von der Blacklist entfernt. YEPP");
+                            else return twitchBot.sendMessage(event, name, "Der Befehl '" + command + "' war nicht auf der Blacklist oder existiert nicht. YEPP");
                         }
                     }
                 }

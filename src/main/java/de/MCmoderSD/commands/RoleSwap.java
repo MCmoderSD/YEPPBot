@@ -8,6 +8,8 @@ import de.MCmoderSD.objects.MessageEvent;
 
 import java.util.ArrayList;
 
+import static de.MCmoderSD.utilities.MessageHelper.tagUser;
+
 public class RoleSwap extends CommandBuilder {
 
     // Constructor
@@ -52,7 +54,7 @@ public class RoleSwap extends CommandBuilder {
 
                     // Fetch Target Channel
                     targetChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
-                    if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal '" + targetChannelName + "' nicht gefunden.");
+                    if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal '" + targetChannelName + "' nicht gefunden. YEPP");
 
                 } else targetChannel = channel;
 
@@ -65,7 +67,7 @@ public class RoleSwap extends CommandBuilder {
 
                     // Fetch Target User
                     targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
-                    if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden.");
+                    if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden. YEPP");
 
                 } else targetUser = user;
 
@@ -93,10 +95,10 @@ public class RoleSwap extends CommandBuilder {
                 }
 
                 // Validate Success
-                if (!success) return twitchBot.sendMessage(event, name, "Fehler: Konnte die Rolle nicht ändern.");
+                if (!success) return twitchBot.sendMessage(event, name, "Fehler: Konnte die Rolle nicht ändern. YEPP");
 
                 // Send Message
-                return twitchBot.sendMessage(event, name, "Die Rolle von " + targetUser.getDisplayName() + " wurde zu " + role.getName() + " geändert.");
+                return twitchBot.sendMessage(event, name, "Die Rolle von " + tagUser(targetUser) + " wurde zu " + role.getName() + " geändert. YEPP");
             }
         });
 

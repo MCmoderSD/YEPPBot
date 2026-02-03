@@ -90,7 +90,7 @@ public class LurkHandler {
                 MessageEvent lurkEvent = lurkManager.getLurkEvent(user);
 
                 // Show traitor message
-                twitchBot.sendMessage(lurkEvent, "Lurk-Traitor", tagUser(user, "ist ein dreckiger Verräter, hab den Kek gerade im Chat von " + tagUser(channel, "gesehen! YEPP")));
+                twitchBot.sendMessage(lurkEvent, "Lurk-Traitor", tagUser(user) + " ist ein dreckiger Verräter, hab den Kek gerade im Chat von " + tagUser(channel) + " gesehen! YEPP");
 
             } else {
 
@@ -103,7 +103,7 @@ public class LurkHandler {
                 lurkManager.removeLurk(user);
 
                 // Show lurk message
-                twitchBot.sendMessage(event, "Lurk-End", tagUser(user, "war " + formatLurkTime(startTime) + " im Lurk! YEPP"));
+                twitchBot.sendMessage(event, "Lurk-End", tagUser(user) + " war " + formatLurkTime(startTime) + " im Lurk! YEPP");
             }
         }, "Handle-Lurk-" + event.getId().toString()).start();
     }

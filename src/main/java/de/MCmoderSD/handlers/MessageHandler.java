@@ -71,7 +71,7 @@ public class MessageHandler {
         if (isCommand(event.getMessage())) return commandHandler.handleCommand(event);
 
         // Handle YEPP
-        if (mentionsBot(event.getMessage())) return twitchBot.sendMessage(event, "YEPP", tagUser(event.getUser(), "YEPP"));
+        if (mentionsBot(event.getMessage())) return twitchBot.sendMessage(event, "YEPP", tagUser(event.getUser()) + "YEPP");
         else if (event.getMessage().toUpperCase().contains("YEP")) return twitchBot.sendMessage(event, "YEPP", "YEPP");
 
         // Default

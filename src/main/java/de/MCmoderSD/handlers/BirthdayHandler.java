@@ -11,6 +11,8 @@ import de.MCmoderSD.objects.MessageEvent;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static de.MCmoderSD.utilities.MessageHelper.tagUser;
+
 public class BirthdayHandler {
 
     // Associations
@@ -75,7 +77,7 @@ public class BirthdayHandler {
             else congratulatedToday.add(user);
 
             // Send Congratulations
-            twitchBot.sendMessage(event, "Birthday-Congratulations", String.format("Alles Gute zu deinem %d. Geburtstag, @%s! YEPP", birthdate.getAge(), event.getUser().getDisplayName()));
+            twitchBot.sendMessage(event, "Birthday-Congratulations", String.format("Alles Gute zu deinem %d. Geburtstag, %s! YEPP", birthdate.getAge(), tagUser(user)));
 
         }, "Handle-Birthday-" + event.getId().toString()).start();
     }

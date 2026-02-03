@@ -12,6 +12,7 @@ import java.time.Month;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static de.MCmoderSD.utilities.MessageHelper.tagUser;
 import static java.time.Month.*;
 
 public class Birthday extends CommandBuilder {
@@ -87,7 +88,7 @@ public class Birthday extends CommandBuilder {
                             birthdayHandler.addBirthday(user, birthdate);
 
                             // Send Confirmation
-                            return twitchBot.sendMessage(event, name, "Dein Geburtstag wurde auf " + birthdate.getFormattedDate() + " gesetzt.");
+                            return twitchBot.sendMessage(event, name, "Dein Geburtstag wurde auf " + birthdate.getFormattedDate() + " gesetzt. YEPP");
 
                         } catch (NumberFormatException e) {
                             return twitchBot.sendMessage(event, name, setSyntax);
@@ -98,7 +99,7 @@ public class Birthday extends CommandBuilder {
 
                     // Delete Action
                     birthdayHandler.removeBirthday(user);
-                    return twitchBot.sendMessage(event, name, "Dein Geburtstag wurde gelöscht.");
+                    return twitchBot.sendMessage(event, name, "Dein Geburtstag wurde gelöscht. YEPP");
                 }
 
                 // Get Action
@@ -113,14 +114,14 @@ public class Birthday extends CommandBuilder {
                     TwitchUser targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
 
                     // Validate Target User
-                    if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Nutzer @" + targetUserName + " nicht gefunden.");
+                    if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Nutzer @" + targetUserName + " nicht gefunden. YEPP");
 
                     // Get Birthdate
                     Birthdate birthdate = birthdayManager.getBirthday(targetUser);
-                    if (birthdate == null) return twitchBot.sendMessage(event, name, "Der Nutzer @" + targetUser.getDisplayName() + " hat keinen Geburtstag gesetzt.");
+                    if (birthdate == null) return twitchBot.sendMessage(event, name, "Der Nutzer " + tagUser(targetUser) + " hat keinen Geburtstag gesetzt. YEPP");
 
                     // Send Birthdate
-                    return twitchBot.sendMessage(event, name, "Der Geburtstag von @" + targetUser.getDisplayName() + " ist der " + birthdate.getFormattedDate() + ".");
+                    return twitchBot.sendMessage(event, name, "Der Geburtstag von " + tagUser(targetUser) + " ist der " + birthdate.getFormattedDate() + ". YEPP");
                 }
 
                 // Variables
@@ -146,7 +147,7 @@ public class Birthday extends CommandBuilder {
                             targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
 
                             // Validate Target User
-                            if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Nutzer @" + targetUserName + " nicht gefunden.");
+                            if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Nutzer @" + targetUserName + " nicht gefunden. YEPP");
                         } else targetUser = user;
 
                         // Get Birthdate
@@ -154,14 +155,14 @@ public class Birthday extends CommandBuilder {
 
                         // Validate Birthdate
                         if (birthdate == null)
-                            return twitchBot.sendMessage(event, name, "Der Nutzer @" + targetUser.getDisplayName() + " hat keinen Geburtstag gesetzt.");
+                            return twitchBot.sendMessage(event, name, "Der Nutzer " + tagUser(targetUser) + " hat keinen Geburtstag gesetzt. YEPP");
 
                         // Calculate Time Until Birthday
                         var timeUntil = timeUntilBirthday(birthdate);
                         String formattedDuration = formatTimeDuration(timeUntil, TimeUnit.DAYS);
 
                         // Send Message
-                        return twitchBot.sendMessage(event, name, "Bis zum Geburtstag von @" + targetUser.getDisplayName() + " am " + birthdate.getFormattedDate() + " sind es noch " + formattedDuration + ".");
+                        return twitchBot.sendMessage(event, name, "Bis zum Geburtstag von " + tagUser(targetUser) + " am " + birthdate.getFormattedDate() + " sind es noch " + formattedDuration + ". YEPP");
 
                         // Send Message
                     }
@@ -180,14 +181,14 @@ public class Birthday extends CommandBuilder {
                         ArrayList<String> usersInMonth = new ArrayList<>();
                         for (var entry : sortedBirthdays.entrySet()) {
                             if (entry.getValue().month() == month.getValue()) {
-                                usersInMonth.add("@" + entry.getKey().getDisplayName() + " am " + entry.getValue().getFormattedDate());
+                                usersInMonth.add(tagUser(entry.getKey()) + " am " + entry.getValue().getFormattedDate());
                             }
                         }
 
                         // Check Results
                         String monthName = month.name().toLowerCase();
                         monthName = monthName.substring(0, 1).toUpperCase() + monthName.substring(1);
-                        if (usersInMonth.isEmpty()) return twitchBot.sendMessage(event, name, "In " + monthName + " hat niemand Geburtstag.");
+                        if (usersInMonth.isEmpty()) return twitchBot.sendMessage(event, name, "In " + monthName + " hat niemand Geburtstag. YEPP");
 
                         // Build Message
                         ArrayList<StringBuilder> messages = new ArrayList<>();
@@ -218,7 +219,7 @@ public class Birthday extends CommandBuilder {
                         // Find Next Birthdays
                         ArrayList<String> nextBirthdays = new ArrayList<>();
                         for (var entry : sortedBirthdays.entrySet()) {
-                            nextBirthdays.add("@" + entry.getKey().getDisplayName() + " am " + entry.getValue().getFormattedDate());
+                            nextBirthdays.add(tagUser(entry.getKey()) + " am " + entry.getValue().getFormattedDate());
                         }
 
                         // Calculate max Amount

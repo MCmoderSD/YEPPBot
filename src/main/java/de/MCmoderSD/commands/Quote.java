@@ -8,6 +8,7 @@ import de.MCmoderSD.objects.MessageEvent;
 import java.util.ArrayList;
 
 import static de.MCmoderSD.utilities.MessageHelper.SPACE;
+import static de.MCmoderSD.utilities.MessageHelper.tagUser;
 import static java.lang.String.format;
 
 public class Quote extends CommandBuilder {
@@ -53,7 +54,7 @@ public class Quote extends CommandBuilder {
                     var quote = quotes.get(id);
 
                     // Send Quote
-                    return twitchBot.sendMessage(event, name, format("@%s, #%d: %s", user.getDisplayName(), id + 1, quote));
+                    return twitchBot.sendMessage(event, name, format("%s, #%d: %s", tagUser(user), id + 1, quote));
                 }
 
                 // Quote ID
@@ -67,7 +68,7 @@ public class Quote extends CommandBuilder {
                     var quote = quotes.get(quoteId);
 
                     // Send Quote
-                    return twitchBot.sendMessage(event, name, format("@%s, #%d: %s", user.getDisplayName(), quoteId + 1, quote));
+                    return twitchBot.sendMessage(event, name, format("%s, #%d: %s", tagUser(user), quoteId + 1, quote));
                 }
 
                 // Check Permissions
@@ -123,7 +124,7 @@ public class Quote extends CommandBuilder {
                         if (noQuotes) response = noQuotesFound;
                         else {
                             String quote = quotes.get(0);
-                            response = String.format("@%s, #%d: %s", user.getDisplayName(), 1, quote);
+                            response = String.format("%s, #%d: %s", tagUser(user), 1, quote);
                         }
                         break;
                     }
@@ -134,7 +135,7 @@ public class Quote extends CommandBuilder {
                         else {
                             var lastId = quotes.size() - 1;
                             String quote = quotes.get(lastId);
-                            response = String.format("@%s, #%d: %s", user.getDisplayName(), lastId + 1, quote);
+                            response = String.format("%s, #%d: %s", tagUser(user), lastId + 1, quote);
                         }
                         break;
                     }

@@ -73,7 +73,7 @@ public class Shoutout extends CommandBuilder {
                         TwitchUser targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
 
                         // Validate Target User
-                        if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden.");
+                        if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden. YEPP");
                         else channel = targetUser;
                     }
 
@@ -84,7 +84,7 @@ public class Shoutout extends CommandBuilder {
                     channelManager.setAutoShoutout(channel, autoShoutout);
 
                     // Send Confirmation
-                    return twitchBot.sendMessage(event, name, "Automatischer Shoutout für Raids wurde " + (autoShoutout ? "aktiviert." : "deaktiviert."));
+                    return twitchBot.sendMessage(event, name, "Automatischer Shoutout für Raids wurde " + (autoShoutout ? "aktiviert." : "deaktiviert. YEPP"));
                 }
 
                 // Specific User Shoutout
@@ -96,7 +96,7 @@ public class Shoutout extends CommandBuilder {
                     TwitchUser targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
 
                     // Validate Target User
-                    if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden.");
+                    if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden. YEPP");
 
                     // Send Shoutout
                     streamHandler.sendShoutout(targetUser, channel);
