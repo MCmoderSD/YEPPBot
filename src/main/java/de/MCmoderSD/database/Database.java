@@ -28,6 +28,7 @@ public class Database extends Driver {
     private final EventLogManager eventLogManager;
     private final BirthdayManager birthdayManager;
     private final LurkManager lurkManager;
+    private final QueueManager queueManager;
     private final QuoteManager quoteManager;
 
     // Constructor
@@ -47,6 +48,7 @@ public class Database extends Driver {
         ArrayList<String> events = loadTables("database/Events.sql");
         ArrayList<String> birthday = loadTables("database/BirthdayTable.sql");
         ArrayList<String> lurker = loadTables("database/Lurker.sql");
+        ArrayList<String> queue = loadTables("database/QueueTable.sql");
         ArrayList<String> quotes = loadTables("database/QuoteTable.sql");
 
         // Initialize Tables
@@ -56,6 +58,7 @@ public class Database extends Driver {
         initTables(events);         // Raid & Follow Table                      | needs UserTable
         initTables(birthday);       // Birthday Table                           | needs UserTable
         initTables(lurker);         // Lurker Table                             | needs UserTable
+        initTables(queue);          // Queue Table                              | needs ChannelTable
         initTables(quotes);         // Quote Table                              | needs ChannelTable
 
         // Initialize Managers
@@ -64,6 +67,7 @@ public class Database extends Driver {
         eventLogManager = new EventLogManager(this);
         birthdayManager = new BirthdayManager(this);
         lurkManager = new LurkManager(this);
+        queueManager = new QueueManager(this);
         quoteManager = new QuoteManager(this);
     }
 
@@ -248,6 +252,10 @@ public class Database extends Driver {
 
     public LurkManager getLurkManager() {
         return lurkManager;
+    }
+
+    public QueueManager getQueueManager() {
+        return queueManager;
     }
 
     public QuoteManager getQuoteManager() {

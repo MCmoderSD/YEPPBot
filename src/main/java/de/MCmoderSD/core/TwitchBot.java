@@ -196,6 +196,7 @@ public class TwitchBot {
         new Lurk(this);
         new Moderate(this);
         new Ping(this);
+        new Queue(this);
         new Quote(this);
         new RoleSwap(this);
         new Say(this);

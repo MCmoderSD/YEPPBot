@@ -23,6 +23,7 @@ public abstract class CommandBuilder {
     protected final EventLogManager eventLogManager;
     protected final BirthdayManager birthdayManager;
     protected final LurkManager lurkManager;
+    protected final QueueManager queueManager;
     protected final QuoteManager quoteManager;
 
     // Handlers
@@ -59,6 +60,7 @@ public abstract class CommandBuilder {
         eventLogManager = database.getEventLogManager();
         birthdayManager = database.getBirthdayManager();
         lurkManager = database.getLurkManager();
+        queueManager = database.getQueueManager();
         quoteManager = database.getQuoteManager();
 
         // Set Handlers

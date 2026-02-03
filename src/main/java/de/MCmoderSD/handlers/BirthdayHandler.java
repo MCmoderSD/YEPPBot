@@ -69,7 +69,7 @@ public class BirthdayHandler {
             var user = event.getUser();
 
             // Check if Congratulated Today
-            if (congratulatedToday.contains(user)) return;
+            if (congratulatedToday.contains(user) || !birthdays.containsKey(user)) return;
 
             // Check if Birthday
             var birthdate = birthdays.get(user);
