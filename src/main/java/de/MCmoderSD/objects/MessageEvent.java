@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -210,5 +211,15 @@ public class MessageEvent implements Serializable {
         public static DeviceType getDeviceType(ChannelMessageActionEvent event) {
             return byNonce(event.getNonce());
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firedAt, channel, user, message, permissions, deviceType, subTier, subMonths, isAction, isHighlighted, isFirstMessage, isUserIntroduction, isSkipSubsModeMessage);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass() == getClass() && hashCode() == obj.hashCode();
     }
 }

@@ -25,7 +25,7 @@ public class Status extends CommandBuilder {
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                return twitchBot.sendMessage(event, name, "Bot ist aktiv!");
+                return twitchBot.sendMessage(event, name, "Bot ist aktiv! YEPP");
             }
         });
 

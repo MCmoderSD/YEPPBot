@@ -5,10 +5,12 @@ import de.MCmoderSD.helix.objects.TwitchUser;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 public class RaidEvent implements Serializable {
 
+    // Event Information
     private final UUID id;                  // Event ID
     private final Instant firedAt;          // Fired At
 
@@ -57,5 +59,15 @@ public class RaidEvent implements Serializable {
 
     public int getViewers() {
         return viewers;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firedAt, channel, user, viewers);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass() == getClass() && hashCode() == obj.hashCode();
     }
 }

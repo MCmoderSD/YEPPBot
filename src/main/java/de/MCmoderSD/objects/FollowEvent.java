@@ -7,6 +7,7 @@ import de.MCmoderSD.helix.objects.TwitchUser;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 
 public class FollowEvent implements Serializable {
 
@@ -41,5 +42,15 @@ public class FollowEvent implements Serializable {
 
     public TwitchUser getUser() {
         return user;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(followedAt, channel, user);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass() == getClass() && hashCode() == obj.hashCode();
     }
 }

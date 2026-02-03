@@ -73,5 +73,4 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
         // Validate using parent class
         return validateApplicationConfig(config.get("application"));
     }
-
 }

@@ -4,6 +4,7 @@ import net.jpountz.xxhash.XXHash32;
 import net.jpountz.xxhash.XXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 
+@SuppressWarnings("unused")
 public class Hasher {
 
     // XXHash Instances

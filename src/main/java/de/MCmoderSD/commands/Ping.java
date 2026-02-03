@@ -25,7 +25,7 @@ public class Ping extends CommandBuilder {
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Send Message
-                return twitchBot.sendMessage(event, name, "Pong " + twitchBot.getChat().getLatency() + "ms");
+                return twitchBot.sendMessage(event, name, "Pong " + twitchBot.getChat().getLatency() + "ms YEPP");
             }
         });
 

@@ -115,13 +115,12 @@ public class MessageHelper {
     }
 
     // Tag User
-    public static String tagUser(TwitchUser user, String message) {
+    public static String tagUser(TwitchUser user) {
 
         // Check Parameters
         if (user == null) throw new IllegalArgumentException("TwitchUser cannot be null");
-        if (message == null) throw new IllegalArgumentException("Message cannot be null");
 
         // Tag User
-        return "@" + user.getDisplayName() + " " + message;
+        return "@" + user.getDisplayName();
     }
 }
