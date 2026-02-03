@@ -28,17 +28,15 @@ void main() throws IOException, URISyntaxException {
     // Load Config
     JsonNode config = JsonUtility.getInstance().load("/database.json");
 
-    // Build Driver
-    Driver.Builder builder = Driver.Builder
+    // Initialize SQL
+    SQL sql = new SQL(Driver.Builder
             .withType(Driver.DatabaseType.MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
             .withDatabase(config.get("database").asString())
             .withUsername(config.get("username").asString())
-            .withPassword(config.get("password").asString());
-
-    // Initialize SQL
-    SQL sql = new SQL(builder);
+            .withPassword(config.get("password").asString())
+    );
 
     // Get Users
     HashSet<TwitchUser> users = sql.getTwitchUsers();
@@ -50,13 +48,11 @@ void main() throws IOException, URISyntaxException {
 
             // Profile Image
             var profileUrl = user.getProfileImageUrl();
-            if (profileUrl != null && validUUID(profileUrl.substring(47, 83)))
-                sql.checkImage(user, profileUrl, PROFILE);
+            if (profileUrl != null && validUUID(profileUrl.substring(47, 83))) sql.checkImage(user, profileUrl, PROFILE);
 
             // Offline Image
             var offlineUrl = user.getOfflineImageUrl();
-            if (offlineUrl != null && validUUID(offlineUrl.substring(47, 83)))
-                sql.checkImage(user, offlineUrl, OFFLINE);
+            if (offlineUrl != null && validUUID(offlineUrl.substring(47, 83))) sql.checkImage(user, offlineUrl, OFFLINE);
 
         }).start();
 

@@ -1,6 +1,8 @@
 import de.MCmoderSD.encryption.core.Encryption;
+import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.sql.Driver;
 import de.MCmoderSD.tools.GZIP;
+import tools.jackson.databind.JsonNode;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,9 +10,8 @@ import java.sql.SQLException;
 
 import static de.MCmoderSD.encryption.enums.Hash.SHA3_256;
 import static de.MCmoderSD.encryption.enums.Transformer.AES_ECB_PKCS5;
-import static de.MCmoderSD.sql.Driver.DatabaseType.MARIADB;
 
-void main() {
+void main() throws IOException, URISyntaxException {
 
     // Secrets
     String oldSecret = "old_secret_key_here"; // Old secret key
@@ -20,17 +21,18 @@ void main() {
     Encryption oldEncryptor = new Encryption(oldSecret, SHA3_256, AES_ECB_PKCS5); // Old encryptor
     Encryption newEncryptor = new Encryption(newSecret, SHA3_256, AES_ECB_PKCS5); // New encryptor
 
-    // Database connection
-    SQL.Builder builder = SQL.Builder
-            .withType(MARIADB)          // Database type
-            .withHost("localhost")      // Database host
-            .withPort(3306)             // Database port
-            .withDatabase("database")   // Database name
-            .withUsername("username")   // Database username
-            .withPassword("password");  // Database password
+    // Load Config
+    JsonNode config = JsonUtility.getInstance().load("/database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(builder);
+    SQL sql = new SQL(Driver.Builder
+            .withType(Driver.DatabaseType.MARIADB)
+            .withHost(config.get("host").asString())
+            .withPort(config.get("port").asInt())
+            .withDatabase(config.get("database").asString())
+            .withUsername(config.get("username").asString())
+            .withPassword(config.get("password").asString())
+    );
 
     // Get auth tokens
     HashMap<Integer, byte[]> authTokens = sql.getAuthTokens();

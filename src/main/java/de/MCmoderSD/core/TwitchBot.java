@@ -103,17 +103,17 @@ public class TwitchBot {
         // Set Associations
         this.server = server;
 
-        // Build Database Driver
-        Database.Builder dbBuilder = Database.Builder
+        // Initialize Database
+        database = new Database(Database.Builder
                 .withType(MARIADB)
                 .withHost(databaseConfig.get("host").asString())
                 .withPort(databaseConfig.get("port").asInt())
                 .withDatabase(databaseConfig.get("database").asString())
                 .withUsername(databaseConfig.get("username").asString())
-                .withPassword(databaseConfig.get("password").asString());
+                .withPassword(databaseConfig.get("password").asString())
+        );
 
-        // Initialize Database
-        database = new Database(dbBuilder);
+        // Initialize Managers
         channelManager = database.getChannelManager();
         commandManager = database.getCommandManager();
         eventLogManager = database.getEventLogManager();
