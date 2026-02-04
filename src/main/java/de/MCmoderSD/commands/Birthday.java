@@ -2,14 +2,21 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
-import de.MCmoderSD.core.TwitchBot;
-import de.MCmoderSD.data.Birthdate;
 import de.MCmoderSD.handlers.BirthdayHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
+import de.MCmoderSD.data.Birthdate;
+import de.MCmoderSD.core.TwitchBot;
 
 import java.time.Month;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static de.MCmoderSD.utilities.MessageHelper.tagUser;
@@ -195,7 +202,7 @@ public class Birthday extends CommandBuilder {
                         StringBuilder message = new StringBuilder("In " + monthName + " haben folgende Nutzer Geburtstag: ");
 
                         // Fill Messages
-                        for (int i = 0; i < usersInMonth.size(); i++) {
+                        for (var i = 0; i < usersInMonth.size(); i++) {
                             String userInMonth = usersInMonth.get(i);
                             if (message.length() + userInMonth.length() + 2 > 500) {
                                 messages.add(message);
@@ -232,7 +239,7 @@ public class Birthday extends CommandBuilder {
                         }
 
                         // Parse Amount
-                        int amount = maxAmount;
+                        var amount = maxAmount;
                         if (argsSize > 1) {
                             try {
                                 amount = Integer.parseInt(args.get(1));
@@ -245,7 +252,7 @@ public class Birthday extends CommandBuilder {
 
                         // Build Message
                         StringBuilder message = new StringBuilder("Die nächsten %d Geburtstage sind: ".formatted(amount));
-                        for (int i = 0; i < amount; i++) {
+                        for (var i = 0; i < amount; i++) {
                             message.append(nextBirthdays.get(i));
                             if (i < amount - 1) message.append(", ");
                         }
@@ -263,6 +270,7 @@ public class Birthday extends CommandBuilder {
         if (!registered) throw new IllegalStateException("Command registration failed for command: " + name[0]);
     }
 
+    // Get Birthdays of Channel Community
     private HashMap<TwitchUser, Birthdate> getBirthdays(TwitchUser channel) {
 
         // Variables
@@ -290,6 +298,7 @@ public class Birthday extends CommandBuilder {
         return birthdayMap;
     }
 
+    // Sort Birthdays by Upcoming
     private static LinkedHashMap<TwitchUser, Birthdate> sortBirthdaysByUpcoming(HashMap<TwitchUser, Birthdate> birthdayMap) {
 
         // Create a list from elements of HashMap
@@ -306,6 +315,7 @@ public class Birthday extends CommandBuilder {
         return sortedMap;
     }
 
+    // Calculate Time Until Birthday
     private static long timeUntilBirthday(Birthdate birthdate) {
 
         // Current Date
@@ -329,6 +339,8 @@ public class Birthday extends CommandBuilder {
         return birthdayThisYear.getTimeInMillis() - now.getTimeInMillis();
     }
 
+    // Format Time Duration
+    @SuppressWarnings("SameParameterValue")
     private static String formatTimeDuration(long duration, TimeUnit unit) {
 
         // Calculate time components
@@ -353,6 +365,7 @@ public class Birthday extends CommandBuilder {
         };
     }
 
+    // Parse Month from String
     private static Month parseMonth(String monthString) {
         while (monthString.startsWith("0")) monthString = monthString.substring(1);
         return switch (monthString.toLowerCase()) {

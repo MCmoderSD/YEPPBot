@@ -66,7 +66,7 @@ void main() throws IOException, URISyntaxException {
     // Update Database
     for (var user : users) {
         IO.println("Updating user: " + user.getUsername() + " (" + user.getId() + ")");
-        sql.addTwitchUser(user);
+        sql.updateUser(user);
     }
 }
 
@@ -288,7 +288,7 @@ private static class SQL extends Driver {
         }
     }
 
-    public void addTwitchUser(TwitchUser user) {
+    public void updateUser(TwitchUser user) {
         try {
 
             // Check Parameters
@@ -301,23 +301,16 @@ private static class SQL extends Driver {
 
             // Prepare the SQL statement
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO User (id, username, displayName, type, broadcasterType, user) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE username = ?, displayName = ?, type = ?, broadcasterType = ?, user = ?;"
+                    "UPDATE User SET username = ?, displayName = ?, type = ?, broadcasterType = ?, user = ? WHERE id = ?;"
             );
 
-            // Set the insert values
-            preparedStatement.setInt(1, user.getId());                          // Twitch User ID
-            preparedStatement.setString(2, user.getUsername());                 // Twitch Username
-            preparedStatement.setString(3, user.getDisplayName());              // Twitch Display Name
-            preparedStatement.setString(4, user.getType().name());              // Type
-            preparedStatement.setString(5, user.getBroadcasterType().name());   // Broadcaster Type
-            preparedStatement.setBytes(6, data);                                // TwitchUser Object (compressed)
-
             // Set the update values
-            preparedStatement.setString(7, user.getUsername());                 // Twitch Username
-            preparedStatement.setString(8, user.getDisplayName());              // Twitch Display Name
-            preparedStatement.setString(9, user.getType().name());              // Type
-            preparedStatement.setString(10, user.getBroadcasterType().name());  // Broadcaster Type
-            preparedStatement.setBytes(11, data);                               // TwitchUser Object (compressed)
+            preparedStatement.setString(1, user.getUsername());                 // Twitch Username
+            preparedStatement.setString(2, user.getDisplayName());              // Twitch Display Name
+            preparedStatement.setString(3, user.getType().name());              // Type
+            preparedStatement.setString(4, user.getBroadcasterType().name());   // Broadcaster Type
+            preparedStatement.setBytes(5, data);                                // TwitchUser Object (compressed)
+            preparedStatement.setInt(6, user.getId());                          // Twitch User ID
 
             // Execute the statement
             preparedStatement.executeUpdate();
@@ -326,10 +319,8 @@ private static class SQL extends Driver {
             preparedStatement.close();
 
             // Check profile image
-            if (profileImageUrl != null && validUUID(profileImageUrl.substring(47, 83)))
-                checkImage(user, profileImageUrl, PROFILE);
-            if (offlineImageUrl != null && validUUID(offlineImageUrl.substring(47, 83)))
-                checkImage(user, offlineImageUrl, OFFLINE);
+            if (profileImageUrl != null && validUUID(profileImageUrl.substring(47, 83))) checkImage(user, profileImageUrl, PROFILE);
+            if (offlineImageUrl != null && validUUID(offlineImageUrl.substring(47, 83))) checkImage(user, offlineImageUrl, OFFLINE);
 
         } catch (SQLException | IOException e) {
             throw new RuntimeException("Failed to add or update TwitchUser with id " + user.getId() + ": " + e.getMessage(), e);

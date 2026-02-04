@@ -4,7 +4,11 @@ import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.helix.enums.Scope;
-import de.MCmoderSD.helix.handler.*;
+import de.MCmoderSD.helix.handler.ChannelHandler;
+import de.MCmoderSD.helix.handler.ChatHandler;
+import de.MCmoderSD.helix.handler.RoleHandler;
+import de.MCmoderSD.helix.handler.StreamHandler;
+import de.MCmoderSD.helix.handler.UserHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 

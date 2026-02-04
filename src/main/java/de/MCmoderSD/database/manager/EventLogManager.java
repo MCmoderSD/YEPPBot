@@ -5,9 +5,9 @@ import de.MCmoderSD.objects.FollowEvent;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.objects.RaidEvent;
 
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.UUID;
 

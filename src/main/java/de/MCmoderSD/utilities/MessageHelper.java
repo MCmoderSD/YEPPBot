@@ -79,8 +79,8 @@ public class MessageHelper {
         if (message.isBlank()) return EMPTY;
 
         // Check Message
-        char firstChar = message.charAt(0);
-        char lastChar = message.charAt(message.length() - 1);
+        var firstChar = message.charAt(0);
+        var lastChar = message.charAt(message.length() - 1);
         if (isWhitespace(firstChar)) throw new IllegalStateException("Message still starts with whitespace after normalization");
         if (isWhitespace(lastChar)) throw new IllegalStateException("Message still ends with whitespace after normalization");
         if (message.contains(SPACE + SPACE)) throw new IllegalStateException("Message still contains duplicate spaces after normalization");
@@ -98,8 +98,8 @@ public class MessageHelper {
         if (message.isEmpty()) throw new IllegalArgumentException("Message cannot be empty");
 
         // Get First and Last Character
-        char firstChar = message.charAt(0);
-        char lastChar = message.charAt(message.length() - 1);
+        var firstChar = message.charAt(0);
+        var lastChar = message.charAt(message.length() - 1);
 
         // Trim Message
         if (isWhitespace(firstChar)) removeDuplicateSpaces(message.substring(1));

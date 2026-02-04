@@ -1,8 +1,16 @@
 package de.MCmoderSD.commands.blueprints;
 
 import de.MCmoderSD.core.TwitchBot;
+
 import de.MCmoderSD.database.Database;
-import de.MCmoderSD.database.manager.*;
+import de.MCmoderSD.database.manager.ChannelManager;
+import de.MCmoderSD.database.manager.CommandManager;
+import de.MCmoderSD.database.manager.EventLogManager;
+import de.MCmoderSD.database.manager.BirthdayManager;
+import de.MCmoderSD.database.manager.LurkManager;
+import de.MCmoderSD.database.manager.QueueManager;
+import de.MCmoderSD.database.manager.QuoteManager;
+
 import de.MCmoderSD.handlers.CommandHandler;
 import de.MCmoderSD.helix.core.HelixHandler;
 import de.MCmoderSD.helix.handler.ChannelHandler;

@@ -2,10 +2,10 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
-import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.objects.RaidEvent;
+import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.tools.GZIP;
 
 import java.io.IOException;

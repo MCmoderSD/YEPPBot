@@ -2,9 +2,9 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
-import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
+import de.MCmoderSD.core.TwitchBot;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

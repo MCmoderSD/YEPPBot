@@ -11,10 +11,26 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
-import de.MCmoderSD.commands.*;
+import de.MCmoderSD.commands.Birthday;
+import de.MCmoderSD.commands.Info;
+import de.MCmoderSD.commands.Lurk;
+import de.MCmoderSD.commands.Moderate;
+import de.MCmoderSD.commands.Ping;
+import de.MCmoderSD.commands.Queue;
+import de.MCmoderSD.commands.Quote;
+import de.MCmoderSD.commands.RoleSwap;
+import de.MCmoderSD.commands.Say;
+import de.MCmoderSD.commands.Shoutout;
+import de.MCmoderSD.commands.Status;
 
 import de.MCmoderSD.database.Database;
-import de.MCmoderSD.database.manager.*;
+import de.MCmoderSD.database.manager.ChannelManager;
+import de.MCmoderSD.database.manager.CommandManager;
+import de.MCmoderSD.database.manager.EventLogManager;
+import de.MCmoderSD.database.manager.BirthdayManager;
+import de.MCmoderSD.database.manager.LurkManager;
+import de.MCmoderSD.database.manager.QueueManager;
+import de.MCmoderSD.database.manager.QuoteManager;
 
 import de.MCmoderSD.handlers.EventHandler;
 import de.MCmoderSD.handlers.MessageHandler;
@@ -196,6 +212,7 @@ public class TwitchBot {
 
         // Initialize Commands
         new Birthday(this);
+        new Info(this);
         new Lurk(this);
         new Moderate(this);
         new Ping(this);

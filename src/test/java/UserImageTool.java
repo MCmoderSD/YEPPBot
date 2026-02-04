@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import static de.MCmoderSD.tools.GZIP.*;
 import static de.MCmoderSD.enums.UserImageType.*;
 import static de.MCmoderSD.utilities.FormatUUID.*;
+import static de.MCmoderSD.utilities.ZipUtil.*;
 import static de.MCmoderSD.enums.ImageFormat.getFormat;
 import static java.util.UUID.fromString;
 
@@ -121,7 +122,7 @@ private static class SQL extends Driver {
 
             // Get all users
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT id, user FROM  User"
+                    "SELECT username, user FROM  User"
             );
 
             // Execute query
@@ -129,7 +130,7 @@ private static class SQL extends Driver {
 
             // Process results
             HashSet<TwitchUser> users = new HashSet<>();
-            while (resultSet.next()) users.add((TwitchUser) inflateObject(resultSet.getBytes("user")));
+            while (resultSet.next()) users.add(inflateTwitchUser(resultSet.getBytes("user")));
 
             // Close resources
             resultSet.close();
@@ -138,7 +139,7 @@ private static class SQL extends Driver {
             // Return users
             return users;
 
-        } catch (SQLException | IOException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             throw new RuntimeException("Failed to get TwitchUsers: " + e.getMessage(), e);
         }
     }
@@ -239,7 +240,7 @@ private static class SQL extends Driver {
 
                     // Get Data
                     byte[] imageData = inflate(resultSet.getBytes("image"));
-                    TwitchUser user = (TwitchUser) inflateObject(resultSet.getBytes("user"));
+                    TwitchUser user = inflateTwitchUser(resultSet.getBytes("user"));
                     UUID uuid = fromString(resultSet.getString("uuid"));
                     UserImageType imageType = UserImageType.valueOf(resultSet.getString("type"));
                     ImageFormat imageFormat = ImageFormat.valueOf(resultSet.getString("format"));
@@ -252,7 +253,7 @@ private static class SQL extends Driver {
 
                     // Write file
                     Files.write(imageFile.toPath(), imageData);
-                } catch (IOException | ClassNotFoundException | SQLException e) {
+                } catch (IOException | SQLException e) {
                     throw new RuntimeException("Failed to write user image: " + e.getMessage(), e);
                 }
             }

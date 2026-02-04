@@ -20,6 +20,7 @@ import java.util.UUID;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static de.MCmoderSD.utilities.MessageHelper.*;
 
+@SuppressWarnings("unused")
 public class MessageEvent implements Serializable {
 
     // Event Information
