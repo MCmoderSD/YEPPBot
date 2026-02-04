@@ -4,7 +4,6 @@ import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.data.Birthdate;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.BirthdayManager;
-import de.MCmoderSD.helix.handler.*;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 
@@ -13,13 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static de.MCmoderSD.utilities.MessageHelper.tagUser;
 
+@SuppressWarnings("BusyWait")
 public class BirthdayHandler {
 
     // Associations
     private final TwitchBot twitchBot;
 
     // Database
-    private final Database database;
     private final BirthdayManager birthdayManager;
 
     // Attributes
@@ -36,7 +35,7 @@ public class BirthdayHandler {
         this.twitchBot = twitchBot;
 
         // Set Database
-        database = twitchBot.getDatabase();
+        Database database = twitchBot.getDatabase();
         birthdayManager = database.getBirthdayManager();
 
         // Initialize Attributes
@@ -49,7 +48,7 @@ public class BirthdayHandler {
                 try {
 
                     // Sleep 7 days
-                    Thread.sleep(604800000L);
+                    Thread.sleep(604800000L); // 7 * 24 * 60 * 60 * 1000 ms
                     congratulatedToday.clear();
 
                 } catch (InterruptedException e) {
@@ -59,6 +58,7 @@ public class BirthdayHandler {
         }, "Birthday-Daily-Reset-Thread").start();
     }
 
+    // Handle Birthday
     public void handleBirthday(MessageEvent event) {
         new Thread(() -> {
 
@@ -82,6 +82,7 @@ public class BirthdayHandler {
         }, "Handle-Birthday-" + event.getId().toString()).start();
     }
 
+    // Add Birthday
     public void addBirthday(TwitchUser user, Birthdate birthdate) {
 
         // Check Parameters
@@ -94,6 +95,7 @@ public class BirthdayHandler {
         birthdayManager.addBirthday(birthdate, user);
     }
 
+    // Remove Birthday
     public void removeBirthday(TwitchUser user) {
 
         // Check Parameters

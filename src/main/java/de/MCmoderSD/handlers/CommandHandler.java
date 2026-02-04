@@ -17,11 +17,7 @@ import static de.MCmoderSD.utilities.MessageHelper.*;
 
 public class CommandHandler {
 
-    // Associations
-    private final TwitchBot twitchBot;
-
     // Database
-    private final Database database;
     private final ChannelManager channelManager;
     private final CommandManager commandManager;
 
@@ -37,11 +33,8 @@ public class CommandHandler {
         // Check Parameters
         if (twitchBot == null) throw new IllegalArgumentException("TwitchBot cannot be null");
 
-        // Set Associations
-        this.twitchBot = twitchBot;
-
         // Set Database
-        database = twitchBot.getDatabase();
+        Database database = twitchBot.getDatabase();
         channelManager = database.getChannelManager();
         commandManager = database.getCommandManager();
 
@@ -50,6 +43,17 @@ public class CommandHandler {
         commandMap = new HashMap<>();
         aliasMap = new HashMap<>();
         blacklist = database.getChannelManager().getBlacklist();
+    }
+
+    // Update Blacklist
+    private void updateBlacklist(HashMap<TwitchUser, HashSet<String>> blacklist) {
+
+        // Check Parameters
+        if (blacklist == null) throw new IllegalArgumentException("Blacklist cannot be null");
+
+        // Update Blacklist
+        this.blacklist.clear();
+        this.blacklist.putAll(blacklist);
     }
 
     // Format Command
@@ -71,11 +75,31 @@ public class CommandHandler {
         return new ArrayList<>(Arrays.asList(normalizeMessage(message).split(SPACE)));
     }
 
-    private boolean isBlackListed(MessageEvent event, String command) {
+    // Check Blacklist
+    private boolean isBlacklisted(MessageEvent event, String command) {
         if (!blacklist.containsKey(event.getChannel())) return false;
         return blacklist.get(event.getChannel()).contains(command);
     }
 
+    // Check if Command is Blacklisted
+    private boolean isBlacklisted(TwitchUser channel, String command) {
+
+        // Check Parameters
+        if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
+        if (command == null || command.isBlank()) throw new IllegalArgumentException("Command cannot be null or blank");
+
+        // Normalize Command
+        command = command.toLowerCase();
+
+        // Convert Alias to Command
+        if (aliasMap.containsKey(command)) command = aliasMap.get(command);
+
+        // Check Blacklist
+        if (!blacklist.containsKey(channel)) return false;
+        return blacklist.get(channel).contains(command);
+    }
+
+    // Handle Command
     public boolean handleCommand(MessageEvent event) {
 
         // Check Parameters
@@ -95,7 +119,7 @@ public class CommandHandler {
         if (commandMap.containsKey(trigger)) {
 
             // Check Blacklist
-            if (isBlackListed(event, trigger)) return false;
+            if (isBlacklisted(event, trigger)) return false;
 
             // Get Command
             Command command = commandMap.get(trigger);
@@ -118,82 +142,69 @@ public class CommandHandler {
         return false;
     }
 
+    // Register Command
     public boolean registerCommand(Command command) {
 
         // Check Parameters
         if (command == null) throw new IllegalArgumentException("Command cannot be null");
         
         // Variables
-        var nameLower = command.getName().toLowerCase();
+        var name = command.getName().toLowerCase();
         
         // Check if Command already exists
-        if (commandMap.containsKey(nameLower)) throw new IllegalArgumentException("Command " + command.getName() + " is already registered");
+        if (commandMap.containsKey(name)) throw new IllegalArgumentException("Command " + command.getName() + " is already registered");
         for (var alias : command.getAliases()) if (aliasMap.containsKey(alias.toLowerCase())) throw new IllegalArgumentException("Alias " + alias + " is already registered");
         
         // Register Command
-        commandMap.put(nameLower, command);
-        for (var alias : command.getAliases()) aliasMap.put(alias.toLowerCase(), nameLower);
+        commandMap.put(name, command);
+        for (var alias : command.getAliases()) aliasMap.put(alias.toLowerCase(), name);
+
+        // Return
         return true;
     }
 
-    private void updateBlacklist(HashMap<TwitchUser, HashSet<String>> blacklist) {
-
-        // Check Parameters
-        if (blacklist == null) throw new IllegalArgumentException("Blacklist cannot be null");
-
-        // Update Blacklist
-        this.blacklist.clear();
-        this.blacklist.putAll(blacklist);
-    }
-
-    public boolean isBlacklisted(TwitchUser channel, String command) {
-
-        // Check Parameters
-        if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
-        if (command == null || command.isBlank()) throw new IllegalArgumentException("Command cannot be null or blank");
-
-        // Convert Alias to Command
-        if (aliasMap.containsKey(command.toLowerCase())) command = aliasMap.get(command.toLowerCase());
-
-        // Check Blacklist
-        if (!blacklist.containsKey(channel)) return false;
-        return blacklist.get(channel).contains(command.toLowerCase());
-    }
-
+    // Check if Command is Blacklisted
     public boolean blacklistAdd(TwitchUser channel, String command) {
 
         // Check Parameters
         if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
         if (command == null || command.isBlank()) throw new IllegalArgumentException("Command cannot be null or blank");
 
+        // Normalize Command
+        command = command.toLowerCase();
+
         // Convert Alias to Command
-        if (aliasMap.containsKey(command.toLowerCase())) command = aliasMap.get(command.toLowerCase());
+        if (aliasMap.containsKey(command)) command = aliasMap.get(command);
 
         // Check if command exists
-        if (!commandMap.containsKey(command.toLowerCase())) return false;
+        if (!commandMap.containsKey(command)) return false;
 
         // Check if already blacklisted
-        if (isBlacklisted(channel, command.toLowerCase())) return false;
+        if (isBlacklisted(channel, command)) return false;
 
         // Update Blacklist
         updateBlacklist(channelManager.blacklistAdd(channel, command));
         return true;
     }
 
+    // Check if Command is Blacklisted
     public boolean blacklistRemove(TwitchUser channel, String command) {
 
         // Check Parameters
         if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
         if (command == null || command.isBlank()) throw new IllegalArgumentException("Command cannot be null or blank");
 
+        // Normalize Command
+        command = command.toLowerCase();
+
         // Convert Alias to Command
-        if (aliasMap.containsKey(command.toLowerCase())) command = aliasMap.get(command.toLowerCase());
+        if (aliasMap.containsKey(command)) command = aliasMap.get(command);
 
         // Check if command exists
-        if (!commandMap.containsKey(command.toLowerCase())) return false;
+        if (!commandMap.containsKey(command)) return false;
 
         // Check if not blacklisted
-        if (!isBlacklisted(channel, command.toLowerCase())) return false;
+        if (!isBlacklisted(channel, command)) return false;
 
         // Update Blacklist
         updateBlacklist(channelManager.blacklistRemove(channel, command));

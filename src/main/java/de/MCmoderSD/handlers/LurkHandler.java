@@ -18,7 +18,6 @@ public class LurkHandler {
     private final TwitchBot twitchBot;
 
     // Database
-    private final Database database;
     private final LurkManager lurkManager;
 
     // Attributes
@@ -36,7 +35,7 @@ public class LurkHandler {
         this.twitchBot = twitchBot;
 
         // Set Database
-        database = twitchBot.getDatabase();
+        Database database = twitchBot.getDatabase();
         lurkManager = database.getLurkManager();
 
         // Initialize Lurk Commands
@@ -52,6 +51,7 @@ public class LurkHandler {
         lurkList = new ConcurrentHashMap<>(lurkManager.getLurks());
     }
 
+    // Handle Lurk
     public void handleLurk(MessageEvent event) {
         new Thread(() -> {
 
@@ -108,6 +108,7 @@ public class LurkHandler {
         }, "Handle-Lurk-" + event.getId().toString()).start();
     }
 
+    // Add Lurk
     public void addLurk(MessageEvent event) {
 
         // Check Parameters
@@ -127,6 +128,7 @@ public class LurkHandler {
         lurkList.put(user, event.getChannel()); // Local entry
     }
 
+    // Format Lurk Time
     private static String formatLurkTime(Timestamp startTime) {
 
         // Constants
@@ -151,43 +153,43 @@ public class LurkHandler {
         var time = System.currentTimeMillis() - startTime.getTime();
 
         // Years
-        var years = time / 31536000000L;
+        long years = time / 31536000000L;
         time %= 31536000000L;
         if (years > 1) response.append(years).append(PATTERN.formatted(YEARS));
         else if (years > 0) response.append(years).append(PATTERN.formatted(YEAR));
 
         // Months
-        var months = time / 2592000000L;
+        long months = time / 2592000000L;
         time %= 2592000000L;
         if (months > 1) response.append(months).append(PATTERN.formatted(MONTHS));
         else if (months > 0) response.append(months).append(PATTERN.formatted(MONTH));
 
         // Weeks
-        var weeks = time / 604800000L;
+        long weeks = time / 604800000L;
         time %= 604800000L;
         if (weeks > 1) response.append(weeks).append(PATTERN.formatted(WEEKS));
         else if (weeks > 0) response.append(weeks).append(PATTERN.formatted(WEEK));
 
         // Days
-        var days = time / 86400000L;
+        long days = time / 86400000L;
         time %= 86400000L;
         if (days > 1) response.append(days).append(PATTERN.formatted(DAYS));
         else if (days > 0) response.append(days).append(PATTERN.formatted(DAY));
 
         // Hours
-        var hours = time / 3600000L;
+        long hours = time / 3600000L;
         time %= 3600000L;
         if (hours > 1) response.append(hours).append(PATTERN.formatted(HOURS));
         else if (hours > 0) response.append(hours).append(PATTERN.formatted(HOUR));
 
         // Minutes
-        var minutes = time / 60000L;
+        long minutes = time / 60000L;
         time %= 60000L;
         if (minutes > 1) response.append(minutes).append(PATTERN.formatted(MINUTES));
         else if (minutes > 0) response.append(minutes).append(PATTERN.formatted(MINUTE));
 
         // Seconds
-        var seconds = time / 1000L;
+        long seconds = time / 1000L;
         if (seconds > 1) response.append(seconds).append(PATTERN.formatted(SECONDS));
         else if (seconds > 0) response.append(seconds).append(PATTERN.formatted(SECOND));
 

@@ -1,30 +1,31 @@
 package de.MCmoderSD.handlers;
 
 import com.github.philippheuer.events4j.core.EventManager;
-import com.github.twitch4j.chat.events.channel.ChannelMessageActionEvent;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import com.github.twitch4j.chat.events.channel.ChannelMessageActionEvent;
 import com.github.twitch4j.chat.events.channel.RaidEvent;
-
 import com.github.twitch4j.eventsub.events.ChannelFollowEvent;
+
 import de.MCmoderSD.core.TwitchBot;
+
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
 import de.MCmoderSD.database.manager.EventLogManager;
+
 import de.MCmoderSD.helix.core.HelixHandler;
-import de.MCmoderSD.helix.handler.*;
+import de.MCmoderSD.helix.handler.UserHandler;
+import de.MCmoderSD.helix.handler.StreamHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
-import de.MCmoderSD.objects.FollowEvent;
 import de.MCmoderSD.objects.MessageEvent;
+import de.MCmoderSD.objects.FollowEvent;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static de.MCmoderSD.utilities.MessageHelper.*;
 
+@SuppressWarnings("unused")
 public class EventHandler {
-
-    // Associations
-    private final TwitchBot twitchBot;
 
     // Database
     private final Database database;
@@ -43,17 +44,14 @@ public class EventHandler {
 
     // Attributes
     private final ConcurrentHashMap<Integer, TwitchUser> userCache;
-    private final ConcurrentHashMap<Integer, RaidEvent> raidCache;
-    private final ConcurrentHashMap<Integer, ChannelFollowEvent> followCache;
+    private final ConcurrentHashMap<TwitchUser, RaidEvent> raidCache;
+    private final ConcurrentHashMap<TwitchUser, ChannelFollowEvent> followCache;
 
     // Constructor
     public EventHandler(TwitchBot twitchBot) {
 
         // Check Parameters
         if (twitchBot == null) throw new IllegalArgumentException("TwitchBot cannot be null");
-
-        // Set Associations
-        this.twitchBot = twitchBot;
 
         // Set Database
         database = twitchBot.getDatabase();
@@ -90,6 +88,7 @@ public class EventHandler {
         eventManager.onEvent(ChannelFollowEvent.class, this::handleFollowEvent);
     }
 
+    // Query User
     public TwitchUser queryUser(Integer id, String user) {
 
         // Check Parameters
@@ -121,7 +120,7 @@ public class EventHandler {
         return twitchUser;
     }
 
-    // Handle
+    // Handle Message Event
     private void handleMessageEvent(ChannelMessageEvent event) {
 
         // Check if Event is Mirrored
@@ -133,7 +132,6 @@ public class EventHandler {
             var messageEvent = new MessageEvent(event, this);
 
             // ToDo DEBUG
-            //IO.println("Nonce: " + event.getNonce() + " Device Type: " + messageEvent.getDeviceType());
             System.out.printf("%s <%s> #%s: %s%n", DEBUG, messageEvent.getChannel().getDisplayName(), messageEvent.getUser().getDisplayName(), messageEvent.getMessage());
 
             // Log Message Event
@@ -145,6 +143,7 @@ public class EventHandler {
         }, "Handle-MessageEvent-" + event.getEventId()).start();
     }
 
+    // Handle Message Action Event
     private void handleMessageEvent(ChannelMessageActionEvent event) {
 
         // Check if Event is Mirrored
@@ -156,7 +155,6 @@ public class EventHandler {
             var messageEvent = new MessageEvent(event, this);
 
             // ToDo DEBUG
-            //IO.println("Nonce: " + event.getNonce() + " Device Type: " + messageEvent.getDeviceType());
             System.out.printf("%s <%s> #%s: %s%n", DEBUG, messageEvent.getChannel().getDisplayName(), messageEvent.getUser().getDisplayName(), messageEvent.getMessage());
 
             // Log Message Event
@@ -168,6 +166,7 @@ public class EventHandler {
         }, "Handle-MessageActionEvent-" + event.getEventId()).start();
     }
 
+    // Handle Raid Event
     private void handleRaidEvent(RaidEvent event) {
         new Thread(() -> {
 
@@ -185,14 +184,15 @@ public class EventHandler {
             TwitchUser raider = raidEvent.getUser();
 
             // Cache Raid Event
-            raidCache.put(channel.getId(), event);
+            raidCache.put(channel, event);
 
             // Send Shoutout
-            if (channelManager.getAutoShoutoutChannels().get(channel.getId())) streamHandler.sendShoutout(raider, channel);
+            if (channelManager.getAutoShoutoutChannels().get(channel)) streamHandler.sendShoutout(raider, channel);
 
         }, "Handle-RaidEvent-" + event.getEventId()).start();
     }
 
+    // Handle Follow Event
     private void handleFollowEvent(ChannelFollowEvent event) {
         new Thread(() -> {
 
@@ -203,7 +203,7 @@ public class EventHandler {
             System.out.printf("%s %s followed %s%n", EVENT, followEvent.getUser().getDisplayName(), followEvent.getChannel().getDisplayName());
 
             // Cache Follow Event
-            followCache.put(followEvent.getChannel().getId(), event);
+            followCache.put(followEvent.getChannel(), event);
 
             // Log Follow Event
             eventLogManager.logFollowEvent(followEvent);
@@ -232,38 +232,29 @@ public class EventHandler {
         return new HashMap<>(userCache);
     }
 
-    public HashMap<Integer, RaidEvent> getRaidCache() {
+    public HashMap<TwitchUser, RaidEvent> getRaidCache() {
         return new HashMap<>(raidCache);
     }
 
-    public HashMap<Integer, ChannelFollowEvent> getFollowCache() {
+    public HashMap<TwitchUser, ChannelFollowEvent> getFollowCache() {
         return new HashMap<>(followCache);
     }
 
-    public TwitchUser getTwitchUser(Integer id) {
+    public RaidEvent getLatestRaidEvent(TwitchUser channel) {
 
         // Check Parameters
-        if (id == null || id <= 0) throw new IllegalArgumentException("Invalid user ID");
-
-        // Return User
-        return userCache.getOrDefault(id, null);
-    }
-
-    public RaidEvent getRaidEvent(Integer channelId) {
-
-        // Check Parameters
-        if (channelId == null || channelId <= 0) throw new IllegalArgumentException("Invalid channel ID");
+        if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
 
         // Return Raid Event
-        return raidCache.getOrDefault(channelId, null);
+        return raidCache.getOrDefault(channel, null);
     }
 
-    public ChannelFollowEvent getFollowEvent(Integer channelId) {
+    public ChannelFollowEvent getLatestFollowEvent(TwitchUser channel) {
 
         // Check Parameters
-        if (channelId == null || channelId <= 0) throw new IllegalArgumentException("Invalid channel ID");
+        if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
 
         // Return Follow Event
-        return followCache.getOrDefault(channelId, null);
+        return followCache.getOrDefault(channel, null);
     }
 }

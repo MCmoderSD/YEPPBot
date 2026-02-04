@@ -44,18 +44,22 @@ public class MessageHandler {
         prefixes = twitchBot.getPrefixes();
     }
 
+    // Check if Message is Command
     private boolean isCommand(String message) {
         for (var prefix : prefixes) if (message.startsWith(prefix)) return true;
         for (var prefix : prefixes) if (message.contains(SPACE + prefix)) return true;
         return false;
     }
 
+    // Check if Message Mentions Bot
     private boolean mentionsBot(String message) {
         message = message.toLowerCase();
         for (var alias : botAliases) if (message.contains(alias.toLowerCase())) return true;
         return message.contains(botUser.getUsername());
     }
 
+    // Handle Message
+    @SuppressWarnings("UnusedReturnValue")
     public boolean handleMessage(MessageEvent event) {
 
         // Check Parameters

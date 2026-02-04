@@ -45,6 +45,7 @@ import static de.MCmoderSD.utilities.ConfigValidator.*;
 import static de.MCmoderSD.utilities.MessageHelper.*;
 import static java.lang.Math.round;
 
+@SuppressWarnings("unused")
 public class TwitchBot {
 
     // Server
@@ -57,6 +58,7 @@ public class TwitchBot {
     private final EventLogManager eventLogManager;
     private final BirthdayManager birthdayManager;
     private final LurkManager lurkManager;
+    private final QueueManager queueManager;
     private final QuoteManager quoteManager;
 
     // Configuration
@@ -119,6 +121,7 @@ public class TwitchBot {
         eventLogManager = database.getEventLogManager();
         birthdayManager = database.getBirthdayManager();
         lurkManager = database.getLurkManager();
+        queueManager = database.getQueueManager();
         quoteManager = database.getQuoteManager();
 
         // Parse Config
@@ -310,7 +313,6 @@ public class TwitchBot {
             if (!found) System.out.printf("%s%s Warning: Owner with ID %d not found!%s%n", BOLD, SYSTEM, id, UNBOLD);
         }
 
-        // Log Missing Owners
         for (var name : ownerNames) {
             boolean found = false;
             for (var owner : owners) {
@@ -409,6 +411,7 @@ public class TwitchBot {
         return success;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean leaveChannel(TwitchUser channel) {
 
         // Check Parameters
@@ -501,6 +504,10 @@ public class TwitchBot {
 
     public LurkManager getLurkManager() {
         return lurkManager;
+    }
+
+    public QueueManager getQueueManager() {
+        return queueManager;
     }
 
     public QuoteManager getQuoteManager() {
@@ -602,7 +609,7 @@ public class TwitchBot {
         if (user == null) throw new IllegalArgumentException("TwitchUser cannot be null");
 
         // Check Bot
-        return botUser.getId().equals(user.getId());
+        return botUser.equals(user);
     }
 
     public boolean isOwner(TwitchUser user) {
@@ -611,7 +618,7 @@ public class TwitchBot {
         if (user == null) throw new IllegalArgumentException("TwitchUser cannot be null");
 
         // Check Owners
-        for (var owner : owners) if (owner.getId().equals(user.getId())) return true;
+        for (var owner : owners) if (owner.equals(user)) return true;
         return false;
     }
 
@@ -622,7 +629,7 @@ public class TwitchBot {
         if (channel == null) throw new IllegalArgumentException("Channel TwitchUser cannot be null");
 
         // Check Broadcaster
-        return user.getId().equals(channel.getId());
+        return user.equals(channel);
     }
 
     public boolean isModerator(TwitchUser user, TwitchUser channel) {
