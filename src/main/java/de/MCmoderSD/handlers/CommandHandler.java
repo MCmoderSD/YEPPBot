@@ -143,6 +143,7 @@ public class CommandHandler {
     }
 
     // Register Command
+    @SuppressWarnings("SameReturnValue")
     public boolean registerCommand(Command command) {
 
         // Check Parameters

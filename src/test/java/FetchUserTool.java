@@ -1,7 +1,7 @@
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.helix.TwitchHelix;
-import de.MCmoderSD.database.manager.*;
+
 import de.MCmoderSD.enums.ImageFormat;
 import de.MCmoderSD.enums.UserImageType;
 import de.MCmoderSD.helix.objects.TwitchUser;

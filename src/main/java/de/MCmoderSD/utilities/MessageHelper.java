@@ -4,6 +4,7 @@ import de.MCmoderSD.helix.objects.TwitchUser;
 
 import static java.lang.Character.isWhitespace;
 
+@SuppressWarnings("unused")
 public class MessageHelper {
 
     // Formatting
@@ -89,6 +90,7 @@ public class MessageHelper {
         return message;
     }
 
+    // Remove Duplicate Spaces Helper
     private static String removeDuplicateSpaces(String message) {
 
         // Check Parameters

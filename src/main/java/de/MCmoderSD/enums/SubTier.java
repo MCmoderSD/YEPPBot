@@ -2,6 +2,7 @@ package de.MCmoderSD.enums;
 
 import java.io.Serializable;
 
+@SuppressWarnings("unused")
 public enum SubTier implements Serializable {
 
     // Constants

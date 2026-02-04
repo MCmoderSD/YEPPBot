@@ -2,18 +2,24 @@ package de.MCmoderSD.main;
 
 import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.helix.enums.Scope;
-import de.MCmoderSD.helix.handler.*;
+import de.MCmoderSD.helix.handler.UserHandler;
+import de.MCmoderSD.helix.handler.ChatHandler;
+import de.MCmoderSD.helix.handler.RoleHandler;
+import de.MCmoderSD.helix.handler.StreamHandler;
+import de.MCmoderSD.helix.handler.ChannelHandler;
+
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.server.core.Server;
 import de.MCmoderSD.utilities.MessageHelper;
 import de.MCmoderSD.utilities.TokenGrabber;
+
 import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.stream.Stream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static de.MCmoderSD.utilities.MessageHelper.ICON;
 

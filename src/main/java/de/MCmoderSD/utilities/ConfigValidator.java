@@ -1,6 +1,5 @@
 package de.MCmoderSD.utilities;
 
-
 import tools.jackson.databind.JsonNode;
 
 public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidator {

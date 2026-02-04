@@ -5,7 +5,11 @@ import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.*;
 import de.MCmoderSD.handlers.CommandHandler;
 import de.MCmoderSD.helix.core.HelixHandler;
-import de.MCmoderSD.helix.handler.*;
+import de.MCmoderSD.helix.handler.ChannelHandler;
+import de.MCmoderSD.helix.handler.ChatHandler;
+import de.MCmoderSD.helix.handler.RoleHandler;
+import de.MCmoderSD.helix.handler.StreamHandler;
+import de.MCmoderSD.helix.handler.UserHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
 
 import java.util.ArrayList;

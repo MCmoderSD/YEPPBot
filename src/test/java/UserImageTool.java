@@ -5,22 +5,13 @@ import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.sql.Driver;
 import tools.jackson.databind.JsonNode;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.UUID;
 
-import static de.MCmoderSD.enums.ImageFormat.getFormat;
-import static de.MCmoderSD.utilities.FormatUUID.*;
-import static de.MCmoderSD.enums.UserImageType.*;
 import static de.MCmoderSD.tools.GZIP.*;
-
+import static de.MCmoderSD.enums.UserImageType.*;
+import static de.MCmoderSD.utilities.FormatUUID.*;
+import static de.MCmoderSD.enums.ImageFormat.getFormat;
 import static java.util.UUID.fromString;
 
 void main() throws IOException, URISyntaxException {
@@ -249,7 +240,7 @@ private static class SQL extends Driver {
                     // Get Data
                     byte[] imageData = inflate(resultSet.getBytes("image"));
                     TwitchUser user = (TwitchUser) inflateObject(resultSet.getBytes("user"));
-                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                    UUID uuid = fromString(resultSet.getString("uuid"));
                     UserImageType imageType = UserImageType.valueOf(resultSet.getString("type"));
                     ImageFormat imageFormat = ImageFormat.valueOf(resultSet.getString("format"));
 
