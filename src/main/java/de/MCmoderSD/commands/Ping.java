@@ -14,7 +14,7 @@ public class Ping extends CommandBuilder {
         super(twitchBot);
 
         // About
-        String[] name = { "ping", "latency" };
+        String[] name = { "Ping", "Latency" };
         String description = "Sendet eine Nachricht mit der Latenz des Bots zurück.";
 
 

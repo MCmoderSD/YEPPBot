@@ -17,10 +17,10 @@ public class Info extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "info <mod|editor|vip>";
+        String syntax = "Syntax: " + prefix + "Info <mod|editor|vip>";
 
         // About
-        String[] name = new String[]{ "info", "information" };
+        String[] name = new String[]{ "Info", "Information" };
         String description = "Zeigt Informationen über einen Kanal an, wie z.B. Moderatoren, Editoren oder VIPs. " + syntax;
 
 

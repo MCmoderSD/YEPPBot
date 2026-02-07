@@ -15,8 +15,8 @@ public class Lurk extends CommandBuilder {
         super(twitchBot);
 
         // About
-        String[] name = new String[]{ "lurk", "lörk", "lürk", "lork", "afk" };
-        String description = "Sendet den Befehl " + prefix + "lurk in den Chat, um im Lurk zu sein";
+        String[] name = new String[]{ "Lurk", "Lörk", "Lürk", "Lork", "AFK" };
+        String description = "Sendet den Befehl " + prefix + "Lurk in den Chat, um im Lurk zu sein";
 
         // Get Lurk Handler
         LurkHandler lurkHandler = twitchBot.getEventHandler().getLurkHandler();

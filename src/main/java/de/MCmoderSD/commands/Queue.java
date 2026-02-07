@@ -19,10 +19,10 @@ public class Queue extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "queue <leave|next|list|dequeue|clear> [User]";
+        String syntax = "Syntax: " + prefix + "Queue <leave|next|list|dequeue|clear> [User]";
 
         // About
-        String[] name = { "queue", "warteliste", "warteschlange" };
+        String[] name = { "Queue", "Warteliste", "Warteschlange" };
         String description = "Verwaltet die Warteliste für den Kanal: " + syntax;
 
 

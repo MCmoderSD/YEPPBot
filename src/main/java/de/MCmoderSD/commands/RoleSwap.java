@@ -20,7 +20,7 @@ public class RoleSwap extends CommandBuilder {
         String syntax = "Syntax: " + prefix + "RoleSwap <Rolle> [Benutzer] [Kanal]";
 
         // About
-        String[] name = { "RoleSwap", "RoleChange" };
+        String[] name = { "RoleSwap", "RoleChange", "rs" };
         String description = "Nur für Moderatoren und Administratoren. Ändert die Rolle eines Benutzers. " + syntax;
 
 
@@ -40,13 +40,16 @@ public class RoleSwap extends CommandBuilder {
                 TwitchUser targetChannel;
 
                 // Check Permissions
-                if (!twitchBot.isOwner(user)) return false;
+                if (!twitchBot.isPermitted(user, channel)) return false;
 
                 // Check Args
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Keine Rolle angegeben. " + syntax);
 
                 // Parse Target Channel
                 if (argsSize > 2) {
+
+                    // Check Permissions
+                    if (!twitchBot.isOwner(user)) return false;
 
                     // Parse Name
                     targetChannelName = args.get(2);

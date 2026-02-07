@@ -19,7 +19,7 @@ public class Say extends CommandBuilder {
         String syntax = "Syntax: " + prefix + "say <Nachricht>";
 
         // About
-        String[] name = { "say", "repeat" };
+        String[] name = { "Say", "Repeat" };
         String description = "Nur für Moderatoren und Administratoren. Sendet eine Nachricht in den Chat. " + syntax;
 
 

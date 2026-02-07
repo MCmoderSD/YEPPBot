@@ -14,7 +14,7 @@ public class Status extends CommandBuilder {
         super(twitchBot);
 
         // About
-        String[] name = { "status", "test" };
+        String[] name = { "Status", "Test" };
         String description = "Zeigt den Status des Bots an. Also ob er aktiv ist oder nicht.";
 
 

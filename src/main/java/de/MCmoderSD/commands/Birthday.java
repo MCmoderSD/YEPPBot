@@ -29,14 +29,14 @@ public class Birthday extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "birthday <set|get|until|in|next>";
-        String setSyntax = "Syntax: " + prefix + "birthday set DD.MM.CCYY";
-        String getSyntax = "Syntax: " + prefix + "birthday get <user>";
-        String inSyntax = "Syntax: " + prefix + "birthday in <month>";
-        String nextSyntax = "Syntax: " + prefix + "birthday next <amount>";
+        String syntax = "Syntax: " + prefix + "Birthday <set|get|until|in|next>";
+        String setSyntax = "Syntax: " + prefix + "Birthday set DD.MM.CCYY";
+        String getSyntax = "Syntax: " + prefix + "Birthday get <user>";
+        String inSyntax = "Syntax: " + prefix + "Birthday in <month>";
+        String nextSyntax = "Syntax: " + prefix + "Birthday next <amount>";
 
         // About
-        String[] name = { "birthday", "bday", "geburtstag", "bd", "geb", "gb" };
+        String[] name = { "Birthday", "bday", "Geburtstag", "bd", "geb", "gb" };
         String description = "Setzt deinen Geburtstag. " + syntax;
 
 

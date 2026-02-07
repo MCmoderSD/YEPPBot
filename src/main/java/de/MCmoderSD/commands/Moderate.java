@@ -25,10 +25,10 @@ public class Moderate extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "moderate <join/leave|authenticate|block/unblock> [Befehl] [Benutzer]";
+        String syntax = "Syntax: " + prefix + "Moderate <join/leave|authenticate|block/unblock> [Befehl] [Benutzer]";
 
         // About
-        String[] name = { "moderate", "mod", "moderrate", "modderate", "modderrate" };
+        String[] name = { "Moderate", "Mod", "Moderrate", "Modderate", "Modderrate" };
         String description = "Ändert die Einstellungen des Bots. " + syntax;
 
         // Scope Array

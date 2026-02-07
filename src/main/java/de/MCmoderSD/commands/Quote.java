@@ -18,11 +18,11 @@ public class Quote extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "quote <add|delete|edit|last> <number>";
+        String syntax = "Syntax: " + prefix + "Quote <add|delete|edit|last> <number>";
 
         // About
-        String[] name = {"quote", "qoute", "zitat", "gänsehosen"};
-        String description = "Ist ein Zitat Feature. " + syntax;
+        String[] name = {"Quote", "Qoute", "Zitat", "Gänsehosen"};
+        String description = "Verwaltet Zitate im Chat. " + syntax;
 
         // Responses
         String noQuotesFound = "No quotes found!";

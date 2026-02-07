@@ -164,6 +164,29 @@ public class CommandHandler {
         return true;
     }
 
+    public HashSet<Command> getCommands(TwitchUser channel) {
+
+        // Check Parameters
+        if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
+
+        // Variables
+        HashSet<Command> commands = new HashSet<>();
+
+        // Get Commands
+        for (var entry : commandMap.entrySet()) {
+
+            // Get Command
+            String commandName = entry.getKey();
+            Command command = entry.getValue();
+
+            // Check Blacklist
+            if (!isBlacklisted(channel, commandName)) commands.add(command);
+        }
+
+        // Return
+        return commands;
+    }
+
     // Check if Command is Blacklisted
     public boolean blacklistAdd(TwitchUser channel, String command) {
 

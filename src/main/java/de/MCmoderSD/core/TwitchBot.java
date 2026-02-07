@@ -12,6 +12,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.commands.Birthday;
+import de.MCmoderSD.commands.Help;
 import de.MCmoderSD.commands.Info;
 import de.MCmoderSD.commands.Lurk;
 import de.MCmoderSD.commands.Moderate;
@@ -212,6 +213,7 @@ public class TwitchBot {
 
         // Initialize Commands
         new Birthday(this);
+        new Help(this);
         new Info(this);
         new Lurk(this);
         new Moderate(this);

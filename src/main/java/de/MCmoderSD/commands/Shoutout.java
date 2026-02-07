@@ -26,8 +26,8 @@ public class Shoutout extends CommandBuilder {
         String syntax = "Syntax: " + prefix + "so <enable|disable|@user> ";
 
         // About
-        String[] name = { "shoutout", "so" };
-        String description = "Enable or disable automatic shoutouts for raids. Use '@user' to shoutout a specific user.";
+        String[] name = { "Shoutout", "so" };
+        String description = "Sendet einen Shoutout für den letzten Raider oder einen bestimmten Benutzer. Moderatoren und Administratoren können den automatischen Shoutout für Raids aktivieren oder deaktivieren. " + syntax;
 
 
         // Register command
