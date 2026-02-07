@@ -1,6 +1,8 @@
 package de.MCmoderSD.enums;
 
-public enum ImageFormat {
+import java.io.Serializable;
+
+public enum ImageFormat implements Serializable {
 
     // Image Formats
     JPEG, PNG, GIF;

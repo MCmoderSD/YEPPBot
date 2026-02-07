@@ -68,14 +68,14 @@ public class TwitchBot {
     private final Server server;
 
     // Database
-    private final Database database;
-    private final ChannelManager channelManager;
-    private final CommandManager commandManager;
-    private final EventLogManager eventLogManager;
-    private final BirthdayManager birthdayManager;
-    private final LurkManager lurkManager;
-    private final QueueManager queueManager;
-    private final QuoteManager quoteManager;
+    private final Database database;                // Database
+    private final ChannelManager channelManager;    // Channel Manager
+    private final CommandManager commandManager;    // Command Manager
+    private final EventLogManager eventLogManager;  // Event Log Manager
+    private final BirthdayManager birthdayManager;  // Birthday Manager
+    private final LurkManager lurkManager;          // Lurk Manager
+    private final QueueManager queueManager;        // Queue Manager
+    private final QuoteManager quoteManager;        // Quote Manager
 
     // Configuration
     private final TwitchUser botUser;               // Bot User

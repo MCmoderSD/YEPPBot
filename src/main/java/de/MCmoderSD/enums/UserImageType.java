@@ -1,5 +1,7 @@
 package de.MCmoderSD.enums;
 
-public enum UserImageType {
+import java.io.Serializable;
+
+public enum UserImageType implements Serializable {
     PROFILE, OFFLINE
 }

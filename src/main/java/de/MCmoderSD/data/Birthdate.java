@@ -1,9 +1,10 @@
 package de.MCmoderSD.data;
 
+import java.io.Serializable;
 import java.time.MonthDay;
 import java.util.Calendar;
 
-public record Birthdate(int day, int month, int year) {
+public record Birthdate(int day, int month, int year) implements Serializable {
 
     // Constants
     private static final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
@@ -43,7 +44,7 @@ public record Birthdate(int day, int month, int year) {
         var today = MonthDay.now();
         var birthMonthDay = getMonthDay();
         var age = CURRENT_YEAR - year;
-        if (today.isBefore(birthMonthDay)) age--;
-        return age;
+        if (today.isBefore(birthMonthDay)) return age - 1;
+        else return age;
     }
 }
