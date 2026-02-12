@@ -64,12 +64,7 @@ public class LurkHandler {
 
             // Check for lurk command
             String message = event.getMessage().toLowerCase();
-            for (var command : lurkCommands) if (command.contains(message)) {
-                lurkManager.removeLurk(user);
-                traitorList.remove(user);
-                lurkList.remove(user);
-                return;
-            }
+            for (var command : lurkCommands) if (command.contains(message)) return;
 
             // Skip if user not in lurk list
             if (!lurkList.containsKey(user)) return;
@@ -121,7 +116,10 @@ public class LurkHandler {
         traitorList.remove(user);
 
         // Remove from lurk list if already present
-        if (lurkList.contains(user)) lurkManager.removeLurk(user);
+        if (lurkList.contains(user)) {
+            lurkManager.removeLurk(user);
+            lurkList.remove(user);
+        }
 
         // Add to lurk list
         lurkManager.addLurk(event);             // Database entry
