@@ -3,9 +3,7 @@ package de.MCmoderSD.enums;
 import de.MCmoderSD.json.JsonUtility;
 import tools.jackson.databind.JsonNode;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.net.URISyntaxException;
 import java.time.MonthDay;
 import java.util.*;
 
@@ -43,19 +41,15 @@ public enum ZodiacSign implements Serializable {
     }
 
     static {
-        try {
 
-            // Load match list from JSON file
-            JsonNode matchList = JsonUtility.getInstance().load("/assets/matchList.json");
+        // Load match list from JSON file
+        JsonNode matchList = JsonUtility.getInstance().loadResource("/assets/matchList.json");
 
-            // Populate matches for each zodiac sign
-            for (var sign : ZodiacSign.values()) {
-                for (var match : getMatchingSigns(sign)) {
-                    sign.addMatch(match, matchList.get(sign.getName()).get(match.getName()).asString());
-                }
+        // Populate matches for each zodiac sign
+        for (var sign : ZodiacSign.values()) {
+            for (var match : getMatchingSigns(sign)) {
+                sign.addMatch(match, matchList.get(sign.getName()).get(match.getName()).asString());
             }
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException("Failed to load match list", e);
         }
     }
 

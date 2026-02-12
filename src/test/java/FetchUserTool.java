@@ -21,13 +21,13 @@ import static de.MCmoderSD.utilities.FormatUUID.asBytes;
 import static de.MCmoderSD.utilities.FormatUUID.validUUID;
 import static java.util.UUID.fromString;
 
-void main() throws IOException, URISyntaxException {
+void main() {
 
     // OAuth Token
     String oauthToken = "OAUTH_TOKEN"; // Replace with your actual OAuth token
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().load("/database.json");
+    JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
 
     // Initialize SQL
     SQL sql = new SQL(Driver.Builder

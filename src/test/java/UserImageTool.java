@@ -3,6 +3,7 @@ import de.MCmoderSD.enums.UserImageType;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.sql.Driver;
+
 import tools.jackson.databind.JsonNode;
 
 import java.sql.PreparedStatement;
@@ -15,10 +16,10 @@ import static de.MCmoderSD.utilities.ZipUtil.*;
 import static de.MCmoderSD.enums.ImageFormat.getFormat;
 import static java.util.UUID.fromString;
 
-void main() throws IOException, URISyntaxException {
+void main() {
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().load("/database.json");
+    JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
 
     // Initialize SQL
     SQL sql = new SQL(Driver.Builder

@@ -89,10 +89,10 @@ public class Main {
             if (index + 1 >= argSize) throw new IllegalArgumentException("No config file path provided after " + args.get(index));
 
             // Load Config
-            config = jsonUtility.load(args.get(index + 1), true);
+            config = jsonUtility.loadFile(args.get(index + 1));
 
-        } else if (dev) config = JsonUtility.getInstance().load("/config/dev-config.json");
-        else config = JsonUtility.getInstance().load("/config/config.json");
+        } else if (dev) config = jsonUtility.loadResource("/config/dev-config.json");
+        else config = jsonUtility.loadResource("/config/config.json");
 
         // Check Config
         if (config == null || config.isNull() || config.isEmpty()) throw new IllegalArgumentException("Config file is missing or empty");

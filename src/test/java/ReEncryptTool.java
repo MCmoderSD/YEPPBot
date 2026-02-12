@@ -2,6 +2,7 @@ import de.MCmoderSD.encryption.core.Encryption;
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.tools.GZIP;
 import de.MCmoderSD.sql.Driver;
+
 import tools.jackson.databind.JsonNode;
 
 import java.sql.PreparedStatement;
@@ -11,7 +12,7 @@ import java.sql.ResultSet;
 import static de.MCmoderSD.encryption.enums.Hash.SHA3_256;
 import static de.MCmoderSD.encryption.enums.Transformer.AES_ECB_PKCS5;
 
-void main() throws IOException, URISyntaxException {
+void main() {
 
     // Secrets
     String oldSecret = "old_secret_key_here"; // Old secret key
@@ -22,7 +23,7 @@ void main() throws IOException, URISyntaxException {
     Encryption newEncryptor = new Encryption(newSecret, SHA3_256, AES_ECB_PKCS5); // New encryptor
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().load("/database.json");
+    JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
 
     // Initialize SQL
     SQL sql = new SQL(Driver.Builder
