@@ -4,6 +4,7 @@ import de.MCmoderSD.core.TwitchBot;
 
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
+import de.MCmoderSD.database.manager.MessageManager;
 import de.MCmoderSD.database.manager.CommandManager;
 import de.MCmoderSD.database.manager.EventLogManager;
 import de.MCmoderSD.database.manager.BirthdayManager;
@@ -31,6 +32,7 @@ public abstract class CommandBuilder {
     // Database
     protected final Database database;
     protected final ChannelManager channelManager;
+    protected final MessageManager messageManager;
     protected final CommandManager commandManager;
     protected final EventLogManager eventLogManager;
     protected final BirthdayManager birthdayManager;
@@ -68,6 +70,7 @@ public abstract class CommandBuilder {
         // Set Database
         database = twitchBot.getDatabase();
         channelManager = database.getChannelManager();
+        messageManager = database.getMessageManager();
         commandManager = database.getCommandManager();
         eventLogManager = database.getEventLogManager();
         birthdayManager = database.getBirthdayManager();

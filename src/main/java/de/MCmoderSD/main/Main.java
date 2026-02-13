@@ -9,6 +9,7 @@ import de.MCmoderSD.helix.handler.StreamHandler;
 import de.MCmoderSD.helix.handler.ChannelHandler;
 
 import de.MCmoderSD.json.JsonUtility;
+import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.server.core.Server;
 import de.MCmoderSD.utilities.MessageHelper;
 import de.MCmoderSD.utilities.TokenGrabber;
@@ -109,11 +110,14 @@ public class Main {
         Server server = new Server(serverConfig);
         server.start();
 
+        // Init OpenAI
+        OpenAI openAI = initOpenAI(config);
+
         // Initialize Token Grabber if needed
         if (needsTokenGrabber(twitchConfig, server)) return null;
 
         // Initialize Twitch Bot
-        return new TwitchBot(twitchConfig, databaseConfig, server);
+        return new TwitchBot(twitchConfig, databaseConfig, server, openAI);
     }
 
     private static ArrayList<String> parseArguments(String[] args) {
@@ -148,5 +152,31 @@ public class Main {
         // Start Token Grabber
         new TokenGrabber(twitchConfig.get("application"), server);
         return true;
+    }
+
+    private static OpenAI initOpenAI(JsonNode config) {
+
+        // Check Config
+        if (config == null || config.isNull() || config.isEmpty()) throw new IllegalArgumentException("Config cannot be null or empty");
+        if (!config.has("openai") || config.get("openai").isNull() || config.get("openai").isEmpty()) return null;
+
+        // Get OpenAI Config
+        JsonNode openAIConfig = config.get("openai");
+
+        // Check API Key
+        if (!openAIConfig.has("apiKey") || openAIConfig.get("apiKey").isNull() || !openAIConfig.get("apiKey").isString()) throw new IllegalArgumentException("OpenAI config missing 'apiKey'");
+        if (!openAIConfig.has("organization") || openAIConfig.get("organization").isNull() || !openAIConfig.get("organization").isString()) throw new IllegalArgumentException("OpenAI config missing 'organization'");
+        if (!openAIConfig.has("project") || openAIConfig.get("project").isNull() || !openAIConfig.get("project").isString()) throw new IllegalArgumentException("OpenAI config missing 'project'");
+        // Parse Config
+        String apiKey = openAIConfig.get("apiKey").asString();
+        String organization = openAIConfig.get("organization").asString();
+        String project = openAIConfig.get("project").asString();
+
+        if (!apiKey.startsWith("sk-")) throw new  IllegalArgumentException("Invalid OpenAI API Key");
+        if (!organization.startsWith("org-")) throw new IllegalArgumentException("Invalid OpenAI Organization ID");
+        if (!project.startsWith("proj_")) throw new IllegalArgumentException("Invalid OpenAI Project");
+
+        // Initialize and return OpenAI instance
+        return new OpenAI(apiKey, organization, project);
     }
 }

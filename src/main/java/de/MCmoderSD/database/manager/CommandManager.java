@@ -41,21 +41,6 @@ public class CommandManager {
                 byte[] uuid = asBytes(UUID.randomUUID());                           // Random UUID
                 Timestamp firedAt = new Timestamp(System.currentTimeMillis());      // Current Timestamp
 
-                // Insert message content
-                PreparedStatement insertContentStatement = database.getConnection().prepareStatement(
-                        "INSERT IGNORE INTO MessageContent (hash, content) VALUES (?, ?);"
-                );
-
-                // Set the insert values
-                insertContentStatement.setBytes(1, contentHash);    // Content Hash
-                insertContentStatement.setString(2, response);      // Response Content
-
-                // Execute the statement
-                insertContentStatement.executeUpdate();
-
-                // Close the statement
-                insertContentStatement.close();
-
                 // Ensure the original message is logged
                 database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 

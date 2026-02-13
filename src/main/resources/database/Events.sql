@@ -1,4 +1,4 @@
-# RaidEvent table to store raid events
+# RaidEvent Table Definition
 CREATE TABLE IF NOT EXISTS RaidEvent (
     id          UUID        PRIMARY KEY,                                # Event ID
     firedAt     TIMESTAMP   NOT NULL        DEFAULT CURRENT_TIMESTAMP,  # Event fired at Timestamp
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS RaidEvent (
 
 
 
-# FollowEvent table to store follow events
+# FollowEvent Table Definition
 CREATE TABLE IF NOT EXISTS FollowEvent (
     followedAt  TIMESTAMP   NOT NULL    DEFAULT CURRENT_TIMESTAMP,  # Event fired at Timestamp
     channelId   INT         NOT NULL,                               # Channel   (User ID)

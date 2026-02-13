@@ -1,4 +1,4 @@
-# MessagesContent table to store unique message contents
+# MessagesContent Table Definition
 CREATE TABLE IF NOT EXISTS MessageContent
 (
     hash    BINARY(8) PRIMARY KEY,                                          # Content Hash
@@ -12,7 +12,21 @@ CREATE TABLE IF NOT EXISTS MessageContent
 
 
 
-# MessageEvent table to store message events
+# Embedding Table Definition
+CREATE TABLE IF NOT EXISTS Embedding
+(
+    hash        BINARY(8)   PRIMARY KEY,                                        # Content Hash
+    dimension   SMALLINT    NOT NULL        DEFAULT 3072,                       # Embedding Dimension
+    embedding   BLOB        NOT NULL,                                           # Embedding Data (compressed)
+    FOREIGN KEY (hash)   REFERENCES MessageContent (hash)    ON DELETE CASCADE  # Foreign Key to MessageContent Table
+)
+    ROW_FORMAT = COMPRESSED     # Compressed Row Format
+    KEY_BLOCK_SIZE = 1;         # Key Block Size
+
+
+
+
+# MessageEvent Table Definition
 CREATE TABLE IF NOT EXISTS MessageEvent
 (
     id                  UUID PRIMARY KEY,                                                                           # Event ID
@@ -39,7 +53,7 @@ CREATE TABLE IF NOT EXISTS MessageEvent
 
 
 
-# ResponseMessage table to store response message events
+# ResponseMessage Table Definition
 CREATE TABLE IF NOT EXISTS ResponseMessage
 (
     id          UUID        PRIMARY KEY,                                            # Response ID
@@ -62,7 +76,7 @@ CREATE TABLE IF NOT EXISTS ResponseMessage
 
 
 
-# CommandLog table to store command log events
+# CommandLog Table Definition
 CREATE TABLE IF NOT EXISTS CommandLog
 (
     messageId   UUID        NOT NULL,                                               # Original Message ID

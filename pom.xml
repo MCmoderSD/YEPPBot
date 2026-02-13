@@ -52,6 +52,13 @@
             <version>3.0.1</version>
         </dependency>
 
+        <!-- OpenAI -->
+        <dependency>
+            <groupId>de.MCmoderSD</groupId>
+            <artifactId>OpenAI</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
         <!-- ZIP Tools -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>

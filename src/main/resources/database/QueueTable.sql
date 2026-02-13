@@ -1,4 +1,4 @@
-# UserImage Table Definition
+# Queue Table Definition
 CREATE TABLE IF NOT EXISTS Queue (
     userId      INT         NOT NULL,                                   # User ID
     position    INT         NOT NULL,                                   # Queue Position
@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS Queue (
     ROW_FORMAT = COMPRESSED     # Compressed Row Format
     KEY_BLOCK_SIZE = 1          # Key Block Size
     CHARACTER SET = utf8mb4     # UTF-8 MB4 Character Set
-    COLLATE utf8mb4_bin;        # Binary Collation for utf8mb4*
+    COLLATE utf8mb4_bin;        # Binary Collation for utf8mb4

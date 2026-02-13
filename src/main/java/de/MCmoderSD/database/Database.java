@@ -24,6 +24,7 @@ public class Database extends Driver {
 
     // Managers
     private final ChannelManager channelManager;
+    private final MessageManager messageManager;
     private final CommandManager commandManager;
     private final EventLogManager eventLogManager;
     private final BirthdayManager birthdayManager;
@@ -45,6 +46,7 @@ public class Database extends Driver {
         ArrayList<String> userTable = loadTables("database/UserTable.sql");
         ArrayList<String> channelTable = loadTables("database/ChannelTable.sql");
         ArrayList<String> messages = loadTables("database/Messages.sql");
+        ArrayList<String> ratingTable = loadTables("database/RatingTable.sql");
         ArrayList<String> events = loadTables("database/Events.sql");
         ArrayList<String> birthday = loadTables("database/BirthdayTable.sql");
         ArrayList<String> lurker = loadTables("database/Lurker.sql");
@@ -55,6 +57,7 @@ public class Database extends Driver {
         initTables(userTable);      // User & UserImage Tables
         initTables(channelTable);   // Channel & Blacklist Tables               | needs UserTable
         initTables(messages);       // Message, Response & Command Log Tables   | needs UserTable
+        initTables(ratingTable);    // Rating, Flag & Score Tables              | needs Messages
         initTables(events);         // Raid & Follow Table                      | needs UserTable
         initTables(birthday);       // Birthday Table                           | needs UserTable
         initTables(lurker);         // Lurker Table                             | needs UserTable
@@ -63,6 +66,7 @@ public class Database extends Driver {
 
         // Initialize Managers
         channelManager = new ChannelManager(this);
+        messageManager = new MessageManager(this);
         commandManager = new CommandManager(this);
         eventLogManager = new EventLogManager(this);
         birthdayManager = new BirthdayManager(this);
@@ -236,6 +240,10 @@ public class Database extends Driver {
     // Getter
     public ChannelManager getChannelManager() {
         return channelManager;
+    }
+
+    public MessageManager getMessageManager() {
+        return messageManager;
     }
 
     public CommandManager getCommandManager() {

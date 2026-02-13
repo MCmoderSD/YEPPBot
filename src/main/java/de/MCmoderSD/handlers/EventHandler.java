@@ -12,12 +12,15 @@ import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
 import de.MCmoderSD.database.manager.EventLogManager;
 
+import de.MCmoderSD.database.manager.MessageManager;
 import de.MCmoderSD.helix.core.HelixHandler;
 import de.MCmoderSD.helix.handler.UserHandler;
 import de.MCmoderSD.helix.handler.StreamHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.objects.FollowEvent;
+import de.MCmoderSD.openai.services.EmbeddingService;
+import de.MCmoderSD.openai.services.ModerationService;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +33,12 @@ public class EventHandler {
     // Database
     private final Database database;
     private final ChannelManager channelManager;
+    private final MessageManager messageManager;
     private final EventLogManager eventLogManager;
+
+    // OpenAI Service
+    private final EmbeddingService embeddingService;
+    private final ModerationService moderationService;
 
     // Helix-Handlers
     private final UserHandler userHandler;
@@ -56,7 +64,12 @@ public class EventHandler {
         // Set Database
         database = twitchBot.getDatabase();
         channelManager = database.getChannelManager();
+        messageManager = database.getMessageManager();
         eventLogManager = database.getEventLogManager();
+
+        // Set OpenAI Service
+        embeddingService = twitchBot.getOpenAI() == null ? null : twitchBot.getOpenAI().embeddings();
+        moderationService = twitchBot.getOpenAI() == null ? null : twitchBot.getOpenAI().moderations();
 
         // Set User Handler
         HelixHandler helixHandler = twitchBot.getHelixHandler();
@@ -134,6 +147,12 @@ public class EventHandler {
             // ToDo DEBUG
             System.out.printf("%s <%s> #%s: %s%n", DEBUG, messageEvent.getChannel().getDisplayName(), messageEvent.getUser().getDisplayName(), messageEvent.getMessage());
 
+            // Insert Message and Related Data
+            if (messageManager.insertMessage(event.getMessage()) && !(embeddingService == null || moderationService == null)) {
+                new Thread(() -> messageManager.insertRating(moderationService.create(event.getMessage()))).start();
+                new Thread(() -> messageManager.insertEmbedding(embeddingService.create(event.getMessage()))).start();
+            }
+
             // Log Message Event
             eventLogManager.logMessageEvent(messageEvent);
 
@@ -156,6 +175,12 @@ public class EventHandler {
 
             // ToDo DEBUG
             System.out.printf("%s <%s> #%s: %s%n", DEBUG, messageEvent.getChannel().getDisplayName(), messageEvent.getUser().getDisplayName(), messageEvent.getMessage());
+
+            // Insert Message and Related Data
+            if (messageManager.insertMessage(event.getMessage()) && !(embeddingService == null || moderationService == null)) {
+                new Thread(() -> messageManager.insertRating(moderationService.create(event.getMessage()))).start();
+                new Thread(() -> messageManager.insertEmbedding(embeddingService.create(event.getMessage()))).start();
+            }
 
             // Log Message Event
             eventLogManager.logMessageEvent(messageEvent);

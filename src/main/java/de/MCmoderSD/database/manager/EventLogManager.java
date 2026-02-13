@@ -59,31 +59,12 @@ public class EventLogManager {
         }
     }
 
-
     public void logMessageEvent(MessageEvent event) {
         new Thread(() -> {
             try {
 
                 // Check Parameters
                 if (event == null) throw new IllegalArgumentException("MessageEvent cannot be null");
-
-                // Variables
-                byte[] contentHash = xxHash64(event.getMessage());
-
-                // Insert message content
-                PreparedStatement insertContentStatement = database.getConnection().prepareStatement(
-                        "INSERT IGNORE INTO MessageContent (hash, content) VALUES (?, ?);"
-                );
-
-                // Set the insert values
-                insertContentStatement.setBytes(1, contentHash);            // Content hash
-                insertContentStatement.setString(2, event.getMessage());    // Message content
-
-                // Execute the statement
-                insertContentStatement.executeUpdate();
-
-                // Close the statement
-                insertContentStatement.close();
 
                 // Insert message event
                 PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
@@ -95,7 +76,7 @@ public class EventLogManager {
                 insertEventStatement.setTimestamp(2, Timestamp.from(event.getFiredAt()));   // Event fired at timestamp
                 insertEventStatement.setInt(3, event.getChannel().getId());                 // Channel ID
                 insertEventStatement.setInt(4, event.getUser().getId());                    // User ID
-                insertEventStatement.setBytes(5, contentHash);                              // Message content Hash
+                insertEventStatement.setBytes(5, xxHash64(event.getMessage()));             // Message content Hash
                 insertEventStatement.setString(6, event.getDeviceType().name());            // Device Type
                 insertEventStatement.setString(7, event.getSubTier().name());               // Subscription Tier
                 insertEventStatement.setInt(8, event.getSubMonths());                       // Subscription Months

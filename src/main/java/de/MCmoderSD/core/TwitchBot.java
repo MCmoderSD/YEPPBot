@@ -26,6 +26,7 @@ import de.MCmoderSD.commands.Status;
 
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
+import de.MCmoderSD.database.manager.MessageManager;
 import de.MCmoderSD.database.manager.CommandManager;
 import de.MCmoderSD.database.manager.EventLogManager;
 import de.MCmoderSD.database.manager.BirthdayManager;
@@ -48,7 +49,9 @@ import de.MCmoderSD.helix.handler.UserHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
 
 import de.MCmoderSD.objects.MessageEvent;
+import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.server.core.Server;
+import org.jetbrains.annotations.Nullable;
 import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
@@ -65,12 +68,14 @@ import static java.lang.Math.round;
 @SuppressWarnings("unused")
 public class TwitchBot {
 
-    // Server
+    // Associations
     private final Server server;
+    private final OpenAI openAI;
 
     // Database
     private final Database database;                // Database
     private final ChannelManager channelManager;    // Channel Manager
+    private final MessageManager messageManager;    // Message Manager
     private final CommandManager commandManager;    // Command Manager
     private final EventLogManager eventLogManager;  // Event Log Manager
     private final BirthdayManager birthdayManager;  // Birthday Manager
@@ -108,7 +113,7 @@ public class TwitchBot {
     private final CommandHandler commandHandler;    // Command Handler
 
     // Constructor
-    public TwitchBot(JsonNode twitchConfig, JsonNode databaseConfig, Server server) {
+    public TwitchBot(JsonNode twitchConfig, JsonNode databaseConfig, Server server, @Nullable OpenAI openAI) {
 
         // Check Parameters
         if (twitchConfig == null || twitchConfig.isNull() || twitchConfig.isEmpty()) throw new IllegalArgumentException("Twitch config cannot be null or empty");
@@ -121,6 +126,7 @@ public class TwitchBot {
 
         // Set Associations
         this.server = server;
+        this.openAI = openAI;
 
         // Initialize Database
         database = new Database(Database.Builder
@@ -134,6 +140,7 @@ public class TwitchBot {
 
         // Initialize Managers
         channelManager = database.getChannelManager();
+        messageManager = database.getMessageManager();
         commandManager = database.getCommandManager();
         eventLogManager = database.getEventLogManager();
         birthdayManager = database.getBirthdayManager();
@@ -488,7 +495,16 @@ public class TwitchBot {
         // Log Message
         if (success) {
             System.out.printf("%s <%s> #%s: %s%n", BOT, channel.getDisplayName(), botUser.getDisplayName(), message);
-            database.getCommandManager().logResponse(event, command, message);
+
+            // Insert Message and Related Data
+            if (messageManager.insertMessage(message) && openAI != null) {
+                String finalMessage = message;
+                new Thread(() -> messageManager.insertRating(openAI.moderations().create(finalMessage))).start();
+                new Thread(() -> messageManager.insertEmbedding(openAI.embeddings().create(finalMessage))).start();
+            }
+
+            // Log Response
+            commandManager.logResponse(event, command, message);
         }
 
         // Return
@@ -500,6 +516,10 @@ public class TwitchBot {
         return server;
     }
 
+    public OpenAI getOpenAI() {
+        return openAI;
+    }
+
     // Database Getters
     public Database getDatabase() {
         return database;
@@ -507,6 +527,10 @@ public class TwitchBot {
 
     public ChannelManager getChannelManager() {
         return channelManager;
+    }
+
+    public MessageManager getMessageManager() {
+        return messageManager;
     }
 
     public CommandManager getCommandManager() {

@@ -1,4 +1,4 @@
-# Birthday
+# Birthday Table Definition
 CREATE TABLE IF NOT EXISTS Birthday (
     id          INT         PRIMARY KEY,                                            # User ID
     day         TINYINT     NOT NULL        CHECK (day >= 1 AND day <= 31),         # Day of Birth
