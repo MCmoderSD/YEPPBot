@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 import static de.MCmoderSD.tools.GZIP.deflateObject;
 import static de.MCmoderSD.utilities.Hasher.xxHash64;
+import static java.math.BigDecimal.ZERO;
 
 void main() {
 
@@ -35,7 +36,7 @@ void main() {
     var processed = 0;
     long totalTokens = 0;
     long promptTokens = 0;
-    BigDecimal totalCost = BigDecimal.ZERO;
+    BigDecimal totalCost = ZERO;
 
     // Loop Through Content
     HashSet<String> unEmbeddedContent = sql.getUnEmbeddedContent();
@@ -64,7 +65,8 @@ void main() {
     }
 
     // Print Telemetry
-    IO.println("\nPrompt tokens: " + promptTokens);
+    IO.println("\nProcessed: " + processed + "/" + unEmbeddedContent.size());
+    IO.println("Prompt tokens: " + promptTokens);
     IO.println("Total tokens: " + totalTokens);
     IO.println("Total cost: " + totalCost);
 }

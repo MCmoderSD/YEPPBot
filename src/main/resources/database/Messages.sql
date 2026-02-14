@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS CommandLog
     channelId   INT         NOT NULL,                                               # Channel ID
     userId      INT         NOT NULL,                                               # User ID
     command     TEXT        NOT NULL        CHECK ( char_length(command) <= 500 ),  # Command that triggered the response
-    args        BINARY(8)   NOT NULL,                                               # Command arguments content hash
+    args        BINARY(8)                   DEFAULT NULL,                           # Command arguments content hash
     FOREIGN KEY (messageId) REFERENCES MessageEvent (id)        ON DELETE CASCADE,  # Foreign Key to MessageEvent Table
     FOREIGN KEY (channelId) REFERENCES User (id)                ON DELETE CASCADE,  # Foreign Key to User Table (Channel)
     FOREIGN KEY (userId)    REFERENCES User (id)                ON DELETE CASCADE,  # Foreign Key to User Table (User)

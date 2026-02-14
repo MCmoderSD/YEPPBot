@@ -5,8 +5,11 @@ import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
 import de.MCmoderSD.database.manager.CommandManager;
+import de.MCmoderSD.database.manager.MessageManager;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
+import de.MCmoderSD.openai.services.EmbeddingService;
+import de.MCmoderSD.openai.services.ModerationService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +22,12 @@ public class CommandHandler {
 
     // Database
     private final ChannelManager channelManager;
+    private final MessageManager messageManager;
     private final CommandManager commandManager;
+
+    // OpenAI Service
+    private final EmbeddingService embeddingService;
+    private final ModerationService moderationService;
 
     // Attributes
     private final ArrayList<String> prefixes;
@@ -36,7 +44,12 @@ public class CommandHandler {
         // Set Database
         Database database = twitchBot.getDatabase();
         channelManager = database.getChannelManager();
+        messageManager = database.getMessageManager();
         commandManager = database.getCommandManager();
+
+        // Set OpenAI Service
+        embeddingService = twitchBot.getOpenAI() == null ? null : twitchBot.getOpenAI().embeddings();
+        moderationService = twitchBot.getOpenAI() == null ? null : twitchBot.getOpenAI().moderations();
 
         // Initialize Attributes
         prefixes = twitchBot.getPrefixes();
@@ -131,7 +144,18 @@ public class CommandHandler {
             // Log Command
             if (success) {
                 System.out.printf("%s <%s> #%s executed command: %s%n", COMMAND, event.getChannel().getDisplayName(), event.getUser().getDisplayName(), trigger);
-                commandManager.logCommand(event, trigger, parts);
+
+                // Join Args
+                String args = String.join(" ", parts);
+
+                // Insert Message and Related Data
+                if (!args.isBlank() && messageManager.insertMessage(args) && !(embeddingService == null || moderationService == null)) {
+                    new Thread(() -> messageManager.insertRating(moderationService.create(args))).start();
+                    new Thread(() -> messageManager.insertEmbedding(embeddingService.create(args))).start();
+                }
+
+                // Log Command
+                commandManager.logCommand(event, trigger, args);
             }
 
             // Return

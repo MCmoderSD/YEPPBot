@@ -61,8 +61,8 @@ void main() {
     }
 
     // Print Telemetry
-    IO.println("Processing complete!");
-    IO.println("Flagged: " + flagged + " of " + unRatedContent.size());
+    IO.println("\nProcessed: " + processed + "/" + unRatedContent.size());
+    IO.println("Flagged: " + flagged + " of " + processed);
 }
 
 private static class SQL extends Driver {

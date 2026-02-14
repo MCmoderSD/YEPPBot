@@ -6,11 +6,11 @@ import de.MCmoderSD.objects.MessageEvent;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static de.MCmoderSD.utilities.FormatUUID.asBytes;
 import static de.MCmoderSD.utilities.Hasher.xxHash64;
+import static java.sql.Types.BINARY;
 
 public class CommandManager {
 
@@ -70,7 +70,7 @@ public class CommandManager {
         }).start();
     }
 
-    public void logCommand(MessageEvent event, String command, ArrayList<String> args) {
+    public void logCommand(MessageEvent event, String command, String args) {
         new Thread(() -> {
             try {
 
@@ -78,27 +78,9 @@ public class CommandManager {
                 if (event == null) throw new IllegalArgumentException("MessageEvent cannot be null");
                 if (command == null || command.isBlank()) throw new IllegalArgumentException("Invalid command");
                 if (args == null) throw new IllegalArgumentException("Arguments cannot be null");
-                for (var arg : args) if (arg == null || arg.isBlank()) throw new IllegalArgumentException("Arguments cannot be null");
 
                 // Variables
-                String argsJoined = String.join(" ", args);
-                byte[] argsHash = xxHash64(argsJoined);
                 Timestamp firedAt = new Timestamp(System.currentTimeMillis());
-
-                // Insert command arguments
-                PreparedStatement insertArgsStatement = database.getConnection().prepareStatement(
-                        "INSERT IGNORE INTO MessageContent (hash, content) VALUES (?, ?);"
-                );
-
-                // Set the insert values
-                insertArgsStatement.setBytes(1, argsHash);        // Content Hash
-                insertArgsStatement.setString(2, argsJoined);     // Args Content
-
-                // Execute the statement
-                insertArgsStatement.executeUpdate();
-
-                // Close the statement
-                insertArgsStatement.close();
 
                 // Ensure the original message is logged
                 database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
@@ -114,7 +96,8 @@ public class CommandManager {
                 insertEventStatement.setInt(3, event.getChannel().getId());     // Channel ID
                 insertEventStatement.setInt(4, event.getUser().getId());        // User ID
                 insertEventStatement.setString(5, command);                     // Command
-                insertEventStatement.setBytes(6, argsHash);                     // Arguments Hash
+                if (args.isBlank()) insertEventStatement.setNull(6, BINARY);    // Null if no arguments
+                else insertEventStatement.setBytes(6, xxHash64(args));          // else Arguments Hash
 
                 // Execute the statement
                 insertEventStatement.executeUpdate();
