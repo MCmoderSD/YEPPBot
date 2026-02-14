@@ -116,6 +116,17 @@ public class MessageHelper {
         return new String(result).trim();
     }
 
+    // Format OpenAI Response
+    public static String formatOpenAI(String content) {
+
+        // Check Parameters
+        if (content == null) throw new IllegalArgumentException("Content cannot be null");
+        if (content.isBlank()) throw new IllegalArgumentException("Content cannot be blank");
+
+        // Format OpenAI Response
+        return normalizeMessage(content.replaceAll("YEPPYEPP", "YEPP"));
+    }
+
     // Tag User
     public static String tagUser(TwitchUser user) {
 

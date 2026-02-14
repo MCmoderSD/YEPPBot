@@ -1,12 +1,20 @@
 package de.MCmoderSD.handlers;
 
 import de.MCmoderSD.core.TwitchBot;
+import de.MCmoderSD.database.manager.OpenAIManger;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
+import de.MCmoderSD.openai.core.OpenAI;
+import de.MCmoderSD.openai.prompts.ChatPrompt;
+import de.MCmoderSD.openai.services.ChatService;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
+import static com.openai.models.ReasoningEffort.*;
+import static de.MCmoderSD.openai.models.ChatModel.*;
 import static de.MCmoderSD.utilities.MessageHelper.*;
 
 public class MessageHandler {
@@ -19,10 +27,17 @@ public class MessageHandler {
     private final LurkHandler lurkHandler;
     private final CommandHandler commandHandler;
 
+    // Database
+    private final OpenAIManger openAIManger;
+
+    // OpenAI Service
+    private final ChatService service;
+
     // Attributes
     private final TwitchUser botUser;
     private final HashSet<String> botAliases;
     private final ArrayList<String> prefixes;
+    private final ConcurrentHashMap<TwitchUser, String> conversations;
 
     // Constructor
     public MessageHandler(TwitchBot twitchBot) {
@@ -38,10 +53,31 @@ public class MessageHandler {
         lurkHandler = new LurkHandler(twitchBot);
         commandHandler = new CommandHandler(twitchBot);
 
+        // Set Database
+        openAIManger = twitchBot.getOpenAIManger();
+
+        // Initialize OpenAI Service
+        OpenAI openAI = twitchBot.getOpenAI();
+        if (openAI == null) service = null;
+        else service = ChatService.builder()
+                .setModel(GPT_5_NANO)
+                .setReasoningEffort(MINIMAL)
+                .setInstructions(
+                                """
+                                You are an TwitchBot called the YEPPBot.
+                                You express yourself like a funny/edgy twitch user.
+                                You always like use the YEPP emote in your sentences and especially at the end.
+                                You don't use emojis just common twitch emote and especially the YEPP.
+                                """
+                )
+                .setMaxOutputTokens(120)
+                .build(twitchBot.getOpenAI());
+
         // Initialize Attributes
         botUser = twitchBot.getBotUser();
         botAliases = twitchBot.getBotAliases();
         prefixes = twitchBot.getPrefixes();
+        conversations = new ConcurrentHashMap<>(openAIManger.getConversations());
     }
 
     // Check if Message is Command
@@ -75,11 +111,55 @@ public class MessageHandler {
         if (isCommand(event.getMessage())) return commandHandler.handleCommand(event);
 
         // Handle YEPP
-        if (mentionsBot(event.getMessage())) return twitchBot.sendMessage(event, "YEPP", tagUser(event.getUser()) + " YEPP");
-        else if (event.getMessage().toUpperCase().contains("YEP")) return twitchBot.sendMessage(event, "YEPP", " YEPP");
+        if (event.getMessage().toUpperCase().contains("YEP")) return twitchBot.sendMessage(event, "YEPP", " YEPP");
+        else if (mentionsBot(event.getMessage())) {
+
+            // Variables
+            TwitchUser user = event.getUser();
+
+            // Check if OpenAI Service Available
+            if (service == null) return twitchBot.sendMessage(event, "YEPP", tagUser(user) + " YEPP");
+
+            // Create Prompt
+            ChatPrompt prompt = conversations.containsKey(user) ? service.create(event.getMessage(), conversations.get(user)) : service.create(event.getMessage());
+
+            // Update Conversations
+            updateConversation(user, prompt);
+
+            // Send Response
+            return twitchBot.sendMessage(event, "AI-Reply", tagUser(user) + " " + formatOpenAI(prompt.getContent()));
+        }
 
         // Default
         return true;
+    }
+
+    // Update Conversation
+    public void updateConversation(TwitchUser user, @Nullable ChatPrompt prompt) {
+
+        // Check Parameters
+        if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
+
+        // Check if Conversation needs to be reset due to token limit
+        boolean reset = prompt == null || prompt.getInputTokens() > 16348;
+
+        // Update Conversations
+        if (reset) conversations.remove(user);
+        else conversations.put(user, prompt.getId());
+
+        // Update Database
+        if (reset) openAIManger.deleteConversation(user);
+        else openAIManger.saveConversation(user, prompt);
+    }
+
+    // Get Conversation
+    public String getConversation(TwitchUser user) {
+
+        // Check Parameters
+        if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
+
+        // Get Conversation
+        return conversations.getOrDefault(user, null);
     }
 
     // Getter

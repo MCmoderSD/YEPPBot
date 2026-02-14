@@ -31,6 +31,7 @@ public class Database extends Driver {
     private final LurkManager lurkManager;
     private final QueueManager queueManager;
     private final QuoteManager quoteManager;
+    private final OpenAIManger openAIManger;
 
     // Constructor
     public Database(Builder builder) {
@@ -50,6 +51,7 @@ public class Database extends Driver {
         ArrayList<String> events = loadTables("database/Events.sql");
         ArrayList<String> birthday = loadTables("database/BirthdayTable.sql");
         ArrayList<String> lurker = loadTables("database/Lurker.sql");
+        ArrayList<String> openAI = loadTables("database/OpenAI.sql");
         ArrayList<String> queue = loadTables("database/QueueTable.sql");
         ArrayList<String> quotes = loadTables("database/QuoteTable.sql");
 
@@ -61,6 +63,7 @@ public class Database extends Driver {
         initTables(events);         // Raid & Follow Table                      | needs UserTable
         initTables(birthday);       // Birthday Table                           | needs UserTable
         initTables(lurker);         // Lurker Table                             | needs UserTable
+        initTables(openAI);         // Conversation Table                       | needs UserTable
         initTables(queue);          // Queue Table                              | needs ChannelTable
         initTables(quotes);         // Quote Table                              | needs ChannelTable
 
@@ -73,6 +76,7 @@ public class Database extends Driver {
         lurkManager = new LurkManager(this);
         queueManager = new QueueManager(this);
         quoteManager = new QuoteManager(this);
+        openAIManger = new OpenAIManger(this);
     }
 
     private static ArrayList<String> loadTables(String path) {
@@ -268,5 +272,9 @@ public class Database extends Driver {
 
     public QuoteManager getQuoteManager() {
         return quoteManager;
+    }
+
+    public OpenAIManger getOpenAIManger() {
+        return openAIManger;
     }
 }

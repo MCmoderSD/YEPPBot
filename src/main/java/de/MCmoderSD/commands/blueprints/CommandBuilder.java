@@ -11,6 +11,7 @@ import de.MCmoderSD.database.manager.BirthdayManager;
 import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.database.manager.QueueManager;
 import de.MCmoderSD.database.manager.QuoteManager;
+import de.MCmoderSD.database.manager.OpenAIManger;
 
 import de.MCmoderSD.handlers.CommandHandler;
 import de.MCmoderSD.helix.core.HelixHandler;
@@ -39,6 +40,7 @@ public abstract class CommandBuilder {
     protected final LurkManager lurkManager;
     protected final QueueManager queueManager;
     protected final QuoteManager quoteManager;
+    protected final OpenAIManger openAIManger;
 
     // Handlers
     protected final HelixHandler helixHandler;
@@ -77,6 +79,7 @@ public abstract class CommandBuilder {
         lurkManager = database.getLurkManager();
         queueManager = database.getQueueManager();
         quoteManager = database.getQuoteManager();
+        openAIManger = database.getOpenAIManger();
 
         // Set Handlers
         helixHandler = twitchBot.getHelixHandler();

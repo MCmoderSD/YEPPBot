@@ -12,6 +12,7 @@ import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
 import de.MCmoderSD.commands.Birthday;
+import de.MCmoderSD.commands.ChatGPT;
 import de.MCmoderSD.commands.Help;
 import de.MCmoderSD.commands.Info;
 import de.MCmoderSD.commands.Lurk;
@@ -34,6 +35,7 @@ import de.MCmoderSD.database.manager.BirthdayManager;
 import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.database.manager.QueueManager;
 import de.MCmoderSD.database.manager.QuoteManager;
+import de.MCmoderSD.database.manager.OpenAIManger;
 
 import de.MCmoderSD.handlers.EventHandler;
 import de.MCmoderSD.handlers.MessageHandler;
@@ -83,6 +85,7 @@ public class TwitchBot {
     private final LurkManager lurkManager;          // Lurk Manager
     private final QueueManager queueManager;        // Queue Manager
     private final QuoteManager quoteManager;        // Quote Manager
+    private final OpenAIManger openAIManger;        // OpenAI Manager
 
     // Configuration
     private final TwitchUser botUser;               // Bot User
@@ -148,6 +151,7 @@ public class TwitchBot {
         lurkManager = database.getLurkManager();
         queueManager = database.getQueueManager();
         quoteManager = database.getQuoteManager();
+        openAIManger = database.getOpenAIManger();
 
         // Parse Config
         JsonNode applicationConfig = twitchConfig.get("application");
@@ -221,6 +225,7 @@ public class TwitchBot {
 
         // Initialize Commands
         new Birthday(this);
+        new ChatGPT(this);
         new Help(this);
         new Info(this);
         new Lurk(this);
@@ -557,6 +562,10 @@ public class TwitchBot {
 
     public QuoteManager getQuoteManager() {
         return quoteManager;
+    }
+
+    public OpenAIManger getOpenAIManger() {
+        return openAIManger;
     }
 
     // Configuration Getters
