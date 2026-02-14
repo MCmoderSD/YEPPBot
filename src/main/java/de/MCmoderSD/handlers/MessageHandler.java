@@ -107,28 +107,32 @@ public class MessageHandler {
         // Handle Lurk
         lurkHandler.handleLurk(event);
 
+        // Variables
+        String message = event.getMessage();
+
         // Handle Command
-        if (isCommand(event.getMessage())) return commandHandler.handleCommand(event);
+        if (isCommand(message)) return commandHandler.handleCommand(event);
 
         // Handle YEPP
-        if (event.getMessage().toUpperCase().contains("YEP")) return twitchBot.sendMessage(event, "YEPP", " YEPP");
-        else if (mentionsBot(event.getMessage())) {
+        if (mentionsBot(message)) {
+            if (message.toUpperCase().contains("YEP")) {
 
-            // Variables
-            TwitchUser user = event.getUser();
+                // Variables
+                TwitchUser user = event.getUser();
 
-            // Check if OpenAI Service Available
-            if (service == null) return twitchBot.sendMessage(event, "YEPP", tagUser(user) + " YEPP");
+                // Check if OpenAI Service Available
+                if (service == null) return twitchBot.sendMessage(event, "YEPP", tagUser(user) + " YEPP");
 
-            // Create Prompt
-            ChatPrompt prompt = conversations.containsKey(user) ? service.create(event.getMessage(), conversations.get(user)) : service.create(event.getMessage());
+                // Create Prompt
+                ChatPrompt prompt = conversations.containsKey(user) ? service.create(message, conversations.get(user)) : service.create(message);
 
-            // Update Conversations
-            updateConversation(user, prompt);
+                // Update Conversations
+                updateConversation(user, prompt);
 
-            // Send Response
-            return twitchBot.sendMessage(event, "AI-Reply", tagUser(user) + " " + formatOpenAI(prompt.getContent()));
-        }
+                // Send Response
+                return twitchBot.sendMessage(event, "AI-Reply", tagUser(user) + " " + formatOpenAI(prompt.getContent()));
+            }
+        } else if (message.toUpperCase().contains("YEP")) return twitchBot.sendMessage(event, "YEPP", " YEPP");
 
         // Default
         return true;
