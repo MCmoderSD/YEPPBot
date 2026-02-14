@@ -23,6 +23,7 @@ import de.MCmoderSD.commands.RoleSwap;
 import de.MCmoderSD.commands.Say;
 import de.MCmoderSD.commands.Shoutout;
 import de.MCmoderSD.commands.Status;
+import de.MCmoderSD.commands.Weather;
 
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
@@ -231,6 +232,7 @@ public class TwitchBot {
         new Say(this);
         new Shoutout(this);
         new Status(this);
+        new Weather(this);
 
         // Add Initial Channels from Config to Database
         HashSet<TwitchUser> configChannels = obtainChannels(twitchConfig.get("channel"), userHandler);

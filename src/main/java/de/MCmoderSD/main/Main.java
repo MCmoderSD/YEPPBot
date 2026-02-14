@@ -1,5 +1,6 @@
 package de.MCmoderSD.main;
 
+import de.MCmoderSD.commands.Weather;
 import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.helix.enums.Scope;
 import de.MCmoderSD.helix.handler.UserHandler;
@@ -112,6 +113,10 @@ public class Main {
 
         // Init OpenAI
         OpenAI openAI = initOpenAI(config);
+
+        // Initialize Weather API if Configured
+        if (config.has("openweathermap")) Weather.api = config.get("openweathermap");
+        else System.err.println("Warning: OpenWeatherMap configuration is missing. Weather command will be unavailable.");
 
         // Initialize Token Grabber if needed
         if (needsTokenGrabber(twitchConfig, server)) return null;

@@ -56,7 +56,14 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>OpenAI</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
+        </dependency>
+
+        <!-- OpenWeatherMap -->
+        <dependency>
+            <groupId>de.MCmoderSD</groupId>
+            <artifactId>OpenWeatherMap</artifactId>
+            <version>1.2.0</version>
         </dependency>
 
         <!-- ZIP Tools -->
