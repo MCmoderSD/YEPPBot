@@ -13,12 +13,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import static de.MCmoderSD.enums.ImageFormat.getFormat;
-import static de.MCmoderSD.enums.UserImageType.OFFLINE;
-import static de.MCmoderSD.enums.UserImageType.PROFILE;
-import static de.MCmoderSD.tools.GZIP.deflate;
-import static de.MCmoderSD.tools.GZIP.deflateObject;
-import static de.MCmoderSD.utilities.FormatUUID.asBytes;
-import static de.MCmoderSD.utilities.FormatUUID.validUUID;
+import static de.MCmoderSD.sql.Driver.DatabaseType.*;
+import static de.MCmoderSD.utilities.FormatUUID.*;
+import static de.MCmoderSD.enums.UserImageType.*;
+import static de.MCmoderSD.tools.GZIP.*;
 import static java.util.UUID.fromString;
 
 void main() {
@@ -30,8 +28,8 @@ void main() {
     JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(Driver.Builder
-            .withType(Driver.DatabaseType.MARIADB)
+    SQL sql = new SQL(SQL.builder()
+            .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
             .withDatabase(config.get("database").asString())
@@ -46,21 +44,11 @@ void main() {
             .build()
             .getHelix();
 
-    // Load resource
-    byte[] data = ResourceLoader.loadResource("/Users.tsv");
-    String[] lines = new String(data).split("\n");
-    HashSet<Integer> ids = new HashSet<>();
-    for (var line : lines) {
-        try {
-            ids.add(Integer.parseInt(line.trim().split("\t")[0].trim()));
-        } catch (NumberFormatException e) {
-            IO.println("Invalid ID in line: " + line);
-        }
-    }
-    IO.println("Total IDs to fetch: " + ids.size());
+    // Get User IDs from Database
+    HashSet<Integer> ids = sql.getAllUserIds();
 
     // Fetch Users
-    HashSet<TwitchUser> users = fetchUsersbyID(ids, helix);
+    HashSet<TwitchUser> users = fetchUsersByID(ids, helix);
     IO.println("Fetched users: " + users.size());
 
     // Update Database
@@ -70,8 +58,7 @@ void main() {
     }
 }
 
-@SuppressWarnings("unused")
-private HashSet<TwitchUser> fetchUsersbyID(HashSet<Integer> ids, TwitchHelix helix) {
+private HashSet<TwitchUser> fetchUsersByID(HashSet<Integer> ids, TwitchHelix helix) {
 
     // Batch IDs
     var batches = new ArrayList<ArrayList<String>>();
@@ -124,7 +111,7 @@ private HashSet<TwitchUser> fetchUsersByName(HashSet<String> names, TwitchHelix 
     var users = new HashSet<TwitchUser>();
     for (var batch : batches) {
         IO.println("Fetching batch of " + batch.size() + " users...");
-        var response = helix.getUsers(null, batch, null).execute();
+        var response = helix.getUsers(null, null, batch).execute();
         response.getUsers().forEach(user -> users.add(new TwitchUser(user)));
     }
 
@@ -132,18 +119,7 @@ private HashSet<TwitchUser> fetchUsersByName(HashSet<String> names, TwitchHelix 
     return users;
 }
 
-@SuppressWarnings("unused")
-private static class ResourceLoader {
-    public static byte[] loadResource(String path) {
-        try (var bis = new BufferedInputStream(Objects.requireNonNull(ResourceLoader.class.getResourceAsStream(path)))) {
-            return bis.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load resource: " + path, e);
-        }
-    }
-}
-
-@SuppressWarnings("unused")
+// SQL Driver Implementation
 private static class SQL extends Driver {
 
     // Constructor
@@ -154,71 +130,9 @@ private static class SQL extends Driver {
 
         // Connect to Database
         connect();
-
-//        // Load Table Statements
-//        ArrayList<String> userTable = loadTables("database/UserTable.sql");
-//        ArrayList<String> channelTable = loadTables("database/ChannelTable.sql");
-//        ArrayList<String> messages = loadTables("database/Messages.sql");
-//        ArrayList<String> events = loadTables("database/Events.sql");
-//        ArrayList<String> birthday = loadTables("database/BirthdayTable.sql");
-//        ArrayList<String> lurker = loadTables("database/Lurker.sql");
-//        ArrayList<String> quotes = loadTables("database/QuoteTable.sql");
-//
-//        // Initialize Tables
-//        initTables(userTable);      // User & UserImage Tables
-//        initTables(channelTable);   // Channel & Blacklist Tables               | needs UserTable
-//        initTables(messages);       // Message, Response & Command Log Tables   | needs UserTable
-//        initTables(events);         // Raid & Follow Table                      | needs UserTable
-//        initTables(birthday);       // Birthday Table                           | needs UserTable
-//        initTables(lurker);         // Lurker Table                             | needs UserTable
-//        initTables(quotes);         // Quote Table                              | needs ChannelTable
     }
 
-//    private static ArrayList<String> loadTables(String path) {
-//
-//        // Check Parameters
-//        if (path == null || path.isBlank()) throw new IllegalArgumentException("Path cannot be null or blank");
-//        var resource = de.MCmoderSD.database.Database.class.getClassLoader().getResourceAsStream(path);
-//        if (resource == null) throw new IllegalArgumentException("Resource not found at path: " + path);
-//
-//        try (var bis = new BufferedInputStream(resource)) {
-//
-//            // Load Data
-//            byte[] data = bis.readAllBytes();
-//            String content = new String(data);
-//            String[] statements = content.split(";");
-//
-//            // Prepare Table Names
-//            ArrayList<String> tables = new ArrayList<>();
-//            for (var statement : statements) {
-//                if (statement == null || statement.isBlank()) continue;
-//                tables.add(statement.trim() + ";");
-//            }
-//
-//            // Return Tables
-//            return tables;
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to load tables from path: " + path + ": " + e.getMessage(), e);
-//        }
-//    }
-//
-//    private void initTables(ArrayList<String> tables) {
-//        if (tables == null || tables.isEmpty()) throw new IllegalArgumentException("Tables cannot be null or empty");
-//        for (var table : tables)
-//            if (table == null || table.isBlank())
-//                throw new IllegalArgumentException("Table statement cannot be null or blank");
-//        try {
-//            for (var table : tables) {
-//                PreparedStatement preparedStatement = connection.prepareStatement(table);
-//                preparedStatement.executeUpdate();
-//                preparedStatement.close();
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException("Failed to initialize tables: " + e.getMessage(), e);
-//        }
-//    }
-
+    // Check Image Method
     private void checkImage(TwitchUser user, String imageUrl, UserImageType imageType) {
         try {
 
@@ -249,8 +163,8 @@ private static class SQL extends Driver {
             ImageFormat imageFormat = getFormat(imageUrl);
 
             // Download Image
-            try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
-                imageData = bufferedInputStream.readAllBytes();
+            try (var bis = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
+                imageData = bis.readAllBytes();
             } catch (IOException | URISyntaxException e) {
                 throw new IOException("Failed to download image from URL: " + imageUrl, e);
             }
@@ -288,6 +202,7 @@ private static class SQL extends Driver {
         }
     }
 
+    // Update User Method
     public void updateUser(TwitchUser user) {
         try {
 
@@ -327,6 +242,7 @@ private static class SQL extends Driver {
         }
     }
 
+    // Get All User IDs Method
     public HashSet<Integer> getAllUserIds() {
         try {
 

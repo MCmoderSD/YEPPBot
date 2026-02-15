@@ -133,7 +133,7 @@ public class TwitchBot {
         this.openAI = openAI;
 
         // Initialize Database
-        database = new Database(Database.Builder
+        database = new Database(Database.builder()
                 .withType(MARIADB)
                 .withHost(databaseConfig.get("host").asString())
                 .withPort(databaseConfig.get("port").asInt())

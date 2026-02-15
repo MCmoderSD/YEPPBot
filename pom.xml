@@ -28,7 +28,7 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>Helix-API</artifactId>
-            <version>2.2.1</version>
+            <version>2.2.2</version>
         </dependency>
 
         <!-- HTTPS-Server -->
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>JSQL-Driver</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
         </dependency>
 
         <!-- OpenAI -->

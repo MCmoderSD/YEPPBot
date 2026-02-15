@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 import static de.MCmoderSD.tools.GZIP.deflateObject;
 import static de.MCmoderSD.utilities.Hasher.xxHash64;
 import static java.math.BigDecimal.ZERO;
@@ -20,8 +21,8 @@ void main() {
     JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(Driver.Builder
-            .withType(Driver.DatabaseType.MARIADB)
+    SQL sql = new SQL(SQL.builder()
+            .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
             .withDatabase(config.get("database").asString())
@@ -71,8 +72,10 @@ void main() {
     IO.println("Total cost: " + totalCost);
 }
 
+// SQL Driver Implementation
 private static class SQL extends Driver {
 
+    // Constructor
     public SQL(SQL.Builder builder) {
 
         // Call super
@@ -82,6 +85,7 @@ private static class SQL extends Driver {
         connect();
     }
 
+    // Get Unembedded Content Method
     public HashSet<String> getUnEmbeddedContent() {
         try {
 
@@ -109,6 +113,7 @@ private static class SQL extends Driver {
         }
     }
 
+    // Insert Embedding Method
     public void insertEmbedding(EmbeddingPrompt prompt) {
         new Thread(() -> {
             try {

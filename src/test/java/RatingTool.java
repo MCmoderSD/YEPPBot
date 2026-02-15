@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 import static de.MCmoderSD.tools.GZIP.deflateObject;
 import static de.MCmoderSD.utilities.Hasher.xxHash64;
 
@@ -20,8 +21,8 @@ void main() {
     JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(Driver.Builder
-            .withType(Driver.DatabaseType.MARIADB)
+    SQL sql = new SQL(SQL.builder()
+            .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
             .withDatabase(config.get("database").asString())
@@ -65,8 +66,10 @@ void main() {
     IO.println("Flagged: " + flagged + " of " + processed);
 }
 
+// SQL Driver Implementation
 private static class SQL extends Driver {
 
+    // Constructor
     public SQL(SQL.Builder builder) {
 
         // Call super
@@ -76,6 +79,7 @@ private static class SQL extends Driver {
         connect();
     }
 
+    // Get Unrated Content Method
     public HashSet<String> getUnRatedContent() {
         try {
 
@@ -103,6 +107,7 @@ private static class SQL extends Driver {
         }
     }
 
+    // Insert Rating Method
     public void insertRating(ModerationPrompt prompt) {
         new Thread(() -> {
             try {

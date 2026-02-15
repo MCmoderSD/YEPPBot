@@ -9,8 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-import static de.MCmoderSD.encryption.enums.Hash.SHA3_256;
-import static de.MCmoderSD.encryption.enums.Transformer.AES_ECB_PKCS5;
+import static de.MCmoderSD.encryption.enums.Hash.*;
+import static de.MCmoderSD.encryption.enums.Transformer.*;
+import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 
 void main() {
 
@@ -26,8 +27,8 @@ void main() {
     JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(Driver.Builder
-            .withType(Driver.DatabaseType.MARIADB)
+    SQL sql = new SQL(SQL.builder()
+            .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
             .withDatabase(config.get("database").asString())
@@ -66,8 +67,10 @@ void main() {
     }
 }
 
+// SQL Driver Implementation
 private static class SQL extends Driver {
 
+    // Constructor
     public SQL(SQL.Builder builder) {
 
         // Call super
@@ -77,6 +80,7 @@ private static class SQL extends Driver {
         connect();
     }
 
+    // Get auth tokens method
     public HashMap<Integer, byte[]> getAuthTokens() {
 
         // Create map
@@ -103,6 +107,7 @@ private static class SQL extends Driver {
         }
     }
 
+    // Update auth token method
     public void updateAuthToken(int id, byte[] token) {
         try {
 

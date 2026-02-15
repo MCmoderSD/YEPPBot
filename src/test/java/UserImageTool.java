@@ -13,6 +13,7 @@ import static de.MCmoderSD.tools.GZIP.*;
 import static de.MCmoderSD.enums.UserImageType.*;
 import static de.MCmoderSD.utilities.FormatUUID.*;
 import static de.MCmoderSD.utilities.ZipUtil.*;
+import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 import static de.MCmoderSD.enums.ImageFormat.getFormat;
 import static java.util.UUID.fromString;
 
@@ -22,8 +23,8 @@ void main() {
     JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(Driver.Builder
-            .withType(Driver.DatabaseType.MARIADB)
+    SQL sql = new SQL(SQL.builder()
+            .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
             .withDatabase(config.get("database").asString())
@@ -53,8 +54,10 @@ void main() {
     sql.writeImages();
 }
 
+// SQL Driver Implementation
 private static class SQL extends Driver {
 
+    // Constructor
     public SQL(Builder builder) {
 
         // Initialize the Database Driver
@@ -118,6 +121,7 @@ private static class SQL extends Driver {
         }
     }
 
+    // Get all Twitch Users
     public HashSet<TwitchUser> getTwitchUsers() {
         try {
 
@@ -145,6 +149,7 @@ private static class SQL extends Driver {
         }
     }
 
+    // Check and Insert Image Method
     public void checkImage(TwitchUser user, String imageUrl, UserImageType imageType) {
         new Thread(() -> {
             try {
@@ -158,7 +163,7 @@ private static class SQL extends Driver {
                 );
 
                 // Set the query value
-                checkStatement.setBytes(1, uuid);   // Image UUID
+                checkStatement.setBytes(1, uuid); // Image UUID
 
                 // Execute the query
                 var resultSet = checkStatement.executeQuery();
@@ -176,8 +181,8 @@ private static class SQL extends Driver {
                 ImageFormat imageFormat = getFormat(imageUrl);
 
                 // Download Image
-                try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
-                    imageData = bufferedInputStream.readAllBytes();
+                try (var bis = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
+                    imageData = bis.readAllBytes();
                 } catch (IOException | URISyntaxException e) {
                     throw new IOException("Failed to download image from URL: " + imageUrl, e);
                 }

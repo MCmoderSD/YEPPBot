@@ -153,8 +153,8 @@ public class Database extends Driver {
                 ImageFormat imageFormat = getFormat(imageUrl);
 
                 // Download Image
-                try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
-                    imageData = bufferedInputStream.readAllBytes();
+                try (var bis = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
+                    imageData = bis.readAllBytes();
                 } catch (IOException | URISyntaxException e) {
                     throw new IOException("Failed to download image from URL: " + imageUrl, e);
                 }
