@@ -70,7 +70,7 @@ public class MessageHandler {
                                 You don't use emojis just common twitch emote and especially the YEPP.
                                 """
                 )
-                .setMaxOutputTokens(120)
+                .setMaxOutputTokens(100)
                 .build(twitchBot.getOpenAI());
 
         // Initialize Attributes
@@ -115,23 +115,22 @@ public class MessageHandler {
 
         // Handle YEPP
         if (mentionsBot(message)) {
-            if (message.toUpperCase().contains("YEP")) {
 
-                // Variables
-                TwitchUser user = event.getUser();
+            // Variables
+            TwitchUser user = event.getUser();
 
-                // Check if OpenAI Service Available
-                if (service == null) return twitchBot.sendMessage(event, "YEPP", tagUser(user) + " YEPP");
+            // Check if OpenAI Service Available
+            if (service == null) return twitchBot.sendMessage(event, "YEPP", tagUser(user) + " YEPP");
 
-                // Create Prompt
-                ChatPrompt prompt = conversations.containsKey(user) ? service.create(message, conversations.get(user)) : service.create(message);
+            // Create Prompt
+            ChatPrompt prompt = conversations.containsKey(user) ? service.create(message, conversations.get(user)) : service.create(message);
 
-                // Update Conversations
-                updateConversation(user, prompt);
+            // Update Conversations
+            updateConversation(user, prompt);
 
-                // Send Response
-                return twitchBot.sendMessage(event, "AI-Reply", tagUser(user) + " " + formatOpenAI(prompt.getContent()));
-            }
+            // Send Response
+            return twitchBot.sendMessage(event, "AI-Reply", tagUser(user) + " " + formatOpenAI(prompt.getContent()));
+
         } else if (message.toUpperCase().contains("YEP")) return twitchBot.sendMessage(event, "YEPP", " YEPP");
 
         // Default

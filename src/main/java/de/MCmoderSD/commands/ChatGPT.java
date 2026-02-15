@@ -43,7 +43,7 @@ public class ChatGPT extends CommandBuilder {
                         You don't use emojis just common twitch emote and especially the YEPP.
                         """
                 )
-                .setMaxOutputTokens(120)
+                .setMaxOutputTokens(100)
                 .build(openAI);
 
         // Register command
