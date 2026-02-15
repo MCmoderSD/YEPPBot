@@ -10,6 +10,7 @@ import java.util.HashSet;
 
 import static de.MCmoderSD.utilities.ZipUtil.inflateTwitchUser;
 
+@SuppressWarnings("unused")
 public class ChannelManager {
 
     // Associations
@@ -25,6 +26,7 @@ public class ChannelManager {
         this.database = database;
     }
 
+    // Add Channel Method
     private void addChannel(TwitchUser channel) {
         try {
 
@@ -53,6 +55,7 @@ public class ChannelManager {
         }
     }
 
+    // Set Channel Active Method
     public void setActive(TwitchUser channel, boolean active) {
         try {
 
@@ -82,6 +85,7 @@ public class ChannelManager {
         }
     }
 
+    // Convenience Methods
     public void joinChannel(TwitchUser channel) {
         setActive(channel, true);
     }
@@ -90,6 +94,7 @@ public class ChannelManager {
         setActive(channel, false);
     }
 
+    // Get Active Channels Method
     public HashMap<TwitchUser, Boolean> getChannels() {
         try {
 
@@ -122,6 +127,7 @@ public class ChannelManager {
         }
     }
 
+    // Set Auto Shoutout Method
     public void setAutoShoutout(TwitchUser channel, boolean autoShoutout) {
         new Thread(() -> {
             try {
@@ -153,16 +159,16 @@ public class ChannelManager {
         }).start();
     }
 
-    @SuppressWarnings("unused")
+    // Convenience Methods
     public void enableAutoShoutout(TwitchUser channel) {
         setAutoShoutout(channel, true);
     }
 
-    @SuppressWarnings("unused")
     public void disableAutoShoutout(TwitchUser channel) {
         setAutoShoutout(channel, false);
     }
 
+    // Get Auto Shoutout Channels Method
     public HashMap<TwitchUser, Boolean> getAutoShoutoutChannels() {
         try {
 
@@ -195,6 +201,7 @@ public class ChannelManager {
         }
     }
 
+    // Add Command to Blacklist
     public HashMap<TwitchUser, HashSet<String>> blacklistAdd(TwitchUser channel, String command) {
         try {
 
@@ -228,6 +235,7 @@ public class ChannelManager {
         }
     }
 
+    // Remove Command from Blacklist
     public HashMap<TwitchUser, HashSet<String>> blacklistRemove(TwitchUser channel, String command) {
         try {
 
@@ -261,6 +269,7 @@ public class ChannelManager {
         }
     }
 
+    // Get Blacklist Method
     public HashMap<TwitchUser, HashSet<String>> getBlacklist() {
         try {
 

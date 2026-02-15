@@ -29,6 +29,7 @@ public class LurkManager {
         this.database = database;
     }
 
+    // Add Lurk
     public void addLurk(MessageEvent event) {
         new Thread(() -> {
             try {
@@ -60,6 +61,7 @@ public class LurkManager {
         }).start();
     }
 
+    // Add Traitor
     public void addTraitor(TwitchUser user) {
         new Thread(() -> {
             try {
@@ -88,6 +90,7 @@ public class LurkManager {
         }).start();
     }
 
+    // Remove Lurk
     public void removeLurk(TwitchUser user) {
         new Thread(() -> {
             try {
@@ -115,6 +118,7 @@ public class LurkManager {
         }).start();
     }
 
+    // Get Lurk Time
     public Timestamp getLurkTime(TwitchUser user) {
         try {
 
@@ -153,6 +157,7 @@ public class LurkManager {
         }
     }
 
+    // Get Lurk Event
     public MessageEvent getLurkEvent(TwitchUser user) {
         try {
 
@@ -191,6 +196,7 @@ public class LurkManager {
         }
     }
 
+    // Get Lurks
     public HashMap<TwitchUser, TwitchUser> getLurks() {
         try {
 
@@ -229,6 +235,7 @@ public class LurkManager {
         }
     }
 
+    // Get Traitors
     public HashSet<TwitchUser> getTraitors() {
         try {
 

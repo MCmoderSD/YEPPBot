@@ -2,7 +2,6 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
-import de.MCmoderSD.handlers.MessageHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.core.TwitchBot;
@@ -30,10 +29,7 @@ public class ChatGPT extends CommandBuilder {
         String description = "Interagiere mit ChatGPT! Sende eine Nachricht, um eine Antwort zu erhalten, oder verwende 'reset', um die Konversation zurückzusetzen. " + syntax;
 
         // Check if OpenAI is configured
-        if (twitchBot.getOpenAI() == null) return;
-
-        // Get Message Handler
-        MessageHandler messageHandler = twitchBot.getMessageHandler();
+        if (openAI == null) return;
 
         // Initialize ChatService
         ChatService service = ChatService.builder()
@@ -48,7 +44,7 @@ public class ChatGPT extends CommandBuilder {
                         """
                 )
                 .setMaxOutputTokens(120)
-                .build(twitchBot.getOpenAI());
+                .build(openAI);
 
         // Register command
         boolean registered = commandHandler.registerCommand(new Command(description, name) {

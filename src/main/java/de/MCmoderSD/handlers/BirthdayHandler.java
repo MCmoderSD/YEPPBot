@@ -2,7 +2,6 @@ package de.MCmoderSD.handlers;
 
 import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.data.Birthdate;
-import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.BirthdayManager;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
@@ -35,8 +34,7 @@ public class BirthdayHandler {
         this.twitchBot = twitchBot;
 
         // Set Database
-        Database database = twitchBot.getDatabase();
-        birthdayManager = database.getBirthdayManager();
+        birthdayManager = twitchBot.getBirthdayManager();
 
         // Initialize Attributes
         birthdays = new ConcurrentHashMap<>(birthdayManager.getBirthdays());

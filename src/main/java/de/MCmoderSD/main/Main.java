@@ -113,6 +113,7 @@ public class Main {
 
         // Init OpenAI
         OpenAI openAI = initOpenAI(config);
+        if (openAI == null) System.err.println("Warning: OpenAI configuration is missing. OpenAI features will be unavailable.");
 
         // Initialize Weather API if Configured
         if (config.has("openweathermap")) Weather.api = config.get("openweathermap");

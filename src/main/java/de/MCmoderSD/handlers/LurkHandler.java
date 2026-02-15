@@ -1,7 +1,6 @@
 package de.MCmoderSD.handlers;
 
 import de.MCmoderSD.core.TwitchBot;
-import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
@@ -35,8 +34,7 @@ public class LurkHandler {
         this.twitchBot = twitchBot;
 
         // Set Database
-        Database database = twitchBot.getDatabase();
-        lurkManager = database.getLurkManager();
+        lurkManager = twitchBot.getLurkManager();
 
         // Initialize Lurk Commands
         lurkCommands = new HashSet<>();

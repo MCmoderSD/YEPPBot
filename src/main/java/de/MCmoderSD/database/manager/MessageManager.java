@@ -27,6 +27,7 @@ public class MessageManager {
         this.database = database;
     }
 
+    // Add Message
     public boolean insertMessage(String content) {
         try {
 
@@ -53,6 +54,7 @@ public class MessageManager {
         }
     }
 
+    // Add Embedding
     public void insertEmbedding(EmbeddingPrompt prompt) {
         new Thread(() -> {
             try {
@@ -83,6 +85,7 @@ public class MessageManager {
         }).start();
     }
 
+    // Add Rating
     public void insertRating(ModerationPrompt prompt) {
         new Thread(() -> {
             try {

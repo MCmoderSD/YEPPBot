@@ -25,13 +25,13 @@ public class Database extends Driver {
     // Managers
     private final ChannelManager channelManager;
     private final MessageManager messageManager;
-    private final CommandManager commandManager;
     private final EventLogManager eventLogManager;
+    private final CommandManager commandManager;
     private final BirthdayManager birthdayManager;
     private final LurkManager lurkManager;
+    private final OpenAIManger openAIManger;
     private final QueueManager queueManager;
     private final QuoteManager quoteManager;
-    private final OpenAIManger openAIManger;
 
     // Constructor
     public Database(Builder builder) {
@@ -47,10 +47,10 @@ public class Database extends Driver {
         ArrayList<String> userTable = loadTables("database/UserTable.sql");
         ArrayList<String> channelTable = loadTables("database/ChannelTable.sql");
         ArrayList<String> messages = loadTables("database/Messages.sql");
-        ArrayList<String> ratingTable = loadTables("database/RatingTable.sql");
         ArrayList<String> events = loadTables("database/Events.sql");
+        ArrayList<String> ratingTable = loadTables("database/RatingTable.sql");
         ArrayList<String> birthday = loadTables("database/BirthdayTable.sql");
-        ArrayList<String> lurker = loadTables("database/Lurker.sql");
+        ArrayList<String> lurker = loadTables("database/LurkerTable.sql");
         ArrayList<String> openAI = loadTables("database/OpenAI.sql");
         ArrayList<String> queue = loadTables("database/QueueTable.sql");
         ArrayList<String> quotes = loadTables("database/QuoteTable.sql");
@@ -59,8 +59,8 @@ public class Database extends Driver {
         initTables(userTable);      // User & UserImage Tables
         initTables(channelTable);   // Channel & Blacklist Tables               | needs UserTable
         initTables(messages);       // Message, Response & Command Log Tables   | needs UserTable
-        initTables(ratingTable);    // Rating, Flag & Score Tables              | needs Messages
         initTables(events);         // Raid & Follow Table                      | needs UserTable
+        initTables(ratingTable);    // Rating, Flag & Score Tables              | needs Messages
         initTables(birthday);       // Birthday Table                           | needs UserTable
         initTables(lurker);         // Lurker Table                             | needs UserTable
         initTables(openAI);         // Conversation Table                       | needs UserTable
@@ -70,15 +70,16 @@ public class Database extends Driver {
         // Initialize Managers
         channelManager = new ChannelManager(this);
         messageManager = new MessageManager(this);
-        commandManager = new CommandManager(this);
         eventLogManager = new EventLogManager(this);
+        commandManager = new CommandManager(this);
         birthdayManager = new BirthdayManager(this);
         lurkManager = new LurkManager(this);
+        openAIManger = new OpenAIManger(this);
         queueManager = new QueueManager(this);
         quoteManager = new QuoteManager(this);
-        openAIManger = new OpenAIManger(this);
     }
 
+    // Load SQL Table Creation Statements from Resource File
     private static ArrayList<String> loadTables(String path) {
 
         // Check Parameters
@@ -108,6 +109,7 @@ public class Database extends Driver {
         }
     }
 
+    // Initialize Tables in Database
     private void initTables(ArrayList<String> tables) {
         if (tables == null || tables.isEmpty()) throw new IllegalArgumentException("Tables cannot be null or empty");
         for (var table : tables) if (table == null || table.isBlank()) throw new IllegalArgumentException("Table statement cannot be null or blank");
@@ -122,6 +124,7 @@ public class Database extends Driver {
         }
     }
 
+    // Check if image exists in database, if not download, compress and insert it
     private void checkImage(TwitchUser user, String imageUrl, UserImageType imageType) {
         new Thread(() -> {
             try {
@@ -193,6 +196,7 @@ public class Database extends Driver {
         }).start();
     }
 
+    // Add or Update TwitchUser in Database
     public void addTwitchUser(TwitchUser user) {
         new Thread(() -> {
             try {
@@ -250,12 +254,12 @@ public class Database extends Driver {
         return messageManager;
     }
 
-    public CommandManager getCommandManager() {
-        return commandManager;
-    }
-
     public EventLogManager getEventLogManager() {
         return eventLogManager;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     public BirthdayManager getBirthdayManager() {
@@ -266,15 +270,15 @@ public class Database extends Driver {
         return lurkManager;
     }
 
+    public OpenAIManger getOpenAIManger() {
+        return openAIManger;
+    }
+
     public QueueManager getQueueManager() {
         return queueManager;
     }
 
     public QuoteManager getQuoteManager() {
         return quoteManager;
-    }
-
-    public OpenAIManger getOpenAIManger() {
-        return openAIManger;
     }
 }

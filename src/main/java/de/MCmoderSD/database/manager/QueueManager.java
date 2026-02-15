@@ -25,6 +25,7 @@ public class QueueManager {
         this.database = database;
     }
 
+    // Enqueue User
     public void enqueueUser(MessageEvent event) {
         new Thread(() -> {
             try {
@@ -60,6 +61,7 @@ public class QueueManager {
         }).start();
     }
 
+    // Dequeue User
     public boolean dequeueUser(TwitchUser user, TwitchUser channel) {
         try {
 
@@ -90,6 +92,7 @@ public class QueueManager {
         }
     }
 
+    // Clear Queue
     public void clearQueue(TwitchUser channel) {
         new Thread(() -> {
             try {
@@ -117,6 +120,7 @@ public class QueueManager {
         }).start();
     }
 
+    // Get Queue
     public ArrayList<TwitchUser> getQueue(TwitchUser channel) {
         try {
 
@@ -150,6 +154,7 @@ public class QueueManager {
         }
     }
 
+    // Get Joined At
     public Timestamp getJoinedAt(TwitchUser user, TwitchUser channel) {
         try {
 

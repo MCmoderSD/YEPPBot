@@ -29,13 +29,13 @@ import de.MCmoderSD.commands.Weather;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
 import de.MCmoderSD.database.manager.MessageManager;
-import de.MCmoderSD.database.manager.CommandManager;
 import de.MCmoderSD.database.manager.EventLogManager;
+import de.MCmoderSD.database.manager.CommandManager;
 import de.MCmoderSD.database.manager.BirthdayManager;
 import de.MCmoderSD.database.manager.LurkManager;
+import de.MCmoderSD.database.manager.OpenAIManger;
 import de.MCmoderSD.database.manager.QueueManager;
 import de.MCmoderSD.database.manager.QuoteManager;
-import de.MCmoderSD.database.manager.OpenAIManger;
 
 import de.MCmoderSD.handlers.EventHandler;
 import de.MCmoderSD.handlers.MessageHandler;
@@ -51,9 +51,10 @@ import de.MCmoderSD.helix.handler.StreamHandler;
 import de.MCmoderSD.helix.handler.UserHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
 
-import de.MCmoderSD.objects.MessageEvent;
-import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.server.core.Server;
+import de.MCmoderSD.openai.core.OpenAI;
+
+import de.MCmoderSD.objects.MessageEvent;
 import org.jetbrains.annotations.Nullable;
 import tools.jackson.databind.JsonNode;
 
@@ -61,8 +62,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static com.github.twitch4j.chat.util.TwitchChatLimitHelper.USER_JOIN_LIMIT;
-import static de.MCmoderSD.sql.Driver.DatabaseType.MARIADB;
+import static com.github.twitch4j.chat.util.TwitchChatLimitHelper.*;
+import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 import static de.MCmoderSD.helix.core.HelixHandler.*;
 import static de.MCmoderSD.utilities.ConfigValidator.*;
 import static de.MCmoderSD.utilities.MessageHelper.*;
@@ -79,13 +80,13 @@ public class TwitchBot {
     private final Database database;                // Database
     private final ChannelManager channelManager;    // Channel Manager
     private final MessageManager messageManager;    // Message Manager
-    private final CommandManager commandManager;    // Command Manager
     private final EventLogManager eventLogManager;  // Event Log Manager
+    private final CommandManager commandManager;    // Command Manager
     private final BirthdayManager birthdayManager;  // Birthday Manager
     private final LurkManager lurkManager;          // Lurk Manager
+    private final OpenAIManger openAIManger;        // OpenAI Manager
     private final QueueManager queueManager;        // Queue Manager
     private final QuoteManager quoteManager;        // Quote Manager
-    private final OpenAIManger openAIManger;        // OpenAI Manager
 
     // Configuration
     private final TwitchUser botUser;               // Bot User
@@ -145,13 +146,13 @@ public class TwitchBot {
         // Initialize Managers
         channelManager = database.getChannelManager();
         messageManager = database.getMessageManager();
-        commandManager = database.getCommandManager();
         eventLogManager = database.getEventLogManager();
+        commandManager = database.getCommandManager();
         birthdayManager = database.getBirthdayManager();
         lurkManager = database.getLurkManager();
+        openAIManger = database.getOpenAIManger();
         queueManager = database.getQueueManager();
         quoteManager = database.getQuoteManager();
-        openAIManger = database.getOpenAIManger();
 
         // Parse Config
         JsonNode applicationConfig = twitchConfig.get("application");
@@ -245,7 +246,7 @@ public class TwitchBot {
         channelManager.joinChannel(botUser); // Ensure Bot Joins Its Own Channel
 
         // Obtain Channels from Database
-        HashMap<TwitchUser, Boolean> channels = database.getChannelManager().getChannels();
+        HashMap<TwitchUser, Boolean> channels = channelManager.getChannels();
 
         // Join with Rate Limit Handling
         var delay = round((((double) USER_JOIN_LIMIT.getRefillPeriodNanos() / (double) USER_JOIN_LIMIT.getCapacity()) * 1.1d) / 1_000_000d); // Delay in ms with 10% buffer
@@ -428,7 +429,7 @@ public class TwitchBot {
         // Log
         if (success) {
             System.out.printf("%s%s Joined Channel: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), UNBOLD);
-            database.getChannelManager().joinChannel(channel);
+            channelManager.joinChannel(channel);
         } else System.out.printf("%s%s Failed to Join Channel: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), UNBOLD);
 
         // Check Moderator Status
@@ -460,7 +461,7 @@ public class TwitchBot {
         // Log
         if (success) {
             System.out.printf("%s%s Left Channel: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), UNBOLD);
-            database.getChannelManager().leaveChannel(channel);
+            channelManager.leaveChannel(channel);
         } else System.out.printf("%s%s Failed to Leave Channel: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), UNBOLD);
 
         // Check Moderator Status
@@ -540,12 +541,12 @@ public class TwitchBot {
         return messageManager;
     }
 
-    public CommandManager getCommandManager() {
-        return commandManager;
-    }
-
     public EventLogManager getEventLogManager() {
         return eventLogManager;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     public BirthdayManager getBirthdayManager() {
@@ -556,16 +557,16 @@ public class TwitchBot {
         return lurkManager;
     }
 
+    public OpenAIManger getOpenAIManger() {
+        return openAIManger;
+    }
+
     public QueueManager getQueueManager() {
         return queueManager;
     }
 
     public QuoteManager getQuoteManager() {
         return quoteManager;
-    }
-
-    public OpenAIManger getOpenAIManger() {
-        return openAIManger;
     }
 
     // Configuration Getters

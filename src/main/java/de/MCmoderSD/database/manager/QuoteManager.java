@@ -23,6 +23,7 @@ public class QuoteManager {
         this.database = database;
     }
 
+    // Get Quotes
     public LinkedHashMap<Integer, String> getQuotes(TwitchUser channel) {
         try {
 
@@ -59,6 +60,7 @@ public class QuoteManager {
         }
     }
 
+    // Reorder Quotes
     public void reorderQuotes(TwitchUser channel) {
         new Thread(() -> {
             try {
@@ -133,6 +135,7 @@ public class QuoteManager {
         }).start();
     }
 
+    // Remove Quote
     public void removeQuote(int quoteId, TwitchUser channel) {
         new Thread(() -> {
             try {
@@ -165,6 +168,7 @@ public class QuoteManager {
         }).start();
     }
 
+    // Edit Quote
     public void editQuote(int id, String quote, TwitchUser channel) {
         new Thread(() -> {
             try {

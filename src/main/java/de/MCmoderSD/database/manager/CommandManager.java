@@ -27,6 +27,7 @@ public class CommandManager {
         this.database = database;
     }
 
+    // Log Bot Responses
     public void logResponse(MessageEvent event, String command, String response) {
         new Thread(() -> {
             try {
@@ -70,6 +71,7 @@ public class CommandManager {
         }).start();
     }
 
+    // Log Command executions
     public void logCommand(MessageEvent event, String command, String args) {
         new Thread(() -> {
             try {

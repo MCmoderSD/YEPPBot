@@ -37,7 +37,7 @@ public class Weather extends CommandBuilder {
         OpenWeatherMap openWeatherMap;
 
         // Initialize OpenWeatherMap
-        if (twitchBot.getOpenAI() == null || api == null) return;
+        if (openAI == null || api == null) return;
         else {
             if (!api.has("apiKey") || api.get("apiKey").isNull() || !api.get("apiKey").isString()) throw new IllegalStateException("OpenWeatherMap API key is missing or invalid in the configuration.");
             openWeatherMap = new OpenWeatherMap(api.get("apiKey").asString());
@@ -50,7 +50,7 @@ public class Weather extends CommandBuilder {
                 .setInstructions("Provide the weather data as a single concise plain text sentence in the specified language. Keep the response under 500 characters without markdown or formatting.")
                 .setTemperature(0)              // No randomness
                 .setMaxOutputTokens(120)        // Limit response length
-                .build(twitchBot.getOpenAI());
+                .build(openAI);
 
         // Register command
         boolean registered = commandHandler.registerCommand(new Command(description, name) {

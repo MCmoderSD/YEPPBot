@@ -2,7 +2,6 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
-import de.MCmoderSD.handlers.LurkHandler;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.core.TwitchBot;
 
@@ -17,9 +16,6 @@ public class Lurk extends CommandBuilder {
         // About
         String[] name = new String[]{ "Lurk", "Lörk", "Lürk", "Lork", "AFK" };
         String description = "Sendet den Befehl " + prefix + "Lurk in den Chat, um im Lurk zu sein";
-
-        // Get Lurk Handler
-        LurkHandler lurkHandler = twitchBot.getEventHandler().getLurkHandler();
 
         // Register command
         boolean registered = commandHandler.registerCommand(new Command(description, name) {

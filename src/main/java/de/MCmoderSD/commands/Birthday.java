@@ -2,7 +2,6 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
-import de.MCmoderSD.handlers.BirthdayHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.data.Birthdate;
@@ -59,9 +58,6 @@ public class Birthday extends CommandBuilder {
 
                 // Set/Delete Action
                 if (Arrays.asList("set", "edit", "delete", "del", "remove", "rem").contains(action)) {
-
-                    // Get Birthday Handler
-                    BirthdayHandler birthdayHandler = twitchBot.getBirthdayHandler();
 
                     // Set Action
                     if (Arrays.asList("set", "edit").contains(action)) {

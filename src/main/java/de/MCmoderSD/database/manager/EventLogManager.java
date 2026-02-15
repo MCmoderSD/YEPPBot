@@ -30,6 +30,7 @@ public class EventLogManager {
         this.database = database;
     }
 
+    // Helper Method
     public boolean waitTillMessageLogged(UUID messageId, int attemptsLeft) {
         try {
 
@@ -59,6 +60,7 @@ public class EventLogManager {
         }
     }
 
+    // Log Message Event
     public void logMessageEvent(MessageEvent event) {
         new Thread(() -> {
             try {
@@ -99,6 +101,7 @@ public class EventLogManager {
         }).start();
     }
 
+    // Log Raid Event
     public void logRaidEvent(RaidEvent event) {
         new Thread(() -> {
             try {
@@ -131,6 +134,7 @@ public class EventLogManager {
         }).start();
     }
 
+    // Log Follow Event
     public void logFollowEvent(FollowEvent event) {
         new Thread(() -> {
             try {

@@ -2,10 +2,9 @@ package de.MCmoderSD.handlers;
 
 import de.MCmoderSD.commands.blueprints.Command;
 import de.MCmoderSD.core.TwitchBot;
-import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
-import de.MCmoderSD.database.manager.CommandManager;
 import de.MCmoderSD.database.manager.MessageManager;
+import de.MCmoderSD.database.manager.CommandManager;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.openai.services.EmbeddingService;
@@ -42,10 +41,9 @@ public class CommandHandler {
         if (twitchBot == null) throw new IllegalArgumentException("TwitchBot cannot be null");
 
         // Set Database
-        Database database = twitchBot.getDatabase();
-        channelManager = database.getChannelManager();
-        messageManager = database.getMessageManager();
-        commandManager = database.getCommandManager();
+        channelManager = twitchBot.getChannelManager();
+        messageManager = twitchBot.getMessageManager();
+        commandManager = twitchBot.getCommandManager();
 
         // Set OpenAI Service
         embeddingService = twitchBot.getOpenAI() == null ? null : twitchBot.getOpenAI().embeddings();
@@ -55,7 +53,7 @@ public class CommandHandler {
         prefixes = twitchBot.getPrefixes();
         commandMap = new HashMap<>();
         aliasMap = new HashMap<>();
-        blacklist = database.getChannelManager().getBlacklist();
+        blacklist = channelManager.getBlacklist();
     }
 
     // Update Blacklist

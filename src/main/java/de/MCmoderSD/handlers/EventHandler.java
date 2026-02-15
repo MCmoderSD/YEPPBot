@@ -10,10 +10,8 @@ import de.MCmoderSD.core.TwitchBot;
 
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.database.manager.ChannelManager;
-import de.MCmoderSD.database.manager.EventLogManager;
-
 import de.MCmoderSD.database.manager.MessageManager;
-import de.MCmoderSD.helix.core.HelixHandler;
+import de.MCmoderSD.database.manager.EventLogManager;
 import de.MCmoderSD.helix.handler.UserHandler;
 import de.MCmoderSD.helix.handler.StreamHandler;
 import de.MCmoderSD.helix.objects.TwitchUser;
@@ -63,18 +61,17 @@ public class EventHandler {
 
         // Set Database
         database = twitchBot.getDatabase();
-        channelManager = database.getChannelManager();
-        messageManager = database.getMessageManager();
-        eventLogManager = database.getEventLogManager();
+        channelManager = twitchBot.getChannelManager();
+        messageManager = twitchBot.getMessageManager();
+        eventLogManager = twitchBot.getEventLogManager();
 
         // Set OpenAI Service
         embeddingService = twitchBot.getOpenAI() == null ? null : twitchBot.getOpenAI().embeddings();
         moderationService = twitchBot.getOpenAI() == null ? null : twitchBot.getOpenAI().moderations();
 
         // Set User Handler
-        HelixHandler helixHandler = twitchBot.getHelixHandler();
-        userHandler = helixHandler.getUserHandler();
-        streamHandler = helixHandler.getStreamHandler();
+        userHandler = twitchBot.getUserHandler();
+        streamHandler = twitchBot.getStreamHandler();
 
         // Initialize Message Handler
         messageHandler = new MessageHandler(twitchBot);

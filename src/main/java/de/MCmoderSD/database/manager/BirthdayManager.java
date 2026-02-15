@@ -24,6 +24,7 @@ public class BirthdayManager {
         this.database = database;
     }
 
+    // Add or Update Birthday
     public void addBirthday(Birthdate birthdate, TwitchUser user) {
         new Thread(() -> {
             try {
@@ -58,6 +59,7 @@ public class BirthdayManager {
         }).start();
     }
 
+    // Delete Birthday
     public void deleteBirthday(TwitchUser user) {
         try {
 
@@ -83,6 +85,7 @@ public class BirthdayManager {
         }
     }
 
+    // Get All Birthdays
     public HashMap<TwitchUser, Birthdate> getBirthdays() {
         try {
 
@@ -125,6 +128,7 @@ public class BirthdayManager {
         }
     }
 
+    // Get Birthday for User
     public Birthdate getBirthday(TwitchUser user) {
         try {
 

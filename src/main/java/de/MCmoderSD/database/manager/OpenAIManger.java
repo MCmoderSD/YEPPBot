@@ -24,6 +24,7 @@ public class OpenAIManger {
         this.database = database;
     }
 
+    // Save Conversation
     public void saveConversation(TwitchUser user, ChatPrompt chatPrompt) {
         new Thread(() -> {
             try {
@@ -53,6 +54,7 @@ public class OpenAIManger {
         }).start();
     }
 
+    // Delete Conversation
     public void deleteConversation(TwitchUser user) {
         new Thread(() -> {
             try {
@@ -80,6 +82,7 @@ public class OpenAIManger {
         }).start();
     }
 
+    // Get Conversations
     public HashMap<TwitchUser, String> getConversations() {
         try {
 
