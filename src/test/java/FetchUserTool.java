@@ -25,7 +25,7 @@ void main() {
     String oauthToken = "OAUTH_TOKEN"; // Replace with your actual OAuth token
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
+    JsonNode config = JsonUtility.getInstance().loadResource("/Database.json");
 
     // Initialize SQL
     SQL sql = new SQL(SQL.builder()

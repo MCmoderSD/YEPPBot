@@ -18,7 +18,7 @@ import static de.MCmoderSD.utilities.Hasher.xxHash64;
 void main() {
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
+    JsonNode config = JsonUtility.getInstance().loadResource("/Database.json");
 
     // Initialize SQL
     SQL sql = new SQL(SQL.builder()

@@ -23,7 +23,7 @@ void main() {
     Encryption newEncryptor = new Encryption(newSecret, SHA3_256, AES_ECB_PKCS5); // New encryptor
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().loadResource("/database.json");
+    JsonNode config = JsonUtility.getInstance().loadResource("/Database.json");
 
     // Initialize SQL
     SQL sql = new SQL(SQL.builder()
