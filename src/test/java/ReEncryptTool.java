@@ -1,6 +1,5 @@
 import de.MCmoderSD.encryption.core.Encryption;
 import de.MCmoderSD.json.JsonUtility;
-import de.MCmoderSD.tools.GZIP;
 import de.MCmoderSD.sql.Driver;
 
 import tools.jackson.databind.JsonNode;
@@ -36,34 +35,24 @@ void main() {
             .withPassword(config.get("password").asString())
     );
 
-    // Get auth tokens
-    HashMap<Integer, byte[]> authTokens = sql.getAuthTokens();
+    // Get refresh tokens from database
+    HashMap<Integer, String> refreshTokens = sql.getRefreshTokens();
 
     // Loop through tokens
-    for (var entry : authTokens.entrySet()) {
-        try {
+    for (var entry : refreshTokens.entrySet()) {
 
-            // Get DB values
-            var id = entry.getKey();
-            var compressedToken = entry.getValue();
+        // Get ID
+        var id = entry.getKey();
 
-            // Decompress and decrypt token
-            byte[] encryptedToken = GZIP.inflate(compressedToken);
-            byte[] decryptedToken = oldEncryptor.decrypt(encryptedToken);
+        // Re-encrypt token
+        String decryptedToken = oldEncryptor.decrypt(entry.getValue()); // Decrypt with old key
+        String encryptedToken = newEncryptor.encrypt(decryptedToken);   // Encrypt with new key
 
-            // Re-encrypt and compress token
-            byte[] reEncryptedToken = newEncryptor.encrypt(decryptedToken);
-            byte[] recompressedToken = GZIP.deflate(reEncryptedToken);
+        // Update token in database
+        sql.updateRefreshToken(id, encryptedToken);
 
-            // Update token in database
-            sql.updateAuthToken(id, recompressedToken);
-
-            // Print result
-            IO.println("Encrypted token: " + new String(recompressedToken));
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to process auth token for ID: " + entry.getKey(), e);
-        }
+        // Print result
+        IO.println("Encrypted token for ID " + id + " has been updated.");
     }
 }
 
@@ -80,51 +69,52 @@ private static class SQL extends Driver {
         connect();
     }
 
-    // Get auth tokens method
-    public HashMap<Integer, byte[]> getAuthTokens() {
-
-        // Create map
-        HashMap<Integer, byte[]> authTokens = new HashMap<>();
-
+    // Retrieve all refresh Tokens
+    public HashMap<Integer, String> getRefreshTokens() {
         try {
 
-            // Prepare statement
+            // SQL statement to select all tokens
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "SELECT * FROM AuthToken"
+                    "SELECT * FROM RefreshToken"
             );
 
-            // Execute query
+            // Execute the query
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            // Loop through results
-            while (resultSet.next()) authTokens.put(resultSet.getInt("id"), resultSet.getBytes("accessToken"));
+            // Process the result set
+            HashMap<Integer, String> refreshTokens = new HashMap<>();
+            while (resultSet.next()) refreshTokens.put(resultSet.getInt("id"), resultSet.getString("token"));
 
-            // Return map
-            return authTokens;
+            // Close the result set and statement
+            resultSet.close();
+            preparedStatement.close();
+
+            // Return the refresh tokens
+            return refreshTokens;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get auth tokens", e);
+            throw new RuntimeException("Failed to retrieve refresh tokens: " + e.getMessage(), e);
         }
     }
 
     // Update auth token method
-    public void updateAuthToken(int id, byte[] token) {
+    public void updateRefreshToken(int id, String token) {
         try {
 
             // Prepare statement
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "UPDATE AuthToken SET token = ? WHERE id = ?"
+                    "UPDATE RefreshToken SET token = ? WHERE id = ?"
             );
 
             // Set parameters
-            preparedStatement.setBytes(1, token);
-            preparedStatement.setInt(2, id);
+            preparedStatement.setString(1, token);  // Set the new token
+            preparedStatement.setInt(2, id);        // Set ID
 
             // Execute update
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to update auth token for ID: " + id, e);
+            throw new RuntimeException("Failed to update refresh token for ID: " + id + ": " + e.getMessage(), e);
         }
     }
 }
