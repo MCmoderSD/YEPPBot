@@ -144,7 +144,7 @@ public class CommandHandler {
                 System.out.printf("%s <%s> #%s executed command: %s%n", COMMAND, event.getChannel().getDisplayName(), event.getUser().getDisplayName(), trigger);
 
                 // Join Args
-                String args = String.join(" ", parts);
+                String args = String.join(SPACE, parts);
 
                 // Insert Message and Related Data
                 if (!args.isBlank() && messageManager.insertMessage(args) && !(embeddingService == null || moderationService == null)) {

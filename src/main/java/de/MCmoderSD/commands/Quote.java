@@ -6,9 +6,9 @@ import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.core.TwitchBot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import static de.MCmoderSD.utilities.MessageHelper.SPACE;
-import static de.MCmoderSD.utilities.MessageHelper.tagUser;
+import static de.MCmoderSD.utilities.MessageHelper.*;
 import static java.lang.String.format;
 
 public class Quote extends CommandBuilder {
@@ -57,6 +57,40 @@ public class Quote extends CommandBuilder {
                     return twitchBot.sendMessage(event, name, format("%s, #%d: %s", tagUser(user), id + 1, quote));
                 }
 
+                // Action
+                String action = args.getFirst().toLowerCase();
+                String response = invalidArgs;
+
+                // First or Last Quote
+                if (Arrays.asList("first", "last").contains(action)) {
+                    switch (action) {
+
+                        // First Quote
+                        case "first": {
+                            if (noQuotes) response = noQuotesFound;
+                            else {
+                                String quote = quotes.get(0);
+                                response = String.format("%s, #%d: %s", tagUser(user), 1, quote);
+                            }
+                            break;
+                        }
+
+                        // Last Quote
+                        case "last": {
+                            if (noQuotes) response = noQuotesFound;
+                            else {
+                                var lastId = quotes.size() - 1;
+                                String quote = quotes.get(lastId);
+                                response = String.format("%s, #%d: %s", tagUser(user), lastId + 1, quote);
+                            }
+                            break;
+                        }
+                    }
+
+                    // Send Message
+                    return twitchBot.sendMessage(event, name, response);
+                }
+
                 // Quote ID
                 if (args.size() == 1) {
 
@@ -77,10 +111,8 @@ public class Quote extends CommandBuilder {
                 // No args
                 if (args.size() < 2) return twitchBot.sendMessage(event, name, invalidArgs);
 
-                // Variables
-                var action = args.getFirst().toLowerCase();
+                // Quote ID
                 var id = parseQuoteID(args.get(1));
-                String response;
 
                 // Perform Action
                 switch (action) {
@@ -116,33 +148,6 @@ public class Quote extends CommandBuilder {
                             quoteManager.editQuote(id, quote, channel);
                             response = String.format("Edited quote #%d: %s", id + 1, quote);
                         }
-                        break;
-                    }
-
-                    // First Quote
-                    case "first": {
-                        if (noQuotes) response = noQuotesFound;
-                        else {
-                            String quote = quotes.get(0);
-                            response = String.format("%s, #%d: %s", tagUser(user), 1, quote);
-                        }
-                        break;
-                    }
-
-                    // Last Quote
-                    case "last": {
-                        if (noQuotes) response = noQuotesFound;
-                        else {
-                            var lastId = quotes.size() - 1;
-                            String quote = quotes.get(lastId);
-                            response = String.format("%s, #%d: %s", tagUser(user), lastId + 1, quote);
-                        }
-                        break;
-                    }
-
-                    // Invalid
-                    default: {
-                        response = invalidArgs;
                         break;
                     }
                 }

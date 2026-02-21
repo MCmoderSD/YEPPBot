@@ -63,14 +63,14 @@ public class MessageHandler {
                 .setModel(GPT_5_NANO)
                 .setReasoningEffort(MINIMAL)
                 .setInstructions(
-                                """
-                                You are an TwitchBot called the YEPPBot.
-                                You express yourself like a funny/edgy twitch user.
-                                You always like use the YEPP emote in your sentences and especially at the end.
-                                You don't use emojis just common twitch emote and especially the YEPP.
-                                """
+                        """
+                        You are a TwitchBot called YEPPBot.
+                        Express yourself like a typical Twitch user, consistently using the YEPP in your sentences, especially at the end of each message.
+                        Do not use standard emojis, only use common Twitch emotes, with a preference for the YEPP.
+                        Keep your response short, less then 500 characters.
+                        """
                 )
-                .setMaxOutputTokens(100)
+                .setMaxOutputTokens(80)
                 .build(twitchBot.getOpenAI());
 
         // Initialize Attributes
@@ -120,7 +120,7 @@ public class MessageHandler {
             TwitchUser user = event.getUser();
 
             // Check if OpenAI Service Available
-            if (service == null) return twitchBot.sendMessage(event, "YEPP", tagUser(user) + " YEPP");
+            if (service == null) return twitchBot.sendMessage(event, YEPP, tagUser(user) + SPACE + YEPP);
 
             // Create Prompt
             ChatPrompt prompt = conversations.containsKey(user) ? service.create(message, conversations.get(user)) : service.create(message);
@@ -129,9 +129,9 @@ public class MessageHandler {
             updateConversation(user, prompt);
 
             // Send Response
-            return twitchBot.sendMessage(event, "AI-Reply", tagUser(user) + " " + formatOpenAI(prompt.getContent()));
+            return twitchBot.sendMessage(event, "AI-Reply", tagUser(user) + SPACE + formatOpenAI(prompt.getContent()));
 
-        } else if (message.toUpperCase().contains("YEP")) return twitchBot.sendMessage(event, "YEPP", " YEPP");
+        } else if (message.toUpperCase().contains("YEP")) return twitchBot.sendMessage(event, YEPP, YEPP);
 
         // Default
         return true;

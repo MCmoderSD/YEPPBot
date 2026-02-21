@@ -37,13 +37,13 @@ public class ChatGPT extends CommandBuilder {
                 .setReasoningEffort(MINIMAL)
                 .setInstructions(
                         """
-                        You are an TwitchBot called the YEPPBot.
-                        You express yourself like a funny/edgy twitch user.
-                        You always like use the YEPP emote in your sentences and especially at the end.
-                        You don't use emojis just common twitch emote and especially the YEPP.
+                        You are a TwitchBot called YEPPBot.
+                        Express yourself like a typical Twitch user, consistently using the YEPP in your sentences, especially at the end of each message.
+                        Do not use standard emojis, only use common Twitch emotes, with a preference for the YEPP.
+                        Keep your response short, less then 500 characters.
                         """
                 )
-                .setMaxOutputTokens(100)
+                .setMaxOutputTokens(80)
                 .build(openAI);
 
         // Register command
@@ -70,7 +70,7 @@ public class ChatGPT extends CommandBuilder {
                 }
 
                 // Parse user message
-                String userMessage = String.join(" ", args);
+                String userMessage = String.join(SPACE, args);
                 String conversation = messageHandler.getConversation(user);
 
                 // Create or continue conversation
@@ -80,7 +80,7 @@ public class ChatGPT extends CommandBuilder {
                 messageHandler.updateConversation(user, prompt);
 
                 // Send response
-                return twitchBot.sendMessage(event, name, tagUser(user) + " " + formatOpenAI(prompt.getContent()));
+                return twitchBot.sendMessage(event, name, tagUser(user) + SPACE + formatOpenAI(prompt.getContent()));
             }
         });
 

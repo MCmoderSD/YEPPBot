@@ -14,6 +14,7 @@ public class MessageHelper {
     public final static String TAB = "\t";
     public final static String SPACE = " ";
     public final static String EMPTY = "";
+    public final static String YEPP = "YEPP";
 
     // Tags
     public final static String SYSTEM = "[SYS]";
@@ -123,8 +124,21 @@ public class MessageHelper {
         if (content == null) throw new IllegalArgumentException("Content cannot be null");
         if (content.isBlank()) throw new IllegalArgumentException("Content cannot be blank");
 
-        // Format OpenAI Response
-        return normalizeMessage(content.replaceAll("YEPPYEPP", "YEPP"));
+        // Normalize Content
+        content = normalizeMessage(content);
+
+        // Format YEPP
+        content = content.replaceAll("(?i)\\byepp\\b[!.,?]*", YEPP);
+        while (content.contains(YEPP + SPACE + YEPP)) content = content.replaceAll(YEPP + SPACE + YEPP, YEPP);
+
+        // Normalize Content
+        content = normalizeMessage(content);
+
+        // Check Content
+        if (content.isBlank()) throw new IllegalStateException("Content is blank after formatting");
+
+        // Return
+        return content;
     }
 
     // Tag User

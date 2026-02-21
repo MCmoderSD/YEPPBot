@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static de.MCmoderSD.utilities.MessageHelper.tagUser;
+import static de.MCmoderSD.utilities.MessageHelper.*;
 
 public class LurkHandler {
 
@@ -41,7 +41,7 @@ public class LurkHandler {
         var commands = new String[]{ "lurk", "lörk", "lürk", "lork", "afk" };
         for (var command : commands) for (var prefix : twitchBot.getPrefixes()) {
             lurkCommands.add(prefix + command);
-            lurkCommands.add(" " + prefix + command);
+            lurkCommands.add(SPACE + prefix + command);
         }
 
         // Initialize Attributes

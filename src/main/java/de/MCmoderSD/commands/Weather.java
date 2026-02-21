@@ -12,9 +12,10 @@ import tools.jackson.databind.JsonNode;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-import static com.openai.models.ReasoningEffort.NONE;
-import static de.MCmoderSD.openweathermap.enums.SpeedUnit.KPH;
-import static de.MCmoderSD.openweathermap.enums.TempUnit.CELSIUS;
+import static com.openai.models.ReasoningEffort.*;
+import static de.MCmoderSD.openweathermap.enums.SpeedUnit.*;
+import static de.MCmoderSD.openweathermap.enums.TempUnit.*;
+import static de.MCmoderSD.utilities.MessageHelper.*;
 
 public class Weather extends CommandBuilder {
 
@@ -47,9 +48,14 @@ public class Weather extends CommandBuilder {
         chatService = ChatService.builder()
                 .setModel(ChatModel.GPT_5_2)    // GPT-5.2
                 .setReasoningEffort(NONE)       // Disable Reasoning
-                .setInstructions("Provide the weather data as a single concise plain text sentence in the specified language. Keep the response under 500 characters without markdown or formatting.")
                 .setTemperature(0)              // No randomness
                 .setMaxOutputTokens(120)        // Limit response length
+                .setInstructions(               // Custom instructions to format the weather data
+                        """
+                        Provide the weather data as a single concise plain text sentence in the specified language.
+                        Keep the response under 500 characters without markdown or formatting.
+                        """
+                )
                 .build(openAI);
 
         // Register command
@@ -62,7 +68,7 @@ public class Weather extends CommandBuilder {
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, "Bitte gib eine Stadt an. " + syntax);
 
                 // Parse City and Language
-                String argsString = String.join(" ", args);
+                String argsString = String.join(SPACE, args);
                 String[] parts =  argsString.split(",", 2);
 
                 // Trim inputs

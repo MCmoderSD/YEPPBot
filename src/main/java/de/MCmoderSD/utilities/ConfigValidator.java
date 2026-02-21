@@ -2,6 +2,8 @@ package de.MCmoderSD.utilities;
 
 import tools.jackson.databind.JsonNode;
 
+import static de.MCmoderSD.utilities.MessageHelper.*;
+
 public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidator {
 
     public static boolean validateTwitchConfig(JsonNode config) throws IllegalArgumentException {
@@ -23,7 +25,7 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
                 if (ownerId <= 0) throw new IllegalArgumentException("Twitch config 'owner' contains an invalid user ID: " + ownerId);
             } else {
                 String ownerName = owner.asString();
-                if (ownerName.isBlank() || ownerName.contains(" ")) throw new IllegalArgumentException("Twitch config 'owner' contains an invalid username: " + ownerName);
+                if (ownerName.isBlank() || ownerName.contains(SPACE)) throw new IllegalArgumentException("Twitch config 'owner' contains an invalid username: " + ownerName);
             }
         }
 
@@ -32,7 +34,7 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
         for (var botAlias : botAliasArray) {
             if (botAlias == null || botAlias.isNull() || !botAlias.isString()) throw new IllegalArgumentException("Twitch config 'botAlias' contains a null or non-text value");
             String botAliasText = botAlias.asString();
-            if (botAliasText.isBlank() || botAliasText.contains(" ")) throw new IllegalArgumentException("Twitch config 'botAlias' contains an invalid alias: " + botAliasText);
+            if (botAliasText.isBlank() || botAliasText.contains(SPACE)) throw new IllegalArgumentException("Twitch config 'botAlias' contains an invalid alias: " + botAliasText);
         }
 
         // Parse and check channel
@@ -51,14 +53,14 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
                     if (channelId <= 0) throw new IllegalArgumentException("Twitch config 'channel' contains an invalid channel ID: " + channelId);
                 } else {
                     String channelName = channel.asString();
-                    if (channelName.isBlank() || channelName.contains(" ")) throw new IllegalArgumentException("Twitch config 'channel' contains an invalid channel name: " + channelName);
+                    if (channelName.isBlank() || channelName.contains(SPACE)) throw new IllegalArgumentException("Twitch config 'channel' contains an invalid channel name: " + channelName);
                 }
             }
         }
 
         // Check oauthToken
         String oauthToken = config.get("oauthToken").asString();
-        if (oauthToken.isBlank() || oauthToken.contains(" ")) throw new IllegalArgumentException("Twitch config 'oauthToken' is invalid");
+        if (oauthToken.isBlank() || oauthToken.contains(SPACE)) throw new IllegalArgumentException("Twitch config 'oauthToken' is invalid");
 
         // Check prefix
         JsonNode prefixArray = config.get("prefix");
@@ -66,7 +68,7 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
         for (var prefix : prefixArray) {
             if (prefix == null || prefix.isNull() || !prefix.isString()) throw new IllegalArgumentException("Twitch config 'prefix' contains a null or non-text value");
             String prefixText = prefix.asString();
-            if (prefixText.isBlank() || prefixText.contains(" ")) throw new IllegalArgumentException("Twitch config 'prefix' contains an invalid prefix: " + prefixText);
+            if (prefixText.isBlank() || prefixText.contains(SPACE)) throw new IllegalArgumentException("Twitch config 'prefix' contains an invalid prefix: " + prefixText);
         }
 
         // Validate using parent class

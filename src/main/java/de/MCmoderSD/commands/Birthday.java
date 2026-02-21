@@ -305,7 +305,7 @@ public class Birthday extends CommandBuilder {
 
         // Put sorted data back into a LinkedHashMap
         LinkedHashMap<TwitchUser, Birthdate> sortedMap = new LinkedHashMap<>();
-        for (Map.Entry<TwitchUser, Birthdate> entry : list) sortedMap.put(entry.getKey(), entry.getValue());
+        for (var entry : list) sortedMap.put(entry.getKey(), entry.getValue());
 
         // Return Map
         return sortedMap;
