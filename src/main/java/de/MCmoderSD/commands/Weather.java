@@ -34,7 +34,7 @@ public class Weather extends CommandBuilder {
         String description = "Zeigt den aktuellen Wetterbericht an. " + syntax;
 
         // Attributes
-        ChatService chatService;
+        ChatService service;
         OpenWeatherMap openWeatherMap;
 
         // Initialize OpenWeatherMap
@@ -45,7 +45,7 @@ public class Weather extends CommandBuilder {
         }
 
         // Initialize Chat Service
-        chatService = ChatService.builder()
+        service = ChatService.builder()
                 .setModel(ChatModel.GPT_5_2)    // GPT-5.2
                 .setReasoningEffort(NONE)       // Disable Reasoning
                 .setTemperature(0)              // No randomness
@@ -86,7 +86,7 @@ public class Weather extends CommandBuilder {
                 }
 
                 // Generate Response with ChatGPT
-                String response = chatService.create("Please answer in " + language + ": " + weatherData).getContent();
+                String response = service.create("Please answer in " + language + ": " + weatherData).getContent();
 
                 // Send Message
                 return twitchBot.sendMessage(event, name, response);

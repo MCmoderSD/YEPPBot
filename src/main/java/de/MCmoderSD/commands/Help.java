@@ -16,7 +16,7 @@ public class Help extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "help [command]";
+        String syntax = "Syntax: " + prefix + "Help [command]";
 
         // About
         String[] name = { "Help", "Hilfe" };

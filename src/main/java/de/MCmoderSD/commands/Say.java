@@ -16,7 +16,7 @@ public class Say extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "say <Nachricht>";
+        String syntax = "Syntax: " + prefix + "Say <Nachricht>";
 
         // About
         String[] name = { "Say", "Repeat" };

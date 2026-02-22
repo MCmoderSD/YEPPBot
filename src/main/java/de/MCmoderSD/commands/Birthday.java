@@ -131,6 +131,9 @@ public class Birthday extends CommandBuilder {
                 HashMap<TwitchUser, Birthdate> birthdays = getBirthdays(channel);
                 LinkedHashMap<TwitchUser, Birthdate> sortedBirthdays = sortBirthdaysByUpcoming(birthdays);
 
+                // Check if channel has any birthdays
+                if (getBirthdays(channel).isEmpty()) return twitchBot.sendMessage(event, name, "In diesem Kanal wurden noch keine Geburtstage gesetzt. YEPP");
+
                 // Handle Actions
                 switch (action) {
 

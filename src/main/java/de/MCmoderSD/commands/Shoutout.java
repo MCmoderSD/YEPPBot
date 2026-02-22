@@ -23,7 +23,7 @@ public class Shoutout extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "so <enable|disable|@user> ";
+        String syntax = "Syntax: " + prefix + "Shoutout <enable|disable|@user> ";
 
         // About
         String[] name = { "Shoutout", "so" };

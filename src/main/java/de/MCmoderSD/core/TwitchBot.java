@@ -230,6 +230,7 @@ public class TwitchBot {
         new Help(this);
         new Info(this);
         new Lurk(this);
+        //new Match(this);
         new Moderate(this);
         new Ping(this);
         new Queue(this);

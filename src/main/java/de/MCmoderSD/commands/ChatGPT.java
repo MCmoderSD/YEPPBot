@@ -35,6 +35,7 @@ public class ChatGPT extends CommandBuilder {
         ChatService service = ChatService.builder()
                 .setModel(GPT_5_NANO)
                 .setReasoningEffort(MINIMAL)
+                .setMaxOutputTokens(80)
                 .setInstructions(
                         """
                         You are a TwitchBot called YEPPBot.
@@ -43,7 +44,6 @@ public class ChatGPT extends CommandBuilder {
                         Keep your response short, less then 500 characters.
                         """
                 )
-                .setMaxOutputTokens(80)
                 .build(openAI);
 
         // Register command
