@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - rewrite-1.25.0-PTB
+      - rewrite-1.26.0-PTB
 
 permissions:
   contents: write
