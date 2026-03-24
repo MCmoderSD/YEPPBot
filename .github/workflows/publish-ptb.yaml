@@ -134,4 +134,4 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           tags: |
             mcmodersd/yeppbot:${{ env.version }}
-            mcmodersd/yeppbot:1.25.0-PTB-latest
+            mcmodersd/yeppbot:1.26.0-PTB-latest

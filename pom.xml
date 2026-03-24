@@ -6,7 +6,7 @@
 
     <groupId>de.MCmoderSD</groupId>
     <artifactId>YEPPBot</artifactId>
-    <version>1.25.0-PTB-1</version>
+    <version>1.26.0-PTB-1</version>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
@@ -28,21 +28,21 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>Helix-API</artifactId>
-            <version>2.3.0</version>
+            <version>2.3.1</version>
         </dependency>
 
         <!-- HTTPS-Server -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>HTTPS-Server</artifactId>
-            <version>3.1.1</version>
+            <version>3.1.2</version>
         </dependency>
 
         <!-- JSON Utility -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>JsonUtility</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.2</version>
         </dependency>
 
         <!-- JSQL Driver -->
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>OpenAI</artifactId>
-            <version>3.3.2</version>
+            <version>3.3.3</version>
         </dependency>
 
         <!-- OpenWeatherMap -->
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>com.github.twitch4j</groupId>
             <artifactId>twitch4j</artifactId>
-            <version>1.25.0</version>
+            <version>1.26.0</version>
         </dependency>
 
         <!-- SLF4J -->
@@ -91,14 +91,14 @@
         <dependency>
             <groupId>at.yawk.lz4</groupId>
             <artifactId>lz4-java</artifactId>
-            <version>1.10.3</version>
+            <version>1.10.4</version>
         </dependency>
 
         <!-- Jackson Databind -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.21.1</version>
+            <version>2.21.2</version>
         </dependency>
 
     </dependencies>
@@ -108,7 +108,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

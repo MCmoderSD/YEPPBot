@@ -172,7 +172,8 @@ public class TwitchBot {
                 .withClientSecret(clientSecret)             // Set Client Secret
                 .withChatAccount(defaultAuthToken)          // Set OAuth Token (Bot Chat Account)
                 .withDefaultAuthToken(defaultAuthToken)     // Set OAuth Token (Bot Account)
-                .withCredentialManager(credentialManager);  // Set Credential Manager
+                .withCredentialManager(credentialManager)   // Set Credential Manager
+                .withChatAutoJoinOwnChannel(true);          // Auto-Join Bot's Own Channel
 
         // Obtain Twitch Users
         botUser = obtainBotUser(defaultAuthToken);

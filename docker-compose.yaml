@@ -1,7 +1,7 @@
 services:
   yeppbot:
     container_name: YEPPBot
-    image: mcmodersd/yeppbot:1.25.0-PTB-latest
+    image: mcmodersd/yeppbot:1.26.0-PTB-latest
     restart: unless-stopped
     pull_policy: always
     ports:
