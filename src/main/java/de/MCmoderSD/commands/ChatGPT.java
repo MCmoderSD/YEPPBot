@@ -33,8 +33,8 @@ public class ChatGPT extends CommandBuilder {
 
         // Initialize ChatService
         ChatService service = ChatService.builder()
-                .setModel(GPT_5_NANO)
-                .setReasoningEffort(MINIMAL)
+                .setModel(GPT_5_4_NANO)
+                .setReasoningEffort(NONE)
                 .setMaxOutputTokens(80)
                 .setInstructions(
                         """
