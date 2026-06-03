@@ -46,7 +46,7 @@ public class Weather extends CommandBuilder {
 
         // Initialize Chat Service
         service = ChatService.builder()
-                .setModel(ChatModel.GPT_5_4)    // GPT-5.4
+                .setModel(ChatModel.GPT_5_5)    // GPT-5.5
                 .setReasoningEffort(NONE)       // Disable Reasoning
                 .setTemperature(0)              // No randomness
                 .setMaxOutputTokens(120)        // Limit response length

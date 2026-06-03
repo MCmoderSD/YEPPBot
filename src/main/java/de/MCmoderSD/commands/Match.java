@@ -32,7 +32,7 @@ public class Match extends CommandBuilder {
 
         // Initialize ChatService
         ChatService service = ChatService.builder()
-                .setModel(GPT_5_2)
+                .setModel(GPT_5_5)
                 .setReasoningEffort(NONE)
                 .setMaxOutputTokens(120)
                 .setInstructions(
