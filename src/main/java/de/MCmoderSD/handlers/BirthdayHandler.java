@@ -7,12 +7,18 @@ import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static de.MCmoderSD.utilities.MessageHelper.tagUser;
 
 @SuppressWarnings("BusyWait")
 public class BirthdayHandler {
+
+    // Constants
+    private static final Integer[] BLOCKED_USERS = new Integer[] {
+            74594283    // Jonas
+    };
 
     // Associations
     private final TwitchBot twitchBot;
@@ -86,6 +92,9 @@ public class BirthdayHandler {
         // Check Parameters
         if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
         if (birthdate == null) throw new IllegalArgumentException("Birthdate birthdate cannot be null");
+
+        // Check Blocked Users
+        if (List.of(BLOCKED_USERS).contains(user.getId())) return;
 
         // Add Birthday
         birthdays.put(user, birthdate);
