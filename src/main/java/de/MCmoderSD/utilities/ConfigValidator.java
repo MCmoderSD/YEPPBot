@@ -17,7 +17,7 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
         if (!config.has("application") || config.get("application").isNull() || config.get("application").isEmpty()) throw new IllegalArgumentException("Twitch config missing 'application'");
 
         // Parse and Check owner
-        JsonNode ownerArray = config.get("owner");
+        var ownerArray = config.get("owner");
         for (var owner : ownerArray) {
             if (owner == null || owner.isNull() || !(owner.isNumber() || owner.isString())) throw new IllegalArgumentException("Twitch config 'owner' contains an invalid value");
             if (owner.isNumber()) {
@@ -30,10 +30,10 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
         }
 
         // Parse and check bot alias
-        JsonNode botAliasArray = config.get("botAlias");
+        var botAliasArray = config.get("botAlias");
         for (var botAlias : botAliasArray) {
             if (botAlias == null || botAlias.isNull() || !botAlias.isString()) throw new IllegalArgumentException("Twitch config 'botAlias' contains a null or non-text value");
-            String botAliasText = botAlias.asString();
+            var botAliasText = botAlias.asString();
             if (botAliasText.isBlank() || botAliasText.contains(SPACE)) throw new IllegalArgumentException("Twitch config 'botAlias' contains an invalid alias: " + botAliasText);
         }
 
@@ -44,7 +44,7 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
             if (config.get("channel").isNull() || !config.get("channel").isArray() || config.get("channel").isEmpty()) throw new IllegalArgumentException("Twitch config missing 'channel'");
 
             // Check each channel entry
-            JsonNode channelArray = config.get("channel");
+            var channelArray = config.get("channel");
             for (var channel : channelArray) {
                 if (channel == null || channel.isNull() || !(channel.isNumber() || channel.isString()))
                     throw new IllegalArgumentException("Twitch config 'channel' contains an invalid value");
@@ -59,15 +59,15 @@ public class ConfigValidator extends de.MCmoderSD.helix.utilities.ConfigValidato
         }
 
         // Check oauthToken
-        String oauthToken = config.get("oauthToken").asString();
+        var oauthToken = config.get("oauthToken").asString();
         if (oauthToken.isBlank() || oauthToken.contains(SPACE)) throw new IllegalArgumentException("Twitch config 'oauthToken' is invalid");
 
         // Check prefix
-        JsonNode prefixArray = config.get("prefix");
+        var prefixArray = config.get("prefix");
         if (prefixArray == null || prefixArray.isNull() || prefixArray.isEmpty() || !prefixArray.isArray()) throw new IllegalArgumentException("Twitch config 'prefix' must be a non-empty array");
         for (var prefix : prefixArray) {
             if (prefix == null || prefix.isNull() || !prefix.isString()) throw new IllegalArgumentException("Twitch config 'prefix' contains a null or non-text value");
-            String prefixText = prefix.asString();
+            var prefixText = prefix.asString();
             if (prefixText.isBlank() || prefixText.contains(SPACE)) throw new IllegalArgumentException("Twitch config 'prefix' contains an invalid prefix: " + prefixText);
         }
 

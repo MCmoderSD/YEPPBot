@@ -2,11 +2,7 @@ import de.MCmoderSD.encryption.core.Encryption;
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.sql.Driver;
 
-import tools.jackson.databind.JsonNode;
-
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.ResultSet;
 
 import static de.MCmoderSD.encryption.enums.Hash.*;
 import static de.MCmoderSD.encryption.enums.Transformer.*;
@@ -15,18 +11,18 @@ import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 void main() {
 
     // Secrets
-    String oldSecret = "old_secret_key_here"; // Old secret key
-    String newSecret = "new_secret_key_here"; // New secret key
+    var oldSecret = "old_secret_key_here"; // Old secret key
+    var newSecret = "new_secret_key_here"; // New secret key
 
     // Create encryptors
-    Encryption oldEncryptor = new Encryption(oldSecret, SHA3_256, AES_ECB_PKCS5); // Old encryptor
-    Encryption newEncryptor = new Encryption(newSecret, SHA3_256, AES_ECB_PKCS5); // New encryptor
+    var oldEncryptor = new Encryption(oldSecret, SHA3_256, AES_ECB_PKCS5); // Old encryptor
+    var newEncryptor = new Encryption(newSecret, SHA3_256, AES_ECB_PKCS5); // New encryptor
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().loadResource("/Database.json");
+    var config = JsonUtility.getInstance().loadResource("/Database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(SQL.builder()
+    var sql = new SQL(SQL.builder()
             .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
@@ -36,7 +32,7 @@ void main() {
     );
 
     // Get refresh tokens from database
-    HashMap<Integer, String> refreshTokens = sql.getRefreshTokens();
+    var refreshTokens = sql.getRefreshTokens();
 
     // Loop through tokens
     for (var entry : refreshTokens.entrySet()) {
@@ -45,8 +41,8 @@ void main() {
         var id = entry.getKey();
 
         // Re-encrypt token
-        String decryptedToken = oldEncryptor.decrypt(entry.getValue()); // Decrypt with old key
-        String encryptedToken = newEncryptor.encrypt(decryptedToken);   // Encrypt with new key
+        var decryptedToken = oldEncryptor.decrypt(entry.getValue()); // Decrypt with old key
+        var encryptedToken = newEncryptor.encrypt(decryptedToken);   // Encrypt with new key
 
         // Update token in database
         sql.updateRefreshToken(id, encryptedToken);
@@ -74,15 +70,15 @@ private static class SQL extends Driver {
         try {
 
             // SQL statement to select all tokens
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            var preparedStatement = connection.prepareStatement(
                     "SELECT * FROM RefreshToken"
             );
 
             // Execute the query
-            ResultSet resultSet = preparedStatement.executeQuery();
+            var resultSet = preparedStatement.executeQuery();
 
             // Process the result set
-            HashMap<Integer, String> refreshTokens = new HashMap<>();
+            var refreshTokens = new HashMap<Integer, String>();
             while (resultSet.next()) refreshTokens.put(resultSet.getInt("id"), resultSet.getString("token"));
 
             // Close the result set and statement
@@ -102,7 +98,7 @@ private static class SQL extends Driver {
         try {
 
             // Prepare statement
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            var preparedStatement = connection.prepareStatement(
                     "UPDATE RefreshToken SET token = ? WHERE id = ?"
             );
 

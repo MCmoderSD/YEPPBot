@@ -3,7 +3,6 @@ package de.MCmoderSD.database.manager;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +36,7 @@ public class ChannelManager {
             database.addTwitchUser(channel);
 
             // Insert channel
-            PreparedStatement insertChannelStatement = database.getConnection().prepareStatement(
+            var insertChannelStatement = database.getConnection().prepareStatement(
                     "INSERT IGNORE INTO Channel (id) VALUES (?)"
             );
 
@@ -66,7 +65,7 @@ public class ChannelManager {
             addChannel(channel);
 
             // Update channel active status
-            PreparedStatement updateChannelStatement = database.getConnection().prepareStatement(
+            var updateChannelStatement = database.getConnection().prepareStatement(
                     "UPDATE Channel SET active = ? WHERE id = ?"
             );
 
@@ -99,7 +98,7 @@ public class ChannelManager {
         try {
 
             // Prepare statement
-            PreparedStatement preparedStatement = database.getConnection().prepareStatement(
+            var preparedStatement = database.getConnection().prepareStatement(
                     "SELECT user, active FROM User u, Channel c WHERE u.id = c.id"
             );
 
@@ -107,7 +106,7 @@ public class ChannelManager {
             var resultSet = preparedStatement.executeQuery();
 
             // Prepare result map
-            HashMap<TwitchUser, Boolean> activeChannels = new HashMap<>();
+            var activeChannels = new HashMap<TwitchUser, Boolean>();
 
             // Process results
             while (resultSet.next()) activeChannels.put(
@@ -139,7 +138,7 @@ public class ChannelManager {
                 addChannel(channel);
 
                 // Update channel auto shoutout status
-                PreparedStatement updateChannelStatement = database.getConnection().prepareStatement(
+                var updateChannelStatement = database.getConnection().prepareStatement(
                         "UPDATE Channel SET autoShoutout = ? WHERE id = ?"
                 );
 
@@ -173,7 +172,7 @@ public class ChannelManager {
         try {
 
             // Prepare statement
-            PreparedStatement preparedStatement = database.getConnection().prepareStatement(
+            var preparedStatement = database.getConnection().prepareStatement(
                     "SELECT user, autoShoutout FROM Channel JOIN User ON Channel.id = User.id;"
             );
 
@@ -181,7 +180,7 @@ public class ChannelManager {
             var resultSet = preparedStatement.executeQuery();
 
             // Prepare result map
-            HashMap<TwitchUser, Boolean> autoShoutoutChannels = new HashMap<>();
+            var autoShoutoutChannels = new HashMap<TwitchUser, Boolean>();
 
             // Process results
             while (resultSet.next()) autoShoutoutChannels.put(
@@ -213,7 +212,7 @@ public class ChannelManager {
             addChannel(channel);
 
             // Insert blacklist entry
-            PreparedStatement insertBlacklistStatement = database.getConnection().prepareStatement(
+            var insertBlacklistStatement = database.getConnection().prepareStatement(
                     "INSERT IGNORE INTO Blacklist (id, command) VALUES (?, ?)"
             );
 
@@ -247,7 +246,7 @@ public class ChannelManager {
             addChannel(channel);
 
             // Delete blacklist entry
-            PreparedStatement deleteBlacklistStatement = database.getConnection().prepareStatement(
+            var deleteBlacklistStatement = database.getConnection().prepareStatement(
                     "DELETE IGNORE FROM Blacklist WHERE id = ? AND command = ?"
             );
 
@@ -274,7 +273,7 @@ public class ChannelManager {
         try {
 
             // Prepare statement
-            PreparedStatement preparedStatement = database.getConnection().prepareStatement(
+            var preparedStatement = database.getConnection().prepareStatement(
                     "SELECT user, command FROM Blacklist JOIN User ON Blacklist.id = User.id"
             );
 
@@ -282,12 +281,12 @@ public class ChannelManager {
             var resultSet = preparedStatement.executeQuery();
 
             // Prepare result map
-            HashMap<TwitchUser, HashSet<String>> blacklist = new HashMap<>();
+            var blacklist = new HashMap<TwitchUser, HashSet<String>>();
 
             // Process results
             while (resultSet.next()) {
-                TwitchUser user = inflateTwitchUser(resultSet.getBytes("user"));    // Twitch User
-                String command = resultSet.getString("command");                    // Command
+                var user = inflateTwitchUser(resultSet.getBytes("user"));   // Twitch User
+                var command = resultSet.getString("command");               // Command
                 blacklist.putIfAbsent(user, new HashSet<>());
                 blacklist.get(user).add(command);
             }

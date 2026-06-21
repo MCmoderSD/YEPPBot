@@ -14,11 +14,11 @@ public class Lurk extends CommandBuilder {
         super(twitchBot);
 
         // About
-        String[] name = new String[]{ "Lurk", "Lörk", "Lürk", "Lork", "AFK" };
-        String description = "Sendet den Befehl " + prefix + "Lurk in den Chat, um im Lurk zu sein";
+        var name = new String[]{ "Lurk", "Lörk", "Lürk", "Lork", "AFK" };
+        var description = "Sendet den Befehl " + prefix + "Lurk in den Chat, um im Lurk zu sein";
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {

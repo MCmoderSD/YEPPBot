@@ -9,7 +9,6 @@ import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.tools.GZIP;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,33 +22,33 @@ public class Shoutout extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Shoutout <enable|disable|@user> ";
+        var syntax = "Syntax: " + prefix + "Shoutout <enable|disable|@user> ";
 
         // About
-        String[] name = { "Shoutout", "so" };
-        String description = "Sendet einen Shoutout für den letzten Raider oder einen bestimmten Benutzer. Moderatoren und Administratoren können den automatischen Shoutout für Raids aktivieren oder deaktivieren. " + syntax;
+        var name = new String[]{ "Shoutout", "so" };
+        var description = "Sendet einen Shoutout für den letzten Raider oder einen bestimmten Benutzer. Moderatoren und Administratoren können den automatischen Shoutout für Raids aktivieren oder deaktivieren. " + syntax;
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Get Variables
-                TwitchUser channel = event.getChannel();
-                boolean noArgs = args.isEmpty();
+                var channel = event.getChannel();
+                var noArgs = args.isEmpty();
 
                 // Check Permissions
                 if (!twitchBot.isPermitted(event.getUser(), channel)) return false;
 
                 // Last Raid
-                RaidEvent lastRaid = getLastRaid(channel);
+                var lastRaid = getLastRaid(channel);
 
                 // No Arguments
                 if (noArgs && lastRaid == null) return twitchBot.sendMessage(event, name, "Fehler: Es gibt keinen letzten Raid, auf den ein Shoutout gemacht werden könnte. " + syntax);
                 else if (noArgs) {
-                    TwitchUser raider = lastRaid.getUser();         // Get Raider
+                    var raider = lastRaid.getUser();                // Get Raider
                     streamHandler.sendShoutout(raider, channel);    // Send Shoutout
                     return true;
                 }
@@ -58,7 +57,7 @@ public class Shoutout extends CommandBuilder {
                 if (Arrays.asList("enable", "disable", "aktivieren", "deaktivieren").contains(args.getFirst().toLowerCase())) {
 
                     // Parse Argument
-                    Boolean autoShoutout = switch (args.getFirst().toLowerCase()) {
+                    var autoShoutout = switch (args.getFirst().toLowerCase()) {
                         case "enable", "aktivieren" -> true;
                         case "disable", "deaktivieren" -> false;
                         default -> null;
@@ -68,9 +67,9 @@ public class Shoutout extends CommandBuilder {
                     if (args.size() > 1) {
 
                         // Fetch Target User
-                        String targetUserName = args.get(1);
+                        var targetUserName = args.get(1);
                         while (targetUserName.startsWith("@")) targetUserName = targetUserName.substring(1);
-                        TwitchUser targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
+                        var targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
 
                         // Validate Target User
                         if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden. YEPP");
@@ -91,9 +90,9 @@ public class Shoutout extends CommandBuilder {
                 if (!args.isEmpty()) {
 
                     // Fetch Target User
-                    String targetUserName = args.getFirst();
+                    var targetUserName = args.getFirst();
                     while (targetUserName.startsWith("@")) targetUserName = targetUserName.substring(1);
-                    TwitchUser targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
+                    var targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
 
                     // Validate Target User
                     if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUserName + "' nicht gefunden. YEPP");
@@ -119,7 +118,7 @@ public class Shoutout extends CommandBuilder {
             if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
 
             // Fetch Last Raid
-            PreparedStatement statement = database.getConnection().prepareStatement(
+            var statement = database.getConnection().prepareStatement(
                     "SELECT event FROM RaidEvent WHERE channelId = ? ORDER BY firedAt DESC LIMIT 1"
             );
 

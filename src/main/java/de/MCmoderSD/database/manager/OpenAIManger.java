@@ -95,7 +95,7 @@ public class OpenAIManger {
             var resultSet = getConversationsStatement.executeQuery();
 
             // Process the results
-            HashMap<TwitchUser, String> conversations = new HashMap<>();
+            var conversations = new HashMap<TwitchUser, String>();
             while (resultSet.next()) conversations.put(inflateTwitchUser(resultSet.getBytes("user")), resultSet.getString("response"));
 
             // Close resources

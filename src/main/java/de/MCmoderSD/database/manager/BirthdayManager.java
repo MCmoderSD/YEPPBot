@@ -98,7 +98,7 @@ public class BirthdayManager {
             var resultSet = getAllBirthdaysStatement.executeQuery();
 
             // Prepare the result map
-            HashMap<TwitchUser, Birthdate> birthdays = new HashMap<>();
+            var birthdays = new HashMap<TwitchUser, Birthdate>();
 
             // Process the results
             while (resultSet.next()) {
@@ -110,7 +110,7 @@ public class BirthdayManager {
                 var year = resultSet.getInt("year");
 
                 // Create Birthdate
-                Birthdate birthdate = new Birthdate(day, month, year);
+                var birthdate = new Birthdate(day, month, year);
 
                 // Store in map
                 birthdays.put(user, birthdate);

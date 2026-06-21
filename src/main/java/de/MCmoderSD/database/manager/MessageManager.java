@@ -1,12 +1,10 @@
 package de.MCmoderSD.database.manager;
 
 import de.MCmoderSD.database.Database;
-import de.MCmoderSD.openai.objects.Rating;
 import de.MCmoderSD.openai.prompts.EmbeddingPrompt;
 import de.MCmoderSD.openai.prompts.ModerationPrompt;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import static de.MCmoderSD.tools.GZIP.deflateObject;
@@ -35,10 +33,10 @@ public class MessageManager {
             if (content == null || content.isBlank()) throw new IllegalArgumentException("Content must not be null or blank");
 
             // Variables
-            byte[] hash = xxHash64(content);
+            var hash = xxHash64(content);
 
             // Insert message content
-            PreparedStatement insertContentStatement = database.getConnection().prepareStatement(
+            var insertContentStatement = database.getConnection().prepareStatement(
                     "INSERT IGNORE INTO MessageContent (hash, content) VALUES (?, ?);"
             );
 
@@ -63,11 +61,11 @@ public class MessageManager {
                 if (prompt == null) throw new IllegalArgumentException("Prompt cannot be null");
 
                 // Variables
-                byte[] contentHash = xxHash64(prompt.getText());
-                byte[] embedding = deflateObject(prompt.getEmbedding().getVector());
+                var contentHash = xxHash64(prompt.getText());
+                var embedding = deflateObject(prompt.getEmbedding().getVector());
 
                 // Insert embedding
-                PreparedStatement insertEmbeddingStatement = database.getConnection().prepareStatement(
+                var insertEmbeddingStatement = database.getConnection().prepareStatement(
                         "INSERT INTO Embedding (hash, dimension, embedding) VALUES (?, ?, ?);"
                 );
 
@@ -94,12 +92,12 @@ public class MessageManager {
                 if (prompt == null) throw new IllegalArgumentException("Prompt cannot be null");
 
                 // Variables
-                Rating rating = prompt.getRating();
-                byte[] contentHash = xxHash64(prompt.getText());
-                byte[] ratingData = deflateObject(rating);
+                var rating = prompt.getRating();
+                var contentHash = xxHash64(prompt.getText());
+                var ratingData = deflateObject(rating);
 
                 // Insert rating
-                PreparedStatement insertRatingStatement = database.getConnection().prepareStatement(
+                var insertRatingStatement = database.getConnection().prepareStatement(
                         "INSERT INTO Rating (hash, flagged, rating) VALUES (?, ?, ?);"
                 );
 
@@ -124,7 +122,7 @@ public class MessageManager {
                 var violenceGraphic         = rating.getViolenceGraphic();          // Violence Graphic
 
                 // Insert Rating Flags
-                PreparedStatement insertFlagStatement = database.getConnection().prepareStatement(
+                var insertFlagStatement = database.getConnection().prepareStatement(
                         "INSERT INTO RatingFlag (hash, harassment, harassmentThreatening, hate, hateThreatening, illicit, illicitViolent, selfHarm, selfHarmInstructions, selfHarmIntent, sexual, sexualMinors, violence, violenceGraphic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 
@@ -145,7 +143,7 @@ public class MessageManager {
                 insertFlagStatement.executeUpdate();
 
                 // Insert Rating Flags
-                PreparedStatement insertScoreStatement = database.getConnection().prepareStatement(
+                var insertScoreStatement = database.getConnection().prepareStatement(
                         "INSERT INTO RatingScore (hash, harassment, harassmentThreatening, hate, hateThreatening, illicit, illicitViolent, selfHarm, selfHarmInstructions, selfHarmIntent, sexual, sexualMinors, violence, violenceGraphic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 

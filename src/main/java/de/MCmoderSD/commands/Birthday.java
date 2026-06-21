@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
@@ -28,19 +27,19 @@ public class Birthday extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Birthday <set|get|until|in|next>";
-        String setSyntax = "Syntax: " + prefix + "Birthday set DD.MM.CCYY";
-        String getSyntax = "Syntax: " + prefix + "Birthday get <user>";
-        String inSyntax = "Syntax: " + prefix + "Birthday in <month>";
-        String nextSyntax = "Syntax: " + prefix + "Birthday next <amount>";
+        var syntax = "Syntax: " + prefix + "Birthday <set|get|until|in|next>";
+        var setSyntax = "Syntax: " + prefix + "Birthday set DD.MM.CCYY";
+        var getSyntax = "Syntax: " + prefix + "Birthday get <user>";
+        var inSyntax = "Syntax: " + prefix + "Birthday in <month>";
+        var nextSyntax = "Syntax: " + prefix + "Birthday next <amount>";
 
         // About
-        String[] name = { "Birthday", "bday", "Geburtstag", "bd", "geb", "gb" };
-        String description = "Setzt deinen Geburtstag. " + syntax;
+        var name = new String[]{ "Birthday", "bday", "Geburtstag", "bd", "geb", "gb" };
+        var description = "Setzt deinen Geburtstag. " + syntax;
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
@@ -49,7 +48,7 @@ public class Birthday extends CommandBuilder {
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, syntax);
 
                 // Parse action
-                String action = args.getFirst().toLowerCase();
+                var action = args.getFirst().toLowerCase();
 
                 // Variables
                 var user = event.getUser();
@@ -66,8 +65,8 @@ public class Birthday extends CommandBuilder {
                         if (argsSize < 2) return twitchBot.sendMessage(event, name, setSyntax);
 
                         // Parse Date
-                        String dateString = args.get(1);
-                        String[] dateParts = dateString.split("\\.");
+                        var dateString = args.get(1);
+                        var dateParts = dateString.split("\\.");
 
                         // Validate Date Parts
                         if (dateParts.length != 3) return twitchBot.sendMessage(event, name, setSyntax);
@@ -112,15 +111,15 @@ public class Birthday extends CommandBuilder {
                     if (argsSize < 2) return twitchBot.sendMessage(event, name, getSyntax);
 
                     // Parse Target User
-                    String targetUserName = args.get(1);
+                    var targetUserName = args.get(1);
                     while (targetUserName.startsWith("@")) targetUserName = targetUserName.substring(1);
-                    TwitchUser targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
+                    var targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
 
                     // Validate Target User
                     if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Nutzer @" + targetUserName + " nicht gefunden. YEPP");
 
                     // Get Birthdate
-                    Birthdate birthdate = birthdayManager.getBirthday(targetUser);
+                    var birthdate = birthdayManager.getBirthday(targetUser);
                     if (birthdate == null) return twitchBot.sendMessage(event, name, "Der Nutzer " + tagUser(targetUser) + " hat keinen Geburtstag gesetzt. YEPP");
 
                     // Send Birthdate
@@ -128,8 +127,8 @@ public class Birthday extends CommandBuilder {
                 }
 
                 // Variables
-                HashMap<TwitchUser, Birthdate> birthdays = getBirthdays(channel);
-                LinkedHashMap<TwitchUser, Birthdate> sortedBirthdays = sortBirthdaysByUpcoming(birthdays);
+                var birthdays = getBirthdays(channel);
+                var sortedBirthdays = sortBirthdaysByUpcoming(birthdays);
 
                 // Check if channel has any birthdays
                 if (getBirthdays(channel).isEmpty()) return twitchBot.sendMessage(event, name, "In diesem Kanal wurden noch keine Geburtstage gesetzt. YEPP");
@@ -148,7 +147,7 @@ public class Birthday extends CommandBuilder {
                         if (argsSize > 2) {
 
                             // Parse Name
-                            String targetUserName = args.get(1);
+                            var targetUserName = args.get(1);
                             while (targetUserName.startsWith("@")) targetUserName = targetUserName.substring(1);
                             targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
 
@@ -160,17 +159,14 @@ public class Birthday extends CommandBuilder {
                         birthdate = birthdays.get(targetUser);
 
                         // Validate Birthdate
-                        if (birthdate == null)
-                            return twitchBot.sendMessage(event, name, "Der Nutzer " + tagUser(targetUser) + " hat keinen Geburtstag gesetzt. YEPP");
+                        if (birthdate == null) return twitchBot.sendMessage(event, name, "Der Nutzer " + tagUser(targetUser) + " hat keinen Geburtstag gesetzt. YEPP");
 
                         // Calculate Time Until Birthday
                         var timeUntil = timeUntilBirthday(birthdate);
-                        String formattedDuration = formatTimeDuration(timeUntil, TimeUnit.DAYS);
+                        var formattedDuration = formatTimeDuration(timeUntil, TimeUnit.DAYS);
 
                         // Send Message
                         return twitchBot.sendMessage(event, name, "Bis zum Geburtstag von " + tagUser(targetUser) + " am " + birthdate.getFormattedDate() + " sind es noch " + formattedDuration + ". YEPP");
-
-                        // Send Message
                     }
 
                     // In Action
@@ -180,11 +176,11 @@ public class Birthday extends CommandBuilder {
                         if (argsSize < 2) return twitchBot.sendMessage(event, name, inSyntax);
 
                         // Parse Month
-                        Month month = parseMonth(args.get(1));
+                        var month = parseMonth(args.get(1));
                         if (month == null) return twitchBot.sendMessage(event, name, inSyntax);
 
                         // Find Birthdays in Month
-                        ArrayList<String> usersInMonth = new ArrayList<>();
+                        var usersInMonth = new ArrayList<String>();
                         for (var entry : sortedBirthdays.entrySet()) {
                             if (entry.getValue().month() == month.getValue()) {
                                 usersInMonth.add(tagUser(entry.getKey()) + " am " + entry.getValue().getFormattedDate());
@@ -192,17 +188,17 @@ public class Birthday extends CommandBuilder {
                         }
 
                         // Check Results
-                        String monthName = month.name().toLowerCase();
+                        var monthName = month.name().toLowerCase();
                         monthName = monthName.substring(0, 1).toUpperCase() + monthName.substring(1);
                         if (usersInMonth.isEmpty()) return twitchBot.sendMessage(event, name, "In " + monthName + " hat niemand Geburtstag. YEPP");
 
                         // Build Message
-                        ArrayList<StringBuilder> messages = new ArrayList<>();
-                        StringBuilder message = new StringBuilder("In " + monthName + " haben folgende Nutzer Geburtstag: ");
+                        var messages = new ArrayList<StringBuilder>();
+                        var message = new StringBuilder("In " + monthName + " haben folgende Nutzer Geburtstag: ");
 
                         // Fill Messages
                         for (var i = 0; i < usersInMonth.size(); i++) {
-                            String userInMonth = usersInMonth.get(i);
+                            var userInMonth = usersInMonth.get(i);
                             if (message.length() + userInMonth.length() + 2 > 500) {
                                 messages.add(message);
                                 message = new StringBuilder();
@@ -213,7 +209,7 @@ public class Birthday extends CommandBuilder {
                         messages.add(message); // Add last message
 
                         // Send Messages
-                        boolean success = true;
+                        var success = true;
                         for (var msg : messages) success &= twitchBot.sendMessage(event, name, msg.toString());
                         return success;
                     }
@@ -223,7 +219,7 @@ public class Birthday extends CommandBuilder {
                     case "next" -> {
 
                         // Find Next Birthdays
-                        ArrayList<String> nextBirthdays = new ArrayList<>();
+                        var nextBirthdays = new ArrayList<String>();
                         for (var entry : sortedBirthdays.entrySet()) {
                             nextBirthdays.add(tagUser(entry.getKey()) + " am " + entry.getValue().getFormattedDate());
                         }
@@ -250,7 +246,7 @@ public class Birthday extends CommandBuilder {
                         }
 
                         // Build Message
-                        StringBuilder message = new StringBuilder("Die nächsten %d Geburtstage sind: ".formatted(amount));
+                        var message = new StringBuilder("Die nächsten %d Geburtstage sind: ".formatted(amount));
                         for (var i = 0; i < amount; i++) {
                             message.append(nextBirthdays.get(i));
                             if (i < amount - 1) message.append(", ");
@@ -273,10 +269,10 @@ public class Birthday extends CommandBuilder {
     private HashMap<TwitchUser, Birthdate> getBirthdays(TwitchUser channel) {
 
         // Variables
-        HashMap<TwitchUser, Birthdate> birthdays = birthdayManager.getBirthdays();
+        var birthdays = birthdayManager.getBirthdays();
 
         // Get Users
-        HashSet<TwitchUser> users = new HashSet<>();
+        var users = new HashSet<TwitchUser>();
         users.addAll(roleHandler.getSubscribers(channel));  // Subscribers
         users.addAll(roleHandler.getModerators(channel));   // Moderators
         users.addAll(roleHandler.getFollowers(channel));    // Followers
@@ -286,7 +282,7 @@ public class Birthday extends CommandBuilder {
         users.add(channel);                                 // Channel Owner
 
         // Map Birthdays
-        HashMap<TwitchUser, Birthdate> birthdayMap = new HashMap<>();
+        var birthdayMap = new HashMap<TwitchUser, Birthdate>();
         for (var user : users) {
             user = new TwitchUser(user);
             var birthdate = birthdays.get(user);
@@ -301,13 +297,13 @@ public class Birthday extends CommandBuilder {
     private static LinkedHashMap<TwitchUser, Birthdate> sortBirthdaysByUpcoming(HashMap<TwitchUser, Birthdate> birthdayMap) {
 
         // Create a list from elements of HashMap
-        ArrayList<Map.Entry<TwitchUser, Birthdate>> list = new ArrayList<>(birthdayMap.entrySet());
+        var list = new ArrayList<>(birthdayMap.entrySet());
 
         // Sort the list based on time until birthday
         list.sort(Comparator.comparingLong(entry -> timeUntilBirthday(entry.getValue())));
 
         // Put sorted data back into a LinkedHashMap
-        LinkedHashMap<TwitchUser, Birthdate> sortedMap = new LinkedHashMap<>();
+        var sortedMap = new LinkedHashMap<TwitchUser, Birthdate>();
         for (var entry : list) sortedMap.put(entry.getKey(), entry.getValue());
 
         // Return Map
@@ -318,13 +314,13 @@ public class Birthday extends CommandBuilder {
     private static long timeUntilBirthday(Birthdate birthdate) {
 
         // Current Date
-        Calendar now = Calendar.getInstance();
+        var now = Calendar.getInstance();
         var currentYear = now.get(Calendar.YEAR);
         var currentMonth = now.get(Calendar.MONTH) + 1; // Months are 0-based
         var currentDay = now.get(Calendar.DAY_OF_MONTH);
 
         // Birthday This Year
-        Calendar birthdayThisYear = Calendar.getInstance();
+        var birthdayThisYear = Calendar.getInstance();
         birthdayThisYear.set(Calendar.YEAR, currentYear);
         birthdayThisYear.set(Calendar.MONTH, birthdate.month() - 1); // Months are
         birthdayThisYear.set(Calendar.DAY_OF_MONTH, birthdate.day());
@@ -343,21 +339,21 @@ public class Birthday extends CommandBuilder {
     private static String formatTimeDuration(long duration, TimeUnit unit) {
 
         // Calculate time components
-        long totalSeconds = TimeUnit.MILLISECONDS.toSeconds(duration);
-        long days = totalSeconds / 86400;
-        long hours = (totalSeconds % 86400) / 3600;
-        long minutes = (totalSeconds % 3600) / 60;
-        long seconds = totalSeconds % 60;
+        var totalSeconds = TimeUnit.MILLISECONDS.toSeconds(duration);
+        var days = totalSeconds / 86400L;
+        var hours = (totalSeconds % 86400L) / 3600L;
+        var minutes = (totalSeconds % 3600L) / 60L;
+        var seconds = totalSeconds % 60L;
 
         // Build String
         return switch (unit) {
             case DAYS -> days + " Tage";
             case HOURS -> {
-                long totalHours = TimeUnit.MILLISECONDS.toHours(duration);
+                var totalHours = TimeUnit.MILLISECONDS.toHours(duration);
                 yield totalHours + " Stunden";
             }
             case MINUTES -> {
-                long totalMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
+                var totalMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
                 yield totalMinutes + " Minuten";
             }
             default -> days + " Tage, " + hours + " Stunden, " + minutes + " Minuten, " + seconds + " Sekunden";

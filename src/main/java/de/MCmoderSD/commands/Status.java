@@ -14,12 +14,12 @@ public class Status extends CommandBuilder {
         super(twitchBot);
 
         // About
-        String[] name = { "Status", "Test" };
-        String description = "Zeigt den Status des Bots an. Also ob er aktiv ist oder nicht.";
+        var name = new String[]{ "Status", "Test" };
+        var description = "Zeigt den Status des Bots an. Also ob er aktiv ist oder nicht.";
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {

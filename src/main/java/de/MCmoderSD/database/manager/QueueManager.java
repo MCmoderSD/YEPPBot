@@ -34,9 +34,9 @@ public class QueueManager {
                 if (event == null) throw new IllegalArgumentException("MessageEvent event cannot be null");
 
                 // Variables
-                TwitchUser user = event.getUser();
-                TwitchUser channel = event.getChannel();
-                Timestamp joinedAt = Timestamp.from(event.getFiredAt());
+                var user = event.getUser();
+                var channel = event.getChannel();
+                var joinedAt = Timestamp.from(event.getFiredAt());
 
                 // Prepare the query
                 var enqueueUserStatement = database.getConnection().prepareStatement(
@@ -139,7 +139,7 @@ public class QueueManager {
             var resultSet = getQueueStatement.executeQuery();
 
             // Process the results
-            ArrayList<TwitchUser> queue = new ArrayList<>();
+            var queue = new ArrayList<TwitchUser>();
             while (resultSet.next()) queue.add(inflateTwitchUser(resultSet.getBytes("user")));
 
             // Close resources

@@ -2,14 +2,11 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.helix.TwitchHelix;
 
-import de.MCmoderSD.enums.ImageFormat;
 import de.MCmoderSD.enums.UserImageType;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.sql.Driver;
-import tools.jackson.databind.JsonNode;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import static de.MCmoderSD.enums.ImageFormat.getFormat;
@@ -22,13 +19,13 @@ import static java.util.UUID.fromString;
 void main() {
 
     // OAuth Token
-    String oauthToken = "OAUTH_TOKEN"; // Replace with your actual OAuth token
+    var oauthToken = "OAUTH_TOKEN"; // Replace with your actual OAuth token
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().loadResource("/Database.json");
+    var config = JsonUtility.getInstance().loadResource("/Database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(SQL.builder()
+    var sql = new SQL(SQL.builder()
             .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
@@ -38,17 +35,17 @@ void main() {
     );
 
     // Initialize Helix
-    TwitchHelix helix = TwitchClientBuilder.builder()
+    var helix = TwitchClientBuilder.builder()
             .withDefaultAuthToken(new OAuth2Credential("twitch", oauthToken))
             .withEnableHelix(true)
             .build()
             .getHelix();
 
     // Get User IDs from Database
-    HashSet<Integer> ids = sql.getAllUserIds();
+    var ids = sql.getAllUserIds();
 
     // Fetch Users
-    HashSet<TwitchUser> users = fetchUsersByID(ids, helix);
+    var users = fetchUsersByID(ids, helix);
     IO.println("Fetched users: " + users.size());
 
     // Update Database
@@ -140,7 +137,7 @@ private static class SQL extends Driver {
             var uuid = asBytes(fromString(imageUrl.substring(47, 83)));
 
             // Check if image is already downloaded
-            PreparedStatement checkStatement = connection.prepareStatement(
+            var checkStatement = connection.prepareStatement(
                     "SELECT COUNT(uuid) AS count FROM UserImage WHERE uuid = ?;"
             );
 
@@ -160,7 +157,7 @@ private static class SQL extends Driver {
             // Variables
             byte[] imageData;
             byte[] compressedData;
-            ImageFormat imageFormat = getFormat(imageUrl);
+            var imageFormat = getFormat(imageUrl);
 
             // Download Image
             try (var bis = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
@@ -177,7 +174,7 @@ private static class SQL extends Driver {
             var compressed = compressedData.length;
 
             // Insert into database
-            PreparedStatement insertStatement = connection.prepareStatement(
+            var insertStatement = connection.prepareStatement(
                     "INSERT IGNORE INTO UserImage (uuid, id, url, size, totalSize, type, format, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
             );
 
@@ -210,12 +207,12 @@ private static class SQL extends Driver {
             if (user == null) throw new IllegalArgumentException("TwitchUser cannot be null");
 
             // Variables
-            byte[] data = deflateObject(user);
-            String profileImageUrl = user.getProfileImageUrl();
-            String offlineImageUrl = user.getOfflineImageUrl();
+            var data = deflateObject(user);
+            var profileImageUrl = user.getProfileImageUrl();
+            var offlineImageUrl = user.getOfflineImageUrl();
 
             // Prepare the SQL statement
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            var preparedStatement = connection.prepareStatement(
                     "UPDATE User SET username = ?, displayName = ?, type = ?, broadcasterType = ?, user = ? WHERE id = ?;"
             );
 
@@ -247,7 +244,7 @@ private static class SQL extends Driver {
         try {
 
             // Prepare the SQL statement
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            var preparedStatement = connection.prepareStatement(
                     "SELECT id FROM User;"
             );
 
@@ -255,7 +252,7 @@ private static class SQL extends Driver {
             var resultSet = preparedStatement.executeQuery();
 
             // Prepare result set
-            HashSet<Integer> userIds = new HashSet<>();
+            var userIds = new HashSet<Integer>();
 
             // Process the results
             while (resultSet.next()) userIds.add(resultSet.getInt("id"));

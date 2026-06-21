@@ -61,14 +61,14 @@ public class LurkHandler {
             var channel = event.getChannel();
 
             // Check for lurk command
-            String message = event.getMessage().toLowerCase();
+            var message = event.getMessage().toLowerCase();
             for (var command : lurkCommands) if (command.contains(message)) return;
 
             // Skip if user not in lurk list
             if (!lurkList.containsKey(user)) return;
 
             // Check if user is a traitor
-            boolean isTraitor = !lurkList.get(user).equals(channel);
+            var isTraitor = !lurkList.get(user).equals(channel);
 
             // If user is a traitor but already marked as one, do nothing
             if (isTraitor && traitorList.contains(user)) return;
@@ -80,7 +80,7 @@ public class LurkHandler {
                 lurkManager.addTraitor(user);
 
                 // Get Message Event
-                MessageEvent lurkEvent = lurkManager.getLurkEvent(user);
+                var lurkEvent = lurkManager.getLurkEvent(user);
 
                 // Show traitor message
                 twitchBot.sendMessage(lurkEvent, "Lurk-Traitor", tagUser(user) + " ist ein dreckiger Verräter, hab den Kek gerade im Chat von " + tagUser(channel) + " gesehen! YEPP");
@@ -88,7 +88,7 @@ public class LurkHandler {
             } else {
 
                 // Get start time
-                Timestamp startTime = lurkManager.getLurkTime(user);
+                var startTime = lurkManager.getLurkTime(user);
 
                 // Remove from lurk list
                 lurkList.remove(user);
@@ -128,64 +128,64 @@ public class LurkHandler {
     private static String formatLurkTime(Timestamp startTime) {
 
         // Constants
-        String PATTERN = " %s, ";
-        String YEARS = "Jahre";
-        String YEAR = "Jahr";
-        String MONTHS = "Monate";
-        String MONTH = "Monat";
-        String WEEKS = "Wochen";
-        String WEEK = "Woche";
-        String DAYS = "Tage";
-        String DAY = "Tag";
-        String HOURS = "Stunden";
-        String HOUR = "Stunde";
-        String MINUTES = "Minuten";
-        String MINUTE = "Minute";
-        String SECONDS = "Sekunden";
-        String SECOND = "Sekunde";
+        var PATTERN = " %s, ";
+        var YEARS = "Jahre";
+        var YEAR = "Jahr";
+        var MONTHS = "Monate";
+        var MONTH = "Monat";
+        var WEEKS = "Wochen";
+        var WEEK = "Woche";
+        var DAYS = "Tage";
+        var DAY = "Tag";
+        var HOURS = "Stunden";
+        var HOUR = "Stunde";
+        var MINUTES = "Minuten";
+        var MINUTE = "Minute";
+        var SECONDS = "Sekunden";
+        var SECOND = "Sekunde";
 
         // Variables
-        StringBuilder response = new StringBuilder();
+        var response = new StringBuilder();
         var time = System.currentTimeMillis() - startTime.getTime();
 
         // Years
-        long years = time / 31536000000L;
+        var years = time / 31536000000L;
         time %= 31536000000L;
         if (years > 1) response.append(years).append(PATTERN.formatted(YEARS));
         else if (years > 0) response.append(years).append(PATTERN.formatted(YEAR));
 
         // Months
-        long months = time / 2592000000L;
+        var months = time / 2592000000L;
         time %= 2592000000L;
         if (months > 1) response.append(months).append(PATTERN.formatted(MONTHS));
         else if (months > 0) response.append(months).append(PATTERN.formatted(MONTH));
 
         // Weeks
-        long weeks = time / 604800000L;
+        var weeks = time / 604800000L;
         time %= 604800000L;
         if (weeks > 1) response.append(weeks).append(PATTERN.formatted(WEEKS));
         else if (weeks > 0) response.append(weeks).append(PATTERN.formatted(WEEK));
 
         // Days
-        long days = time / 86400000L;
+        var days = time / 86400000L;
         time %= 86400000L;
         if (days > 1) response.append(days).append(PATTERN.formatted(DAYS));
         else if (days > 0) response.append(days).append(PATTERN.formatted(DAY));
 
         // Hours
-        long hours = time / 3600000L;
+        var hours = time / 3600000L;
         time %= 3600000L;
         if (hours > 1) response.append(hours).append(PATTERN.formatted(HOURS));
         else if (hours > 0) response.append(hours).append(PATTERN.formatted(HOUR));
 
         // Minutes
-        long minutes = time / 60000L;
+        var minutes = time / 60000L;
         time %= 60000L;
         if (minutes > 1) response.append(minutes).append(PATTERN.formatted(MINUTES));
         else if (minutes > 0) response.append(minutes).append(PATTERN.formatted(MINUTE));
 
         // Seconds
-        long seconds = time / 1000L;
+        var seconds = time / 1000L;
         if (seconds > 1) response.append(seconds).append(PATTERN.formatted(SECONDS));
         else if (seconds > 0) response.append(seconds).append(PATTERN.formatted(SECOND));
 

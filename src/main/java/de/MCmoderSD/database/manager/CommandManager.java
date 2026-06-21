@@ -3,7 +3,6 @@ package de.MCmoderSD.database.manager;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.objects.MessageEvent;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -38,15 +37,15 @@ public class CommandManager {
                 if (response == null || response.isBlank()) throw new IllegalArgumentException("Invalid response");
 
                 // Variables
-                byte[] contentHash = xxHash64(response);                            // Response Content Hash
-                byte[] uuid = asBytes(UUID.randomUUID());                           // Random UUID
-                Timestamp firedAt = new Timestamp(System.currentTimeMillis());      // Current Timestamp
+                var contentHash = xxHash64(response);                       // Response Content Hash
+                var uuid = asBytes(UUID.randomUUID());                      // Random UUID
+                var firedAt = new Timestamp(System.currentTimeMillis());    // Current Timestamp
 
                 // Ensure the original message is logged
                 database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert message event
-                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
+                var insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO ResponseMessage (id, firedAt, channelId, userId, command, content, messageId) VALUES (?, ?, ?, ?, ?, ?, ?);"
                 );
 
@@ -82,13 +81,13 @@ public class CommandManager {
                 if (args == null) throw new IllegalArgumentException("Arguments cannot be null");
 
                 // Variables
-                Timestamp firedAt = new Timestamp(System.currentTimeMillis());
+                var firedAt = new Timestamp(System.currentTimeMillis());
 
                 // Ensure the original message is logged
                 database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert command event
-                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
+                var insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO CommandLog (messageId, firedAt, channelId, userId, command, args) VALUES (?, ?, ?, ?, ?, ?);"
                 );
 

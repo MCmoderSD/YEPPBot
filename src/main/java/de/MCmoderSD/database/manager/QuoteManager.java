@@ -42,7 +42,7 @@ public class QuoteManager {
             var resultSet = getQuotesStatement.executeQuery();
 
             // Process the results
-            LinkedHashMap<Integer, String> quotes = new LinkedHashMap<>();
+            var quotes = new LinkedHashMap<Integer, String>();
             while (resultSet.next()) quotes.put(
                     resultSet.getInt("id"),         // Quote ID
                     resultSet.getString("quote")    // Quote Text

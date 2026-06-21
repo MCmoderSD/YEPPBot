@@ -1,6 +1,5 @@
 package de.MCmoderSD.core;
 
-import com.github.philippheuer.credentialmanager.CredentialManager;
 import com.github.philippheuer.credentialmanager.CredentialManagerBuilder;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.core.EventManager;
@@ -59,7 +58,6 @@ import org.jetbrains.annotations.Nullable;
 import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import static com.github.twitch4j.chat.util.TwitchChatLimitHelper.*;
@@ -155,16 +153,16 @@ public class TwitchBot {
         quoteManager = database.getQuoteManager();
 
         // Parse Config
-        JsonNode applicationConfig = twitchConfig.get("application");
-        JsonNode credentialConfig = applicationConfig.get("credentials");
-        String oauthToken = twitchConfig.get("oauthToken").asString();
-        String clientId = credentialConfig.get("clientId").asString();
-        String clientSecret = credentialConfig.get("clientSecret").asString();
+        var applicationConfig = twitchConfig.get("application");
+        var credentialConfig = applicationConfig.get("credentials");
+        var oauthToken = twitchConfig.get("oauthToken").asString();
+        var clientId = credentialConfig.get("clientId").asString();
+        var clientSecret = credentialConfig.get("clientSecret").asString();
 
         // Initialize Twitch Client Builder
-        TwitchClientBuilder clientBuilder = TwitchClientBuilder.builder();
-        OAuth2Credential defaultAuthToken = new OAuth2Credential(PROVIDER, oauthToken);
-        CredentialManager credentialManager = CredentialManagerBuilder.builder().build();
+        var clientBuilder = TwitchClientBuilder.builder();
+        var defaultAuthToken = new OAuth2Credential(PROVIDER, oauthToken);
+        var credentialManager = CredentialManagerBuilder.builder().build();
 
         // Configure Application
         clientBuilder = clientBuilder
@@ -243,12 +241,12 @@ public class TwitchBot {
         new Weather(this);
 
         // Add Initial Channels from Config to Database
-        HashSet<TwitchUser> configChannels = obtainChannels(twitchConfig.get("channel"), userHandler);
+        var configChannels = obtainChannels(twitchConfig.get("channel"), userHandler);
         for (var channel : configChannels) channelManager.joinChannel(channel);
         channelManager.joinChannel(botUser); // Ensure Bot Joins Its Own Channel
 
         // Obtain Channels from Database
-        HashMap<TwitchUser, Boolean> channels = channelManager.getChannels();
+        var channels = channelManager.getChannels();
 
         // Join with Rate Limit Handling
         var delay = round((((double) USER_JOIN_LIMIT.getRefillPeriodNanos() / (double) USER_JOIN_LIMIT.getCapacity()) * 1.1d) / 1_000_000d); // Delay in ms with 10% buffer
@@ -274,11 +272,11 @@ public class TwitchBot {
         if (defaultAuthToken == null) throw new IllegalArgumentException("Default Auth Token cannot be null");
 
         // Initialize Temporary Helix Client
-        TwitchHelix tempHelix = TwitchClientBuilder.builder().withEnableHelix(true).build().getHelix();
+        var tempHelix = TwitchClientBuilder.builder().withEnableHelix(true).build().getHelix();
 
         // Parse Owners
-        HashSet<Integer> ownerIds = new HashSet<>();
-        HashSet<String> ownerNames = new HashSet<>();
+        var ownerIds = new HashSet<Integer>();
+        var ownerNames = new HashSet<String>();
         for (var owner : ownerArray) {
             if (owner == null || owner.isNull()) throw new IllegalArgumentException("Owner ID/Name cannot be null or empty");
             if (owner.isInt()) ownerIds.add(owner.asInt());
@@ -287,8 +285,8 @@ public class TwitchBot {
         }
 
         // Batch Owner IDs
-        HashSet<HashSet<Integer>> idBatches = new HashSet<>();
-        HashSet<Integer> currentBatch = new HashSet<>();
+        var idBatches = new HashSet<HashSet<Integer>>();
+        var currentBatch = new HashSet<Integer>();
         for (var id : ownerIds) {
             currentBatch.add(id);
             if (currentBatch.size() == 100) {
@@ -299,8 +297,8 @@ public class TwitchBot {
         idBatches.add(currentBatch);
 
         // Batch Owner Names
-        HashSet<HashSet<String>> nameBatches = new HashSet<>();
-        HashSet<String> currentNameBatch = new HashSet<>();
+        var nameBatches = new HashSet<HashSet<String>>();
+        var currentNameBatch = new HashSet<String>();
         for (var name : ownerNames) {
             currentNameBatch.add(name);
             if (currentNameBatch.size() == 100) {
@@ -311,7 +309,7 @@ public class TwitchBot {
         nameBatches.add(currentNameBatch);
 
         // Fetch Owners by ID
-        HashSet<TwitchUser> fetchedIdOwners = new HashSet<>();
+        var fetchedIdOwners = new HashSet<TwitchUser>();
         for (var idBatch : idBatches) {
             if (idBatch.isEmpty()) continue;
             var userList = tempHelix.getUsers(defaultAuthToken.getAccessToken(), idBatch.stream().map(Object::toString).toList(), null).execute();
@@ -322,7 +320,7 @@ public class TwitchBot {
         }
 
         // Fetch Owners by Name
-        HashSet<TwitchUser> fetchedNameOwners = new HashSet<>();
+        var fetchedNameOwners = new HashSet<TwitchUser>();
         for (var nameBatch : nameBatches) {
             if (nameBatch.isEmpty()) continue;
             var userList = tempHelix.getUsers(defaultAuthToken.getAccessToken(), null, nameBatch.stream().toList()).execute();
@@ -333,13 +331,13 @@ public class TwitchBot {
         }
 
         // Combine Fetched Owners
-        HashSet<TwitchUser> owners = new HashSet<>();
+        var owners = new HashSet<TwitchUser>();
         owners.addAll(fetchedNameOwners);
         owners.addAll(fetchedIdOwners);
 
         // Log Missing Owners
         for (var id : ownerIds) {
-            boolean found = false;
+            var found = false;
             for (var owner : owners) {
                 if (owner.getId().equals(id)) {
                     found = true;
@@ -350,7 +348,7 @@ public class TwitchBot {
         }
 
         for (var name : ownerNames) {
-            boolean found = false;
+            var found = false;
             for (var owner : owners) {
                 if (owner.getUsername().equalsIgnoreCase(name)) {
                     found = true;
@@ -371,8 +369,8 @@ public class TwitchBot {
         if (userHandler == null) throw new IllegalArgumentException("UserHandler cannot be null");
 
         // Parse channels
-        HashSet<Integer> channelIds = new HashSet<>();
-        HashSet<String> channelNames = new HashSet<>();
+        var channelIds = new HashSet<Integer>();
+        var channelNames = new HashSet<String>();
         for (var channel : channelArray) {
             if (channel.isNumber()) channelIds.add(channel.asInt());
             else if (channel.isString()) channelNames.add(channel.asString().toLowerCase());
@@ -380,17 +378,17 @@ public class TwitchBot {
         }
 
         // Fetch Channels
-        HashSet<TwitchUser> fetchedIdChannels = channelIds.isEmpty() ? new HashSet<>() : userHandler.getTwitchUsers(channelIds);
-        HashSet<TwitchUser> fetchedNameChannels = channelNames.isEmpty() ? new HashSet<>() : userHandler.getTwitchUsersByName(channelNames);
+        var fetchedIdChannels = channelIds.isEmpty() ? new HashSet<TwitchUser>() : userHandler.getTwitchUsers(channelIds);
+        var fetchedNameChannels = channelNames.isEmpty() ? new HashSet<TwitchUser>() : userHandler.getTwitchUsersByName(channelNames);
 
         // Combine Fetched Channels
-        HashSet<TwitchUser> channels = new HashSet<>();
+        var channels = new HashSet<TwitchUser>();
         channels.addAll(fetchedNameChannels);
         channels.addAll(fetchedIdChannels);
 
         // Log Missing Channels
         for (var id : channelIds) {
-            boolean found = false;
+            var found = false;
             for (var channel : channels) {
                 if (channel.getId().equals(id)) {
                     found = true;
@@ -401,7 +399,7 @@ public class TwitchBot {
         }
 
         for (var name : channelNames) {
-            boolean found = false;
+            var found = false;
             for (var channel : channels) {
                 if (channel.getUsername().equalsIgnoreCase(name)) {
                     found = true;
@@ -426,7 +424,7 @@ public class TwitchBot {
 
         // Join Channel
         chat.joinChannel(channel.getUsername());
-        boolean success = isChannelJoined(channel);
+        var success = isChannelJoined(channel);
 
         // Log
         if (success) {
@@ -458,7 +456,7 @@ public class TwitchBot {
 
         // Leave Channel
         chat.leaveChannel(channel.getUsername());
-        boolean success = !isChannelJoined(channel);
+        var success = !isChannelJoined(channel);
 
         // Log
         if (success) {
@@ -493,14 +491,14 @@ public class TwitchBot {
         if (message.isBlank() || message.length() > 500) return false;
 
         // Get Channel
-        boolean oldEvent = System.currentTimeMillis() - event.getFiredAt().toEpochMilli() > 60000;
-        TwitchUser channel = oldEvent ? userHandler.getTwitchUser(event.getChannel().getId()) : event.getChannel();
+        var oldEvent = System.currentTimeMillis() - event.getFiredAt().toEpochMilli() > 60000;
+        var channel = oldEvent ? userHandler.getTwitchUser(event.getChannel().getId()) : event.getChannel();
 
         // Check Channel
         if (!isChannelJoined(channel)) if (!joinChannel(channel)) return false;
 
         // Send Message
-        boolean success = chat.sendMessage(channel.getUsername(), message);
+        var success = chat.sendMessage(channel.getUsername(), message);
 
         // Log Message
         if (success) {
@@ -508,7 +506,7 @@ public class TwitchBot {
 
             // Insert Message and Related Data
             if (messageManager.insertMessage(message) && openAI != null) {
-                String finalMessage = message;
+                var finalMessage = message;
                 new Thread(() -> messageManager.insertRating(openAI.moderations().create(finalMessage))).start();
                 new Thread(() -> messageManager.insertEmbedding(openAI.embeddings().create(finalMessage))).start();
             }

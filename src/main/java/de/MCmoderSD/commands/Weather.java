@@ -27,11 +27,11 @@ public class Weather extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Weather [city], [language]";
+        var syntax = "Syntax: " + prefix + "Weather [city], [language]";
 
         // About
-        String[] name = { "Weather", "Wetter", "Wetterbericht" };
-        String description = "Zeigt den aktuellen Wetterbericht an. " + syntax;
+        var name = new String[]{ "Weather", "Wetter", "Wetterbericht" };
+        var description = "Zeigt den aktuellen Wetterbericht an. " + syntax;
 
         // Attributes
         ChatService service;
@@ -59,7 +59,7 @@ public class Weather extends CommandBuilder {
                 .build(openAI);
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
@@ -68,12 +68,12 @@ public class Weather extends CommandBuilder {
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, "Bitte gib eine Stadt an. " + syntax);
 
                 // Parse City and Language
-                String argsString = String.join(SPACE, args);
-                String[] parts =  argsString.split(",", 2);
+                var argsString = String.join(SPACE, args);
+                var parts =  argsString.split(",", 2);
 
                 // Trim inputs
-                String city = parts[0].trim();
-                String language = parts.length > 1 ? parts[1].trim() : "German";
+                var city = parts[0].trim();
+                var language = parts.length > 1 ? parts[1].trim() : "German";
 
                 // Fetch Weather Data
                 String weatherData;
@@ -86,7 +86,7 @@ public class Weather extends CommandBuilder {
                 }
 
                 // Generate Response with ChatGPT
-                String response = service.create("Please answer in " + language + ": " + weatherData).getContent();
+                var response = service.create("Please answer in " + language + ": " + weatherData).getContent();
 
                 // Send Message
                 return twitchBot.sendMessage(event, name, response);
@@ -98,7 +98,7 @@ public class Weather extends CommandBuilder {
 
     // Helper method to format weather data into a concise plain text string
     private static String formatWeatherResponse(de.MCmoderSD.openweathermap.data.Weather weather) {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         sb.append("city=").append(weather.getCity()).append("\n");
         sb.append("weather=").append(weather.getTitle()).append("\n");
         sb.append("description=").append(weather.getDescription()).append("\n");

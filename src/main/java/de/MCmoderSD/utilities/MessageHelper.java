@@ -59,18 +59,17 @@ public class MessageHelper {
         if (message.isBlank()) return EMPTY;
 
         // Remove unwanted characters
-        do {
-            message = message.replaceAll(REGEX_PATTERN, SPACE);
-        } while (message.matches(REGEX_PATTERN));
+        do message = message.replaceAll(REGEX_PATTERN, SPACE);
+        while (message.matches(REGEX_PATTERN));
 
         // Trim Message
-        while (message.contains(BREAK)) message = message.replaceAll(BREAK, SPACE);
+        while (message.contains(BREAK)) message = message.replace(BREAK, SPACE);
         while (message.startsWith(BREAK)) message = message.substring(1);
         while (message.endsWith(BREAK)) message  = message.substring(0, message.length() - 1);
-        while (message.contains(TAB))  message = message.replaceAll(TAB, SPACE);
+        while (message.contains(TAB))  message = message.replace(TAB, SPACE);
         while (message.startsWith(TAB)) message = message.substring(1);
         while (message.endsWith(TAB)) message = message.substring(0, message.length() - 1);
-        while (message.contains(SPACE + SPACE)) message = message.replaceAll(SPACE + SPACE, SPACE);
+        while (message.contains(SPACE + SPACE)) message = message.replace(SPACE + SPACE, SPACE);
         while (message.startsWith(SPACE)) message = message.substring(1);
         while (message.endsWith(SPACE)) message = message.substring(0, message.length() - 1);
         if (message.isBlank()) return EMPTY;
@@ -107,8 +106,8 @@ public class MessageHelper {
         if (isWhitespace(lastChar)) removeDuplicateSpaces(message.substring(0, message.length() - 1));
 
         // Loop to remove duplicate spaces
-        char[] messageChars = message.toCharArray();
-        char[] result = new char[messageChars.length];
+        var messageChars = message.toCharArray();
+        var result = new char[messageChars.length];
         result[0] = messageChars[0];
         for (var i = 1; i < messageChars.length; i++) {
             if (isWhitespace(messageChars[i]) && isWhitespace(messageChars[i - 1])) continue;
@@ -129,7 +128,7 @@ public class MessageHelper {
 
         // Format YEPP
         content = content.replaceAll("(?i)\\byepp\\b[!.,?]*", YEPP);
-        while (content.contains(YEPP + SPACE + YEPP)) content = content.replaceAll(YEPP + SPACE + YEPP, YEPP);
+        while (content.contains(YEPP + SPACE + YEPP)) content = content.replace(YEPP + SPACE + YEPP, YEPP);
 
         // Normalize Content
         content = normalizeMessage(content);

@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     pull_policy: always
     ports:
-      - "6767:80/tcp" # HTTP
+      - "80:80/tcp" # HTTP
       - "420:420/tcp" # HTTPS
     volumes:
       - ./config.json:/app/config.json

@@ -5,7 +5,6 @@ import de.MCmoderSD.objects.FollowEvent;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.objects.RaidEvent;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -35,7 +34,7 @@ public class EventLogManager {
         try {
 
             // Prepare the query
-            PreparedStatement checkStatement = database.getConnection().prepareStatement(
+            var checkStatement = database.getConnection().prepareStatement(
                     "SELECT COUNT(*) FROM MessageEvent WHERE id = ?;"
             );
 
@@ -69,7 +68,7 @@ public class EventLogManager {
                 if (event == null) throw new IllegalArgumentException("MessageEvent cannot be null");
 
                 // Insert message event
-                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
+                var insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO MessageEvent (id, firedAt, channelId, userId, content, deviceType, subTier, subMonths, action, highlighted, firstMessage, userIntroduction, skipSubsModeMessage, event) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
                 );
 
@@ -110,7 +109,7 @@ public class EventLogManager {
                 if (event == null) throw new IllegalArgumentException("RaidEvent cannot be null");
 
                 // Insert raid event
-                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
+                var insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO RaidEvent (id, firedAt, channelId, userId, viewers, event) VALUES (?, ?, ?, ?, ?, ?);"
                 );
 
@@ -143,10 +142,10 @@ public class EventLogManager {
                 if (event == null) throw new IllegalArgumentException("FollowEvent cannot be null");
 
                 // Variables
-                byte[] eventData = deflateObject(event);
+                var eventData = deflateObject(event);
 
                 // Insert raid event
-                PreparedStatement insertEventStatement = database.getConnection().prepareStatement(
+                var insertEventStatement = database.getConnection().prepareStatement(
                         "INSERT INTO FollowEvent (followedAt, channelId, userId, event) VALUES (?, ?, ?, ?);"
                 );
 

@@ -1,7 +1,6 @@
 package de.MCmoderSD.enums;
 
 import de.MCmoderSD.json.JsonUtility;
-import tools.jackson.databind.JsonNode;
 
 import java.io.Serializable;
 import java.time.MonthDay;
@@ -43,7 +42,7 @@ public enum ZodiacSign implements Serializable {
     static {
 
         // Load match list from JSON file
-        JsonNode matchList = JsonUtility.getInstance().loadResource("/assets/matchList.json");
+        var matchList = JsonUtility.getInstance().loadResource("/assets/matchList.json");
 
         // Populate matches for each zodiac sign
         for (var sign : ZodiacSign.values()) {

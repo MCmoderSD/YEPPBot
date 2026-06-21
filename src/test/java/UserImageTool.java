@@ -4,9 +4,6 @@ import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.sql.Driver;
 
-import tools.jackson.databind.JsonNode;
-
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import static de.MCmoderSD.tools.GZIP.*;
@@ -20,10 +17,10 @@ import static java.util.UUID.fromString;
 void main() {
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().loadResource("/Database.json");
+    var config = JsonUtility.getInstance().loadResource("/Database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(SQL.builder()
+    var sql = new SQL(SQL.builder()
             .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
@@ -33,7 +30,7 @@ void main() {
     );
 
     // Get Users
-    HashSet<TwitchUser> users = sql.getTwitchUsers();
+    var users = sql.getTwitchUsers();
     IO.println("Total Users: " + users.size());
 
     // Download Profile and Offline Images
@@ -68,7 +65,7 @@ private static class SQL extends Driver {
         try {
 
             // User Table
-            PreparedStatement userTable = connection.prepareStatement(
+            var userTable = connection.prepareStatement(
                     """
                         # User Table Definition
                         CREATE TABLE IF NOT EXISTS User (
@@ -87,7 +84,7 @@ private static class SQL extends Driver {
             );
 
             // UserImage Table
-            PreparedStatement userImageTable = connection.prepareStatement(
+            var userImageTable = connection.prepareStatement(
                         """
                         # UserImage Table Definition
                         CREATE TABLE IF NOT EXISTS UserImage (
@@ -126,7 +123,7 @@ private static class SQL extends Driver {
         try {
 
             // Get all users
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            var preparedStatement = connection.prepareStatement(
                     "SELECT username, user FROM  User"
             );
 
@@ -134,7 +131,7 @@ private static class SQL extends Driver {
             var resultSet = preparedStatement.executeQuery();
 
             // Process results
-            HashSet<TwitchUser> users = new HashSet<>();
+            var users = new HashSet<TwitchUser>();
             while (resultSet.next()) users.add(inflateTwitchUser(resultSet.getBytes("user")));
 
             // Close resources
@@ -158,7 +155,7 @@ private static class SQL extends Driver {
                 var uuid = asBytes(fromString(imageUrl.substring(47, 83)));
 
                 // Check if image is already downloaded
-                PreparedStatement checkStatement = connection.prepareStatement(
+                var checkStatement = connection.prepareStatement(
                         "SELECT COUNT(uuid) AS count FROM UserImage WHERE uuid = ?;"
                 );
 
@@ -178,7 +175,7 @@ private static class SQL extends Driver {
                 // Variables
                 byte[] imageData;
                 byte[] compressedData;
-                ImageFormat imageFormat = getFormat(imageUrl);
+                var imageFormat = getFormat(imageUrl);
 
                 // Download Image
                 try (var bis = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
@@ -195,7 +192,7 @@ private static class SQL extends Driver {
                 var compressed = compressedData.length;
 
                 // Insert into database
-                PreparedStatement insertStatement = connection.prepareStatement(
+                var insertStatement = connection.prepareStatement(
                         "INSERT INTO UserImage (uuid, id, url, size, totalSize, type, format, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
                 );
 
@@ -226,7 +223,7 @@ private static class SQL extends Driver {
         try {
 
             // Get all images
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            var preparedStatement = connection.prepareStatement(
                     "SELECT i.image, u.user, i.uuid, i.type, i.format FROM UserImage i, User u WHERE i.id = u.id;"
             );
 
@@ -234,9 +231,9 @@ private static class SQL extends Driver {
             var resultSet = preparedStatement.executeQuery();
 
             // Create directories
-            File dir = new File("UserImages/");
-            File profileDir = new File(dir, "Profile/");
-            File offlineDir = new File(dir, "Offline/");
+            var dir = new File("UserImages/");
+            var profileDir = new File(dir, "Profile/");
+            var offlineDir = new File(dir, "Offline/");
             if (!profileDir.exists()) profileDir.mkdirs();
             if (!offlineDir.exists()) offlineDir.mkdirs();
 
@@ -245,14 +242,14 @@ private static class SQL extends Driver {
                 try {
 
                     // Get Data
-                    byte[] imageData = inflate(resultSet.getBytes("image"));
-                    TwitchUser user = inflateTwitchUser(resultSet.getBytes("user"));
-                    UUID uuid = fromString(resultSet.getString("uuid"));
-                    UserImageType imageType = UserImageType.valueOf(resultSet.getString("type"));
-                    ImageFormat imageFormat = ImageFormat.valueOf(resultSet.getString("format"));
+                    var imageData = inflate(resultSet.getBytes("image"));
+                    var user = inflateTwitchUser(resultSet.getBytes("user"));
+                    var uuid = fromString(resultSet.getString("uuid"));
+                    var imageType = UserImageType.valueOf(resultSet.getString("type"));
+                    var imageFormat = ImageFormat.valueOf(resultSet.getString("format"));
 
                     // Create file
-                    File imageFile = switch (imageType) {
+                    var imageFile = switch (imageType) {
                         case PROFILE -> new File(profileDir, user.getDisplayName() + "_" + uuid + "." + imageFormat.name().toLowerCase());
                         case OFFLINE -> new File(offlineDir, user.getDisplayName() + "_" + uuid + "." + imageFormat.name().toLowerCase());
                     };

@@ -9,7 +9,6 @@ import de.MCmoderSD.helix.handler.ChatHandler;
 import de.MCmoderSD.helix.handler.RoleHandler;
 import de.MCmoderSD.helix.handler.StreamHandler;
 import de.MCmoderSD.helix.handler.UserHandler;
-import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 
 import java.util.ArrayList;
@@ -25,14 +24,14 @@ public class Moderate extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Moderate <join/leave|authenticate|block/unblock> [Befehl] [Benutzer]";
+        var syntax = "Syntax: " + prefix + "Moderate <join/leave|authenticate|block/unblock> [Befehl] [Benutzer]";
 
         // About
-        String[] name = { "Moderate", "Mod", "Moderrate", "Modderate", "Modderrate" };
-        String description = "Ändert die Einstellungen des Bots. " + syntax;
+        var name = new String[]{ "Moderate", "Mod", "Moderrate", "Modderate", "Modderrate" };
+        var description = "Ändert die Einstellungen des Bots. " + syntax;
 
         // Scope Array
-        Scope[] scopes = new ArrayList<>(Arrays.asList(
+        var scopes = new ArrayList<>(Arrays.asList(
                 UserHandler.REQUIRED_SCOPES,
                 ChatHandler.REQUIRED_SCOPES,
                 RoleHandler.REQUIRED_SCOPES,
@@ -46,7 +45,7 @@ public class Moderate extends CommandBuilder {
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
@@ -60,7 +59,7 @@ public class Moderate extends CommandBuilder {
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, syntax);
 
                 // Get Action
-                String action = args.getFirst().toLowerCase();
+                var action = args.getFirst().toLowerCase();
                 if (!Arrays.asList("join", "leave", "block", "unblock", "authenticate", "auth", "oauth").contains(action)) return twitchBot.sendMessage(event, name, syntax);
 
                 // Authenticate Action
@@ -82,9 +81,9 @@ public class Moderate extends CommandBuilder {
                     }
 
                     // Parse Target Channel
-                    String targetChannelName = args.get(1);
+                    var targetChannelName = args.get(1);
                     while (targetChannelName.startsWith("@")) targetChannelName = targetChannelName.substring(1);
-                    TwitchUser targetChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
+                    var targetChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
 
                     // Validate Target Channel
                     if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal @" + targetChannelName + " nicht gefunden. YEPP");
@@ -113,7 +112,7 @@ public class Moderate extends CommandBuilder {
                     if (argsSize < 2) return twitchBot.sendMessage(event, name, syntax);
 
                     // Get Command/Channel to Block/Unblock
-                    String command = args.get(1).toLowerCase();
+                    var command = args.get(1).toLowerCase();
 
                     if (argsSize == 2) {
 
@@ -134,9 +133,9 @@ public class Moderate extends CommandBuilder {
                     }
 
                     // Parse Target Channel
-                    String targetChannelName = args.get(2);
+                    var targetChannelName = args.get(2);
                     while (targetChannelName.startsWith("@")) targetChannelName = targetChannelName.substring(1);
-                    TwitchUser targetChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
+                    var targetChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
 
                     // Validate Target Channel
                     if (targetChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal '" + targetChannelName + "' nicht gefunden. YEPP");

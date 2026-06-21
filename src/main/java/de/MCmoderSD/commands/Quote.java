@@ -18,20 +18,20 @@ public class Quote extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Quote <add|delete|edit|last> <number>";
+        var syntax = "Syntax: " + prefix + "Quote <add|delete|edit|last> <number>";
 
         // About
-        String[] name = {"Quote", "Qoute", "Zitat", "Gänsehosen"};
-        String description = "Verwaltet Zitate im Chat. " + syntax;
+        var name = new String[]{"Quote", "Qoute", "Zitat", "Gänsehosen"};
+        var description = "Verwaltet Zitate im Chat. " + syntax;
 
         // Responses
-        String noQuotesFound = "No quotes found!";
-        String invalidQuoteID = "Invalid quote ID";
-        String quoteDoesNotExist = "Quote does not exist!";
-        String invalidArgs = "See Syntax: " + syntax;
+        var noQuotesFound = "No quotes found!";
+        var invalidQuoteID = "Invalid quote ID";
+        var quoteDoesNotExist = "Quote does not exist!";
+        var invalidArgs = "See Syntax: " + syntax;
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
@@ -58,8 +58,8 @@ public class Quote extends CommandBuilder {
                 }
 
                 // Action
-                String action = args.getFirst().toLowerCase();
-                String response = invalidArgs;
+                var action = args.getFirst().toLowerCase();
+                var response = invalidArgs;
 
                 // First or Last Quote
                 if (Arrays.asList("first", "last").contains(action)) {
@@ -69,7 +69,7 @@ public class Quote extends CommandBuilder {
                         case "first": {
                             if (noQuotes) response = noQuotesFound;
                             else {
-                                String quote = quotes.get(0);
+                                var quote = quotes.get(0);
                                 response = String.format("%s, #%d: %s", tagUser(user), 1, quote);
                             }
                             break;
@@ -80,7 +80,7 @@ public class Quote extends CommandBuilder {
                             if (noQuotes) response = noQuotesFound;
                             else {
                                 var lastId = quotes.size() - 1;
-                                String quote = quotes.get(lastId);
+                                var quote = quotes.get(lastId);
                                 response = String.format("%s, #%d: %s", tagUser(user), lastId + 1, quote);
                             }
                             break;
@@ -119,7 +119,7 @@ public class Quote extends CommandBuilder {
 
                     // Add Quote
                     case "add": {
-                        String quote = String.join(SPACE, args.subList(1, args.size()));
+                        var quote = String.join(SPACE, args.subList(1, args.size()));
                         quoteManager.addQuote(quote, channel);
                         response = String.format("Added quote #%d: %s", quotes.size() + 1, quote);
                         break;
@@ -144,7 +144,7 @@ public class Quote extends CommandBuilder {
                     case "update": {
                         if (id == null || id < 0 || id >= quotes.size()) response = quoteDoesNotExist;
                         else {
-                            String quote = String.join(SPACE, args.subList(2, args.size()));
+                            var quote = String.join(SPACE, args.subList(2, args.size()));
                             quoteManager.editQuote(id, quote, channel);
                             response = String.format("Edited quote #%d: %s", id + 1, quote);
                         }

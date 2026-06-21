@@ -4,7 +4,6 @@ import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.database.manager.OpenAIManger;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
-import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.openai.prompts.ChatPrompt;
 import de.MCmoderSD.openai.services.ChatService;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +56,7 @@ public class MessageHandler {
         openAIManger = twitchBot.getOpenAIManger();
 
         // Initialize OpenAI Service
-        OpenAI openAI = twitchBot.getOpenAI();
+        var openAI = twitchBot.getOpenAI();
         if (openAI == null) service = null;
         else service = ChatService.builder()
                 .setModel(GPT_5_4_NANO)
@@ -108,7 +107,7 @@ public class MessageHandler {
         lurkHandler.handleLurk(event);
 
         // Variables
-        String message = event.getMessage();
+        var message = event.getMessage();
 
         // Handle Command
         if (isCommand(message)) return commandHandler.handleCommand(event);
@@ -117,13 +116,13 @@ public class MessageHandler {
         if (mentionsBot(message)) {
 
             // Variables
-            TwitchUser user = event.getUser();
+            var user = event.getUser();
 
             // Check if OpenAI Service Available
             if (service == null) return twitchBot.sendMessage(event, YEPP, tagUser(user) + SPACE + YEPP);
 
             // Create Prompt
-            ChatPrompt prompt = conversations.containsKey(user) ? service.create(message, conversations.get(user)) : service.create(message);
+            var prompt = conversations.containsKey(user) ? service.create(message, conversations.get(user)) : service.create(message);
 
             // Update Conversations
             updateConversation(user, prompt);
@@ -144,7 +143,7 @@ public class MessageHandler {
         if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
         // Check if Conversation needs to be reset due to token limit
-        boolean reset = prompt == null || prompt.getInputTokens() > 16348;
+        var reset = prompt == null || prompt.getInputTokens() > 16348;
 
         // Update Conversations
         if (reset) conversations.remove(user);

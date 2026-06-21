@@ -21,17 +21,17 @@ public class Match extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Match <amount> <language>";
+        var syntax = "Syntax: " + prefix + "Match <amount> <language>";
 
         // About
-        String[] name = { "Match", "Matching" };
-        String description = "Interagiere mit ChatGPT! Sende eine Nachricht, um eine Antwort zu erhalten, oder verwende 'reset', um die Konversation zurückzusetzen. " + syntax;
+        var name = new String[] { "Match", "Matching" };
+        var description = "Interagiere mit ChatGPT! Sende eine Nachricht, um eine Antwort zu erhalten, oder verwende 'reset', um die Konversation zurückzusetzen. " + syntax;
 
         // Check if OpenAI is configured
         if (openAI == null) return;
 
         // Initialize ChatService
-        ChatService service = ChatService.builder()
+        var service = ChatService.builder()
                 .setModel(GPT_5_5)
                 .setReasoningEffort(NONE)
                 .setMaxOutputTokens(120)
@@ -41,7 +41,7 @@ public class Match extends CommandBuilder {
                 .build(openAI);
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
@@ -68,10 +68,10 @@ public class Match extends CommandBuilder {
     private HashMap<TwitchUser, Birthdate> getBirthdays(TwitchUser channel) {
 
         // Variables
-        HashMap<TwitchUser, Birthdate> birthdays = birthdayManager.getBirthdays();
+        var birthdays = birthdayManager.getBirthdays();
 
         // Get Users
-        HashSet<TwitchUser> users = new HashSet<>();
+        var users = new HashSet<TwitchUser>();
         users.addAll(roleHandler.getSubscribers(channel));  // Subscribers
         users.addAll(roleHandler.getModerators(channel));   // Moderators
         users.addAll(roleHandler.getFollowers(channel));    // Followers
@@ -81,7 +81,7 @@ public class Match extends CommandBuilder {
         users.add(channel);                                 // Channel Owner
 
         // Map Birthdays
-        HashMap<TwitchUser, Birthdate> birthdayMap = new HashMap<>();
+        var birthdayMap = new HashMap<TwitchUser, Birthdate>();
         for (var user : users) {
             user = new TwitchUser(user);
             var birthdate = birthdays.get(user);

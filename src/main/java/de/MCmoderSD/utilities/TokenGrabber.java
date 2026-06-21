@@ -28,9 +28,9 @@ public class TokenGrabber {
         if (!validateApplicationConfig(application)) throw new IllegalArgumentException("Invalid Application Config");
 
         // Get Twitch Credentials
-        JsonNode credentials = application.get("credentials");
-        String clientId = credentials.get("clientId").asString();
-        String redirectURL = application.get("oAuthRedirectURL").asString();
+        var credentials = application.get("credentials");
+        var clientId = credentials.get("clientId").asString();
+        var redirectURL = application.get("oAuthRedirectURL").asString();
 
         // Print Credentials
         IO.println("\nTwitch Application Credentials:");
@@ -38,13 +38,13 @@ public class TokenGrabber {
         IO.println(" - OAuth Redirect URL: " + redirectURL);
 
         // Build Scopes
-        StringBuilder scopeBuilder = new StringBuilder();
+        var scopeBuilder = new StringBuilder();
         for (var scope : Scope.values()) scopeBuilder.append(scope.getScope()).append("+");
         scopeBuilder.deleteCharAt(scopeBuilder.length() - 1);
 
         // Load HTML Resource
         String htmlPage;
-        String resourcePath = "/html/TokenGrabber.html";
+        var resourcePath = "/html/TokenGrabber.html";
         try (InputStream stream = HtmlModule.class.getResourceAsStream(resourcePath)) {
             if (stream == null) throw new RuntimeException("Error loading resource: " + resourcePath);
             htmlPage = new String(stream.readAllBytes()).replaceAll("<%clientId%>", clientId);

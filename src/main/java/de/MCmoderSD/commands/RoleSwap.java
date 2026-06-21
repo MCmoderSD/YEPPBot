@@ -17,15 +17,15 @@ public class RoleSwap extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "RoleSwap <Rolle> [Benutzer] [Kanal]";
+        var syntax = "Syntax: " + prefix + "RoleSwap <Rolle> [Benutzer] [Kanal]";
 
         // About
-        String[] name = { "RoleSwap", "RoleChange", "rs" };
-        String description = "Nur für Moderatoren und Administratoren. Ändert die Rolle eines Benutzers. " + syntax;
+        var name = new String[]{ "RoleSwap", "RoleChange", "rs" };
+        var description = "Nur für Moderatoren und Administratoren. Ändert die Rolle eines Benutzers. " + syntax;
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
@@ -75,7 +75,7 @@ public class RoleSwap extends CommandBuilder {
                 } else targetUser = user;
 
                 // Get Role
-                Role role = switch (args.getFirst().toLowerCase()) {
+                var role = switch (args.getFirst().toLowerCase()) {
                     case "moderator", "mod" -> Role.MODERATOR;
                     case "vip" -> Role.VIP;
                     case "viewer", "user", "none" -> Role.VIEWER;

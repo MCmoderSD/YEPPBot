@@ -1,7 +1,6 @@
 package de.MCmoderSD.database;
 
 import de.MCmoderSD.database.manager.*;
-import de.MCmoderSD.enums.ImageFormat;
 import de.MCmoderSD.enums.UserImageType;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.sql.Driver;
@@ -10,7 +9,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -44,16 +42,16 @@ public class Database extends Driver {
         connect();
 
         // Load Table Statements
-        ArrayList<String> userTable = loadTables("database/UserTable.sql");
-        ArrayList<String> channelTable = loadTables("database/ChannelTable.sql");
-        ArrayList<String> messages = loadTables("database/Messages.sql");
-        ArrayList<String> events = loadTables("database/Events.sql");
-        ArrayList<String> ratingTable = loadTables("database/RatingTable.sql");
-        ArrayList<String> birthday = loadTables("database/BirthdayTable.sql");
-        ArrayList<String> lurker = loadTables("database/LurkerTable.sql");
-        ArrayList<String> openAI = loadTables("database/OpenAI.sql");
-        ArrayList<String> queue = loadTables("database/QueueTable.sql");
-        ArrayList<String> quotes = loadTables("database/QuoteTable.sql");
+        var userTable = loadTables("database/UserTable.sql");
+        var channelTable = loadTables("database/ChannelTable.sql");
+        var messages = loadTables("database/Messages.sql");
+        var events = loadTables("database/Events.sql");
+        var ratingTable = loadTables("database/RatingTable.sql");
+        var birthday = loadTables("database/BirthdayTable.sql");
+        var lurker = loadTables("database/LurkerTable.sql");
+        var openAI = loadTables("database/OpenAI.sql");
+        var queue = loadTables("database/QueueTable.sql");
+        var quotes = loadTables("database/QuoteTable.sql");
 
         // Initialize Tables
         initTables(userTable);      // User & UserImage Tables
@@ -90,12 +88,12 @@ public class Database extends Driver {
         try (var bis = new BufferedInputStream(resource)) {
 
             // Load Data
-            byte[] data = bis.readAllBytes();
-            String content = new String(data);
-            String[] statements = content.split(";");
+            var data = bis.readAllBytes();
+            var content = new String(data);
+            var statements = content.split(";");
 
             // Prepare Table Names
-            ArrayList<String> tables = new ArrayList<>();
+            var tables = new ArrayList<String>();
             for (var statement : statements) {
                 if (statement == null || statement.isBlank()) continue;
                 tables.add(statement.trim() + ";");
@@ -115,7 +113,7 @@ public class Database extends Driver {
         for (var table : tables) if (table == null || table.isBlank()) throw new IllegalArgumentException("Table statement cannot be null or blank");
         try {
             for (var table : tables) {
-                PreparedStatement preparedStatement = connection.prepareStatement(table);
+                var preparedStatement = connection.prepareStatement(table);
                 preparedStatement.executeUpdate();
                 preparedStatement.close();
             }
@@ -133,7 +131,7 @@ public class Database extends Driver {
                 var uuid = asBytes(fromString(imageUrl.substring(47, 83)));
 
                 // Check if image is already downloaded
-                PreparedStatement checkStatement = connection.prepareStatement(
+                var checkStatement = connection.prepareStatement(
                         "SELECT COUNT(uuid) AS count FROM UserImage WHERE uuid = ?;"
                 );
 
@@ -153,7 +151,7 @@ public class Database extends Driver {
                 // Variables
                 byte[] imageData;
                 byte[] compressedData;
-                ImageFormat imageFormat = getFormat(imageUrl);
+                var imageFormat = getFormat(imageUrl);
 
                 // Download Image
                 try (var bis = new BufferedInputStream(new URI(imageUrl).toURL().openStream())) {
@@ -170,7 +168,7 @@ public class Database extends Driver {
                 var compressed = compressedData.length;
 
                 // Insert into database
-                PreparedStatement insertStatement = connection.prepareStatement(
+                var insertStatement = connection.prepareStatement(
                         "INSERT IGNORE INTO UserImage (uuid, id, url, size, totalSize, type, format, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
                 );
 
@@ -205,12 +203,12 @@ public class Database extends Driver {
                 if (user == null) throw new IllegalArgumentException("TwitchUser cannot be null");
 
                 // Variables
-                byte[] data = deflateObject(user);
-                String profileImageUrl = user.getProfileImageUrl();
-                String offlineImageUrl = user.getOfflineImageUrl();
+                var data = deflateObject(user);
+                var profileImageUrl = user.getProfileImageUrl();
+                var offlineImageUrl = user.getOfflineImageUrl();
 
                 // Prepare the SQL statement
-                PreparedStatement preparedStatement = connection.prepareStatement(
+                var preparedStatement = connection.prepareStatement(
                         "INSERT INTO User (id, username, displayName, type, broadcasterType, user) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE username = ?, displayName = ?, type = ?, broadcasterType = ?, user = ?;"
                 );
 

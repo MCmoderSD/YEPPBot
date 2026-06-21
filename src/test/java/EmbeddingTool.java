@@ -1,13 +1,8 @@
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.openai.core.OpenAI;
 import de.MCmoderSD.openai.prompts.EmbeddingPrompt;
-import de.MCmoderSD.openai.services.EmbeddingService;
 import de.MCmoderSD.sql.Driver;
 
-import tools.jackson.databind.JsonNode;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static de.MCmoderSD.sql.Driver.DatabaseType.*;
@@ -18,10 +13,10 @@ import static java.math.BigDecimal.ZERO;
 void main() {
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().loadResource("/Database.json");
+    var config = JsonUtility.getInstance().loadResource("/Database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(SQL.builder()
+    var sql = new SQL(SQL.builder()
             .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
@@ -31,21 +26,21 @@ void main() {
     );
 
     // Initialize OpenAI
-    EmbeddingService service = new OpenAI("sk-proj-").embeddings();
+    var service = new OpenAI("sk-proj-").embeddings();
 
     // Telemetry
     var processed = 0;
-    long totalTokens = 0;
-    long promptTokens = 0;
-    BigDecimal totalCost = ZERO;
+    var totalTokens = 0L;
+    var promptTokens = 0L;
+    var totalCost = ZERO;
 
     // Loop Through Content
-    HashSet<String> unEmbeddedContent = sql.getUnEmbeddedContent();
+    var unEmbeddedContent = sql.getUnEmbeddedContent();
     for (var content : unEmbeddedContent) {
         try {
 
             // Create Embedding
-            EmbeddingPrompt prompt = service.create(content);
+            var prompt = service.create(content);
 
             // Add Telemetry
             totalTokens += prompt.getTotalTokens();
@@ -90,15 +85,15 @@ private static class SQL extends Driver {
         try {
 
             // Prepare Statement
-            PreparedStatement preparedStatement = getConnection().prepareStatement(
+            var preparedStatement = getConnection().prepareStatement(
                     "SELECT content FROM MessageContent WHERE hash NOT IN (SELECT hash FROM Embedding);"
             );
 
             // Execute Query
-            ResultSet resultSet = preparedStatement.executeQuery();
+            var resultSet = preparedStatement.executeQuery();
 
             // Collect Results
-            HashSet<String> unEmbeddedContent = new HashSet<>();
+            var unEmbeddedContent = new HashSet<String>();
             while (resultSet.next()) unEmbeddedContent.add(resultSet.getString("content"));
 
             // Close Resources
@@ -122,11 +117,11 @@ private static class SQL extends Driver {
                 if (prompt == null) throw new IllegalArgumentException("Prompt cannot be null");
 
                 // Variables
-                byte[] contentHash = xxHash64(prompt.getText());
-                byte[] embedding = deflateObject(prompt.getEmbedding().getVector());
+                var contentHash = xxHash64(prompt.getText());
+                var embedding = deflateObject(prompt.getEmbedding().getVector());
 
                 // Insert embedding
-                PreparedStatement insertEmbeddingStatement = connection.prepareStatement(
+                var insertEmbeddingStatement = connection.prepareStatement(
                         "INSERT INTO Embedding (hash, dimension, embedding) VALUES (?, ?, ?);"
                 );
 

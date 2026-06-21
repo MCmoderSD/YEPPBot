@@ -2,10 +2,8 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
-import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.core.TwitchBot;
-import de.MCmoderSD.openai.prompts.ChatPrompt;
 import de.MCmoderSD.openai.services.ChatService;
 
 import java.util.ArrayList;
@@ -22,17 +20,17 @@ public class ChatGPT extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "ChatGPT <Message|reset>";
+        var syntax = "Syntax: " + prefix + "ChatGPT <Message|reset>";
 
         // About
-        String[] name = { "ChatGPT", "Conversation", "GPT", "AI" };
-        String description = "Interagiere mit ChatGPT! Sende eine Nachricht, um eine Antwort zu erhalten, oder verwende 'reset', um die Konversation zurückzusetzen. " + syntax;
+        var name = new String[]{ "ChatGPT", "Conversation", "GPT", "AI" };
+        var description = "Interagiere mit ChatGPT! Sende eine Nachricht, um eine Antwort zu erhalten, oder verwende 'reset', um die Konversation zurückzusetzen. " + syntax;
 
         // Check if OpenAI is configured
         if (openAI == null) return;
 
         // Initialize ChatService
-        ChatService service = ChatService.builder()
+        var service = ChatService.builder()
                 .setModel(GPT_5_4_NANO)
                 .setReasoningEffort(NONE)
                 .setMaxOutputTokens(80)
@@ -47,7 +45,7 @@ public class ChatGPT extends CommandBuilder {
                 .build(openAI);
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
@@ -56,7 +54,7 @@ public class ChatGPT extends CommandBuilder {
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, "Bitte gib eine Nachricht ein. " + syntax);
 
                 // Variables
-                TwitchUser user = event.getUser();
+                var user = event.getUser();
 
                 // Check if user wants to reset the conversation
                 if (args.size() == 1 && Arrays.asList("reset", "clear", "wipe", "new").contains(args.getFirst().toLowerCase())) {
@@ -70,11 +68,11 @@ public class ChatGPT extends CommandBuilder {
                 }
 
                 // Parse user message
-                String userMessage = String.join(SPACE, args);
-                String conversation = messageHandler.getConversation(user);
+                var userMessage = String.join(SPACE, args);
+                var conversation = messageHandler.getConversation(user);
 
                 // Create or continue conversation
-                ChatPrompt prompt = conversation == null ? service.create(userMessage) : service.create(userMessage, conversation);
+                var prompt = conversation == null ? service.create(userMessage) : service.create(userMessage, conversation);
 
                 // Save conversation
                 messageHandler.updateConversation(user, prompt);

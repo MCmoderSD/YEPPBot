@@ -1,6 +1,5 @@
 package de.MCmoderSD.handlers;
 
-import com.github.philippheuer.events4j.core.EventManager;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.chat.events.channel.ChannelMessageActionEvent;
 import com.github.twitch4j.chat.events.channel.RaidEvent;
@@ -80,7 +79,7 @@ public class EventHandler {
         commandHandler = messageHandler.getCommandHandler();
 
         // Event Manager
-        EventManager eventManager = twitchBot.getEventManager();
+        var eventManager = twitchBot.getEventManager();
 
         // Initialize Attributes
         userCache = new ConcurrentHashMap<>();
@@ -109,14 +108,14 @@ public class EventHandler {
         TwitchUser twitchUser;
 
         // Check Cache
-        boolean isCached = userCache.containsKey(id);
+        var isCached = userCache.containsKey(id);
 
         // Get User
         if (isCached) twitchUser = userCache.get(id);
         else twitchUser = userHandler.getTwitchUser(id);
 
         // Check if Update is Needed
-        boolean needsUpdate = !twitchUser.getUsername().equalsIgnoreCase(user);
+        var needsUpdate = !twitchUser.getUsername().equalsIgnoreCase(user);
 
         // Needs Update
         if (!isCached || needsUpdate) {
@@ -202,8 +201,8 @@ public class EventHandler {
             eventLogManager.logRaidEvent(raidEvent);
 
             // Variables
-            TwitchUser channel = raidEvent.getChannel();
-            TwitchUser raider = raidEvent.getUser();
+            var channel = raidEvent.getChannel();
+            var raider = raidEvent.getUser();
 
             // Cache Raid Event
             raidCache.put(channel, event);

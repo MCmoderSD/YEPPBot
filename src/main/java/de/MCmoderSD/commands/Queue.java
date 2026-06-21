@@ -6,7 +6,6 @@ import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.core.TwitchBot;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -19,24 +18,24 @@ public class Queue extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Queue <leave|next|list|dequeue|clear> [User]";
+        var syntax = "Syntax: " + prefix + "Queue <leave|next|list|dequeue|clear> [User]";
 
         // About
-        String[] name = { "Queue", "Warteliste", "Warteschlange" };
-        String description = "Verwaltet die Warteliste für den Kanal: " + syntax;
+        var name = new String[]{ "Queue", "Warteliste", "Warteschlange" };
+        var description = "Verwaltet die Warteliste für den Kanal: " + syntax;
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Variables
                 var argsSize = args.size();
-                TwitchUser user = event.getUser();
-                TwitchUser channel = event.getChannel();
-                ArrayList<TwitchUser> queue = queueManager.getQueue(channel);
+                var user = event.getUser();
+                var channel = event.getChannel();
+                var queue = queueManager.getQueue(channel);
 
 
                 // Join Queue
@@ -51,7 +50,7 @@ public class Queue extends CommandBuilder {
                 }
 
                 // Parse Action
-                String action = args.getFirst().toLowerCase();
+                var action = args.getFirst().toLowerCase();
 
                 // Leave Queue
                 if (argsSize == 1 && Arrays.asList("leave", "quit").contains(action)) {
@@ -66,9 +65,9 @@ public class Queue extends CommandBuilder {
                     if (queue.isEmpty()) return twitchBot.sendMessage(event, name, "Die Warteliste ist aktuell leer. YEPP");
 
                     // Build Queue Message
-                    StringBuilder queueMessage = new StringBuilder("Aktuelle Warteliste: ");
+                    var queueMessage = new StringBuilder("Aktuelle Warteliste: ");
                     for (var i = 0; i < queue.size(); i++) {
-                        TwitchUser queuedUser = queue.get(i);
+                        var queuedUser = queue.get(i);
                         queueMessage.append(i + 1).append(". ").append(tagUser(queuedUser));
                         if (i < queue.size() - 1) queueMessage.append(", ");
                     }
@@ -84,10 +83,10 @@ public class Queue extends CommandBuilder {
                     if (queue.isEmpty()) return twitchBot.sendMessage(event, name, "Die Warteliste ist leer. YEPP");
 
                     // Get Next User and Wait Time
-                    TwitchUser nextUser = queue.getFirst();
-                    Timestamp joinedAt = queueManager.getJoinedAt(nextUser, channel);
+                    var nextUser = queue.getFirst();
+                    var joinedAt = queueManager.getJoinedAt(nextUser, channel);
                     var waitTimeMillis = System.currentTimeMillis() - joinedAt.getTime();
-                    String formattedDuration = formatDuration(waitTimeMillis);
+                    var formattedDuration = formatDuration(waitTimeMillis);
 
                     // Send Next User Message
                     return twitchBot.sendMessage(event, name, "Nächster in der Warteliste: " + tagUser(nextUser) + ", wartet seit " + formattedDuration + ". YEPP");
@@ -108,7 +107,7 @@ public class Queue extends CommandBuilder {
                     // Parse Target User
                     TwitchUser targetUser;
                     if (argsSize >= 2) {
-                        String targetUserName = args.get(1);
+                        var targetUserName = args.get(1);
                         while (targetUserName.startsWith("@")) targetUserName = targetUserName.substring(1);
                         targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
                         if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer @" + targetUserName + " nicht gefunden. YEPP");
@@ -130,10 +129,10 @@ public class Queue extends CommandBuilder {
     private static String formatDuration(long millis) {
 
         // Calculate time components
-        long seconds = millis / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
+        var seconds = millis / 1000L;
+        var minutes = seconds / 60L;
+        var hours = minutes / 60L;
+        var days = hours / 24L;
 
         // Remainders
         seconds %= 60;
@@ -141,7 +140,7 @@ public class Queue extends CommandBuilder {
         hours %= 24;
 
         // Build formatted string
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         if (days > 0) sb.append(days).append("d ");
         if (hours > 0) sb.append(hours).append("h ");
         if (minutes > 0) sb.append(minutes).append("m ");

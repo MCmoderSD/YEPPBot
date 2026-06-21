@@ -71,7 +71,7 @@ public class CommandHandler {
     private ArrayList<String> formatCommand(MessageEvent event) {
 
         // Variables
-        String message = event.getMessage();
+        var message = event.getMessage();
 
         // Find Prefix
         String prefix = null;
@@ -117,8 +117,8 @@ public class CommandHandler {
         if (event == null) throw new IllegalArgumentException("MessageEvent cannot be null");
 
         // Variables
-        ArrayList<String> parts = formatCommand(event);
-        String trigger = parts.getFirst().toLowerCase();
+        var parts = formatCommand(event);
+        var trigger = parts.getFirst().toLowerCase();
 
         // Check for Alias
         if (aliasMap.containsKey(trigger)) {
@@ -133,18 +133,18 @@ public class CommandHandler {
             if (isBlacklisted(event, trigger)) return false;
 
             // Get Command
-            Command command = commandMap.get(trigger);
+            var command = commandMap.get(trigger);
             parts.removeFirst();
 
             // Execute Command
-            boolean success = command.execute(event, parts);
+            var success = command.execute(event, parts);
 
             // Log Command
             if (success) {
                 System.out.printf("%s <%s> #%s executed command: %s%n", COMMAND, event.getChannel().getDisplayName(), event.getUser().getDisplayName(), trigger);
 
                 // Join Args
-                String args = String.join(SPACE, parts);
+                var args = String.join(SPACE, parts);
 
                 // Insert Message and Related Data
                 if (!args.isBlank() && messageManager.insertMessage(args) && !(embeddingService == null || moderationService == null)) {
@@ -192,14 +192,14 @@ public class CommandHandler {
         if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
 
         // Variables
-        HashSet<Command> commands = new HashSet<>();
+        var commands = new HashSet<Command>();
 
         // Get Commands
         for (var entry : commandMap.entrySet()) {
 
             // Get Command
-            String commandName = entry.getKey();
-            Command command = entry.getValue();
+            var commandName = entry.getKey();
+            var command = entry.getValue();
 
             // Check Blacklist
             if (!isBlacklisted(channel, commandName)) commands.add(command);

@@ -14,12 +14,12 @@ public class Ping extends CommandBuilder {
         super(twitchBot);
 
         // About
-        String[] name = { "Ping", "Latency" };
-        String description = "Sendet eine Nachricht mit der Latenz des Bots zurück.";
+        var name = new String[]{ "Ping", "Latency" };
+        var description = "Sendet eine Nachricht mit der Latenz des Bots zurück.";
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {

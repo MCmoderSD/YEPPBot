@@ -4,7 +4,6 @@ import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -41,7 +40,7 @@ public class LurkManager {
                 database.getEventLogManager().waitTillMessageLogged(event.getId(), 10);
 
                 // Insert lurk entry
-                PreparedStatement insertLurkStatement = database.getConnection().prepareStatement(
+                var insertLurkStatement = database.getConnection().prepareStatement(
                         "INSERT INTO Lurker (eventId, lurkerId) VALUES (?, ?);"
                 );
 
@@ -70,7 +69,7 @@ public class LurkManager {
                 if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
                 // Insert traitor entry
-                PreparedStatement insertTraitorStatement = database.getConnection().prepareStatement(
+                var insertTraitorStatement = database.getConnection().prepareStatement(
                         "UPDATE Lurker SET traitor = ? WHERE lurkerId = ?;"
                 );
 
@@ -99,7 +98,7 @@ public class LurkManager {
                 if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
                 // Delete lurk entry
-                PreparedStatement deleteLurkStatement = database.getConnection().prepareStatement(
+                var deleteLurkStatement = database.getConnection().prepareStatement(
                         "DELETE IGNORE FROM Lurker WHERE lurkerId = ?;"
                 );
 
@@ -126,7 +125,7 @@ public class LurkManager {
             if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
             // Query lurk time
-            PreparedStatement queryLurkTimeStatement = database.getConnection().prepareStatement(
+            var queryLurkTimeStatement = database.getConnection().prepareStatement(
                     "SELECT e.firedAt FROM Lurker l, MessageEvent e WHERE lurkerId = ? AND e.id = l.eventId;"
             );
 
@@ -165,7 +164,7 @@ public class LurkManager {
             if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
 
             // Query lurk event
-            PreparedStatement queryLurkEventStatement = database.getConnection().prepareStatement(
+            var queryLurkEventStatement = database.getConnection().prepareStatement(
                     "SELECT event FROM MessageEvent e, Lurker l WHERE lurkerId = ? AND e.id = l.eventId;"
             );
 
@@ -201,7 +200,7 @@ public class LurkManager {
         try {
 
             // Query lurk entries
-            PreparedStatement queryLurkStatement = database.getConnection().prepareStatement(
+            var queryLurkStatement = database.getConnection().prepareStatement(
                     """
                     SELECT lurkerUser.user AS lurker, channelUser.user AS channel
                     FROM Lurker
@@ -215,7 +214,7 @@ public class LurkManager {
             var resultSet = queryLurkStatement.executeQuery();
 
             // Variables
-            HashMap<TwitchUser, TwitchUser> lurkMap = new HashMap<>();
+            var lurkMap = new HashMap<TwitchUser, TwitchUser>();
 
             // Process results
             while (resultSet.next()) lurkMap.put(
@@ -240,7 +239,7 @@ public class LurkManager {
         try {
 
             // Query traitors entries
-            PreparedStatement queryTraitorsStatement = database.getConnection().prepareStatement(
+            var queryTraitorsStatement = database.getConnection().prepareStatement(
                     "SELECT user FROM Lurker JOIN User ON Lurker.lurkerId = User.id WHERE traitor = TRUE"
             );
 
@@ -248,7 +247,7 @@ public class LurkManager {
             var resultSet = queryTraitorsStatement.executeQuery();
 
             // Variables
-            HashSet<TwitchUser> traitorSet = new HashSet<>();
+            var traitorSet = new HashSet<TwitchUser>();
 
             // Process results
             while (resultSet.next()) traitorSet.add(inflateTwitchUser(resultSet.getBytes("user")));

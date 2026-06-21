@@ -16,15 +16,15 @@ public class Say extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Say <Nachricht>";
+        var syntax = "Syntax: " + prefix + "Say <Nachricht>";
 
         // About
-        String[] name = { "Say", "Repeat" };
-        String description = "Nur für Moderatoren und Administratoren. Sendet eine Nachricht in den Chat. " + syntax;
+        var name = new String[]{ "Say", "Repeat" };
+        var description = "Nur für Moderatoren und Administratoren. Sendet eine Nachricht in den Chat. " + syntax;
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {

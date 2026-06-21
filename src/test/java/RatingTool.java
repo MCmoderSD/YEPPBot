@@ -1,14 +1,8 @@
 import de.MCmoderSD.json.JsonUtility;
 import de.MCmoderSD.openai.core.OpenAI;
-import de.MCmoderSD.openai.objects.Rating;
 import de.MCmoderSD.openai.prompts.ModerationPrompt;
-import de.MCmoderSD.openai.services.ModerationService;
 import de.MCmoderSD.sql.Driver;
 
-import tools.jackson.databind.JsonNode;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static de.MCmoderSD.sql.Driver.DatabaseType.*;
@@ -18,10 +12,10 @@ import static de.MCmoderSD.utilities.Hasher.xxHash64;
 void main() {
 
     // Load Config
-    JsonNode config = JsonUtility.getInstance().loadResource("/Database.json");
+    var config = JsonUtility.getInstance().loadResource("/Database.json");
 
     // Initialize SQL
-    SQL sql = new SQL(SQL.builder()
+    var sql = new SQL(SQL.builder()
             .withType(MARIADB)
             .withHost(config.get("host").asString())
             .withPort(config.get("port").asInt())
@@ -31,19 +25,19 @@ void main() {
     );
 
     // Initialize OpenAI
-    ModerationService service = new OpenAI("sk-proj-").moderations();
+    var service = new OpenAI("sk-proj-").moderations();
 
     // Telemetry
     var processed = 0;
     var flagged = 0;
 
     // Loop Through Content
-    HashSet<String> unRatedContent = sql.getUnRatedContent();
+    var unRatedContent = sql.getUnRatedContent();
     for (var content : unRatedContent) {
         try {
 
             // Create Rating
-            ModerationPrompt prompt = service.create(content);
+            var prompt = service.create(content);
 
             // Add Telemetry
             processed++;
@@ -84,15 +78,15 @@ private static class SQL extends Driver {
         try {
 
             // Prepare Statement
-            PreparedStatement preparedStatement = getConnection().prepareStatement(
+            var preparedStatement = getConnection().prepareStatement(
                     "SELECT content FROM MessageContent WHERE hash NOT IN (SELECT hash FROM Rating) OR hash NOT IN (SELECT hash FROM RatingFlag) OR hash NOT IN (SELECT hash FROM RatingScore);"
             );
 
             // Execute Query
-            ResultSet resultSet = preparedStatement.executeQuery();
+            var resultSet = preparedStatement.executeQuery();
 
             // Collect Results
-            HashSet<String> unRatedContent = new HashSet<>();
+            var unRatedContent = new HashSet<String>();
             while (resultSet.next()) unRatedContent.add(resultSet.getString("content"));
 
             // Close Resources
@@ -116,12 +110,12 @@ private static class SQL extends Driver {
                 if (prompt == null) throw new IllegalArgumentException("Prompt cannot be null");
 
                 // Variables
-                Rating rating = prompt.getRating();
-                byte[] contentHash = xxHash64(prompt.getText());
-                byte[] ratingData = deflateObject(rating);
+                var rating = prompt.getRating();
+                var contentHash = xxHash64(prompt.getText());
+                var ratingData = deflateObject(rating);
 
                 // Insert rating
-                PreparedStatement insertRatingStatement = connection.prepareStatement(
+                var insertRatingStatement = connection.prepareStatement(
                         "INSERT INTO Rating (hash, flagged, rating) VALUES (?, ?, ?);"
                 );
 
@@ -146,7 +140,7 @@ private static class SQL extends Driver {
                 var violenceGraphic         = rating.getViolenceGraphic();          // Violence Graphic
 
                 // Insert Rating Flags
-                PreparedStatement insertFlagStatement = connection.prepareStatement(
+                var insertFlagStatement = connection.prepareStatement(
                         "INSERT INTO RatingFlag (hash, harassment, harassmentThreatening, hate, hateThreatening, illicit, illicitViolent, selfHarm, selfHarmInstructions, selfHarmIntent, sexual, sexualMinors, violence, violenceGraphic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 
@@ -167,7 +161,7 @@ private static class SQL extends Driver {
                 insertFlagStatement.executeUpdate();
 
                 // Insert Rating Flags
-                PreparedStatement insertScoreStatement = connection.prepareStatement(
+                var insertScoreStatement = connection.prepareStatement(
                         "INSERT INTO RatingScore (hash, harassment, harassmentThreatening, hate, hateThreatening, illicit, illicitViolent, selfHarm, selfHarmInstructions, selfHarmIntent, sexual, sexualMinors, violence, violenceGraphic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
 

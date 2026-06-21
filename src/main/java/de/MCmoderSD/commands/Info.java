@@ -2,7 +2,6 @@ package de.MCmoderSD.commands;
 
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
 import de.MCmoderSD.commands.blueprints.Command;
-import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.core.TwitchBot;
 
@@ -17,15 +16,15 @@ public class Info extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Info <mod|editor|vip>";
+        var syntax = "Syntax: " + prefix + "Info <mod|editor|vip>";
 
         // About
-        String[] name = new String[]{ "Info", "Information" };
-        String description = "Zeigt Informationen über einen Kanal an, wie z.B. Moderatoren, Editoren oder VIPs. " + syntax;
+        var name = new String[]{ "Info", "Information" };
+        var description = "Zeigt Informationen über einen Kanal an, wie z.B. Moderatoren, Editoren oder VIPs. " + syntax;
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
@@ -37,10 +36,10 @@ public class Info extends CommandBuilder {
                 if (args.isEmpty()) return twitchBot.sendMessage(event, name, "Bitte gib eine Rolle an. " + syntax);
 
                 // Parse Role
-                String role = args.getFirst().toLowerCase();
+                var role = args.getFirst().toLowerCase();
 
                 // Variables
-                TwitchUser targetChannel = event.getChannel();
+                var targetChannel = event.getChannel();
 
                 // Parse Target Channel
                 if (args.size() > 1) {
@@ -49,11 +48,11 @@ public class Info extends CommandBuilder {
                     if (!twitchBot.isOwner(event.getUser())) return false;
 
                     // Parse Name
-                    String targetChannelName = args.get(1);
+                    var targetChannelName = args.get(1);
                     while (targetChannelName.startsWith("@")) targetChannelName = targetChannelName.substring(1);
 
                     // Fetch Target Channel
-                    TwitchUser fetchedChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
+                    var fetchedChannel = userHandler.getTwitchUser(targetChannelName.toLowerCase());
                     if (fetchedChannel == null) return twitchBot.sendMessage(event, name, "Fehler: Kanal '" + targetChannelName + "' nicht gefunden. YEPP");
                     targetChannel = fetchedChannel;
                 }
@@ -71,7 +70,7 @@ public class Info extends CommandBuilder {
                         if (mods.isEmpty()) return twitchBot.sendMessage(event, name, "Der Kanal " + tagUser(targetChannel) + " hat keine Moderatoren.");
 
                         // Build Response
-                        StringBuilder response = new StringBuilder(tagUser(targetChannel) + String.format(" hat %d Moderatoren: ", mods.size()));
+                        var response = new StringBuilder(tagUser(targetChannel) + String.format(" hat %d Moderatoren: ", mods.size()));
                         for (var mod : mods) response.append(tagUser(mod)).append(", ");
                         response.setLength(response.length() - 2); // Remove last comma and space
 
@@ -89,7 +88,7 @@ public class Info extends CommandBuilder {
                         if (editors.isEmpty()) return twitchBot.sendMessage(event, name, "Der Kanal " + tagUser(targetChannel) + " hat keine Editoren.");
 
                         // Build Response
-                        StringBuilder response = new StringBuilder(tagUser(targetChannel) + String.format(" hat %d Editoren: ", editors.size()));
+                        var response = new StringBuilder(tagUser(targetChannel) + String.format(" hat %d Editoren: ", editors.size()));
                         for (var editor : editors) response.append(tagUser(editor)).append(", ");
                         response.setLength(response.length() - 2); // Remove last comma and space
 
@@ -107,7 +106,7 @@ public class Info extends CommandBuilder {
                         if (vips.isEmpty()) return twitchBot.sendMessage(event, name, "Der Kanal " + tagUser(targetChannel) + " hat keine VIPs.");
 
                         // Build Response
-                        StringBuilder response = new StringBuilder(tagUser(targetChannel) + String.format(" hat %d VIPs: ", vips.size()));
+                        var response = new StringBuilder(tagUser(targetChannel) + String.format(" hat %d VIPs: ", vips.size()));
                         for (var vip : vips) response.append(tagUser(vip)).append(", ");
                         response.setLength(response.length() - 2); // Remove last comma and space
 

@@ -16,34 +16,34 @@ public class Help extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        String syntax = "Syntax: " + prefix + "Help [command]";
+        var syntax = "Syntax: " + prefix + "Help [command]";
 
         // About
-        String[] name = { "Help", "Hilfe" };
-        String description = "Zeigt eine Liste aller Befehle oder Informationen zu einem bestimmten Befehl an. " + syntax;
+        var name = new String[]{ "Help", "Hilfe" };
+        var description = "Zeigt eine Liste aller Befehle oder Informationen zu einem bestimmten Befehl an. " + syntax;
 
 
         // Register command
-        boolean registered = commandHandler.registerCommand(new Command(description, name) {
+        var registered = commandHandler.registerCommand(new Command(description, name) {
 
             @Override
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Get Command List
-                ArrayList<Command> commands = new ArrayList<>(commandHandler.getCommands(event.getChannel()));
+                var commands = new ArrayList<>(commandHandler.getCommands(event.getChannel()));
                 commands.sort((c1, c2) -> c1.getName().compareToIgnoreCase(c2.getName()));
 
                 // Check Arguments
                 if (!args.isEmpty()) {
 
                     // Get Command
-                    String commandName = args.getFirst().toLowerCase();
+                    var commandName = args.getFirst().toLowerCase();
 
                     // Find Command
                     for (var command : commands) {
 
                         // Check Name and Aliases
-                        boolean matches = commandName.equalsIgnoreCase(command.getName());
+                        var matches = commandName.equalsIgnoreCase(command.getName());
                         for (var alias : command.getAliases()) if (commandName.equalsIgnoreCase(alias)) {
                             matches = true;
                             break;
@@ -55,7 +55,7 @@ public class Help extends CommandBuilder {
                 }
 
                 // Build Response
-                StringBuilder response = new StringBuilder("Verfügbare Befehle: ");
+                var response = new StringBuilder("Verfügbare Befehle: ");
                 for (var command : commands) response.append(prefix).append(command.getName()).append(SPACE);
 
                 // Send Message

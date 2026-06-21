@@ -40,13 +40,13 @@ public class Main {
         try {
 
             // Initialize Twitch Bot
-            TwitchBot twitchBot = init(parseArguments(args));
+            var twitchBot = init(parseArguments(args));
 
             // Token Grabber active
             if (twitchBot == null) return;
 
-            // Scope[] all = Scope.values();
-            Scope[] used = new ArrayList<>(Arrays.asList(
+            // var all = Scope.values();
+            var used = new ArrayList<>(Arrays.asList(
                     UserHandler.REQUIRED_SCOPES,
                     ChatHandler.REQUIRED_SCOPES,
                     RoleHandler.REQUIRED_SCOPES,
@@ -71,8 +71,8 @@ public class Main {
 
         // Check Arguments
         var argSize = args.size();
-        boolean dev = args.contains("-dev");
-        boolean debug = args.contains("-debug");
+        var dev = args.contains("-dev");
+        var debug = args.contains("-debug");
 
         // Set Debug Mode
         if (debug || dev) {
@@ -82,7 +82,7 @@ public class Main {
 
         // Load Config
         JsonNode config;
-        JsonUtility jsonUtility = JsonUtility.getInstance();
+        var jsonUtility = JsonUtility.getInstance();
         if (argSize > 1 && (args.contains("-config") || args.contains("-c"))) {
 
             // Determine Config Path
@@ -103,16 +103,16 @@ public class Main {
         if (!config.has("server") || config.get("server").isNull() || config.get("server").isEmpty()) throw new IllegalArgumentException("Config file missing 'server' section");
 
         // Get Config Sections
-        JsonNode twitchConfig = config.get("twitch");
-        JsonNode databaseConfig = config.get("database");
-        JsonNode serverConfig = config.get("server");
+        var twitchConfig = config.get("twitch");
+        var databaseConfig = config.get("database");
+        var serverConfig = config.get("server");
 
         // Initialize and Start Server
-        Server server = new Server(serverConfig);
+        var server = new Server(serverConfig);
         server.start();
 
         // Init OpenAI
-        OpenAI openAI = initOpenAI(config);
+        var openAI = initOpenAI(config);
         if (openAI == null) System.err.println("Warning: OpenAI configuration is missing. OpenAI features will be unavailable.");
 
         // Initialize Weather API if Configured
@@ -127,7 +127,7 @@ public class Main {
     }
 
     private static ArrayList<String> parseArguments(String[] args) {
-        ArrayList<String> arguments = new ArrayList<>();
+        var arguments = new ArrayList<String>();
         if (args != null) {
             for (var arg : args) {
                 if (arg != null && !arg.isBlank()) {
@@ -149,7 +149,7 @@ public class Main {
         if (twitchConfig == null || twitchConfig.isNull() || twitchConfig.isEmpty()) throw new IllegalArgumentException("Twitch config cannot be null or empty");
 
         // Check OAuth Token
-        boolean missingToken = !twitchConfig.has("oauthToken") || twitchConfig.get("oauthToken").isNull() || !twitchConfig.get("oauthToken").isString();
+        var missingToken = !twitchConfig.has("oauthToken") || twitchConfig.get("oauthToken").isNull() || !twitchConfig.get("oauthToken").isString();
         if (!missingToken && !twitchConfig.get("oauthToken").asString().isBlank()) return false;
 
         // Check Application Config
@@ -167,16 +167,17 @@ public class Main {
         if (!config.has("openai") || config.get("openai").isNull() || config.get("openai").isEmpty()) return null;
 
         // Get OpenAI Config
-        JsonNode openAIConfig = config.get("openai");
+        var openAIConfig = config.get("openai");
 
         // Check API Key
         if (!openAIConfig.has("apiKey") || openAIConfig.get("apiKey").isNull() || !openAIConfig.get("apiKey").isString()) throw new IllegalArgumentException("OpenAI config missing 'apiKey'");
         if (!openAIConfig.has("organization") || openAIConfig.get("organization").isNull() || !openAIConfig.get("organization").isString()) throw new IllegalArgumentException("OpenAI config missing 'organization'");
         if (!openAIConfig.has("project") || openAIConfig.get("project").isNull() || !openAIConfig.get("project").isString()) throw new IllegalArgumentException("OpenAI config missing 'project'");
+
         // Parse Config
-        String apiKey = openAIConfig.get("apiKey").asString();
-        String organization = openAIConfig.get("organization").asString();
-        String project = openAIConfig.get("project").asString();
+        var apiKey = openAIConfig.get("apiKey").asString();
+        var organization = openAIConfig.get("organization").asString();
+        var project = openAIConfig.get("project").asString();
 
         if (!apiKey.startsWith("sk-")) throw new  IllegalArgumentException("Invalid OpenAI API Key");
         if (!organization.startsWith("org-")) throw new IllegalArgumentException("Invalid OpenAI Organization ID");
