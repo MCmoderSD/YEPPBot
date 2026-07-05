@@ -8,6 +8,7 @@ import de.MCmoderSD.database.manager.MessageManager;
 import de.MCmoderSD.database.manager.EventLogManager;
 import de.MCmoderSD.database.manager.CommandManager;
 import de.MCmoderSD.database.manager.BirthdayManager;
+import de.MCmoderSD.database.manager.BdsmManager;
 import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.database.manager.OpenAIManger;
 import de.MCmoderSD.database.manager.QueueManager;
@@ -47,6 +48,7 @@ public abstract class CommandBuilder {
     protected final EventLogManager eventLogManager;    // Event Log Manager
     protected final CommandManager commandManager;      // Command Manager
     protected final BirthdayManager birthdayManager;    // Birthday Manager
+    protected final BdsmManager bdsmManager;            // BDSM Manager
     protected final LurkManager lurkManager;            // Lurk Manager
     protected final OpenAIManger openAIManger;          // OpenAI Manager
     protected final QueueManager queueManager;          // Queue Manager
@@ -92,6 +94,7 @@ public abstract class CommandBuilder {
         eventLogManager = twitchBot.getEventLogManager();
         commandManager = twitchBot.getCommandManager();
         birthdayManager = twitchBot.getBirthdayManager();
+        bdsmManager = twitchBot.getBdsmManager();
         lurkManager = twitchBot.getLurkManager();
         openAIManger = twitchBot.getOpenAIManger();
         queueManager = twitchBot.getQueueManager();

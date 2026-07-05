@@ -26,6 +26,7 @@ public class Database extends Driver {
     private final EventLogManager eventLogManager;
     private final CommandManager commandManager;
     private final BirthdayManager birthdayManager;
+    private final BdsmManager bdsmManager;
     private final LurkManager lurkManager;
     private final OpenAIManger openAIManger;
     private final QueueManager queueManager;
@@ -48,6 +49,7 @@ public class Database extends Driver {
         var events = loadTables("database/Events.sql");
         var ratingTable = loadTables("database/RatingTable.sql");
         var birthday = loadTables("database/BirthdayTable.sql");
+        var bdsmTable = loadTables("database/BDSM-Table.sql");
         var lurker = loadTables("database/LurkerTable.sql");
         var openAI = loadTables("database/OpenAI.sql");
         var queue = loadTables("database/QueueTable.sql");
@@ -60,6 +62,7 @@ public class Database extends Driver {
         initTables(events);         // Raid & Follow Table                      | needs UserTable
         initTables(ratingTable);    // Rating, Flag & Score Tables              | needs Messages
         initTables(birthday);       // Birthday Table                           | needs UserTable
+        initTables(bdsmTable);      // BDSM Table                               | needs UserTable
         initTables(lurker);         // Lurker Table                             | needs UserTable
         initTables(openAI);         // Conversation Table                       | needs UserTable
         initTables(queue);          // Queue Table                              | needs ChannelTable
@@ -71,6 +74,7 @@ public class Database extends Driver {
         eventLogManager = new EventLogManager(this);
         commandManager = new CommandManager(this);
         birthdayManager = new BirthdayManager(this);
+        bdsmManager = new BdsmManager(this);
         lurkManager = new LurkManager(this);
         openAIManger = new OpenAIManger(this);
         queueManager = new QueueManager(this);
@@ -262,6 +266,10 @@ public class Database extends Driver {
 
     public BirthdayManager getBirthdayManager() {
         return birthdayManager;
+    }
+
+    public BdsmManager getBdsmManager() {
+        return bdsmManager;
     }
 
     public LurkManager getLurkManager() {

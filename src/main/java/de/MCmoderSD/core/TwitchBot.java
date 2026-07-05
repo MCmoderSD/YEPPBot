@@ -10,6 +10,7 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
+import de.MCmoderSD.commands.BDSM;
 import de.MCmoderSD.commands.Birthday;
 import de.MCmoderSD.commands.ChatGPT;
 import de.MCmoderSD.commands.Help;
@@ -31,6 +32,7 @@ import de.MCmoderSD.database.manager.MessageManager;
 import de.MCmoderSD.database.manager.EventLogManager;
 import de.MCmoderSD.database.manager.CommandManager;
 import de.MCmoderSD.database.manager.BirthdayManager;
+import de.MCmoderSD.database.manager.BdsmManager;
 import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.database.manager.OpenAIManger;
 import de.MCmoderSD.database.manager.QueueManager;
@@ -81,6 +83,7 @@ public class TwitchBot {
     private final EventLogManager eventLogManager;  // Event Log Manager
     private final CommandManager commandManager;    // Command Manager
     private final BirthdayManager birthdayManager;  // Birthday Manager
+    private final BdsmManager bdsmManager;          // BDSM Manager
     private final LurkManager lurkManager;          // Lurk Manager
     private final OpenAIManger openAIManger;        // OpenAI Manager
     private final QueueManager queueManager;        // Queue Manager
@@ -147,6 +150,7 @@ public class TwitchBot {
         eventLogManager = database.getEventLogManager();
         commandManager = database.getCommandManager();
         birthdayManager = database.getBirthdayManager();
+        bdsmManager = database.getBdsmManager();
         lurkManager = database.getLurkManager();
         openAIManger = database.getOpenAIManger();
         queueManager = database.getQueueManager();
@@ -224,6 +228,7 @@ public class TwitchBot {
         commandHandler = eventHandler.getCommandHandler();
 
         // Initialize Commands
+        new BDSM(this);
         new Birthday(this);
         new ChatGPT(this);
         new Help(this);
@@ -551,6 +556,10 @@ public class TwitchBot {
 
     public BirthdayManager getBirthdayManager() {
         return birthdayManager;
+    }
+
+    public BdsmManager getBdsmManager() {
+        return bdsmManager;
     }
 
     public LurkManager getLurkManager() {

@@ -24,6 +24,13 @@
 
     <dependencies>
 
+        <!-- BDSM-Test-API -->
+        <dependency>
+            <groupId>de.MCmoderSD</groupId>
+            <artifactId>BDSM-Test-API</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
         <!-- Helix-API -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>

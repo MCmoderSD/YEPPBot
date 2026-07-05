@@ -1,5 +1,6 @@
 package de.MCmoderSD.utilities;
 
+import de.MCmoderSD.bdsm.data.TestResult;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.FollowEvent;
 import de.MCmoderSD.objects.MessageEvent;
@@ -41,6 +42,14 @@ public class ZipUtil {
             return (FollowEvent) inflateObject(data);
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Failed to inflate FollowEvent object: " + e.getMessage(), e);
+        }
+    }
+
+    public static TestResult inflateTestResult(byte[] data) {
+        try {
+            return (TestResult) inflateObject(data);
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Failed to inflate TestResult object: " + e.getMessage(), e);
         }
     }
 }
