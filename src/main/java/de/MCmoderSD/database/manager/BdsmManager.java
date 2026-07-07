@@ -2,6 +2,7 @@ package de.MCmoderSD.database.manager;
 
 
 import de.MCmoderSD.bdsm.data.TestResult;
+import de.MCmoderSD.bdsm.enums.Kink;
 import de.MCmoderSD.database.Database;
 import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.tools.GZIP;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import static de.MCmoderSD.bdsm.enums.Kink.*;
 import static de.MCmoderSD.utilities.ZipUtil.*;
@@ -29,7 +31,7 @@ public class BdsmManager {
         this.database = database;
     }
 
-    public void addTestResult(TestResult testResult, TwitchUser twitchUser) {
+    public boolean addTestResult(TestResult testResult, TwitchUser twitchUser) {
 
         // Check Parameters
         if (testResult == null) throw new IllegalArgumentException("TestResult cannot be null");
@@ -43,7 +45,7 @@ public class BdsmManager {
 
             // Prepare the SQL statement
             var preparedStatement = database.getConnection().prepareStatement(
-                    "INSERT INTO BDSM (id, user, timestamp, version, gender, ageGroup, data, ageplayer, brat, bratTamer, daddyMommy, degrader, dominant, degradee, little, masochist, masterMistress, nonMonogamist, owner, primalHunter, pet, primalPrey, rigger, ropeBunny, sadist, slave, submissive, switch, vanilla, voyeur, exhibitionist, experimentalist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                    "INSERT IGNORE INTO BDSM (id, user, timestamp, version, gender, ageGroup, data, ageplayer, brat, bratTamer, daddyMommy, degrader, dominant, degradee, little, masochist, masterMistress, nonMonogamist, owner, primalHunter, pet, primalPrey, rigger, ropeBunny, sadist, slave, submissive, switch, vanilla, voyeur, exhibitionist, experimentalist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
 
             // Set the parameters for the prepared statement
@@ -81,10 +83,13 @@ public class BdsmManager {
             preparedStatement.setDouble(32, scoreMap.get(Experimentalist) / 100d);
 
             // Execute the prepared statement
-            preparedStatement.executeUpdate();
+            var rowsAffected = preparedStatement.executeUpdate();
 
             // Close resources
             preparedStatement.close();
+
+            // Return Update Result
+            return rowsAffected == 1;
 
         } catch (SQLException | IOException e) {
             throw new RuntimeException("Error occurred while adding Test Result", e);
@@ -163,5 +168,72 @@ public class BdsmManager {
         } catch (SQLException e) {
             throw new RuntimeException("Error occurred while retrieving latest Test Results", e);
         }
+    }
+
+    public LinkedHashMap<TwitchUser, TestResult> getBiggest(Kink kink) {
+
+        // Check Parameters
+        if (kink == null) throw new IllegalArgumentException("Kink cannot be null");
+
+        try {
+
+            // Prepare the SQL statement
+            var preparedStatement = database.getConnection().prepareStatement(
+                    "SELECT u.user, b1.data FROM BDSM b1 JOIN User u ON b1.user = u.id WHERE timestamp = (SELECT MAX(timestamp) FROM BDSM b2 WHERE b1.user = b2.user) ORDER BY " + resolveColumn(kink) + " DESC"
+            );
+
+            // Execute the query and get the result set
+            var resultSet = preparedStatement.executeQuery();
+
+            // Create a map to hold the highest kinker results
+            var highestKinkerResults = new LinkedHashMap<TwitchUser, TestResult>();
+
+            // Iterate through the result set and create TestResult objects
+            while (resultSet.next()) {
+                var user = inflateTwitchUser(resultSet.getBytes("user"));
+                var testResult = inflateTestResult(resultSet.getBytes("data"));
+                highestKinkerResults.put(user, testResult);
+            }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
+            // Return
+            return highestKinkerResults;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error occurred while retrieving highest kinker results", e);
+        }
+    }
+
+    private static String resolveColumn(Kink kink) {
+        return switch (kink) {
+            case Ageplayer -> "ageplayer";
+            case Brat -> "brat";
+            case BratTamer -> "bratTamer";
+            case DaddyMommy -> "daddyMommy";
+            case Degrader -> "degrader";
+            case Dominant -> "dominant";
+            case Degradee -> "degradee";
+            case Little -> "little";
+            case Masochist -> "masochist";
+            case MasterMistress -> "masterMistress";
+            case NonMonogamist -> "nonMonogamist";
+            case Owner -> "owner";
+            case PrimalHunter -> "primalHunter";
+            case Pet -> "pet";
+            case PrimalPrey -> "primalPrey";
+            case Rigger -> "rigger";
+            case RopeBunny -> "ropeBunny";
+            case Sadist -> "sadist";
+            case Slave -> "slave";
+            case Submissive -> "submissive";
+            case Switch -> "switch";
+            case Vanilla -> "vanilla";
+            case Voyeur -> "voyeur";
+            case Exhibitionist -> "exhibitionist";
+            case Experimentalist -> "experimentalist";
+        };
     }
 }
