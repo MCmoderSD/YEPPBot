@@ -84,8 +84,13 @@ public class BDSM extends CommandBuilder {
 
                 if (action.equalsIgnoreCase("biggest")) {
 
-                    var kink = parseKink(args.get(1));
-                    if (kink == null) return twitchBot.sendMessage(event, name, "Fehler: Ungültiger Kink '" + args.get(1) + "'. " + biggestSyntax);
+                    // Parse Kink
+                    var kinkInput = args.get(1).toLowerCase();
+                    if (args.size() > 2) kinkInput = kinkInput + args.get(2).toLowerCase();
+
+                    // Parse Kink
+                    var kink = parseKink(kinkInput);
+                    if (kink == null) return twitchBot.sendMessage(event, name, "Fehler: Ungültiger Kink '" + kinkInput + "'. " + biggestSyntax);
 
                     // Fetch Biggest Test Result
                     var result = bdsmManager.getBiggest(kink);
