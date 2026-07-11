@@ -1,6 +1,7 @@
 package de.MCmoderSD.commands;
 
 import de.MCmoderSD.bdsm.core.BdsmTestApi;
+import de.MCmoderSD.bdsm.data.MatchResult;
 import de.MCmoderSD.bdsm.data.TestResult;
 import de.MCmoderSD.bdsm.enums.Kink;
 import de.MCmoderSD.commands.blueprints.CommandBuilder;
@@ -10,6 +11,7 @@ import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.core.TwitchBot;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import static de.MCmoderSD.bdsm.enums.Kink.*;
 import static de.MCmoderSD.utilities.MessageHelper.tagUser;
@@ -24,7 +26,7 @@ public class BDSM extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        var syntax = "Syntax: " + prefix + "BDSM <set|get|biggest>";
+        var syntax = "Syntax: " + prefix + "BDSM <set|get|match|biggest>";
         var setSyntax = "Syntax: " + prefix + "BDSM set <Test-ID>";
         var getSyntax = "Syntax: " + prefix + "BDSM get <@User>";
         var biggestSyntax = "Syntax: " + prefix + "BDSM biggest <ageplayer|brat|brat tamer|daddy|mommy|degrader|dominant|degradee|little|masochist|master|mistress|nonmonogamist|owner|hunter|hunter|pet|prey|prey|rigger|rope bunny|sadist|slave|submissive|sub|switch|vanilla|voyeur|exhibitionist|experimentalist>";
@@ -44,12 +46,17 @@ public class BDSM extends CommandBuilder {
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Check Args
-                if (args.size() < 2) return twitchBot.sendMessage(event, name, "Fehler: Keine Aktion angegeben. " + syntax);
+                if (args.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Keine Aktion angegeben. " + syntax);
 
+                // Variables
+                var user = event.getUser();
                 var action = args.getFirst().toLowerCase();
 
                 // Set Action
                 if (action.equalsIgnoreCase("set")) {
+
+                    // Check Args
+                    if (args.size() < 2) return twitchBot.sendMessage(event, name, "Fehler: Keine Test-ID angegeben. " + setSyntax);
 
                     // Parse ID
                     var id = args.get(1);
@@ -60,13 +67,16 @@ public class BDSM extends CommandBuilder {
 
                     // Save Test Result
                     var saved = bdsmManager.addTestResult(result, event.getUser());
-                    if (!saved) return twitchBot.sendMessage(event, name, "Fehler: Test mit ID '" + id + "' ist bereits vorhanden.");
+                    if (!saved) return twitchBot.sendMessage(event, name, "Fehler: Test mit ID '" + id + "' ist bereits vorhanden YEPP.");
 
                     // Send Success Message
                     return twitchBot.sendMessage(event, name, "Erfolg: Test mit ID '" + id + "' wurde hinzugefügt.");
                 }
 
                 if (action.equalsIgnoreCase("get")) {
+
+                    // Check Args
+                    if (args.size() < 2) return twitchBot.sendMessage(event, name, "Fehler: Kein Benutzer angegeben. " + getSyntax);
 
                     // Parse User
                     var targetUser = args.get(1).replace("@", "").toLowerCase();
@@ -75,11 +85,70 @@ public class BDSM extends CommandBuilder {
                     var twitchUser = fetchTwitchUser(targetUser);
                     if (twitchUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUser + "' nicht gefunden. " + getSyntax);
 
+                    // Fetch User Test Result
                     var result = bdsmManager.getTestResults(twitchUser);
-                    if (result == null || result.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Kein Test für Benutzer '" + targetUser + "' gefunden.");
+                    if (result == null || result.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Kein Test für " + tagUser(twitchUser) + " gefunden YEPP");
 
                     var testResult = result.getFirst();
                     return twitchBot.sendMessage(event, name, "Test-Ergebnisse für " + tagUser(twitchUser) + ": " + formatTestResult(testResult));
+                }
+
+                if (action.equalsIgnoreCase("match")) {
+
+                    // Match User
+                    if (args.size() > 1) {
+
+                        // Parse User
+                        var targetUser = args.get(1).replace("@", "").toLowerCase();
+
+                        // Fetch Twitch User
+                        var twitchUser = fetchTwitchUser(targetUser);
+                        if (twitchUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUser + "' nicht gefunden. " + getSyntax);
+
+                        // Fetch User Test Result
+                        var result = bdsmManager.getTestResults(event.getUser());
+                        if (result == null || result.isEmpty()) return twitchBot.sendMessage(event, name, "Du hast noch keinen Test gemacht. Bitte benutze " + prefix + "BDSM set <Test-ID> um einen Test hinzuzufügen YEPP");
+
+                        // Fetch Target User Test Result
+                        var targetResult = bdsmManager.getTestResults(twitchUser);
+                        if (targetResult == null || targetResult.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Kein Test für " + tagUser(twitchUser) + " gefunden YEPP");
+
+                        // Calculate Match Result
+                        var match = api.fetchMatch(result.getFirst(), targetResult.getFirst());
+                        if (match == null) return twitchBot.sendMessage(event, name, "Fehler: Match konnte nicht berechnet werden YEPP");
+
+                        // Send Match Result Message
+                        return twitchBot.sendMessage(event, name, tagUser(event.getUser()) + " und " + tagUser(twitchUser) + " sind zu " + match.getScore() + "% miteinander kompatibel YEPP");
+                    }
+
+                    // Highlight Compatible Users
+                    var result = bdsmManager.getTestResults(user);
+                    if (result == null || result.isEmpty()) return twitchBot.sendMessage(event, name, "Du hast noch keinen Test gemacht. Bitte benutze " + prefix + "BDSM set <Test-ID> um einen Test hinzuzufügen YEPP");
+
+                    // Fetch All Test Results
+                    var allResults = bdsmManager.getLatestTestResults().entrySet();
+                    var matches = new LinkedHashMap<TwitchUser, MatchResult>();
+                    for (var entry : allResults) {
+
+                        // Variables
+                        var targetUser = entry.getKey();
+                        var targetResult = entry.getValue();
+
+                        // Skip Self
+                        if (targetUser.getId().equals(user.getId())) continue;
+
+                        // Calculate Match Result
+                        var match = api.fetchMatch(result.getFirst(), targetResult);
+                        if (match != null) matches.put(targetUser, match);
+                    }
+
+                    // Sort Matches by Score
+                    var sortedMatches = matches.entrySet().stream().sorted((e1, e2) -> Integer.compare(e2.getValue().getScore(), e1.getValue().getScore()));
+                    var mostCompatible = sortedMatches.toList().getFirst();
+
+                    // Send Match Result Message
+                    if (mostCompatible == null) return twitchBot.sendMessage(event, name, "Fehler: Keine kompatiblen Benutzer gefunden YEPP");
+                    return twitchBot.sendMessage(event, name, tagUser(mostCompatible.getKey()) + " ist der kompatibelste Benutzer mit einer Kompatibilität von " + mostCompatible.getValue().getScore() + "% YEPP");
                 }
 
                 if (action.equalsIgnoreCase("biggest")) {
@@ -94,10 +163,10 @@ public class BDSM extends CommandBuilder {
 
                     // Fetch Biggest Test Result
                     var result = bdsmManager.getBiggest(kink);
-                    if (result == null || result.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Kein Test für Kink '" + args.get(1) + "' gefunden.");
+                    if (result == null || result.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Kein Test für Kink '" + kinkInput + "' gefunden YEPP");
 
                     // Send Result Message
-                    return twitchBot.sendMessage(event, name, "The biggest " + args.get(1) + " is " + tagUser(result.keySet().iterator().next()) + " with a score of " + result.values().iterator().next().getScoreMap().get(kink) + "%");
+                    return twitchBot.sendMessage(event, name, "The biggest " + kinkInput + " is " + tagUser(result.keySet().iterator().next()) + " with a score of " + result.values().iterator().next().getScoreMap().get(kink) + "% YEPP");
                 }
 
                 return twitchBot.sendMessage(event, name, "Fehler: Ungültige Aktion '" + args.getFirst() + "'. " + syntax);
