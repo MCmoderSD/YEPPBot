@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import static de.MCmoderSD.encryption.enums.Hash.*;
 import static de.MCmoderSD.encryption.enums.Transformer.*;
 import static de.MCmoderSD.sql.Driver.DatabaseType.*;
+import static java.lang.IO.println;
 
 void main() {
 
@@ -48,7 +49,7 @@ void main() {
         sql.updateRefreshToken(id, encryptedToken);
 
         // Print result
-        IO.println("Encrypted token for ID " + id + " has been updated.");
+        println("Encrypted token for ID " + id + " has been updated.");
     }
 }
 

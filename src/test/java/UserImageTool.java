@@ -12,6 +12,7 @@ import static de.MCmoderSD.utilities.FormatUUID.*;
 import static de.MCmoderSD.utilities.ZipUtil.*;
 import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 import static de.MCmoderSD.enums.ImageFormat.getFormat;
+import static java.lang.IO.println;
 import static java.util.UUID.fromString;
 
 void main() {
@@ -31,7 +32,7 @@ void main() {
 
     // Get Users
     var users = sql.getTwitchUsers();
-    IO.println("Total Users: " + users.size());
+    println("Total Users: " + users.size());
 
     // Download Profile and Offline Images
     for (var user : users)

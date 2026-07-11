@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 import static de.MCmoderSD.tools.GZIP.deflateObject;
 import static de.MCmoderSD.utilities.Hasher.xxHash64;
+import static java.lang.IO.println;
 import static java.math.BigDecimal.ZERO;
 
 void main() {
@@ -61,10 +62,10 @@ void main() {
     }
 
     // Print Telemetry
-    IO.println("\nProcessed: " + processed + "/" + unEmbeddedContent.size());
-    IO.println("Prompt tokens: " + promptTokens);
-    IO.println("Total tokens: " + totalTokens);
-    IO.println("Total cost: " + totalCost);
+    println("\nProcessed: " + processed + "/" + unEmbeddedContent.size());
+    println("Prompt tokens: " + promptTokens);
+    println("Total tokens: " + totalTokens);
+    println("Total cost: " + totalCost);
 }
 
 // SQL Driver Implementation

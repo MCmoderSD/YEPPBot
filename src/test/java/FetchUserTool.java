@@ -14,6 +14,7 @@ import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 import static de.MCmoderSD.utilities.FormatUUID.*;
 import static de.MCmoderSD.enums.UserImageType.*;
 import static de.MCmoderSD.tools.GZIP.*;
+import static java.lang.IO.println;
 import static java.util.UUID.fromString;
 
 void main() {
@@ -46,11 +47,11 @@ void main() {
 
     // Fetch Users
     var users = fetchUsersByID(ids, helix);
-    IO.println("Fetched users: " + users.size());
+    println("Fetched users: " + users.size());
 
     // Update Database
     for (var user : users) {
-        IO.println("Updating user: " + user.getUsername() + " (" + user.getId() + ")");
+        println("Updating user: " + user.getUsername() + " (" + user.getId() + ")");
         sql.updateUser(user);
     }
 }
@@ -70,13 +71,13 @@ private HashSet<TwitchUser> fetchUsersByID(HashSet<Integer> ids, TwitchHelix hel
     if (!currentBatch.isEmpty()) batches.add(currentBatch);
 
     // Log Batching Info
-    IO.println("Total batches: " + batches.size());
-    IO.println("Total users to fetch: " + ids.size());
+    println("Total batches: " + batches.size());
+    println("Total users to fetch: " + ids.size());
 
     // Fetch Users
     var users = new HashSet<TwitchUser>();
     for (var batch : batches) {
-        IO.println("Fetching batch of " + batch.size() + " users...");
+        println("Fetching batch of " + batch.size() + " users...");
         var response = helix.getUsers(null, batch, null).execute();
         response.getUsers().forEach(user -> users.add(new TwitchUser(user)));
     }
@@ -101,13 +102,13 @@ private HashSet<TwitchUser> fetchUsersByName(HashSet<String> names, TwitchHelix 
     if (!currentBatch.isEmpty()) batches.add(currentBatch);
 
     // Log Batching Info
-    IO.println("Total batches: " + batches.size());
-    IO.println("Total users to fetch: " + names.size());
+    println("Total batches: " + batches.size());
+    println("Total users to fetch: " + names.size());
 
     // Fetch Users
     var users = new HashSet<TwitchUser>();
     for (var batch : batches) {
-        IO.println("Fetching batch of " + batch.size() + " users...");
+        println("Fetching batch of " + batch.size() + " users...");
         var response = helix.getUsers(null, null, batch).execute();
         response.getUsers().forEach(user -> users.add(new TwitchUser(user)));
     }

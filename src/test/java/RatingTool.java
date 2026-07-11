@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import static de.MCmoderSD.sql.Driver.DatabaseType.*;
 import static de.MCmoderSD.tools.GZIP.deflateObject;
 import static de.MCmoderSD.utilities.Hasher.xxHash64;
+import static java.lang.IO.println;
 
 void main() {
 
@@ -56,8 +57,8 @@ void main() {
     }
 
     // Print Telemetry
-    IO.println("\nProcessed: " + processed + "/" + unRatedContent.size());
-    IO.println("Flagged: " + flagged + " of " + processed);
+    println("\nProcessed: " + processed + "/" + unRatedContent.size());
+    println("Flagged: " + flagged + " of " + processed);
 }
 
 // SQL Driver Implementation
