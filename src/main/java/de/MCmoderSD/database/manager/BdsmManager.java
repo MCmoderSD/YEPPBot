@@ -1,6 +1,7 @@
 package de.MCmoderSD.database.manager;
 
 
+import de.MCmoderSD.bdsm.data.MatchResult;
 import de.MCmoderSD.bdsm.data.TestResult;
 import de.MCmoderSD.bdsm.enums.Kink;
 import de.MCmoderSD.database.Database;
@@ -204,6 +205,79 @@ public class BdsmManager {
 
         } catch (SQLException e) {
             throw new RuntimeException("Error occurred while retrieving highest kinker results", e);
+        }
+    }
+
+    public void addMatch(MatchResult matchResult) {
+
+        // Check Parameters
+        if (matchResult == null) throw new IllegalArgumentException("MatchResult cannot be null");
+
+        try {
+
+            // Variables
+            var score = matchResult.getScore() / 100d;
+            var data = GZIP.deflateObject(matchResult);
+
+            // Prepare the SQL statement
+            var preparedStatement = database.getConnection().prepareStatement(
+                    "INSERT INTO MatchCache (id, partner, score, data) VALUES (?, ?, ?, ?)"
+            );
+
+            // Set the parameters for the prepared statement
+            preparedStatement.setString(1, matchResult.getResult().getId());
+            preparedStatement.setString(2, matchResult.getPartner().getId());
+            preparedStatement.setDouble(3, score);
+            preparedStatement.setBytes(4, data);
+
+            // Execute the prepared statement
+            preparedStatement.executeUpdate();
+
+            // Close resources
+            preparedStatement.close();
+
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException("Error occurred while adding Match Result", e);
+        }
+    }
+
+    public HashMap<String, MatchResult> getMatchCache(TestResult testResult) {
+
+        // Check Parameters
+        if (testResult == null) throw new IllegalArgumentException("TestResult cannot be null");
+
+        try {
+
+            // Prepare the SQL statement
+            var preparedStatement = database.getConnection().prepareStatement(
+                    "SELECT partner, data FROM MatchCache WHERE id = ?"
+            );
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setString(1, testResult.getId());
+
+            // Execute the query and get the result set
+            var resultSet = preparedStatement.executeQuery();
+
+            // Create a map to hold the match cache
+            var matchCache = new HashMap<String, MatchResult>();
+
+            // Iterate through the result set and populate the match cache
+            while (resultSet.next()) {
+                var key = resultSet.getString("partner");
+                var value = resultSet.getBytes("data");
+                matchCache.put(key, inflateMatchResult(value));
+            }
+
+            // Close resources
+            resultSet.close();
+            preparedStatement.close();
+
+            // Return
+            return matchCache;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error occurred while retrieving match cache", e);
         }
     }
 

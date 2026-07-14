@@ -139,6 +139,7 @@ public class BDSM extends CommandBuilder {
 
             // Fetch All Test Results
             var allResults = bdsmManager.getLatestTestResults().entrySet();
+            var matchCache = bdsmManager.getMatchCache(result.getFirst());
             var matches = new LinkedHashMap<TwitchUser, MatchResult>();
             for (var entry : allResults) {
 
@@ -149,9 +150,19 @@ public class BDSM extends CommandBuilder {
                 // Skip Self
                 if (targetUser.equals(event.getUser())) continue;
 
+                // Check Cache
+                if (matchCache.containsKey(targetResult.getId())) {
+                    matches.put(targetUser, matchCache.get(targetResult.getId()));
+                    continue;
+                }
+
                 // Calculate Match Result
                 var match = api.fetchMatch(result.getFirst(), targetResult);
-                if (match != null) matches.put(targetUser, match);
+                if (match == null) continue;
+
+                // Add to Matches
+                matches.put(targetUser, match);
+                bdsmManager.addMatch(match);
             }
 
             // Sort Matches by Score

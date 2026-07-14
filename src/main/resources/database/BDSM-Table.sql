@@ -35,4 +35,17 @@ CREATE TABLE IF NOT EXISTS BDSM (
     FOREIGN KEY (user) REFERENCES User(id) ON DELETE CASCADE
 )
     ROW_FORMAT = COMPRESSED     # Compressed Row Format
-    KEY_BLOCK_SIZE = 1          # Key Block Size
+    KEY_BLOCK_SIZE = 1;         # Key Block Size
+
+# Match Cache Table
+CREATE TABLE IF NOT EXISTS MatchCache(
+    id      VARCHAR(32) NOT NULL,
+    partner VARCHAR(32) NOT NULL,
+    score   DOUBLE      NOT NULL CHECK ( score >= 0 AND score <= 1),
+    data    BLOB        NOT NULL,
+    PRIMARY KEY (id, partner),
+    FOREIGN KEY (id) REFERENCES BDSM(id) ON DELETE CASCADE,
+    FOREIGN KEY (partner) REFERENCES BDSM(id) ON DELETE CASCADE
+)
+    ROW_FORMAT = COMPRESSED     # Compressed Row Format
+    KEY_BLOCK_SIZE = 1;         # Key Block Size
