@@ -104,6 +104,9 @@ public class BDSM extends CommandBuilder {
 
     private boolean actionMatch(MessageEvent event, ArrayList<String> args, String name, String matchSyntax) {
 
+        // Variables
+        var user = event.getUser();
+
         // Match User
         if (args.get(1).startsWith("@")) {
 
@@ -115,7 +118,7 @@ public class BDSM extends CommandBuilder {
             if (twitchUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer '" + targetUser + "' nicht gefunden YEPP");
 
             // Fetch User Test Result
-            var result = bdsmManager.getTestResults(event.getUser());
+            var result = bdsmManager.getTestResults(user);
             if (result == null || result.isEmpty()) return twitchBot.sendMessage(event, name, "Du hast noch keinen Test gemacht. Bitte benutze " + prefix + "BDSM set <Test-ID> um einen Test hinzuzufügen YEPP");
 
             // Fetch Target User Test Result
@@ -127,14 +130,14 @@ public class BDSM extends CommandBuilder {
             if (match == null) return twitchBot.sendMessage(event, name, "Fehler: Match konnte nicht berechnet werden YEPP");
 
             // Send Match Result Message
-            return twitchBot.sendMessage(event, name, tagUser(event.getUser()) + " und " + tagUser(twitchUser) + " sind zu " + match.getScore() + "% miteinander kompatibel YEPP");
+            return twitchBot.sendMessage(event, name, tagUser(user) + " und " + tagUser(twitchUser) + " sind zu " + match.getScore() + "% miteinander kompatibel YEPP");
         }
 
         // Top Matches
         if (args.get(1).equalsIgnoreCase("top")) {
 
             // Fetch User Test Result
-            var result = bdsmManager.getTestResults(event.getUser());
+            var result = bdsmManager.getTestResults(user);
             if (result == null || result.isEmpty()) return twitchBot.sendMessage(event, name, "Du hast noch keinen Test gemacht. Bitte benutze " + prefix + "BDSM set <Test-ID> um einen Test hinzuzufügen YEPP");
 
             // Fetch All Test Results
@@ -148,7 +151,7 @@ public class BDSM extends CommandBuilder {
                 var targetResult = entry.getValue();
 
                 // Skip Self
-                if (targetUser.equals(event.getUser())) continue;
+                if (targetUser.equals(user)) continue;
 
                 // Check Cache
                 if (matchCache.containsKey(targetResult.getId())) {
@@ -183,7 +186,7 @@ public class BDSM extends CommandBuilder {
             if (mostCompatible.isEmpty()) return twitchBot.sendMessage(event, name, "Fehler: Keine kompatiblen Benutzer gefunden YEPP");
 
             // Send Match Result Message
-            if (amount == 1) return twitchBot.sendMessage(event, name, tagUser(mostCompatible.getFirst().getKey()) + " ist der kompatibelste Benutzer mit einer Kompatibilität von " + mostCompatible.getFirst().getValue().getScore() + "% YEPP");
+            if (amount == 1) return twitchBot.sendMessage(event, name, tagUser(user) + " ist am kompatibelsten mit " + tagUser(mostCompatible.getFirst().getKey()) + " mit einer kompatibilität von " + mostCompatible.getFirst().getValue().getScore() + "% YEPP");
 
             // Send Match Result Message for Multiple Users
             if (amount > 1) {
@@ -197,7 +200,7 @@ public class BDSM extends CommandBuilder {
                 }
 
                 // Send Result Message
-                var message = "Die " + amount + " kompatibelsten Benutzer sind: " + sb.substring(0, sb.length() - 2) + " YEPP";
+                var message = tagUser(user) + " deine " + amount + " kompatibelsten Benutzer sind: " + sb.substring(0, sb.length() - 2) + " YEPP";
                 return twitchBot.sendMessage(event, name,  message);
             }
         }
