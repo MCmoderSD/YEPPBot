@@ -1,4 +1,3 @@
-
 # Base Image JRE 25
 FROM eclipse-temurin:25-jre-alpine
 

@@ -1,3 +1,7 @@
+### Git ###
+.github/
+.git/
+
 ### IntelliJ IDEA ###
 .idea/
 
@@ -19,6 +23,9 @@ src/main/resources/config/dev-config.json
 src/main/resources/META-INF/
 src/main/resources.zip
 src/test/resources/
+
+### Target ###
+target/
 
 ### Test Files ###
 TestStatic.webm

@@ -8,9 +8,26 @@
     <artifactId>YEPPBot</artifactId>
     <version>1.26.0-PTB-1</version>
 
+    <name>YEPPBot</name>
+    <description>A Twitch bot with moderation, chat interaction and utility commands</description>
+    <url>https://github.com/MCmoderSD/YEPPBot</url>
+
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>https://github.com/MCmoderSD/YEPPBot/blob/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/MCmoderSD/YEPPBot</url>
+        <connection>scm:git:https://github.com/MCmoderSD/YEPPBot.git</connection>
+        <developerConnection>scm:git:https://github.com/MCmoderSD/YEPPBot.git</developerConnection>
+    </scm>
+
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -70,7 +87,7 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>OpenWeatherMap</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.2</version>
         </dependency>
 
         <!-- ZIP Tools -->
@@ -122,7 +139,6 @@
                         <goals><goal>shade</goal></goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
 
                             <filters>
                                 <filter>
