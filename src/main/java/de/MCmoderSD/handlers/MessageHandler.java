@@ -113,7 +113,7 @@ public class MessageHandler {
         if (isCommand(message)) return commandHandler.handleCommand(event);
 
         // Handle YEPP
-        if (mentionsBot(message)) {
+        if (message.startsWith("@") && mentionsBot(message)) {
 
             // Variables
             var user = event.getUser();
