@@ -10,6 +10,8 @@ import com.github.twitch4j.TwitchClientHelper;
 import com.github.twitch4j.chat.TwitchChat;
 import com.github.twitch4j.helix.TwitchHelix;
 
+import de.MCmoderSD.api.ApiHandler;
+
 import de.MCmoderSD.commands.BDSM;
 import de.MCmoderSD.commands.Birthday;
 import de.MCmoderSD.commands.ChatGPT;
@@ -117,6 +119,7 @@ public class TwitchBot {
     private final BirthdayHandler birthdayHandler;  // Birthday Handler
     private final LurkHandler lurkHandler;          // Lurk Handler
     private final CommandHandler commandHandler;    // Command Handler
+    private final ApiHandler apiHandler;            // API Handler
 
     // Constructor
     public TwitchBot(JsonNode twitchConfig, JsonNode databaseConfig, Server server, @Nullable OpenAI openAI) {
@@ -135,7 +138,7 @@ public class TwitchBot {
         this.openAI = openAI;
 
         // Initialize Database
-        database = new Database(Database.builder()
+        database = new Database(this, Database.builder()
                 .withType(MARIADB)
                 .withHost(databaseConfig.get("host").asString())
                 .withPort(databaseConfig.get("port").asInt())
@@ -244,6 +247,12 @@ public class TwitchBot {
         new Shoutout(this);
         new Status(this);
         new Weather(this);
+
+        // Fetch Commands from Database
+        commandManager.initCustomCommands();
+
+        // Initialize API Handler
+        apiHandler = new ApiHandler(this, clientSecret);
 
         // Add Initial Channels from Config to Database
         var configChannels = obtainChannels(twitchConfig.get("channel"), userHandler);
@@ -664,6 +673,10 @@ public class TwitchBot {
 
     public CommandHandler getCommandHandler() {
         return commandHandler;
+    }
+
+    public ApiHandler getApiHandler() {
+        return apiHandler;
     }
 
     // Checks

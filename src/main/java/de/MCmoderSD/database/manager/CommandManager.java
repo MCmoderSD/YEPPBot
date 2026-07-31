@@ -1,6 +1,8 @@
 package de.MCmoderSD.database.manager;
 
 import de.MCmoderSD.database.Database;
+import de.MCmoderSD.helix.objects.TwitchUser;
+import de.MCmoderSD.commands.blueprints.CustomCommand;
 import de.MCmoderSD.objects.MessageEvent;
 
 import java.sql.SQLException;
@@ -9,6 +11,7 @@ import java.util.UUID;
 
 import static de.MCmoderSD.utilities.FormatUUID.asBytes;
 import static de.MCmoderSD.utilities.Hasher.xxHash64;
+import static de.MCmoderSD.utilities.ZipUtil.inflateTwitchUser;
 import static java.sql.Types.BINARY;
 
 public class CommandManager {
@@ -108,6 +111,67 @@ public class CommandManager {
 
             } catch (SQLException e) {
                 throw new RuntimeException("Failed to log Command: " + e.getMessage(), e);
+            }
+        }).start();
+    }
+
+    // Get Custom Commands
+    public void initCustomCommands() {
+        new Thread(() -> {
+            try {
+
+                // Fetch commands from database
+                var fetchCommandsStatement = database.getConnection().prepareStatement(
+                        "SELECT * FROM CustomCommands c JOIN User u ON c.id = u.id;"
+                );
+
+                // Execute the statement
+                var resultSet = fetchCommandsStatement.executeQuery();
+
+                 while (resultSet.next()) {
+                     var twitchBot = database.getTwitchBot();
+                     var channel = inflateTwitchUser(resultSet.getBytes("user"));
+                     new CustomCommand(twitchBot, channel, resultSet);
+                 }
+
+                // Close the statement and result set
+                resultSet.close();
+                fetchCommandsStatement.close();
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to fetch Custom Commands: " + e.getMessage(), e);
+            }
+        }).start();
+    }
+
+    public void fetchCustomCommandsForChannel(TwitchUser channel) {
+        new Thread(() -> {
+            try {
+
+                // Check Parameters
+                if (channel == null) throw new IllegalArgumentException("Channel cannot be null");
+
+                // Fetch commands from database
+                var fetchCommandsStatement = database.getConnection().prepareStatement(
+                        "SELECT * FROM CustomCommands WHERE id = ?;"
+                );
+
+                // Set the channel ID
+                fetchCommandsStatement.setInt(1, channel.getId());
+
+                // Execute the statement
+                var resultSet = fetchCommandsStatement.executeQuery();
+
+                var twitchBot = database.getTwitchBot();
+                twitchBot.getCommandHandler().resetCustomCommands(channel);
+                while (resultSet.next()) new CustomCommand(twitchBot, channel, resultSet);
+
+                // Close the statement and result set
+                resultSet.close();
+                fetchCommandsStatement.close();
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to fetch Custom Commands for channel: " + channel.getDisplayName() + " - " + e.getMessage(), e);
             }
         }).start();
     }

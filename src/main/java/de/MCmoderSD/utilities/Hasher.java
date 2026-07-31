@@ -4,8 +4,16 @@ import net.jpountz.xxhash.XXHash32;
 import net.jpountz.xxhash.XXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+
 @SuppressWarnings("unused")
 public class Hasher {
+
+    // SHA-256 Algorithm
+    private static final String SHA256 = "SHA-256";
 
     // XXHash Instances
     private static final XXHashFactory factory = XXHashFactory.fastestInstance();
@@ -44,5 +52,27 @@ public class Hasher {
 
     public static byte[] xxHash64(String data) {
         return xxHash64(data.getBytes());
+    }
+
+    // SHA-256 Methods
+    public static byte[] sha256(byte[] data) {
+
+        // Check Parameters
+        if (data == null) throw new IllegalArgumentException("Data cannot be null");
+
+        // Hash Data
+        try {
+            return MessageDigest.getInstance(SHA256).digest(data);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 algorithm is not available", e);
+        }
+    }
+
+    public static byte[] sha256(String data) {
+        return sha256(data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String sha256Hex(String data) {
+        return HexFormat.of().formatHex(sha256(data));
     }
 }

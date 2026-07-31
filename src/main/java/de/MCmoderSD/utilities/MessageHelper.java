@@ -22,6 +22,7 @@ public class MessageHelper {
     public final static String USER = "[USR]";
     public final static String EVENT = "[EVT]";
     public final static String COMMAND = "[CMD]";
+    public final static String API = "[API]";
     public final static String MESSAGE = "[MSG]";
     public final static String WARNING = "[WRN]";
     public final static String ERROR = "[ERR]";

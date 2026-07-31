@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static de.MCmoderSD.utilities.MessageHelper.*;
 
@@ -32,7 +33,9 @@ public class CommandHandler {
     private final ArrayList<String> prefixes;
     private final HashMap<String, Command> commandMap;
     private final HashMap<String, String> aliasMap;
-    private final HashMap<TwitchUser, HashSet<String>> blacklist;
+    private final ConcurrentHashMap<TwitchUser, HashSet<String>> blacklist;
+    private final ConcurrentHashMap<TwitchUser, HashMap<String, Command>> customCommands;
+    private final ConcurrentHashMap<TwitchUser, HashMap<String, String>> customAliases;
 
     // Constructor
     public CommandHandler(TwitchBot twitchBot) {
@@ -53,7 +56,9 @@ public class CommandHandler {
         prefixes = twitchBot.getPrefixes();
         commandMap = new HashMap<>();
         aliasMap = new HashMap<>();
-        blacklist = channelManager.getBlacklist();
+        customCommands = new ConcurrentHashMap<>();
+        customAliases = new ConcurrentHashMap<>();
+        blacklist = new ConcurrentHashMap<>(channelManager.getBlacklist());
     }
 
     // Update Blacklist
@@ -117,6 +122,7 @@ public class CommandHandler {
         if (event == null) throw new IllegalArgumentException("MessageEvent cannot be null");
 
         // Variables
+        var channel = event.getChannel();
         var parts = formatCommand(event);
         var trigger = parts.getFirst().toLowerCase();
 
@@ -141,7 +147,7 @@ public class CommandHandler {
 
             // Log Command
             if (success) {
-                System.out.printf("%s <%s> #%s executed command: %s%n", COMMAND, event.getChannel().getDisplayName(), event.getUser().getDisplayName(), trigger);
+                System.out.printf("%s <%s> #%s executed command: %s%n", COMMAND, channel.getDisplayName(), event.getUser().getDisplayName(), trigger);
 
                 // Join Args
                 var args = String.join(SPACE, parts);
@@ -158,6 +164,43 @@ public class CommandHandler {
 
             // Return
             return success;
+        }
+
+        var alias = customAliases.get(channel);
+
+        // Check for Custom Command
+        if (alias != null && alias.containsKey(trigger)) {
+            trigger = alias.get(trigger);
+            parts.set(0, trigger);
+        }
+
+        // Check for Custom Command
+        var custom = customCommands.get(channel);
+        if (custom != null && custom.containsKey(trigger)) {
+
+            // Get Command
+            var command = custom.get(trigger);
+            parts.removeFirst();
+
+            // Execute Command
+            var success = command.execute(event, parts);
+
+            // Log Command
+            if (success) {
+                System.out.printf("%s <%s> #%s executed command: %s%n", COMMAND, channel.getDisplayName(), event.getUser().getDisplayName(), trigger);
+
+                // Join Args
+                var args = String.join(SPACE, parts);
+
+                // Insert Message and Related Data
+                if (!args.isBlank() && messageManager.insertMessage(args) && !(embeddingService == null || moderationService == null)) {
+                    new Thread(() -> messageManager.insertRating(moderationService.create(args))).start();
+                    new Thread(() -> messageManager.insertEmbedding(embeddingService.create(args))).start();
+                }
+
+                // Log Command
+                commandManager.logCommand(event, trigger, args);
+            }
         }
 
         // Command not found
@@ -184,6 +227,44 @@ public class CommandHandler {
 
         // Return
         return true;
+    }
+
+    public boolean registerCustomCommand(TwitchUser twitchUser, Command command) {
+
+        // Check Parameters
+        if (command == null) throw new IllegalArgumentException("Command cannot be null");
+
+        // Variables
+        var name = command.getName().toLowerCase();
+
+        // Check if Command already exists
+        if (commandMap.containsKey(name)) return false;
+        for (var alias : command.getAliases()) if (aliasMap.containsKey(alias.toLowerCase())) return false;
+
+        // Register Custom Command
+        if (!customCommands.containsKey(twitchUser)) customCommands.put(twitchUser, new HashMap<>());
+        if (!customAliases.containsKey(twitchUser)) customAliases.put(twitchUser, new HashMap<>());
+
+        // Check if Custom Command already exists
+        if (customCommands.get(twitchUser).containsKey(name)) return false;
+        for (var alias : command.getAliases()) if (customAliases.get(twitchUser).containsKey(alias.toLowerCase())) return false;
+
+        // Register Command
+        customCommands.get(twitchUser).put(name, command);
+        for (var alias : command.getAliases()) customAliases.get(twitchUser).put(alias.toLowerCase(), name);
+
+        // Return
+        return true;
+    }
+
+    public void resetCustomCommands(TwitchUser twitchUser) {
+
+        // Check Parameters
+        if (twitchUser == null) throw new IllegalArgumentException("TwitchUser cannot be null");
+
+        // Reset Custom Commands
+        customCommands.remove(twitchUser);
+        customAliases.remove(twitchUser);
     }
 
     public HashSet<Command> getCommands(TwitchUser channel) {

@@ -1,5 +1,6 @@
 package de.MCmoderSD.database;
 
+import de.MCmoderSD.core.TwitchBot;
 import de.MCmoderSD.database.manager.*;
 import de.MCmoderSD.enums.UserImageType;
 import de.MCmoderSD.helix.objects.TwitchUser;
@@ -20,6 +21,9 @@ import static java.util.UUID.fromString;
 
 public class Database extends Driver {
 
+    // Associations
+    private final TwitchBot twitchBot;
+
     // Managers
     private final ChannelManager channelManager;
     private final MessageManager messageManager;
@@ -33,7 +37,7 @@ public class Database extends Driver {
     private final QuoteManager quoteManager;
 
     // Constructor
-    public Database(Builder builder) {
+    public Database(TwitchBot twitchBot, Builder builder) {
 
         // Initialize Driver
         super(builder);
@@ -52,6 +56,7 @@ public class Database extends Driver {
         var bdsmTable = loadTables("database/BDSM-Table.sql");
         var lurker = loadTables("database/LurkerTable.sql");
         var openAI = loadTables("database/OpenAI.sql");
+        var commands = loadTables("database/CommandsTable.sql");
         var queue = loadTables("database/QueueTable.sql");
         var quotes = loadTables("database/QuoteTable.sql");
 
@@ -65,6 +70,7 @@ public class Database extends Driver {
         initTables(bdsmTable);      // BDSM Table                               | needs UserTable
         initTables(lurker);         // Lurker Table                             | needs UserTable
         initTables(openAI);         // Conversation Table                       | needs UserTable
+        initTables(commands);       // Commands Table                            | needs UserTable
         initTables(queue);          // Queue Table                              | needs ChannelTable
         initTables(quotes);         // Quote Table                              | needs ChannelTable
 
@@ -79,6 +85,9 @@ public class Database extends Driver {
         openAIManger = new OpenAIManger(this);
         queueManager = new QueueManager(this);
         quoteManager = new QuoteManager(this);
+
+        // Set Associations
+        this.twitchBot = twitchBot;
     }
 
     // Load SQL Table Creation Statements from Resource File
@@ -248,6 +257,10 @@ public class Database extends Driver {
     }
 
     // Getter
+    public TwitchBot getTwitchBot() {
+        return twitchBot;
+    }
+
     public ChannelManager getChannelManager() {
         return channelManager;
     }
