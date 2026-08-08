@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.stream.Stream;
 import java.util.ArrayList;
-import java.util.Arrays;
 
+import static de.MCmoderSD.helix.enums.Scope.*;
 import static de.MCmoderSD.utilities.MessageHelper.ICON;
 
 public class Main {
@@ -46,13 +46,39 @@ public class Main {
             if (twitchBot == null) return;
 
             // var all = Scope.values();
-            var used = new ArrayList<>(Arrays.asList(
-                    UserHandler.REQUIRED_SCOPES,
-                    ChatHandler.REQUIRED_SCOPES,
-                    RoleHandler.REQUIRED_SCOPES,
-                    StreamHandler.REQUIRED_SCOPES,
-                    ChannelHandler.REQUIRED_SCOPES
-            )).stream().flatMap(Stream::of).distinct().toArray(Scope[]::new);
+            var used = Stream.concat(
+
+                    // Handlers Required Scopes
+                    Stream.of(
+                            UserHandler.REQUIRED_SCOPES,
+                            ChatHandler.REQUIRED_SCOPES,
+                            RoleHandler.REQUIRED_SCOPES,
+                            StreamHandler.REQUIRED_SCOPES,
+                            ChannelHandler.REQUIRED_SCOPES
+                    ).flatMap(Stream::of),
+
+                    // Additional Scopes
+                    Stream.of(
+                            CHANNEL_EDIT_COMMERCIAL,
+                            CHANNEL_READ_EDITORS,
+                            CHANNEL_MANAGE_MODERATORS,
+                            CHANNEL_MANAGE_RAIDS,
+                            CHANNEL_READ_SUBSCRIPTIONS,
+                            CHANNEL_READ_VIPS,
+                            CHANNEL_MANAGE_VIPS,
+                            MODERATION_READ,
+                            MODERATOR_MANAGE_BANNED_USERS,
+                            MODERATOR_MANAGE_CHAT_MESSAGES,
+                            MODERATOR_READ_CHATTERS,
+                            MODERATOR_READ_FOLLOWERS,
+                            MODERATOR_MANAGE_SHOUTOUTS,
+                            USER_READ_BLOCKED_USERS,
+                            USER_MANAGE_BLOCKED_USERS,
+                            USER_READ_EMAIL
+                    )
+
+            ).distinct().toArray(Scope[]::new);
+
             IO.println("Authenticate: " + twitchBot.getHelixHandler().getAuthorizationUrl(used));
 
         } catch (IOException | URISyntaxException e) {
