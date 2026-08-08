@@ -1,0 +1,339 @@
+name: Publish & Release
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_NAME: yeppbot
+  JAVA_VERSION: "25"
+  JAVA_DISTRIBUTION: zulu
+  MAVEN_ARGS: -B -ntp
+
+jobs:
+
+  build:
+    name: Build jar
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, 'release')
+    outputs:
+      version: ${{ steps.project.outputs.version }}
+      release: ${{ steps.project.outputs.release }}
+      jar: ${{ steps.assets.outputs.jar }}
+      md5: ${{ steps.assets.outputs.md5 }}
+      sha1: ${{ steps.assets.outputs.sha1 }}
+      sha256: ${{ steps.assets.outputs.sha256 }}
+
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - id: setup-java
+        name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: maven
+
+      - id: build
+        name: Build fat jar
+        run: mvn -T 1C clean package
+
+      - id: project
+        name: Resolve project version
+        run: |
+          VERSION="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+          case "$VERSION" in
+            *-SNAPSHOT) RELEASE=false ;;
+            *)          RELEASE=true  ;;
+          esac
+          echo "release=${RELEASE}" >> "$GITHUB_OUTPUT"
+
+          echo "Resolved version ${VERSION} (GitHub release: ${RELEASE})"
+
+      - id: assets
+        name: Collect artifact and checksums
+        run: |
+          JAR="$(find target -maxdepth 1 -type f -name '*.jar' \
+            ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name 'original-*.jar' \
+            | head -n 1)"
+
+          if [ -z "$JAR" ]; then
+            echo "::error::No build artifact found in target/"
+            exit 1
+          fi
+
+          mkdir -p dist
+          cp "$JAR" dist/
+
+          {
+            echo "jar=$(basename "$JAR")"
+            echo "md5=$(md5sum "$JAR" | cut -d ' ' -f 1)"
+            echo "sha1=$(sha1sum "$JAR" | cut -d ' ' -f 1)"
+            echo "sha256=$(sha256sum "$JAR" | cut -d ' ' -f 1)"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Built $(basename "$JAR")"
+
+      - id: upload-jar
+        name: Upload jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: jar
+          path: dist/*.jar
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    name: GitHub release
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.outputs.release == 'true'
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: download-jar
+        name: Download jar
+        uses: actions/download-artifact@v8
+        with:
+          name: jar
+          path: release-assets
+
+      - id: attest
+        name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: release-assets/*.jar
+
+      - id: changelog
+        name: Build changelog link
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          PREVIOUS="$(git tag --sort=-creatordate | grep -vFx "$VERSION" | head -n 1 || true)"
+
+          if [ -z "$PREVIOUS" ]; then
+            echo "No previous tag found, linking full commit history"
+            echo "url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commits/${VERSION}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Previous tag: ${PREVIOUS}"
+            echo "url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/${PREVIOUS}...${VERSION}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - id: release
+        name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.build.outputs.version }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          CHANGELOG_URL: ${{ steps.changelog.outputs.url }}
+          MD5: ${{ needs.build.outputs.md5 }}
+          SHA1: ${{ needs.build.outputs.sha1 }}
+          SHA256: ${{ needs.build.outputs.sha256 }}
+        run: |
+          cat > release-notes.md <<EOF
+          **Full Changelog**: ${CHANGELOG_URL}
+
+          ## Checksums:
+
+          - MD5: ${MD5}
+          - SHA1: ${SHA1}
+          - SHA256: ${SHA256}
+          EOF
+
+          gh release create "$VERSION" release-assets/* \
+            --target "$GITHUB_SHA" \
+            --title "${REPO_NAME} - Release ${VERSION}" \
+            --notes-file release-notes.md
+
+  image:
+    name: Image ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - id: download-jar
+        name: Download jar
+        uses: actions/download-artifact@v8
+        with:
+          name: jar
+
+      - id: stage-jar
+        name: Stage jar for the build context
+        env:
+          JAR: ${{ needs.build.outputs.jar }}
+        run: mv "$JAR" app.jar
+
+      - id: prepare
+        name: Prepare platform slug and image names
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          echo "slug=${PLATFORM//\//-}" >> "$GITHUB_OUTPUT"
+          echo "ghcr-image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+
+      - id: buildx
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - id: login-dockerhub
+        name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - id: login-ghcr
+        name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        name: Generate image metadata
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            docker.io/${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+            ${{ steps.prepare.outputs.ghcr-image }}
+
+      - id: build
+        name: Build and push by digest
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,"name=docker.io/${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }},${{ steps.prepare.outputs.ghcr-image }}",push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ steps.prepare.outputs.slug }}
+          cache-to: type=gha,mode=max,scope=${{ steps.prepare.outputs.slug }}
+
+      - id: export-digest
+        name: Export digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p "${RUNNER_TEMP}/digests"
+          touch "${RUNNER_TEMP}/digests/${DIGEST#sha256:}"
+
+      - id: upload-digest
+        name: Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-${{ steps.prepare.outputs.slug }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  manifest:
+    name: Create manifest list
+    runs-on: ubuntu-latest
+    needs: [build, image]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - id: download-digests
+        name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - id: prepare
+        name: Prepare image names
+        run: echo "ghcr-image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+
+      - id: buildx
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - id: login-dockerhub
+        name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - id: login-ghcr
+        name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        name: Generate image metadata
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            docker.io/${{ vars.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+            ${{ steps.prepare.outputs.ghcr-image }}
+          tags: |
+            type=raw,value=${{ needs.build.outputs.version }}
+            type=raw,value=latest,enable=${{ needs.build.outputs.release == 'true' }}
+
+      - id: create-manifest
+        name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        env:
+          SOURCE_IMAGE: ${{ steps.prepare.outputs.ghcr-image }}
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf "${SOURCE_IMAGE}@sha256:%s " *)
+
+      - id: inspect
+        name: Inspect image
+        env:
+          SOURCE_IMAGE: ${{ steps.prepare.outputs.ghcr-image }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: docker buildx imagetools inspect "${SOURCE_IMAGE}:${VERSION}"

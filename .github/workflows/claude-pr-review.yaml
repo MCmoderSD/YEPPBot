@@ -1,0 +1,94 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: read
+  actions: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  review:
+    name: Automated Code Review
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.user.type != 'Bot'
+
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - id: claude-review
+        name: Claude Review
+        uses: anthropics/claude-code-action@v1.0.185
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          use_sticky_comment: true
+          classify_inline_comments: true
+          track_progress: true
+          include_fix_links: true
+          display_report: true
+          additional_permissions: |
+            actions: read
+          claude_args: |
+            --model sonnet
+            --allowedTools "Read,Glob,Grep,LSP,Bash,WebFetch,WebSearch,Agent,Skill,TodoWrite,ToolSearch,TaskCreate,TaskGet,TaskList,TaskOutput,TaskStop,TaskUpdate,ListMcpResourcesTool,ReadMcpResourceTool"
+            --disallowedTools "Edit,Write,NotebookEdit"
+          prompt: |
+            Review target: this pull request.
+
+            Gather the diff with (instead of any local `git diff`):
+            1. `gh pr view ${{ github.event.pull_request.number }} --json title,body,author,baseRefName,headRefName,state,additions,deletions,changedFiles,labels` for context
+            2. `gh pr diff ${{ github.event.pull_request.number }}` for the unified diff
+
+            The PR's diff is the only review scope — local working-tree changes
+            are out of scope. When you need surrounding code, read the files in
+            this checkout if it matches the PR's branch, otherwise fetch file
+            contents via `gh`.
+
+            Analyze the changes and provide a thorough code review that includes:
+            - A one- or two-sentence overview of what the PR does
+            - Analysis of code quality and style
+            - Specific, actionable suggestions for improvement
+            - Any potential issues or risks, each with a severity, a file:line
+              location, and a concrete fix — not vague prose
+
+            Keep your review concise but thorough. Focus on:
+            - Code correctness — logic errors, unhandled failure modes,
+              behaviour that does not match the PR description
+            - Following project conventions
+            - Performance implications
+            - Test coverage
+            - Security — hardcoded secrets/tokens/passwords; injection risks
+              (command, SQL, path traversal); auth/authorization gaps. If the
+              diff touches CI/CD workflows: overly broad `permissions:` blocks,
+              unpinned actions (`@main` instead of a tag/SHA), `pull_request_target`
+              combined with checkout of fork code, or unescaped GitHub Actions
+              expression interpolation (double-curly-brace syntax) inside
+              `run:` blocks. If the diff touches a Dockerfile: containers
+              running as root, secrets baked into layers, or unpinned base images.
+
+            Rules for your review:
+            - Only comment on what you actually see in the diff. Do not invent
+              problems or speculate about unchanged files.
+            - Skip pure style and taste preferences unless they have a real effect.
+            - If the PR is clean, say so briefly — no filler.
+            - Format your review with clear sections and bullet points.
+            - You have read-only access. Investigate freely (read files, run
+              shell commands, search the web, check CI logs), but do not modify
+              any files and do not commit anything. Post the review as a PR
+              comment.
