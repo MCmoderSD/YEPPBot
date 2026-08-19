@@ -30,9 +30,15 @@ public abstract class Controller implements HttpHandler {
     // Attributes
     private final String endpoint;
     private final String key;
+    private final boolean requiresChannel;
 
     // Constructor
     protected Controller(TwitchBot twitchBot, String endpoint, String key) {
+        this(twitchBot, endpoint, key, true);
+    }
+
+    // Constructor
+    protected Controller(TwitchBot twitchBot, String endpoint, String key, boolean requiresChannel) {
 
         // Check Parameters
         if (twitchBot == null) throw new IllegalArgumentException("TwitchBot cannot be null");
@@ -46,6 +52,7 @@ public abstract class Controller implements HttpHandler {
         // Set Attributes
         this.endpoint = endpoint;
         this.key = key;
+        this.requiresChannel = requiresChannel;
     }
 
     // Handle Request
@@ -71,19 +78,29 @@ public abstract class Controller implements HttpHandler {
             return;
         }
 
-        // Parse User ID
-        var userId = parseUserId(exchange.getRelativePath());
-        if (userId == null) {
-            ApiResponse.badRequest("Invalid or missing user ID, expected: /" + endpoint + "/{userID}").send(exchange);
-            return;
-        }
-
         // Resolve Channel
-        TwitchUser channel;
-        try {
-            channel = userHandler.getTwitchUser(userId);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            ApiResponse.notFound("No Twitch user found with ID: " + userId).send(exchange);
+        TwitchUser channel = null;
+        if (requiresChannel) {
+
+            // Parse User ID
+            var userId = parseUserId(exchange.getRelativePath());
+            if (userId == null) {
+                ApiResponse.badRequest("Invalid or missing user ID, expected: /" + endpoint + "/{userID}").send(exchange);
+                return;
+            }
+
+            // Resolve Channel
+            try {
+                channel = userHandler.getTwitchUser(userId);
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                ApiResponse.notFound("No Twitch user found with ID: " + userId).send(exchange);
+                return;
+            }
+
+        } else if (!isRootPath(exchange.getRelativePath())) {
+
+            // Reject Path Segments
+            ApiResponse.badRequest("Endpoint " + endpoint + " does not accept a user ID, expected: /" + endpoint).send(exchange);
             return;
         }
 
@@ -120,6 +137,11 @@ public abstract class Controller implements HttpHandler {
         );
     }
 
+    // Check for Root Path
+    private static boolean isRootPath(String path) {
+        return path == null || path.isBlank() || path.replace("/", "").isBlank();
+    }
+
     // Parse User ID
     private static Integer parseUserId(String path) {
 
@@ -143,11 +165,15 @@ public abstract class Controller implements HttpHandler {
         }
     }
 
-    // Execute Controller
+    // Execute Controller, channel is null for endpoints that do not require one
     protected abstract ApiResponse execute(TwitchUser channel);
 
     // Getter
     public String getEndpoint() {
         return endpoint;
+    }
+
+    public boolean requiresChannel() {
+        return requiresChannel;
     }
 }

@@ -3,6 +3,7 @@ package de.MCmoderSD.api;
 import de.MCmoderSD.api.controller.Controller;
 import de.MCmoderSD.api.controller.JoinChannel;
 import de.MCmoderSD.api.controller.LeaveChannel;
+import de.MCmoderSD.api.controller.UpdateBlacklist;
 import de.MCmoderSD.api.controller.UpdateCustomCommands;
 
 import de.MCmoderSD.core.TwitchBot;
@@ -46,6 +47,7 @@ public class ApiHandler {
         register(new JoinChannel(twitchBot, key));
         register(new LeaveChannel(twitchBot, key));
         register(new UpdateCustomCommands(twitchBot, key));
+        register(new UpdateBlacklist(twitchBot, key));
 
         // Log
         System.out.printf("%s%s Registered %d API endpoints under %s%s%n", BOLD, API, controllers.size(), BASE_PATH, UNBOLD);

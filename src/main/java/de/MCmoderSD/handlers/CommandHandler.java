@@ -61,6 +61,18 @@ public class CommandHandler {
         blacklist = new ConcurrentHashMap<>(channelManager.getBlacklist());
     }
 
+    // Fetch Blacklist from Database
+    public int fetchBlacklist() {
+
+        // Reload Blacklist
+        updateBlacklist(channelManager.getBlacklist());
+
+        // Count Entries
+        var entries = 0;
+        for (var commands : blacklist.values()) entries += commands.size();
+        return entries;
+    }
+
     // Update Blacklist
     private void updateBlacklist(HashMap<TwitchUser, HashSet<String>> blacklist) {
 
