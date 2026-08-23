@@ -13,6 +13,7 @@ import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.database.manager.OpenAIManger;
 import de.MCmoderSD.database.manager.QueueManager;
 import de.MCmoderSD.database.manager.QuoteManager;
+import de.MCmoderSD.database.manager.SubathonManager;
 
 import de.MCmoderSD.handlers.EventHandler;
 import de.MCmoderSD.handlers.MessageHandler;
@@ -53,6 +54,7 @@ public abstract class CommandBuilder {
     protected final OpenAIManger openAIManger;          // OpenAI Manager
     protected final QueueManager queueManager;          // Queue Manager
     protected final QuoteManager quoteManager;          // Quote Manager
+    protected final SubathonManager subathonManager;    // Subathon Manager
 
     // Helix-Handlers
     protected final HelixHandler helixHandler;          // Helix Handler
@@ -99,6 +101,7 @@ public abstract class CommandBuilder {
         openAIManger = twitchBot.getOpenAIManger();
         queueManager = twitchBot.getQueueManager();
         quoteManager = twitchBot.getQuoteManager();
+        subathonManager = twitchBot.getSubathonManager();
 
         // Set Handlers
         helixHandler = twitchBot.getHelixHandler();

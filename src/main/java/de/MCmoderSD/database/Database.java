@@ -35,6 +35,7 @@ public class Database extends Driver {
     private final OpenAIManger openAIManger;
     private final QueueManager queueManager;
     private final QuoteManager quoteManager;
+    private final SubathonManager subathonManager;
 
     // Constructor
     public Database(TwitchBot twitchBot, Builder builder) {
@@ -59,6 +60,7 @@ public class Database extends Driver {
         var commands = loadTables("database/CommandsTable.sql");
         var queue = loadTables("database/QueueTable.sql");
         var quotes = loadTables("database/QuoteTable.sql");
+        var subathon = loadTables("database/SubathonTable.sql");
 
         // Initialize Tables
         initTables(userTable);      // User & UserImage Tables
@@ -70,9 +72,10 @@ public class Database extends Driver {
         initTables(bdsmTable);      // BDSM Table                               | needs UserTable
         initTables(lurker);         // Lurker Table                             | needs UserTable
         initTables(openAI);         // Conversation Table                       | needs UserTable
-        initTables(commands);       // Commands Table                            | needs UserTable
+        initTables(commands);       // Commands Table                           | needs UserTable
         initTables(queue);          // Queue Table                              | needs ChannelTable
         initTables(quotes);         // Quote Table                              | needs ChannelTable
+        initTables(subathon);       // Subathon Timer Table                     | needs ChannelTable
 
         // Initialize Managers
         channelManager = new ChannelManager(this);
@@ -85,6 +88,7 @@ public class Database extends Driver {
         openAIManger = new OpenAIManger(this);
         queueManager = new QueueManager(this);
         quoteManager = new QuoteManager(this);
+        subathonManager = new SubathonManager(this);
 
         // Set Associations
         this.twitchBot = twitchBot;
@@ -299,5 +303,9 @@ public class Database extends Driver {
 
     public QuoteManager getQuoteManager() {
         return quoteManager;
+    }
+
+    public SubathonManager getSubathonManager() {
+        return subathonManager;
     }
 }

@@ -26,6 +26,7 @@ import de.MCmoderSD.commands.RoleSwap;
 import de.MCmoderSD.commands.Say;
 import de.MCmoderSD.commands.Shoutout;
 import de.MCmoderSD.commands.Status;
+import de.MCmoderSD.commands.Timer;
 import de.MCmoderSD.commands.Weather;
 
 import de.MCmoderSD.database.Database;
@@ -39,6 +40,7 @@ import de.MCmoderSD.database.manager.LurkManager;
 import de.MCmoderSD.database.manager.OpenAIManger;
 import de.MCmoderSD.database.manager.QueueManager;
 import de.MCmoderSD.database.manager.QuoteManager;
+import de.MCmoderSD.database.manager.SubathonManager;
 
 import de.MCmoderSD.handlers.EventHandler;
 import de.MCmoderSD.handlers.MessageHandler;
@@ -90,6 +92,7 @@ public class TwitchBot {
     private final OpenAIManger openAIManger;        // OpenAI Manager
     private final QueueManager queueManager;        // Queue Manager
     private final QuoteManager quoteManager;        // Quote Manager
+    private final SubathonManager subathonManager;  // Subathon Manager
 
     // Configuration
     private final TwitchUser botUser;               // Bot User
@@ -158,6 +161,7 @@ public class TwitchBot {
         openAIManger = database.getOpenAIManger();
         queueManager = database.getQueueManager();
         quoteManager = database.getQuoteManager();
+        subathonManager = database.getSubathonManager();
 
         // Parse Config
         var applicationConfig = twitchConfig.get("application");
@@ -180,7 +184,7 @@ public class TwitchBot {
                 .withCredentialManager(credentialManager)   // Set Credential Manager
                 .withChatAutoJoinOwnChannel(true);          // Auto-Join Bot's Own Channel
 
-        // Obtain Twitch Users
+        // Get Twitch Users
         botUser = obtainBotUser(defaultAuthToken);
         owners = obtainOwnerUsers(twitchConfig.get("owner"), defaultAuthToken);
         owners.add(botUser);
@@ -246,6 +250,7 @@ public class TwitchBot {
         new Say(this);
         new Shoutout(this);
         new Status(this);
+        new Timer(this);
         new Weather(this);
 
         // Fetch Commands from Database
@@ -259,7 +264,7 @@ public class TwitchBot {
         for (var channel : configChannels) channelManager.joinChannel(channel);
         channelManager.joinChannel(botUser); // Ensure Bot Joins Its Own Channel
 
-        // Obtain Channels from Database
+        // Get Channels from Database
         var channels = channelManager.getChannels();
 
         // Join with Rate Limit Handling
@@ -269,7 +274,7 @@ public class TwitchBot {
                 joinChannel(channel.getKey());  // Join Channel
                 Thread.sleep(delay);            // Wait to avoid rate limits
             } catch (InterruptedException e) {
-                throw new RuntimeException("Failed to join channels from database: " + e.getMessage(), e);
+                throw new RuntimeException("Failed to join channels from the database: " + e.getMessage(), e);
             }
         }
     }
@@ -451,7 +456,7 @@ public class TwitchBot {
             try {
                 if (!isModerator(botUser, channel)) roleHandler.addModerator(botUser, channel);
             } catch (IllegalArgumentException e) {
-                System.out.printf("%s%s Warning: Failed to add bot as moderator in channel %s: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), e.getMessage(), UNBOLD);
+                System.out.printf("%s%s Warning: Failed to add bot as moderator in the channel %s: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), e.getMessage(), UNBOLD);
             }
         }
 
@@ -483,7 +488,7 @@ public class TwitchBot {
             try {
                 if (isModerator(botUser, channel)) roleHandler.removeModerator(botUser, channel);
             } catch (IllegalArgumentException e) {
-                System.out.printf("%s%s Warning: Failed to remove bot as moderator in channel %s: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), e.getMessage(), UNBOLD);
+                System.out.printf("%s%s Warning: Failed to remove bot as moderator in the channel %s: %s%s%n", BOLD, SYSTEM, channel.getDisplayName(), e.getMessage(), UNBOLD);
             }
         }
 
@@ -585,6 +590,10 @@ public class TwitchBot {
 
     public QuoteManager getQuoteManager() {
         return quoteManager;
+    }
+
+    public SubathonManager getSubathonManager() {
+        return subathonManager;
     }
 
     // Configuration Getters
