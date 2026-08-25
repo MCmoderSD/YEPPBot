@@ -216,13 +216,12 @@ public class SubathonManager {
 
             // Prepare the query
             var setTimeStatement = database.getConnection().prepareStatement(
-                    "UPDATE SubathonTimer SET endsAt = IF(running, DATE_ADD(UTC_TIMESTAMP(3), INTERVAL ? SECOND), NULL), remaining = IF(running, 0, ?) WHERE id = ?;"
+                    "UPDATE SubathonTimer SET running = FALSE, endsAt = NULL, remaining = ? WHERE id = ?;"
             );
 
             // Set the query parameters
-            setTimeStatement.setInt(1, seconds);                // Seconds while running
-            setTimeStatement.setInt(2, seconds);                // Seconds while paused
-            setTimeStatement.setInt(3, channel.getId());        // Channel ID
+            setTimeStatement.setInt(1, seconds);                // Remaining Seconds
+            setTimeStatement.setInt(2, channel.getId());        // Channel ID
 
             // Execute the query
             setTimeStatement.executeUpdate();

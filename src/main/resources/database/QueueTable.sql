@@ -1,13 +1,12 @@
 # Queue Table Definition
 CREATE TABLE IF NOT EXISTS Queue (
-    userId      INT         NOT NULL,                                   # User ID
-    position    INT         NOT NULL,                                   # Queue Position
-    joinedAt    TIMESTAMP   NOT NULL    DEFAULT CURRENT_TIMESTAMP,      # Joined At Timestamp
-    channelId   INT         NOT NULL,                                   # Channel ID
-    FOREIGN KEY (userId)    REFERENCES User(id) ON DELETE CASCADE,      # Foreign Key to User Table
-    FOREIGN KEY (channelId) REFERENCES Channel(id) ON DELETE CASCADE,   # Foreign Key to Channel Table
-    UNIQUE KEY positionEntry (position, channelId),                     # Unique Position Entry
-    UNIQUE KEY queueEntry (userId, channelId)                           # Unique User Queue Entry
+    id          INT                                                 NOT NULL,                       # Channel ID
+    isOpen      BIT                                                 NOT NULL    DEFAULT FALSE,      # Accepts !queue join
+    requirement ENUM ('everyone', 'follower', 'subscriber', 'vip')  NOT NULL    DEFAULT 'everyone', # Who may join (checked by the bot, set by the dashboard)
+    queue       TEXT                                                NOT NULL    DEFAULT (''),       # The waiting list: user IDs, comma separated, in order
+    updatedAt   DATETIME(3)                                         NOT NULL    DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (id),                                                                               # One Queue Entry per Channel
+    FOREIGN KEY (id) REFERENCES Channel(id) ON DELETE CASCADE                                       # Foreign Key to Channel Table
 )
     ROW_FORMAT = COMPRESSED     # Compressed Row Format
     KEY_BLOCK_SIZE = 1          # Key Block Size

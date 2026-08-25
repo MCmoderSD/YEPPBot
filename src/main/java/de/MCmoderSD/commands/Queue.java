@@ -6,6 +6,7 @@ import de.MCmoderSD.helix.objects.TwitchUser;
 import de.MCmoderSD.objects.MessageEvent;
 import de.MCmoderSD.core.TwitchBot;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -18,7 +19,7 @@ public class Queue extends CommandBuilder {
         super(twitchBot);
 
         // Syntax
-        var syntax = "Syntax: " + prefix + "Queue <leave|next|list|dequeue|clear> [User]";
+        var syntax = "Syntax: " + prefix + "queue <join|leave|list|position|next|open|close|clear> [username]";
 
         // About
         var name = new String[]{ "Queue", "Warteliste", "Warteschlange" };
@@ -32,121 +33,217 @@ public class Queue extends CommandBuilder {
             public boolean execute(MessageEvent event, ArrayList<String> args) {
 
                 // Variables
-                var argsSize = args.size();
                 var user = event.getUser();
                 var channel = event.getChannel();
                 var queue = queueManager.getQueue(channel);
 
-
-                // Join Queue
-                if (args.isEmpty() || (argsSize == 1 && Arrays.asList("join", "enqueue").contains(args.getFirst().toLowerCase()))) {
-
-                    // Check if User is already in Queue
-                    if (queue.contains(user)) return twitchBot.sendMessage(event, name, tagUser(user) + ", du bist bereits in der Warteliste auf Position: " + (queue.indexOf(user) + 1) + " YEPP");
-
-                    // Enqueue User
-                    queueManager.enqueueUser(event);
-                    return twitchBot.sendMessage(event, name, tagUser(user) + ", du wurdest der Warteliste hinzugefügt! Deine Position ist: " + (queue.size() + 1) + " YEPP");
+                if (args.isEmpty()) {
+                    if (queue.isEmpty()) {
+                        return twitchBot.sendMessage(event, name, "Die Warteliste ist leer. YEPP");
+                    } else {
+                        var status = queueStatus(queue);
+                        return twitchBot.sendMessage(event, name, status);
+                    }
                 }
 
-                // Parse Action
-                var action = args.getFirst().toLowerCase();
+                // Validate argument
+                var argument = args.getFirst().toLowerCase();
 
-                // Leave Queue
-                if (argsSize == 1 && Arrays.asList("leave", "quit").contains(action)) {
-                    if (queueManager.dequeueUser(user, channel)) return twitchBot.sendMessage(event, name, tagUser(user) + ", du wurdest aus der Warteliste entfernt. YEPP");
-                    return twitchBot.sendMessage(event, name, tagUser(user) + ", Bro du warst nie auf der Warteliste? YEPP");
-                }
+                // Join the queue, permitted users may add someone else
+                if (Arrays.asList("join", "beitreten", "enqueue").contains(argument)) {
 
-                // List Queue
-                if (Arrays.asList("list", "show").contains(action)) {
+                    // Resolve the target, without a second argument the sender adds himself
+                    var self = args.size() < 2;
+                    var target = user;
+                    if (!self) {
 
-                    // Check if Queue is Empty
-                    if (queue.isEmpty()) return twitchBot.sendMessage(event, name, "Die Warteliste ist aktuell leer. YEPP");
+                        // Check Permissions
+                        if (!twitchBot.isPermitted(user, channel)) return twitchBot.sendMessage(event, name, tagUser(user) + " Du hast keine Berechtigung, andere der Warteliste hinzuzufügen. YEPP");
 
-                    // Build Queue Message
-                    var queueMessage = new StringBuilder("Aktuelle Warteliste: ");
-                    for (var i = 0; i < queue.size(); i++) {
-                        var queuedUser = queue.get(i);
-                        queueMessage.append(i + 1).append(". ").append(tagUser(queuedUser));
-                        if (i < queue.size() - 1) queueMessage.append(", ");
+                        // Resolve the target user
+                        target = resolveUser(args.get(1));
+                        if (target == null) return twitchBot.sendMessage(event, name, tagUser(user) + " Der Benutzer " + args.get(1) + " wurde nicht gefunden. YEPP");
                     }
 
-                    // Send Queue Message
-                    return twitchBot.sendMessage(event, name, queueMessage.toString());
+                    // Validate if queue is open
+                    if (!queueManager.isOpen(channel)) return twitchBot.sendMessage(event, name, "Die Warteliste ist derzeit geschlossen. YEPP");
+
+                    // Check if user can join, a permitted user adding someone else overrides the requirement
+                    if (self) {
+                        var requirement = queueManager.getRequirement(channel);
+                        if (!canJoin(user, channel, requirement)) return twitchBot.sendMessage(event, name, tagUser(user) + " " + denial(requirement));
+                    }
+
+                    // Add user to queue
+                    if (queueManager.enqueueUser(target, channel)) {
+                        return twitchBot.sendMessage(event, name, self ? tagUser(user) + " Du wurdest erfolgreich der Warteliste hinzugefügt. YEPP" : tagUser(target) + " wurde der Warteliste hinzugefügt. YEPP");
+                    } else {
+                        return twitchBot.sendMessage(event, name, self ? tagUser(user) + " Du bist bereits in der Warteliste. YEPP" : tagUser(target) + " ist bereits in der Warteliste. YEPP");
+                    }
                 }
 
-                // Next in Queue
-                if (action.equals("next")) {
+                // Leave the queue, permitted users may remove someone else
+                if (Arrays.asList("leave", "verlassen", "dequeue", "entfernen", "remove", "kick").contains(argument)) {
 
-                    // Check if Queue is Empty
-                    if (queue.isEmpty()) return twitchBot.sendMessage(event, name, "Die Warteliste ist leer. YEPP");
+                    // Resolve the target, without a second argument the sender removes himself
+                    var self = args.size() < 2;
+                    var target = user;
+                    if (!self) {
 
-                    // Get Next User and Wait Time
-                    var nextUser = queue.getFirst();
-                    var joinedAt = queueManager.getJoinedAt(nextUser, channel);
-                    var waitTimeMillis = System.currentTimeMillis() - joinedAt.getTime();
-                    var formattedDuration = formatDuration(waitTimeMillis);
+                        // Check Permissions
+                        if (!twitchBot.isPermitted(user, channel)) return twitchBot.sendMessage(event, name, tagUser(user) + " Du hast keine Berechtigung, andere aus der Warteliste zu entfernen. YEPP");
 
-                    // Send Next User Message
-                    return twitchBot.sendMessage(event, name, "Nächster in der Warteliste: " + tagUser(nextUser) + ", wartet seit " + formattedDuration + ". YEPP");
+                        // Resolve the target user
+                        target = resolveUser(args.get(1));
+                        if (target == null) return twitchBot.sendMessage(event, name, tagUser(user) + " Der Benutzer " + args.get(1) + " wurde nicht gefunden. YEPP");
+                    }
+
+                    // Remove user from queue
+                    if (queueManager.dequeueUser(target, channel)) {
+                        return twitchBot.sendMessage(event, name, self ? tagUser(user) + " Du wurdest erfolgreich aus der Warteliste entfernt. YEPP" : tagUser(target) + " wurde aus der Warteliste entfernt. YEPP");
+                    } else {
+                        return twitchBot.sendMessage(event, name, self ? tagUser(user) + " Du bist nicht in der Warteliste. YEPP" : tagUser(target) + " ist nicht in der Warteliste. YEPP");
+                    }
+                }
+
+                // Display the queue status
+                if (Arrays.asList("status", "list", "anzeigen").contains(argument)) {
+
+                    if (queue.isEmpty()) {
+                        return twitchBot.sendMessage(event, name, "Die Warteliste ist leer. YEPP");
+                    } else {
+                        var status = queueStatus(queue);
+                        return twitchBot.sendMessage(event, name, status);
+                    }
+                }
+
+                // Display current queue position of the user
+                if (Arrays.asList("position", "platz", "platzierung").contains(argument)) {
+                    var position = queue.indexOf(user);
+                    if (position == -1) {
+                        return twitchBot.sendMessage(event, name,  tagUser(user) + " Du bist nicht in der Warteliste. YEPP");
+                    } else {
+                        return twitchBot.sendMessage(event, name, tagUser(user) + " Deine aktuelle Position in der Warteliste ist: #" + (position + 1) + ". YEPP");
+                    }
+                }
+
+                // Display the next user in the queue
+                if (Arrays.asList("next", "nächster").contains(argument)) {
+                    if (queue.isEmpty()) {
+                        return twitchBot.sendMessage(event, name, "Die Warteliste ist leer. YEPP");
+                    } else {
+                        return twitchBot.sendMessage(event, name, "Der nächste in der Warteliste ist: " + tagUser(queue.getFirst()) + ". YEPP");
+                    }
                 }
 
                 // Check Permissions
-                if (!twitchBot.isPermitted(user, channel)) return false;
+                if (!twitchBot.isPermitted(user, channel)) return twitchBot.sendMessage(event, name, tagUser(user) + " Du hast keine Berechtigung, diesen Befehl auszuführen. YEPP");
 
-                // Clear Queue
-                if (action.equals("clear")) {
+                // Open the queue
+                if (Arrays.asList("open", "öffnen", "start").contains(argument)) {
+                    var success = queueManager.setOpen(channel, true);
+                    if (success) {
+                        return twitchBot.sendMessage(event, name, "Die Warteliste wurde erfolgreich geöffnet. YEPP");
+                    } else {
+                        return twitchBot.sendMessage(event, name, "Die Warteliste ist bereits geöffnet. YEPP");
+                    }
+                }
+
+                // Close the queue
+                if (Arrays.asList("close", "schließen", "stop").contains(argument)) {
+                    var success = queueManager.setOpen(channel, false);
+                    if (success) {
+                        return twitchBot.sendMessage(event, name, "Die Warteliste wurde erfolgreich geschlossen. YEPP");
+                    } else {
+                        return twitchBot.sendMessage(event, name, "Die Warteliste ist bereits geschlossen. YEPP");
+                    }
+                }
+
+                // Clear the queue
+                if (Arrays.asList("clear", "löschen", "reset").contains(argument)) {
                     queueManager.clearQueue(channel);
-                    return twitchBot.sendMessage(event, name, "Die Warteliste wurde geleert. YEPP");
+                    return twitchBot.sendMessage(event, name, "Die Warteliste wurde erfolgreich geleert. YEPP");
                 }
 
-                // Dequeue next or specific User
-                if (Arrays.asList("dequeue", "remove").contains(action)) {
-
-                    // Parse Target User
-                    TwitchUser targetUser;
-                    if (argsSize >= 2) {
-                        var targetUserName = args.get(1);
-                        while (targetUserName.startsWith("@")) targetUserName = targetUserName.substring(1);
-                        targetUser = userHandler.getTwitchUser(targetUserName.toLowerCase());
-                        if (targetUser == null) return twitchBot.sendMessage(event, name, "Fehler: Benutzer @" + targetUserName + " nicht gefunden. YEPP");
-                    } else targetUser = queue.getFirst();
-
-                    // Dequeue Target User
-                    if (queueManager.dequeueUser(targetUser, channel)) return twitchBot.sendMessage(event, name, tagUser(targetUser) + " wurde aus der Warteliste entfernt. YEPP");
-                    return twitchBot.sendMessage(event, name, tagUser(targetUser) + " ist nicht in der Warteliste. YEPP");
-                }
-
-                // Send Syntax Message
-                return twitchBot.sendMessage(event, name, syntax);
+                // Invalid command
+                return twitchBot.sendMessage(event, name, "Unbekannter Befehl. " + syntax);
             }
         });
 
         if (!registered) throw new IllegalStateException("Command registration failed for command: " + name[0]);
     }
 
-    private static String formatDuration(long millis) {
+    // Resolve a TwitchUser from a command argument
+    private TwitchUser resolveUser(String argument) {
 
-        // Calculate time components
-        var seconds = millis / 1000L;
-        var minutes = seconds / 60L;
-        var hours = minutes / 60L;
-        var days = hours / 24L;
+        // Strip the leading tags
+        var userName = argument;
+        while (userName.startsWith("@")) userName = userName.substring(1);
 
-        // Remainders
-        seconds %= 60;
-        minutes %= 60;
-        hours %= 24;
+        // Look up the user
+        if (userName.isBlank()) return null;
+        return userHandler.getTwitchUser(userName.toLowerCase());
+    }
 
-        // Build formatted string
-        var sb = new StringBuilder();
-        if (days > 0) sb.append(days).append("d ");
-        if (hours > 0) sb.append(hours).append("h ");
-        if (minutes > 0) sb.append(minutes).append("m ");
-        sb.append(seconds).append("s");
+    // Check if a user can join the queue based on the requirement
+    private boolean canJoin(TwitchUser user, TwitchUser channel, Requirement requirement) {
 
-        // Return trimmed string
-        return sb.toString().trim();
+        // Broadcaster and Moderators always get through
+        if (twitchBot.isPermitted(user, channel)) return true;
+
+        // Check the Requirement
+        return switch (requirement) {
+            case EVERYONE -> true;
+            case FOLLOWER -> twitchBot.isFollower(user, channel);
+            case SUBSCRIBER -> twitchBot.isSubscriber(user, channel);
+            case VIP -> twitchBot.isVIP(user, channel) || twitchBot.isModerator(user, channel);
+        };
+    }
+
+    // Build the Denial Message for a Requirement
+    private static String denial(Requirement requirement) {
+        return switch (requirement) {
+            case EVERYONE -> "du kannst der Warteliste gerade nicht beitreten. YEPP";
+            case FOLLOWER -> "nur Follower können der Warteliste beitreten. YEPP";
+            case SUBSCRIBER -> "nur Subscriber können der Warteliste beitreten. YEPP";
+            case VIP -> "nur VIPs können der Warteliste beitreten. YEPP";
+        };
+    }
+
+    private static String queueStatus(ArrayList<TwitchUser> queue) {
+        var status = new StringBuilder("Aktuelle Warteliste: ");
+
+        // Build the queue status message
+        for (var i = 0; i < queue.size(); i++) {
+            var part = new StringBuilder();
+            var user = queue.get(i);
+            part.append("#").append(i + 1).append(" ").append(tagUser(user));
+            if (i < queue.size() - 1) part.append(", ");
+
+            // Check Char Limit (500) and truncate if necessary
+            if (status.length() + part.length() > 475) {
+                status.append("... und ").append(queue.size() - i).append(" weitere.");
+                break;
+            } else status.append(part);
+        }
+
+        return status.toString();
+    }
+
+
+    // Requirement Enum
+    public enum Requirement implements Serializable {
+
+        // Requirements
+        EVERYONE, FOLLOWER, SUBSCRIBER, VIP;
+
+        public static Requirement fromString(String value) {
+            return switch (value.toLowerCase()) {
+                case "follower" -> FOLLOWER;
+                case "subscriber" -> SUBSCRIBER;
+                case "vip" -> VIP;
+                default -> EVERYONE;
+            };
+        }
     }
 }
