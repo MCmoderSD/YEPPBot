@@ -50,7 +50,7 @@ public class Queue extends CommandBuilder {
                 var argument = args.getFirst().toLowerCase();
 
                 // Join the queue, permitted users may add someone else
-                if (Arrays.asList("join", "beitreten", "enqueue").contains(argument)) {
+                if (Arrays.asList("join", "beitreten", "enqueue", "add", "hinzufügen").contains(argument)) {
 
                     // Resolve the target, without a second argument the sender adds himself
                     var self = args.size() < 2;
@@ -76,10 +76,15 @@ public class Queue extends CommandBuilder {
 
                     // Add user to queue
                     if (queueManager.enqueueUser(target, channel)) {
-                        return twitchBot.sendMessage(event, name, self ? tagUser(user) + " Du wurdest erfolgreich der Warteliste hinzugefügt. YEPP" : tagUser(target) + " wurde der Warteliste hinzugefügt. YEPP");
-                    } else {
-                        return twitchBot.sendMessage(event, name, self ? tagUser(user) + " Du bist bereits in der Warteliste. YEPP" : tagUser(target) + " ist bereits in der Warteliste. YEPP");
+                        var placement = queueManager.getPosition(target, channel);
+                        return twitchBot.sendMessage(event, name, self ? tagUser(user) + " Du wurdest erfolgreich der Warteliste hinzugefügt. Deine Position ist: #" + placement + ". YEPP" : tagUser(target) + " wurde der Warteliste hinzugefügt. Position: #" + placement + ". YEPP");
                     }
+
+                    // User is already in the queue
+                    var placement = queueManager.getPosition(target, channel);
+                    if (placement > 0) return twitchBot.sendMessage(event, name, self ? tagUser(user) + " Du bist bereits in der Warteliste auf Position: #" + placement + ". YEPP" : tagUser(target) + " ist bereits in der Warteliste auf Position: #" + placement + ". YEPP");
+                    if (!queueManager.isOpen(channel)) return twitchBot.sendMessage(event, name, "Die Warteliste ist derzeit geschlossen. YEPP");
+                    return twitchBot.sendMessage(event, name, "Die Warteliste ist voll. YEPP");
                 }
 
                 // Leave the queue, permitted users may remove someone else
@@ -196,7 +201,7 @@ public class Queue extends CommandBuilder {
             case EVERYONE -> true;
             case FOLLOWER -> twitchBot.isFollower(user, channel);
             case SUBSCRIBER -> twitchBot.isSubscriber(user, channel);
-            case VIP -> twitchBot.isVIP(user, channel) || twitchBot.isModerator(user, channel);
+            case VIP -> twitchBot.isVIP(user, channel);
         };
     }
 

@@ -151,6 +151,42 @@ public class QueueManager {
         }
     }
 
+    // Get the Position of a User in the Queue
+    public int getPosition(TwitchUser user, TwitchUser channel) {
+        try {
+
+            // Check Parameters
+            if (user == null) throw new IllegalArgumentException("TwitchUser user cannot be null");
+            if (channel == null) throw new IllegalArgumentException("TwitchUser channel cannot be null");
+
+            // Prepare the query
+            var getPositionStatement = database.getConnection().prepareStatement(
+                    "SELECT FIND_IN_SET(?, queue) AS position FROM Queue WHERE id = ?;"
+            );
+
+            // Set the query parameters
+            getPositionStatement.setInt(1, user.getId());       // User ID
+            getPositionStatement.setInt(2, channel.getId());    // Channel ID
+
+            // Execute the query
+            var resultSet = getPositionStatement.executeQuery();
+
+            // Process the result
+            var position = 0;
+            if (resultSet.next()) position = resultSet.getInt("position");
+
+            // Close resources
+            resultSet.close();
+            getPositionStatement.close();
+
+            // Return the position, a channel without an entry counts as not queued
+            return position;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get position: " + e.getMessage(), e);
+        }
+    }
+
     // Enqueue User
     public boolean enqueueUser(TwitchUser user, TwitchUser channel) {
         try {
