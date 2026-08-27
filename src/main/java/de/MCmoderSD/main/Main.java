@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import static de.MCmoderSD.helix.enums.Scope.*;
 import static de.MCmoderSD.utilities.MessageHelper.ICON;
+import static java.lang.IO.println;
 
 public class Main {
 
@@ -60,6 +61,7 @@ public class Main {
                     // Additional Scopes
                     Stream.of(
                             CHANNEL_EDIT_COMMERCIAL,
+                            CHANNEL_MANAGE_BROADCAST,
                             CHANNEL_READ_EDITORS,
                             CHANNEL_MANAGE_MODERATORS,
                             CHANNEL_MANAGE_RAIDS,
@@ -79,15 +81,15 @@ public class Main {
 
             ).distinct().toArray(Scope[]::new);
 
-            IO.println("Authenticate: " + twitchBot.getHelixHandler().getAuthorizationUrl(used));
+            println("Authenticate: " + twitchBot.getHelixHandler().getAuthorizationUrl(used));
 
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException("Failed to initialize Twitch Bot", e);
         }
 
         // Print Uptime
-        IO.println("Twitch Bot startup took " + ((System.nanoTime() - UPTIME) / 1_000_000) + " ms");
-        IO.println("Twitch Bot is now running. Version: " + VERSION);
+        println("Twitch Bot startup took " + ((System.nanoTime() - UPTIME) / 1_000_000) + " ms");
+        println("Twitch Bot is now running. Version: " + VERSION);
     }
 
     private static TwitchBot init(ArrayList<String> args) throws IOException, URISyntaxException {

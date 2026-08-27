@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 
+import static java.lang.IO.println;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static de.MCmoderSD.utilities.MessageHelper.*;
 
@@ -113,22 +114,21 @@ public class MessageEvent implements Serializable {
 
     // Methods
     public void printInfo() {
-        IO.println("--- Message Event Info ---");
-        IO.println("Event ID: " + id);
-        IO.println("Fired At: " + ofPattern(TIMESTAMP_FORMAT).withZone(ZoneId.systemDefault()).format(firedAt));
-        IO.println("Channel: " + channel.getDisplayName() + " (ID: " + channel.getId() + ")");
-        IO.println("User: " + user.getDisplayName() +       " (ID: " + user.getId() + ")");
-        IO.println("Message: " + message);
-        IO.println("Permissions: " + Arrays.toString(permissions.toArray()));
-        IO.println("Device Type: " + deviceType);
-        IO.println("Subscription Tier: " + subTier);
-        IO.println("Subscriber Months: " + subMonths);
-        IO.println("Is Action: " + isAction);
-        IO.println("Is Highlighted: " + isHighlighted);
-        IO.println("Is First Message: " + isFirstMessage);
-        IO.println("Is User Introduction: " + isUserIntroduction);
-        IO.println("Is Skip Subs Mode Message: " + isSkipSubsModeMessage);
-        IO.println("--------------------------");
+        println("Event ID: " + id);
+        println("Fired At: " + ofPattern(TIMESTAMP_FORMAT).withZone(ZoneId.systemDefault()).format(firedAt));
+        println("Channel: " + channel.getDisplayName() + " (ID: " + channel.getId() + ")");
+        println("User: " + user.getDisplayName() + " (ID: " + user.getId() + ")");
+        println("Message: " + message);
+        println("Permissions: " + Arrays.toString(permissions.toArray()));
+        println("Device Type: " + deviceType);
+        println("Subscription Tier: " + subTier);
+        println("Subscriber Months: " + subMonths);
+        println("Is Action: " + isAction);
+        println("Is Highlighted: " + isHighlighted);
+        println("Is First Message: " + isFirstMessage);
+        println("Is User Introduction: " + isUserIntroduction);
+        println("Is Skip Subs Mode Message: " + isSkipSubsModeMessage);
+        println("--------------------------");
     }
 
     // Getters

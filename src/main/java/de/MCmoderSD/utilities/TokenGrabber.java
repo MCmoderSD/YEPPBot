@@ -11,6 +11,7 @@ import java.io.InputStream;
 
 import static de.MCmoderSD.helix.utilities.ConfigValidator.validateApplicationConfig;
 import static de.MCmoderSD.server.modules.HtmlModule.mountHtml;
+import static java.lang.IO.println;
 
 public class TokenGrabber {
 
@@ -33,9 +34,9 @@ public class TokenGrabber {
         var redirectURL = application.get("oAuthRedirectURL").asString();
 
         // Print Credentials
-        IO.println("\nTwitch Application Credentials:");
-        IO.println(" - Client ID: " + clientId);
-        IO.println(" - OAuth Redirect URL: " + redirectURL);
+        println("\nTwitch Application Credentials:");
+        println(" - Client ID: " + clientId);
+        println(" - OAuth Redirect URL: " + redirectURL);
 
         // Build Scopes
         var scopeBuilder = new StringBuilder();
