@@ -52,14 +52,14 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>Helix-API</artifactId>
-            <version>2.3.8</version>
+            <version>2.3.10</version>
         </dependency>
 
         <!-- HTTPS-Server -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>HTTPS-Server</artifactId>
-            <version>3.1.8</version>
+            <version>3.1.9</version>
         </dependency>
 
         <!-- JSON Utility -->

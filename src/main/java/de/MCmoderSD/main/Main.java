@@ -60,11 +60,12 @@ public class Main {
 
                     // Additional Scopes
                     Stream.of(
-                            CHANNEL_EDIT_COMMERCIAL,
                             CHANNEL_MANAGE_BROADCAST,
+                            CHANNEL_EDIT_COMMERCIAL,
                             CHANNEL_READ_EDITORS,
                             CHANNEL_MANAGE_MODERATORS,
                             CHANNEL_MANAGE_RAIDS,
+                            CHANNEL_MANAGE_REDEMPTIONS,
                             CHANNEL_READ_SUBSCRIPTIONS,
                             CHANNEL_READ_VIPS,
                             CHANNEL_MANAGE_VIPS,
