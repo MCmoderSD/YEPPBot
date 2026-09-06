@@ -52,14 +52,14 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>Helix-API</artifactId>
-            <version>2.3.10</version>
+            <version>2.3.11</version>
         </dependency>
 
         <!-- HTTPS-Server -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>HTTPS-Server</artifactId>
-            <version>3.1.9</version>
+            <version>3.1.10</version>
         </dependency>
 
         <!-- JSON Utility -->
@@ -73,14 +73,14 @@
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>JSQL-Driver</artifactId>
-            <version>3.1.4</version>
+            <version>3.1.5</version>
         </dependency>
 
         <!-- OpenAI -->
         <dependency>
             <groupId>de.MCmoderSD</groupId>
             <artifactId>OpenAI</artifactId>
-            <version>3.3.14</version>
+            <version>3.3.15</version>
         </dependency>
 
         <!-- OpenWeatherMap -->
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>com.github.twitch4j</groupId>
             <artifactId>twitch4j</artifactId>
-            <version>1.26.0</version>
+            <version>1.27.0</version>
         </dependency>
 
         <!-- SLF4J -->
